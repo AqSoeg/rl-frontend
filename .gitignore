@@ -1,0 +1,9 @@
+# Webstrom
+.iead/
+
+# Node.js 依赖文件
+node_modules/
+
+# 构建输出目录
+build/
+dist/
