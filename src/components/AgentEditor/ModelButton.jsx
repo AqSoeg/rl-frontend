@@ -1,10 +1,11 @@
 import { Button } from 'antd';
+import './AgentEditor.css'; // 引入 CSS 文件
 
 const ModelFunction = () => {
     return (
-        <div className="mt-4 flex space-x-4">
-            <Button className="w-full bg-green-500 text-white hover:bg-blue-600">载入模型</Button>
-            <Button className="w-full bg-green-500 text-white hover:bg-green-600">保存模型</Button>
+        <div className="model-button-container">
+            <Button className="model-button load">载入模型</Button>
+            <Button className="model-button">保存模型</Button>
         </div>
     );
 };
