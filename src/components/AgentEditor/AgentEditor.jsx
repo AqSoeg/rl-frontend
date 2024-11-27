@@ -4,6 +4,7 @@ import StateVector from './StateVector';
 import ActionSpace from './ActionSpace';
 import RewardFunction from './RewardFunction';
 import ModelButton from './ModelButton';
+import './AgentEditor.css'; // 引入 CSS 文件
 
 const AgentEditor = () => {
     const [scenarios, setScenarios] = useState([]);
@@ -21,19 +22,19 @@ const AgentEditor = () => {
     }, []);
 
     return (
-        <div className="flex h-screen">
+        <div className="container">
             {/* 侧边栏固定长度和宽度 */}
-            <div className="w-80">
+            <div className="sidebar">
                 <Sidebar scenarios={scenarios} />
             </div>
             {/* 其余三列均匀分布，宽度随窗口变化而变化 */}
-            <div className="flex-1 flex flex-col bg-gradient-to-b from-blue-100 to-gray-100">
+            <div className="main-content">
                 <div className="flex-1 flex">
                     <StateVector />
                     <ActionSpace />
                     <RewardFunction />
                 </div>
-                <div className="flex flex-col justify-end p-4">
+                <div className="button-area">
                     <ModelButton />
                 </div>
             </div>
