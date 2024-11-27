@@ -23,20 +23,12 @@ const AgentEditor = () => {
 
     return (
         <div className="container">
-            {/* 侧边栏固定长度和宽度 */}
-            <div className="sidebar">
-                <Sidebar scenarios={scenarios} />
-            </div>
-            {/* 其余三列均匀分布，宽度随窗口变化而变化 */}
-            <div className="main-content">
-                <div className="flex-1 flex">
-                    <StateVector />
-                    <ActionSpace />
-                    <RewardFunction />
-                </div>
-                <div className="button-area">
-                    <ModelButton />
-                </div>
+            <Sidebar scenarios={scenarios} />
+            <div className="gradient-box">
+            <StateVector />
+            <ActionSpace />
+            <RewardFunction />
+            <ModelButton />
             </div>
         </div>
     );

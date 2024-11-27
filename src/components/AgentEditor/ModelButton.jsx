@@ -3,9 +3,9 @@ import './AgentEditor.css'; // 引入 CSS 文件
 
 const ModelFunction = () => {
     return (
-        <div className="model-button-container">
-            <Button className="model-button load">载入模型</Button>
-            <Button className="model-button">保存模型</Button>
+        <div className="button-container">
+            <Button className="button">载入模型</Button>
+            <Button className="button">保存模型</Button>
         </div>
     );
 };
