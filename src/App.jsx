@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes, NavLink, useNavigate } from 're
 import reactLogo from './assets/react.svg';
 import SettingsLogo from './assets/settings.svg';
 import AgentEditor from './components/AgentEditor/AgentEditor.jsx';
+import TrainingService from './components/TrainingService/TrainingService.jsx';
 import './App.css'; // 导入 CSS 文件
 
 function App() {
@@ -77,9 +78,6 @@ function HomePage() {
   return <div>首页</div>;
 }
 
-function TrainingService() {
-  return <div>训练服务页面</div>;
-}
 
 function EvaluationOptimization() {
   return <div>评估与优化页面</div>;
