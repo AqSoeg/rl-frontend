@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Select, Input, Alert } from 'antd';
 import { nanoid } from 'nanoid'; // 使用 nanoid 生成唯一ID
-import './AgentEditor.css'; // 引入 CSS 文件
 
 const { Option } = Select;
 
