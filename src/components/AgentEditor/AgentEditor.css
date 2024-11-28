@@ -50,12 +50,67 @@
 /* 子组件样式 */
 .sub-component {
     flex: 1; /* 设置子组件的弹性比例为1 */
-    padding: 1rem; /* 设置内边距为1个rem单位 */
+    padding: 0.5rem; /* 设置内边距为1个rem单位 */
     background-color: white; /* 设置背景颜色为白色 */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 设置阴影效果，水平偏移0，垂直偏移4px，模糊半径8px，颜色为黑色透明度10% */
     height: 70vh; /* 设置高度与侧边栏一致 */
     margin-right: 1rem; /* 设置右侧外边距为1个rem单位 */
     border-radius: 8px; /* 设置圆角半径为8像素 */
+    display: flex; /* 使用弹性布局 */
+    flex-direction: column; /* 设置主轴方向为垂直 */
+    position: relative; /* 设置相对定位 */
+}
+
+/* 子组件横幅样式 */
+.sub-component-banner {
+    background-color: #ADD8E6; /* 设置淡蓝色背景 */
+    padding: 0.5rem 0; /* 设置上下内边距为0.5rem，左右内边距为0 */
+    text-align: center; /* 文字居中 */
+    border-radius: 8px; /* 设置四个角的圆角半径为8像素 */
+    margin-bottom: 0; /* 移除底部外边距 */
+}
+
+/* 子组件Logo样式 */
+.sub-component-logo {
+    margin-right: 0.5rem; /* 设置Logo右侧外边距 */
+    height: 1.5rem; /* 设置Logo高度 */
+    vertical-align: middle; /* 垂直居中对齐 */
+    display: inline-block; /* 设置为行内块元素 */
+}
+
+/* 子组件标题样式 */
+.sub-component-title {
+    font-size: 1.5rem; /* 设置字体大小 */
+    font-weight: bold; /* 设置字体加粗 */
+    display: inline-block; /* 设置为行内块元素 */
+    vertical-align: middle; /* 垂直居中对齐 */
+}
+
+/* 上传文件按钮样式 */
+.upload-button {
+    position: absolute; /* 设置绝对定位 */
+    bottom: 1.5rem; /* 设置底部距离 */
+    right: 2rem; /* 设置右侧距离 */
+    padding: 0; /* 移除内边距 */
+    border-radius: 4px; /* 设置圆角半径 */
+    cursor: pointer; /* 设置鼠标指针样式 */
+    display: flex; /* 使用弹性布局 */
+    align-items: center; /* 垂直居中对齐 */
+    justify-content: center; /* 水平居中对齐 */
+    z-index: 1; /* 设置层级，确保按钮显示在其他内容之上 */
+    background-color: transparent; /* 设置背景颜色为透明 */
+}
+
+/* 上传文件按钮Logo样式 */
+.upload-button-logo {
+    height: 3rem; /* 设置Logo高度为2rem */
+    vertical-align: middle; /* 垂直居中对齐 */
+    transition: transform 0.3s ease; /* 添加点击效果过渡 */
+}
+
+/* 鼠标点击时添加缩放效果 */
+.upload-button:active .upload-button-logo {
+    transform: scale(0.9); /* 设置点击时的缩放效果 */
 }
 
 .button-container {

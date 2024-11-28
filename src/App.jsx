@@ -64,7 +64,7 @@ function HomeLink() {
 
   return (
       <div onClick={handleClick} className="home-link">
-        <img src={reactLogo} alt="Logo" className="logo-icon" />
+        <img src={reactLogo} alt="React" className="logo-icon" />
         <div className="logo-text">
           <h1 className="main-title">智能体建模软件</h1>
           <h1 className="sub-title">v1.0</h1>
