@@ -39,9 +39,9 @@ rl-frontend/
 │       │                       ├── ModelButton.jsx # 模型按钮  
 │       │                       ├── RewardFunction.jsx # 奖励函数  
 │       │                       ├── Sidebar.jsx # 侧边栏：智能体设置  
-│       │                       └── StateVector.jsx # 状态向量 
-│       │         └── TrainingService # 训练服务界面
-│       ├── App.css # 全局样式表文件，用于定义项目中通用的样式规则 
+│       │                       └── StateVector.jsx # 状态向量  
+│       │         └── TrainingService # 训练服务界面  
+│       ├── App.css # 全局样式表文件，用于定义项目中通用的样式规则   
 │       ├── App.jsx # 项目的主组件文件，通常作为应用的根组件   
 │       └── main.jsx # 应用的入口文件，通常用于渲染根组件（如 App.jsx）到页面上  
 ├── .gitignore # Git 忽略文件配置，用于指定哪些文件或目录不应该被 Git 版本控制  
