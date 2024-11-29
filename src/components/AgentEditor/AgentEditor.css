@@ -113,7 +113,7 @@
     transform: scale(0.9); /* 设置点击时的缩放效果 */
 }
 
-.button-container {
+.model-button-container {
     position: fixed; /* 固定位置 */
     bottom: 100px; /* 距离底部40像素 */
     right: 100px; /* 距离右侧20像素 */
@@ -121,7 +121,7 @@
     gap: 10px; /* 按钮之间的间距 */
 }
 
-.button {
+.model-button {
     background-color: #4caf50; /* 设置背景颜色为绿色 */
     color: white; /* 设置文字颜色为白色 */
     padding: 30px 50px; /* 设置内边距，使按钮变大 */
@@ -133,11 +133,11 @@
     font-size: 18px; /* 设置文字大小 */
 }
 
-.button:hover {
+.model-button:hover {
     background-color: #43a047; /* 鼠标悬停时的背景颜色 */
 }
 
-.button:active {
+.model-button:active {
     background-color: #388e3c; /* 按钮被点击时的背景颜色 */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 按钮被点击时的阴影效果 */
     transform: translateY(2px); /* 按钮被点击时的向下移动效果 */
