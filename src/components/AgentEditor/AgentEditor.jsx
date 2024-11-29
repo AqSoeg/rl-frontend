@@ -11,6 +11,7 @@ const AgentEditor = () => {
     const [scenarios, setScenarios] = useState([]);
     const [mockState, setMockState] = useState({});
     const [mockAction, setMockAction] = useState({});
+    const [mockReward, setMockReward] = useState({});
 
     useEffect(() => {
         const mockData = {
@@ -71,6 +72,24 @@ const AgentEditor = () => {
             ]
         };
         setMockAction(mockActionData);
+
+        const mockRewardData = {
+            RewardCount: 11,
+            Functions: [
+                { name: '奖赏1', equation: 'R = x + y', meaning: '奖赏1的含义' },
+                { name: '奖赏2', equation: 'R = x * y', meaning: '奖赏2的含义' },
+                { name: '奖赏3', equation: 'R = x - y', meaning: '奖赏3的含义' },
+                { name: '奖赏4', equation: 'R = x / y', meaning: '奖赏4的含义' },
+                { name: '奖赏5', equation: 'R = x ^ y', meaning: '奖赏5的含义' },
+                { name: '奖赏6', equation: 'R = x % y', meaning: '奖赏6的含义' },
+                { name: '奖赏7', equation: 'R = x + y + z', meaning: '奖赏7的含义' },
+                { name: '奖赏8', equation: 'R = x * y * z', meaning: '奖赏8的含义' },
+                { name: '奖赏9', equation: 'R = x - y - z', meaning: '奖赏9的含义' },
+                { name: '奖赏10', equation: 'R = x / y / z', meaning: '奖赏10的含义' },
+                { name: '奖赏11', equation: 'R = x ^ y ^ z', meaning: '奖赏11的含义' }
+            ]
+        };
+        setMockReward(mockRewardData);
     }, []);
 
     return (
@@ -79,7 +98,7 @@ const AgentEditor = () => {
             <div className="gradient-box">
                 <StateVector simulation={mockState} />
                 <ActionSpace mockAction={mockAction} />
-                <RewardFunction />
+                <RewardFunction mockReward={mockReward} />
                 <ModelButton />
             </div>
         </div>
