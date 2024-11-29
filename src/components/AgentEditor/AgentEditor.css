@@ -172,6 +172,38 @@
     color: #1890ff;
 }
 
+/* 按钮组样式 */
+.button-group {
+    display: flex; /* 使用弹性布局 */
+    align-items: center; /* 垂直居中对齐 */
+    justify-content: flex-end; /* 水平靠右对齐 */
+}
+
+/* 蓝色分割线样式 */
+.blue-divider {
+    width: 1px; /* 设置宽度为1像素 */
+    height: 20px; /* 设置高度为20像素 */
+    background-color: #1890ff; /* 设置背景颜色为蓝色 */
+    margin: 0 10px; /* 设置左右外边距为10像素 */
+}
+
+/* 规则按钮样式 */
+.rule-button {
+    width: 80px; /* 设置矩形宽度为80像素 */
+    height: 30px; /* 设置矩形高度为30像素 */
+    border-radius: 4px; /* 设置圆角半径为4像素 */
+    display: flex; /* 使用弹性布局 */
+    align-items: center; /* 垂直居中对齐 */
+    justify-content: center; /* 水平居中对齐 */
+    cursor: pointer; /* 设置鼠标指针为手型 */
+    color: black; /* 设置文字颜色为黑色 */
+    transition: color 0.3s ease; /* 添加文字颜色过渡效果 */
+}
+
+.rule-button.active {
+    color: #1890ff;
+}
+
 /* 表格容器样式 */
 .table-container {
     margin-top: 10px;
@@ -238,5 +270,43 @@
 
 /* 含义输入框样式 */
 .meaning-input {
+    width: 200px;
+}
+
+/* 规则容器样式 */
+.rule-container {
+    padding: 10px;
+    border: 1px solid #e8e8e8;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.rule-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    width: 100%;
+    justify-content: center;
+}
+
+.rule-row span {
+    margin-right: 10px;
+}
+
+.rule-buttons {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.rule-buttons button {
+    margin-left: 10px;
+}
+
+/* 通用输入框样式 */
+.common-input {
     width: 200px;
 }

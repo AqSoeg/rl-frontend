@@ -14,6 +14,12 @@ const ActionSpace = ({ mockAction }) => {
     const [selectedType, setSelectedType] = useState(null);
     const [selectedOption, setSelectedOption] = useState(null);
     const [meaning, setMeaning] = useState('');
+    const [ruleVisible, setRuleVisible] = useState(Array(mockAction.ActionCount).fill(false));
+    const [ruleType, setRuleType] = useState(Array(mockAction.ActionCount).fill(null));
+    const [condition1, setCondition1] = useState(Array(mockAction.ActionCount).fill(''));
+    const [condition2, setCondition2] = useState(Array(mockAction.ActionCount).fill(''));
+    const [execution1, setExecution1] = useState(Array(mockAction.ActionCount).fill(''));
+    const [execution2, setExecution2] = useState(Array(mockAction.ActionCount).fill(''));
 
     const handleSelectChange = (index) => {
         const newVisible = [...visible];
@@ -65,6 +71,55 @@ const ActionSpace = ({ mockAction }) => {
         }
     };
 
+    const handleRuleClick = (index) => {
+        const newRuleVisible = [...ruleVisible];
+        newRuleVisible[index] = !newRuleVisible[index];
+        setRuleVisible(newRuleVisible);
+    };
+
+    const handleRuleTypeChange = (index, value) => {
+        const newRuleType = [...ruleType];
+        newRuleType[index] = value;
+        setRuleType(newRuleType);
+    };
+
+    const handleCondition1Change = (index, value) => {
+        const newCondition1 = [...condition1];
+        newCondition1[index] = value;
+        setCondition1(newCondition1);
+    };
+
+    const handleCondition2Change = (index, value) => {
+        const newCondition2 = [...condition2];
+        newCondition2[index] = value;
+        setCondition2(newCondition2);
+    };
+
+    const handleExecution1Change = (index, value) => {
+        const newExecution1 = [...execution1];
+        newExecution1[index] = value;
+        setExecution1(newExecution1);
+    };
+
+    const handleExecution2Change = (index, value) => {
+        const newExecution2 = [...execution2];
+        newExecution2[index] = value;
+        setExecution2(newExecution2);
+    };
+
+    const handleRuleConfirm = (index) => {
+        // 处理规则确认逻辑
+        const newRuleVisible = [...ruleVisible];
+        newRuleVisible[index] = false;
+        setRuleVisible(newRuleVisible);
+    };
+
+    const handleRuleCancel = (index) => {
+        const newRuleVisible = [...ruleVisible];
+        newRuleVisible[index] = false;
+        setRuleVisible(newRuleVisible);
+    };
+
     return (
         <div className="sub-component">
             <div className="sub-component-banner">
@@ -79,9 +134,21 @@ const ActionSpace = ({ mockAction }) => {
                     <div key={i} className="dropdown-container">
                         <div className="dropdown-header" onClick={() => handleSelectChange(i)}>
                             <span>动作{i + 1}</span>
-                            <Button type="link" className="dropdown-button">
-                                {visible[i] ? '▲' : '▼'}
-                            </Button>
+                            <div className="button-group">
+                                <Button type="link" className="dropdown-button">
+                                    {visible[i] ? '▲' : '▼'}
+                                </Button>
+                                <div className="blue-divider"></div>
+                                <div
+                                    className={`rule-button ${ruleVisible[i] ? 'active' : ''}`}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleRuleClick(i);
+                                    }}
+                                >
+                                    行为规则
+                                </div>
+                            </div>
                         </div>
                         {visible[i] && (
                             <div className="action-container">
@@ -130,6 +197,67 @@ const ActionSpace = ({ mockAction }) => {
                                         确定
                                     </Button>
                                     <Button onClick={handleCancel}>
+                                        取消
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+                        {ruleVisible[i] && (
+                            <div className="rule-container">
+                                <div className="rule-row">
+                                    <span>规则类型：</span>
+                                    <Select
+                                        style={{ width: 200 }}
+                                        onChange={(value) => handleRuleTypeChange(i, value)}
+                                        value={ruleType[i] || null}
+                                    >
+                                        <Option value="IF ELSE">IF ELSE</Option>
+                                        <Option value="WHILE">WHILE</Option>
+                                        <Option value="MAX">MAX</Option>
+                                        <Option value="MIN">MIN</Option>
+                                    </Select>
+                                </div>
+                                <div className="rule-row">
+                                    <span>条件1：</span>
+                                    <Input
+                                        placeholder="单行输入"
+                                        value={condition1[i]}
+                                        onChange={(e) => handleCondition1Change(i, e.target.value)}
+                                        className="common-input"
+                                    />
+                                </div>
+                                <div className="rule-row">
+                                    <span>条件2：</span>
+                                    <Input
+                                        placeholder="单行输入"
+                                        value={condition2[i]}
+                                        onChange={(e) => handleCondition2Change(i, e.target.value)}
+                                        className="common-input"
+                                    />
+                                </div>
+                                <div className="rule-row">
+                                    <span>执行内容1：</span>
+                                    <Input
+                                        placeholder="单行输入"
+                                        value={execution1[i]}
+                                        onChange={(e) => handleExecution1Change(i, e.target.value)}
+                                        className="common-input"
+                                    />
+                                </div>
+                                <div className="rule-row">
+                                    <span>执行内容2：</span>
+                                    <Input
+                                        placeholder="单行输入"
+                                        value={execution2[i]}
+                                        onChange={(e) => handleExecution2Change(i, e.target.value)}
+                                        className="common-input"
+                                    />
+                                </div>
+                                <div className="rule-buttons">
+                                    <Button type="primary" onClick={() => handleRuleConfirm(i)}>
+                                        确定
+                                    </Button>
+                                    <Button onClick={() => handleRuleCancel(i)}>
                                         取消
                                     </Button>
                                 </div>
