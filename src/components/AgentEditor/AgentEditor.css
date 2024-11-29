@@ -1,3 +1,4 @@
+/* AgentEditor.css */
 /* 容器样式 */
 .container {
     display: flex;
@@ -141,4 +142,101 @@
     background-color: #388e3c; /* 按钮被点击时的背景颜色 */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 按钮被点击时的阴影效果 */
     transform: translateY(2px); /* 按钮被点击时的向下移动效果 */
+}
+
+/* 下拉框容器样式 */
+.dropdown-container-wrapper {
+    max-height: 720px; /* 设置最大高度，容纳10个下拉框 */
+    overflow-y: auto; /* 添加垂直滚动条 */
+    margin-top: 20px;
+}
+
+.dropdown-container {
+    margin-bottom: 20px; /* 每个下拉框之间的间距 */
+}
+
+/* 下拉框头部样式 */
+.dropdown-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+/* 下拉按钮样式 */
+.dropdown-button {
+    font-size: 14px;
+    color: #1890ff;
+}
+
+/* 表格容器样式 */
+.table-container {
+    margin-top: 10px;
+    max-height: 240px;
+    border: 1px solid #e8e8e8;
+    border-radius: 4px;
+}
+
+/* 表格样式 */
+.fixed-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.fixed-table .ant-table-thead > tr > th {
+    background-color: #A9A9A9; /* 表头颜色为深灰色 */
+    color: white; /* 表头文字颜色 */
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.fixed-table .ant-table-body {
+    overflow-y: auto;
+}
+
+/* 动作容器样式 */
+.action-container {
+    padding: 10px;
+    border: 1px solid #e8e8e8;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.action-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    width: 100%;
+    justify-content: center;
+}
+
+.action-row span {
+    margin-right: 10px;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    width: 100%;
+}
+
+.action-buttons button {
+    margin-left: 10px;
+}
+
+/* 含义标签样式 */
+.meaning-label {
+    margin-right: 10px;
+}
+
+/* 含义输入框样式 */
+.meaning-input {
+    width: 200px;
 }
