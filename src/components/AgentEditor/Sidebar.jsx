@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Select, Input, Alert } from 'antd';
 import { nanoid } from 'nanoid'; // 使用 nanoid 生成唯一ID
-import './AgentEditor.css'; // 引入 CSS 文件
 
 const { Option } = Select;
 
@@ -160,7 +159,7 @@ const Sidebar = ({ scenarios }) => {
     return (
         <div className="sidebar">
             <div className="sidebar-section">
-                <div className="font-bold mb-2">想定场景</div>
+                <div className="text">想定场景</div>
                 <Select value={scenario} onChange={handleScenarioChange} className="w-full">
                     {scenarios.map((scenario) => (
                         <Option key={scenario.name} value={scenario.name}>{scenario.name}</Option>
@@ -168,7 +167,7 @@ const Sidebar = ({ scenarios }) => {
                 </Select>
             </div>
             <div className="sidebar-section">
-                <div className="font-bold mb-2">智能体角色/功能</div>
+                <div className="text">智能体角色/功能</div>
                 <Select value={role} onChange={handleRoleChange} className="w-full">
                     {agentRoles.map((role) => (
                         <Option key={role.name} value={role.name}>{role.name}</Option>
@@ -176,7 +175,7 @@ const Sidebar = ({ scenarios }) => {
                 </Select>
             </div>
             <div className="sidebar-section">
-                <div className="font-bold mb-2">智能体类型</div>
+                <div className="text">智能体类型</div>
                 <Select value={type} onChange={handleTypeChange} className="w-full">
                     {getAgentTypeOptions(role).map((option) => (
                         <Option key={option} value={option}>{option}</Option>
@@ -184,30 +183,30 @@ const Sidebar = ({ scenarios }) => {
                 </Select>
             </div>
             <div className="sidebar-section">
-                <div className="font-bold mb-2">智能体名称</div>
+                <div className="text">智能体名称</div>
                 <Input
                     value={name}
                     onChange={handleNameChange}
                     placeholder="请不要超过10个字"
                     className="w-full"
                 />
-                <div className="font-bold mb-2">版本</div>
+                <div className="text">版本</div>
                 <Input
                     value={version}
                     onChange={handleVersionChange}
-                    placeholder="请输出实数，小数位数不超过两位"
+                    placeholder="请输出实数"
                     className="w-full"
                 />
                 {inputIncomplete && <Alert message="请输入完整的智能体名称和版本号!" type="error" className="mt-2" />}
             </div>
             <div className="sidebar-section">
-                <div className="font-bold mb-2">智能体数量</div>
+                <div className="text">智能体数量</div>
                 <Select value={agentCount} onChange={handleAgentCountChange} className="w-full">
                     {getAgentCountOptions(type).map((option) => (
                         <Option key={option} value={option}>{option}</Option>
                     ))}
                 </Select>
-                <div className="font-bold mb-2">智能体模型</div>
+                <div className="text">智能体模型</div>
                 <Select value={selectedAgent} onChange={handleAgentChange} className="w-full">
                     {getAgentOptions(agentCount).map((option) => (
                         <Option key={option} value={option}>{option}</Option>
@@ -215,8 +214,8 @@ const Sidebar = ({ scenarios }) => {
                 </Select>
             </div>
             <div className="sidebar-section">
-                <div className="font-bold mb-2">模型名称：{modelName}</div>
-                <div className="font-bold mb-2">模型ID：{modelID}</div>
+                <div className="text">模型名称：{modelName}</div>
+                <div className="text">模型ID：{modelID}</div>
             </div>
         </div>
     );
