@@ -1,9 +1,5 @@
 import React, { useState } from 'react';
 import { Select, Button, Input, Card} from 'antd';
-
-
-
-
 const { Option } = Select;
 
 const Middle = () => {
