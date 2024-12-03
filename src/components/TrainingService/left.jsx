@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Select, Button, Modal } from 'antd';
-
+import { observer } from 'mobx-react';
+import { intelligentStore } from './IntelligentStore';
 const { Option } = Select;
 
-const Left = () => {
+const Left = observer(() => {
   const [trainingMode, setTrainingMode] = useState('offline');
   const [algorithmType, setAlgorithmType] = useState('shared');
   const [visible, setVisible] = useState(false);
@@ -88,11 +89,17 @@ const Left = () => {
           {/* 弹窗内容 */}
         </Modal>
 
-        <div className="form-item">
-          <h5>智能体名称：XXX</h5>
-          <h5>智能体ID：XXX</h5>
-          <h5>智能体版本：XXX</h5>
-          <h5>模型类型：XXX</h5>
+        <div className='form-item'>
+          {intelligentStore.selectedAgent ? (
+            <>
+              <h5>智能体名称：{intelligentStore.selectedAgent.name}</h5>
+              <h5>智能体ID：{intelligentStore.selectedAgent.id}</h5>
+              <h5>智能体版本：{intelligentStore.selectedAgent.version}</h5>
+              <h5>模型类型：{intelligentStore.selectedAgent.type}</h5>
+            </>
+          ) : (
+            <div>请选择一个智能体</div>
+          )}
           <label>智能体数量</label>
           <Select placeholder="请选择">
             <Option value="1">1</Option>
@@ -112,6 +119,6 @@ const Left = () => {
         </div>
       </div>
   );
-};
+});
 
 export default Left;
