@@ -100,6 +100,9 @@
   }
   
   .hyper-params > * {
-    flex: 1 1 30%; /* 默认每个组件占据45%的宽度 */
+    flex: 1 1 30%; /* 默认每个组件占据%的宽度 */
     margin-bottom: 10px; /* 组件之间的间距 */
+  }
+  .value{
+    width: 150px;
   }

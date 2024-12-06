@@ -4,6 +4,7 @@ import reactLogo from './assets/react.svg';
 import SettingsLogo from './assets/settings.svg';
 import AgentEditor from './components/AgentEditor/AgentEditor.jsx';
 import TrainingService from './components/TrainingService/TrainingService.jsx';
+import ModelManagement from './components/ModelManage/ModelManagement.jsx';
 import './App.css'; // 导入 CSS 文件
 
 function App() {
@@ -83,8 +84,5 @@ function EvaluationOptimization() {
   return <div>评估与优化页面</div>;
 }
 
-function ModelManagement() {
-  return <div>模型管理页面</div>;
-}
 
 export default App;
