@@ -35,8 +35,6 @@ const BehaviorLibrary = () => {
     }
   };
 
-
-  
   const handleFinish = (values) => {
     let newRules;
     if (isAdding) {
