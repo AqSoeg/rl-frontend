@@ -34,6 +34,9 @@ const BehaviorLibrary = () => {
       setIsModalVisible(false);
     }
   };
+
+
+  
   const handleFinish = (values) => {
     let newRules;
     if (isAdding) {
