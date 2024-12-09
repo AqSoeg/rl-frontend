@@ -35,13 +35,16 @@ const ModelLibrary = () => {
   };
 
   const handleFinish = (values) => {
-    const updatedModels = models.map(modelItem => {
-      if (modelItem.key === currentModel.key) {
-        return { ...modelItem, ...values, date: values.date ? moment(values.date).format('YYYY-MM-DD') : modelItem.date };
-      }
-      return modelItem;
-    });
-    setModels(updatedModels);
+    let newModels;
+    const now = moment().format('YYYY年MM月DD日 HH:mm:ss');
+    newModels = models.map(modelItem =>
+      modelItem.key === currentModel.key ? { ...modelItem, ...values, date: now } : modelItem
+    );
+    newModels = newModels.map((model, index) => ({
+      ...model,
+      key: `${index + 1}`, // 确保 key 是字符串类型
+    }));  
+    setModels(newModels); // 使用新的规则列表更新状态
     setIsModalVisible(false);
   };
 
@@ -57,7 +60,12 @@ const ModelLibrary = () => {
   };
 
   const handleDelete = (model) => {
-    const updatedModels = models.filter(m => m.key !== model.key);
+    let updatedModels = models.filter(m => m.key !== model.key);
+    // 更新所有规则的 key 和 序号，以保持连续性
+    updatedModels = updatedModels.map((model, index) => ({
+      ...model,
+      key: `${index + 1}`, // 确保 key 是字符串类型
+    }));
     setModels(updatedModels);
   };
 
@@ -130,7 +138,11 @@ const ModelLibrary = () => {
               <Form.Item label="智能体角色" name="role">
                 <Input disabled={!isEditing} />
               </Form.Item>
-
+              {!isEditing ? (
+                <Form.Item label="更新时间" name="date">
+                  <Input disabled={!isEditing} />
+                </Form.Item>
+              ) : null}
             </>
           )}
         </Form>
