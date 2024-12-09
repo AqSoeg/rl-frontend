@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Table, Button, Modal, Form, Input, DatePicker, Card, Select } from 'antd';
 import { PlusOutlined, SettingOutlined } from '@ant-design/icons';
 import moment from 'moment';
+
 const BehaviorLibrary = () => {
   const [rules, setRules] = useState([
     { key: '1', id: 'role_1111', scenario: '场景1', role: '角色1', action: '动作1', type: 'MAX', condition1: '条件1', content1: null, content2: null },
@@ -15,6 +16,7 @@ const BehaviorLibrary = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [searchField, setSearchField] = useState(''); // 默认搜索字段
+  const [isAdding, setIsAdding] = useState(false);
   const [form] = Form.useForm();
 
   const showModal = (rule) => {
@@ -22,6 +24,7 @@ const BehaviorLibrary = () => {
     form.setFieldsValue(rule);
     setIsModalVisible(true);
     setIsEditing(false);
+    setIsAdding(false);
   };
 
   const handleOk = () => {
@@ -32,15 +35,34 @@ const BehaviorLibrary = () => {
     }
   };
   const handleFinish = (values) => {
-    const updatedModels = models.map(modelItem => {
-      if (modelItem.key === currentModel.key) {
-        return { ...modelItem, ...values, date: values.date ? moment(values.date).format('YYYY-MM-DD') : modelItem.date };
-      }
-      return modelItem;
-    });
-    setModels(updatedModels);
+    let newRules;
+    if (isAdding) {
+      // 添加新规则时，首先添加新规则，然后更新所有规则的 key
+      const now = moment().format('YYYY年MM月DD日 HH:mm:ss');
+      const newRule = {
+        ...values,
+        key: `${rules.length + 1}`,
+        id: values.id || `NEW-${Date.now()}`, // 如果没有提供ID，则使用时间戳生成一个临时ID
+        date: now,
+      };
+      newRules = [...rules, newRule];
+    } else {
+      // 更新现有规则时，先更新对应的规则，然后更新所有规则的 key
+      const now = moment().format('YYYY年MM月DD日 HH:mm:ss');
+      newRules = rules.map(ruleItem => 
+        ruleItem.key === currentRule.key ? { ...ruleItem, ...values, date: now } : ruleItem
+      );
+    }
+    // 更新所有规则的 key 和 序号，以保持连续性
+    newRules = newRules.map((rule, index) => ({
+      ...rule,
+      key: `${index + 1}`, // 确保 key 是字符串类型
+    }));
+    setRules(newRules); // 使用新的规则列表更新状态
     setIsModalVisible(false);
+    setIsAdding(false);
   };
+
   const handleCancel = () => {
     setIsModalVisible(false);
   };
@@ -49,10 +71,16 @@ const BehaviorLibrary = () => {
     form.setFieldsValue(rule);
     setIsModalVisible(true);
     setIsEditing(true);
+    setIsAdding(false);
   };
 
   const handleDelete = (rule) => {
-    const updatedRules = rules.filter(m => m.key !== rule.key);
+    let updatedRules = rules.filter(m => m.key !== rule.key);
+    // 更新所有规则的 key 和 序号，以保持连续性
+    updatedRules = updatedRules.map((rule, index) => ({
+      ...rule,
+      key: `${index + 1}`, // 确保 key 是字符串类型
+    }));
     setRules(updatedRules);
   };
 
@@ -62,23 +90,26 @@ const BehaviorLibrary = () => {
     );
     setRules(filteredRules);
   };
-  const handleAdd = () => {
-    const defaultRule = {
-      key:'rule_${rules.length + 1}',
+
+  const addRule = () => {
+    // 创建一个新的规则对象，确保key和id是唯一的
+    const newRule = {
+      key: '',
       id: '',
-      scenario: '',
-      role: '',
-      action: '',
-      type: '',
-      condition1: '',
-      condition2: '',
+      scenario: '', // 默认为空，待用户填写
+      role: '', // 默认为空，待用户填写
+      action: '', // 默认为空，待用户填写
+      type: '', // 默认为空，待用户填写
+      condition1: '', // 默认为空，待用户填写
+      condition2: '', // 默认为空，待用户填写
       content1: '',
       content2: '',
     };
-    setCurrentRule(defaultRule);
-    form.setFieldsValue(defaultRule);
+    setCurrentRule(newRule);
+    form.setFieldsValue(newRule);
     setIsModalVisible(true);
-    setIsEditing(true); // 标记为编辑状态，以便所有字段都可编辑
+    setIsEditing(true); // 标记为编辑状态，这样表单字段就是可编辑的
+    setIsAdding(true);
   };
 
   const columns = [
@@ -92,6 +123,7 @@ const BehaviorLibrary = () => {
     { title: '条件2', dataIndex: 'condition2', key: 'condition2', render: () => <span>/</span> },
     { title: '内容1', dataIndex: 'content1', key: 'content1' },
     { title: '内容2', dataIndex: 'content2', key: 'content2' },
+    { title: '更新时间', dataIndex: 'date', key: 'date' },
     { title: '操作', key: 'action', render: (text, record) => (
       <>
         <Button type="link" onClick={() => showModal(record)}>查看</Button>
@@ -124,10 +156,24 @@ const BehaviorLibrary = () => {
       />
       <Button type="primary" onClick={handleSearch}>搜索</Button>
       <Table columns={columns} dataSource={rules} />
-      <Modal title={isEditing ? "更新行为准则" : "行为准则信息"} visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
+      <Modal
+        title={
+          isAdding 
+            ? "增加模型"
+            : isEditing 
+              ? "更新模型" 
+              : "模型详情"
+        }
+        visible={isModalVisible}
+        onOk={handleOk}
+        onCancel={handleCancel}
+      >
         <Form form={form} initialValues={currentRule} onFinish={handleFinish}>
           {currentRule && (
             <>
+              <Form.Item label="序号" name="key">
+                <Input disabled />
+              </Form.Item>
               <Form.Item label="行为规则ID" name="id">
                 <Input disabled={!isEditing} />
               </Form.Item>
@@ -155,11 +201,16 @@ const BehaviorLibrary = () => {
               <Form.Item label="内容2" name="content2">
                 <Input disabled={!isEditing}/>
               </Form.Item>
+              {!isAdding && !isEditing ? (
+                <Form.Item label="更新时间" name="date">
+                  <Input disabled={!isEditing} />
+                </Form.Item>
+              ) : null}
             </>
           )}  
         </Form>
       </Modal>
-      <Button type="primary" onClick={handleAdd} style={{ marginBottom: 20 }}>
+      <Button type="primary" onClick={addRule} style={{ marginBottom: 20 }}>
         <PlusOutlined /> 新增行为准则
       </Button>
     </Card>

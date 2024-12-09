@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { Table, Button, Modal, Form, Input, DatePicker, Card, Select } from 'antd';
 import { PlusOutlined, SettingOutlined } from '@ant-design/icons';
-import { Link } from 'react-router-dom';
 import moment from 'moment';
 
-const { Option } = Select;
 
 const OfflineDatabase = () => {
   const [models, setModels] = useState([
@@ -19,15 +17,48 @@ const OfflineDatabase = () => {
   const [searchText, setSearchText] = useState('');
   const [searchField, setSearchField] = useState(''); // 默认搜索字段
   const [form] = Form.useForm();
-
+  const [isEditing, setIsEditing] = useState(false);
 
   const showModal = (model) => {
     setCurrentModel(model);
     form.setFieldsValue(model);
     setIsModalVisible(true);
+    setIsEditing(false)
   };
 
   const handleOk = () => {
+    if (isEditing) {
+      form.submit();
+    } else {
+      setIsModalVisible(false);
+    }
+  };
+ 
+  const handleFinish = (values) => {
+    let newModels;
+    
+    if (!isEditing) {
+      // 更新现有模型时，先更新对应的模型，然后更新所有模型的 key
+      newModels = models.map(modelItem =>
+        modelItem.key === currentModel.key ? { ...modelItem, ...values } : modelItem
+      );
+    } else {
+      // 添加新模型时，首先添加新模型，然后更新所有模型的 key
+      const now = moment().format('YYYY年MM月DD日 HH:mm:ss');
+      const newModel = {
+        ...values,
+        key: `${models.length + 1}`,
+        datasetId: values.datasetId || `NEW-${Date.now()}`, // 如果没有提供ID，则使用时间戳生成一个临时ID
+        updateTime: now,
+      };
+      newModels = [...models, newModel];
+    }
+    // 更新所有模型的 key 和 序号，以保持连续性
+    newModels = newModels.map((model, index) => ({
+      ...model,
+      key: `${index + 1}`, // 确保 key 是字符串类型
+    }));
+    setModels(newModels); // 使用新的规则列表更新状态
     setIsModalVisible(false);
   };
 
@@ -35,9 +66,34 @@ const OfflineDatabase = () => {
     setIsModalVisible(false);
   };
   const handleDelete = (model) => {
-    const updatedModels = models.filter(m => m.key !== model.key);
+    let updatedModels = models.filter(m => m.key !== model.key);
+    // 更新所有规则的 key 和 序号，以保持连续性
+    updatedModels = updatedModels.map((model, index) => ({
+      ...model,
+      key: `${index + 1}`, // 确保 key 是字符串类型
+    }));
     setModels(updatedModels);
   };
+
+  const addDataset = () => {
+    // 创建一个新的规则对象，确保key和id是唯一的
+    const newModel = {
+      key: '',
+      scenario: '', // 默认为空，待用户填写
+      role: '', // 默认为空，待用户填写
+      datasetId: '', // 默认为空，待用户填写
+      dataId: '', // 默认为空，待用户填写
+      statusS: '', // 默认为空，待用户填写
+      statusA: '', // 默认为空，待用户填写
+      statusR: '',
+      statusSJ: '',
+      updateTime: '',
+    };
+    setCurrentModel(newModel);
+    form.setFieldsValue(newModel);
+    setIsModalVisible(true);
+    setIsEditing(true); // 标记为编辑状态，这样表单字段就是可编辑的
+  }
 
   const handleSearch = () => {
     const filteredModels = models.filter(model =>
@@ -56,6 +112,7 @@ const OfflineDatabase = () => {
     { title: '当前时刻奖励(R)', dataIndex: 'statusR', key: 'statusR' },
     { title: '下一时刻状态(S_)', dataIndex: 'statusSJ', key: 'statusSJ' },
     { title: '更新时间', dataIndex: 'updateTime', key: 'updateTime' },
+    { title: '文件存储路径', dataIndex: 'route', key: 'route' },
     { title: '操作', key: 'action', render: (text, record) => (
       <>
         <Button type="link" onClick={() => showModal(record)}>查看</Button>
@@ -87,42 +144,47 @@ const OfflineDatabase = () => {
       />
       <Button type="primary" onClick={handleSearch}>搜索</Button>
       <Table columns={columns} dataSource={models} />
-      <Modal title="模型详情" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
-        <Form form={form} initialValues={currentModel}>
+      <Modal title={isEditing ? "新增模型" : "模型详情"} visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
+        <Form form={form} initialValues={currentModel} onFinish={handleFinish}>
           <Form.Item label="想定场景" name="scenario">
-            <Input disabled />
+            <Input disabled={!isEditing} />
           </Form.Item>
           <Form.Item label="智能体角色" name="role">
-            <Input disabled />
+            <Input disabled={!isEditing} />
           </Form.Item>
           <Form.Item label="数据集ID" name="datasetId">
-            <Input disabled />
+            <Input disabled={!isEditing} />
           </Form.Item>
           <Form.Item label="数据ID" name="dataId">
-            <Input disabled />
+            <Input disabled={!isEditing} />
           </Form.Item>
           <Form.Item label="当前时刻状态(S)" name="statusS">
-            <Input disabled />
+            <Input disabled={!isEditing} />
           </Form.Item>
           <Form.Item label="当前时刻执行动作(A)" name="statusA">
-            <Input disabled />
+            <Input disabled={!isEditing} />
           </Form.Item>
           <Form.Item label="当前时刻奖励(R)" name="statusR">
-            <Input disabled />
+            <Input disabled={!isEditing} />
           </Form.Item>
           <Form.Item label="下一时刻状态(S_)" name="statusSJ">
-            <Input disabled />
+            <Input disabled={!isEditing} />
           </Form.Item>
-          <Form.Item label="更新时间" name="updateTime">
-            <Input disabled />
-          </Form.Item>
+          {!isEditing ? (
+            <Form.Item label="更新时间" name="updateTime">
+              <Input disabled={!isEditing} />
+            </Form.Item>
+          ) : null}
+          {isEditing ? (
+            <Form.Item label="文件存储路径" name="route">
+              <Input disabled={!isEditing} />
+            </Form.Item>
+          ) : null}
         </Form>
       </Modal>
-      <Link to="/智能体编辑" style={{ marginBottom: 20 }}>
-        <Button type="primary" icon={<PlusOutlined />} style={{ marginBottom: 20 }}>
-          新增模型
-        </Button>
-      </Link>
+      <Button type="primary" icon={<PlusOutlined />} style={{ marginBottom: 20 }} onClick={addDataset}>
+        新增模型
+      </Button>
     </Card>
   );
 };;
