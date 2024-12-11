@@ -2,8 +2,8 @@
 
 使用 [Vite](https://vitejs.cn/vite3-cn/guide/) 搭建项目：
 ```bash
-npm create vite@latest
-cd rl-fronted
+npm create vite@latest # frontend -> React-> JavaScript + SWC
+cd frontend
 npm install
 ```
 
@@ -12,9 +12,9 @@ npm install
 1. 安装路由管理：`npm install react-router-dom`。
 2. 安装 [Ant Design](https://ant.design/docs/react/use-with-vite-cn)：`npm install antd --save`。
 3. 安装 [json-server](https://www.npmjs.com/package/json-server)：`npm install json-server`，运行 `json-server db.json`。
-4. 安装 moment。
-5. 安装 mobx 和 mobx-react。
-6. 安装 axios。
+4. 安装 moment：`npm install`。
+5. 安装 mobx 和 mobx-react：`npm install mobx mobx-react`。
+6. 安装 axios：`npm install axios`。
 
 运行网页：
 ```bash
