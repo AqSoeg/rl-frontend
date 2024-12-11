@@ -1,0 +1,49 @@
+.model {
+    display: flex;
+  }
+  
+  .modelleft {
+    flex: 0 0 10%; /* 20% width */
+    padding: 10px; /* Optional: Add some padding */
+    background-color: blue;
+    height: 85vh;
+    border-radius: 10px; /* 圆角边框 */
+  }
+  
+  /* 按钮的基本样式 */
+.button {
+    display: block; /* 使按钮独占一行 */
+    padding: 10px 20px; /* 内边距 */
+    margin-bottom: 30px; /* 按钮之间的外边距 */
+    border: none; /* 无边框 */
+    border-radius: 10px; /* 圆角边框 */
+    background-color: #e6eaff; /* 背景颜色 */
+    color: #333; /* 字体颜色 */
+    text-align: center; /* 文本居中 */
+    text-decoration: none; /* 去除下划线 */
+    cursor: pointer; /* 鼠标悬停时显示指针 */
+    transition: background-color 0.3s, color 0.3s; /* 平滑背景色和字体颜色的过渡效果 */
+    width: 80%;
+    height: 5vh;
+    font-size: large;
+    align-items: center;
+  }
+  /* 按钮的悬浮样式 */
+.button:hover {
+    background-color: #d9dfff; /* 悬浮时的背景颜色 */
+    color: #000; /* 悬浮时的字体颜色 */
+  }
+  /* 按钮的激活/选中样式 */
+  .button.active {
+    background-color: #c0c6ff; /* 选中时的背景颜色 */
+    color: #fff; /* 选中时的字体颜色 */
+  }
+
+
+
+
+
+  .modelright {
+    flex: 1 1 90%; /* 80% width */
+    padding: 10px; /* Optional: Add some padding */
+  }
