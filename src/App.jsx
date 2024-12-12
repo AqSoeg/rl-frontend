@@ -1,14 +1,16 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, NavLink, useNavigate } from 'react-router-dom';
 import reactLogo from './assets/react.svg';
 import SettingsLogo from './assets/settings.svg';
 import AgentEditor from './components/AgentEditor/AgentEditor.jsx';
 import TrainingService from './components/TrainingService/TrainingService.jsx';
 import ModelManagement from './components/ModelManage/ModelManagement.jsx';
-import './App.css'; // 导入 CSS 文件
+import './App.css';
+import scenarioStore from "./store/ScenarioStore.js";
+import {observer} from "mobx-react";
 
-function App() {
-  const [activeTab, setActiveTab] = useState('');
+const App = observer(() => {
+
 
   const tabs = [
     { name: '智能体编辑', path: '/智能体编辑' },
@@ -55,7 +57,7 @@ function App() {
         </div>
       </Router>
   );
-}
+});
 
 function HomeLink() {
   const navigate = useNavigate();
