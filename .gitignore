@@ -9,5 +9,5 @@ build/
 dist/
 
 # 本地配置文件
-package.json
-package-lock.json
+#package.json
+#package-lock.json
