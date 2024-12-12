@@ -1,4 +1,4 @@
-# 项目配置
+## 项目配置
 
 使用 [Vite](https://vitejs.cn/vite3-cn/guide/) 搭建项目：
 ```bash
@@ -7,7 +7,7 @@ cd frontend
 npm install
 ```
 
-工具安装：
+## 工具安装
 
 1. 安装路由管理：`npm install react-router-dom`。
 2. 安装 [Ant Design](https://ant.design/docs/react/use-with-vite-cn)：`npm install antd --save`。
@@ -16,7 +16,8 @@ npm install
 5. 安装 mobx 和 mobx-react：`npm install mobx mobx-react`。
 6. 安装 axios：`npm install axios`。
 
-运行网页：
+## 项目运行
+
 ```bash
 npm run dev
 ```
