@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Select, Input, Alert } from 'antd';
 import { nanoid } from 'nanoid';
-import { observer } from "mobx-react";
-import scenarioStore from "../../store/ScenarioStore.js";
 
 const { Option } = Select;
 
-const Sidebar = observer(() => {
+const Sidebar = ({ scenarios }) => {
     const [scenario, setScenario] = useState('');
     const [role, setRole] = useState('');
     const [type, setType] = useState('');
@@ -22,13 +20,9 @@ const Sidebar = observer(() => {
     const [inputIncomplete, setInputIncomplete] = useState(false);
 
     useEffect(() => {
-        scenarioStore.fetchScenarios(); // 获取场景数据
-    }, []);
-
-    useEffect(() => {
-        const selectedScenario = scenarioStore.scenarios.find(s => s.id === scenario);
-        setAgentRoles(selectedScenario ? selectedScenario.agentRoles : []);
-    }, [scenario, scenarioStore.scenarios]);
+        const selectedScenario = scenarios.find(s => s.id === scenario);
+        setAgentRoles(selectedScenario ? selectedScenario.roles : []);
+    }, [scenario, scenarios]);
 
     const handleScenarioChange = (value) => {
         setScenario(value);
@@ -90,10 +84,10 @@ const Sidebar = observer(() => {
     };
 
     const getAgentTypeOptions = (role) => {
-        const selectedRole = agentRoles.find(r => r.roleID === role);
-        if (selectedRole && selectedRole.roleCount === 1) {
+        const selectedRole = agentRoles.find(r => r.id === role);
+        if (selectedRole && selectedRole.entities.length === 1) {
             return ['单智能体'];
-        } else if (selectedRole && selectedRole.roleCount > 1) {
+        } else if (selectedRole && selectedRole.entities.length > 1) {
             return ['单智能体', '同构多智能体', '异构多智能体'];
         }
         return [''];
@@ -103,9 +97,9 @@ const Sidebar = observer(() => {
         if (type === '单智能体') {
             return ['1'];
         } else if (type === '同构多智能体' || type === '异构多智能体') {
-            const selectedRole = agentRoles.find(r => r.roleID === role);
+            const selectedRole = agentRoles.find(r => r.id === role);
             if (selectedRole) {
-                return [...Array.from({ length: selectedRole.roleCount }, (_, i) => (i + 1).toString())];
+                return [...Array.from({ length: selectedRole.entities.length }, (_, i) => (i + 1).toString())];
             }
         }
         return [''];
@@ -167,7 +161,7 @@ const Sidebar = observer(() => {
             <div className="sidebar-section">
                 <div className="text">想定场景</div>
                 <Select value={scenario} onChange={handleScenarioChange} className="w-full">
-                    {scenarioStore.scenarios.map((scenario) => (
+                    {scenarios.map((scenario) => (
                         <Option key={scenario.id} value={scenario.id}>{scenario.name}</Option>
                     ))}
                 </Select>
@@ -176,7 +170,7 @@ const Sidebar = observer(() => {
                 <div className="text">智能体角色/功能</div>
                 <Select value={role} onChange={handleRoleChange} className="w-full">
                     {agentRoles.map((role) => (
-                        <Option key={role.roleID} value={role.roleID}>{role.roleName}</Option>
+                        <Option key={role.id} value={role.id}>{role.name}</Option>
                     ))}
                 </Select>
             </div>
@@ -225,6 +219,6 @@ const Sidebar = observer(() => {
             </div>
         </div>
     );
-});
+};
 
 export default Sidebar;

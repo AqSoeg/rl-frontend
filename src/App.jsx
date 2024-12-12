@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, NavLink, useNavigate } from 'react-router-dom';
 import reactLogo from './assets/react.svg';
 import SettingsLogo from './assets/settings.svg';
@@ -6,11 +6,9 @@ import AgentEditor from './components/AgentEditor/AgentEditor.jsx';
 import TrainingService from './components/TrainingService/TrainingService.jsx';
 import ModelManagement from './components/ModelManage/ModelManagement.jsx';
 import './App.css';
-import scenarioStore from "./store/ScenarioStore.js";
-import {observer} from "mobx-react";
 
-const App = observer(() => {
-
+function App() {
+  const [activeTab, setActiveTab] = useState('');
 
   const tabs = [
     { name: '智能体编辑', path: '/智能体编辑' },
@@ -57,7 +55,7 @@ const App = observer(() => {
         </div>
       </Router>
   );
-});
+}
 
 function HomeLink() {
   const navigate = useNavigate();

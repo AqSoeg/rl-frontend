@@ -1,25 +1,40 @@
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import Sidebar from './Sidebar';
 import StateVector from './StateVector';
 import ActionSpace from './ActionSpace';
 import RewardFunction from './RewardFunction';
 import ModelFunction from "./ModelButton.jsx";
 import './AgentEditor.css';
-import {observer} from "mobx-react";
-import scenarioStore from "../../store/ScenarioStore.js";
 
-const AgentEditor = observer(({ scenarios }) => {
+const AgentEditor = () => {
+    const [scenarios, setScenarios] = useState([]);
+
+    // 获取场景数据
+    useEffect(() => {
+        const fetchScenarios = async () => {
+            try {
+                const response = await axios.get('http://localhost:3000/scenarios');
+                setScenarios(response.data);
+            } catch (error) {
+                console.error('Error fetching scenarios:', error);
+            }
+        };
+
+        fetchScenarios();
+    }, []);
+
     return (
         <div className="container">
-            <Sidebar scenarios={scenarios} scenarioStore={scenarioStore}/>
+            <Sidebar scenarios={scenarios} />
             <div className="gradient-box">
-                {/*<StateVector simulation={mockState} />*/}
-                {/*<ActionSpace mockAction={mockAction} />*/}
-                {/*<RewardFunction mockReward={mockReward} />*/}
+                {/*<StateVector />*/}
+                {/*<ActionSpace />*/}
+                {/*<RewardFunction />*/}
                 <ModelFunction />
             </div>
         </div>
     );
-});
+};
 
 export default AgentEditor;

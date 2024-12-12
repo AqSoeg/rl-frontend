@@ -1,18 +1,15 @@
 {
-  "scenarioCount": 3,
   "scenarios": [
     {
       "id": "traffic",
       "name": "城市交通",
-      "roleCount": 3,
-      "agentRoles": [
+      "roles": [
         {
-          "roleID": "traffic_light",
-          "roleName": "红绿灯",
-          "roleCount": 4,
+          "id": "traffic_light",
+          "name": "红绿灯",
           "entities": [
             {
-              "entityName": "红绿灯1",
+              "name": "红绿灯1",
               "stateVector": [
                 ["信号灯状态", "当前信号灯状态", "状态"],
                 ["等待车辆数量", "等待通过的车辆数量", "辆"],
@@ -24,7 +21,7 @@
               }
             },
             {
-              "entityName": "红绿灯2",
+              "name": "红绿灯2",
               "stateVector": [
                 ["信号灯状态", "当前信号灯状态", "状态"],
                 ["等待车辆数量", "等待通过的车辆数量", "辆"],
@@ -36,7 +33,7 @@
               }
             },
             {
-              "entityName": "红绿灯3",
+              "name": "红绿灯3",
               "stateVector": [
                 ["信号灯状态", "当前信号灯状态", "状态"],
                 ["等待车辆数量", "等待通过的车辆数量", "辆"],
@@ -48,7 +45,7 @@
               }
             },
             {
-              "entityName": "红绿灯4",
+              "name": "红绿灯4",
               "stateVector": [
                 ["信号灯状态", "当前信号灯状态", "状态"],
                 ["等待车辆数量", "等待通过的车辆数量", "辆"],
@@ -62,12 +59,11 @@
           ]
         },
         {
-          "roleID": "vehicle",
-          "roleName": "车辆",
-          "roleCount": 10,
+          "id": "vehicle",
+          "name": "车辆",
           "entities": [
             {
-              "entityName": "车辆1",
+              "name": "车辆1",
               "stateVector": [
                 ["车辆位置", "车辆当前位置", "坐标"],
                 ["速度", "车辆当前速度", "km/h"],
@@ -79,7 +75,7 @@
               }
             },
             {
-              "entityName": "车辆2",
+              "name": "车辆2",
               "stateVector": [
                 ["车辆位置", "车辆当前位置", "坐标"],
                 ["速度", "车辆当前速度", "km/h"],
@@ -91,7 +87,7 @@
               }
             },
             {
-              "entityName": "车辆3",
+              "name": "车辆3",
               "stateVector": [
                 ["车辆位置", "车辆当前位置", "坐标"],
                 ["速度", "车辆当前速度", "km/h"],
@@ -103,7 +99,7 @@
               }
             },
             {
-              "entityName": "车辆4",
+              "name": "车辆4",
               "stateVector": [
                 ["车辆位置", "车辆当前位置", "坐标"],
                 ["速度", "车辆当前速度", "km/h"],
@@ -115,7 +111,7 @@
               }
             },
             {
-              "entityName": "车辆5",
+              "name": "车辆5",
               "stateVector": [
                 ["车辆位置", "车辆当前位置", "坐标"],
                 ["速度", "车辆当前速度", "km/h"],
@@ -127,7 +123,7 @@
               }
             },
             {
-              "entityName": "车辆6",
+              "name": "车辆6",
               "stateVector": [
                 ["车辆位置", "车辆当前位置", "坐标"],
                 ["速度", "车辆当前速度", "km/h"],
@@ -139,7 +135,7 @@
               }
             },
             {
-              "entityName": "车辆7",
+              "name": "车辆7",
               "stateVector": [
                 ["车辆位置", "车辆当前位置", "坐标"],
                 ["速度", "车辆当前速度", "km/h"],
@@ -151,7 +147,7 @@
               }
             },
             {
-              "entityName": "车辆8",
+              "name": "车辆8",
               "stateVector": [
                 ["车辆位置", "车辆当前位置", "坐标"],
                 ["速度", "车辆当前速度", "km/h"],
@@ -163,7 +159,7 @@
               }
             },
             {
-              "entityName": "车辆9",
+              "name": "车辆9",
               "stateVector": [
                 ["车辆位置", "车辆当前位置", "坐标"],
                 ["速度", "车辆当前速度", "km/h"],
@@ -175,7 +171,7 @@
               }
             },
             {
-              "entityName": "车辆10",
+              "name": "车辆10",
               "stateVector": [
                 ["车辆位置", "车辆当前位置", "坐标"],
                 ["速度", "车辆当前速度", "km/h"],
@@ -189,12 +185,11 @@
           ]
         },
         {
-          "roleID": "police",
-          "roleName": "交警",
-          "roleCount": 2,
+          "id": "police",
+          "name": "交警",
           "entities": [
             {
-              "entityName": "交警1",
+              "name": "交警1",
               "stateVector": [
                 ["位置", "交警当前位置", "坐标"],
                 ["状态", "交警当前状态", "状态"],
@@ -206,7 +201,7 @@
               }
             },
             {
-              "entityName": "交警2",
+              "name": "交警2",
               "stateVector": [
                 ["位置", "交警当前位置", "坐标"],
                 ["状态", "交警当前状态", "状态"],
@@ -224,15 +219,13 @@
     {
       "id": "manufacturing",
       "name": "工业生产线",
-      "roleCount": 3,
-      "agentRoles": [
+      "roles": [
         {
-          "roleID": "robot",
-          "roleName": "机器人",
-          "roleCount": 5,
+          "id": "robot",
+          "name": "机器人",
           "entities": [
             {
-              "entityName": "机器人1",
+              "name": "机器人1",
               "stateVector": [
                 ["位置", "机器人当前位置", "坐标"],
                 ["状态", "机器人当前状态", "状态"],
@@ -244,7 +237,7 @@
               }
             },
             {
-              "entityName": "机器人2",
+              "name": "机器人2",
               "stateVector": [
                 ["位置", "机器人当前位置", "坐标"],
                 ["状态", "机器人当前状态", "状态"],
@@ -256,7 +249,7 @@
               }
             },
             {
-              "entityName": "机器人3",
+              "name": "机器人3",
               "stateVector": [
                 ["位置", "机器人当前位置", "坐标"],
                 ["状态", "机器人当前状态", "状态"],
@@ -268,7 +261,7 @@
               }
             },
             {
-              "entityName": "机器人4",
+              "name": "机器人4",
               "stateVector": [
                 ["位置", "机器人当前位置", "坐标"],
                 ["状态", "机器人当前状态", "状态"],
@@ -280,7 +273,7 @@
               }
             },
             {
-              "entityName": "机器人5",
+              "name": "机器人5",
               "stateVector": [
                 ["位置", "机器人当前位置", "坐标"],
                 ["状态", "机器人当前状态", "状态"],
@@ -294,12 +287,11 @@
           ]
         },
         {
-          "roleID": "conveyor_belt",
-          "roleName": "传送带",
-          "roleCount": 3,
+          "id": "conveyor_belt",
+          "name": "传送带",
           "entities": [
             {
-              "entityName": "传送带1",
+              "name": "传送带1",
               "stateVector": [
                 ["速度", "传送带当前速度", "m/s"],
                 ["负载", "传送带当前负载", "kg"],
@@ -311,7 +303,7 @@
               }
             },
             {
-              "entityName": "传送带2",
+              "name": "传送带2",
               "stateVector": [
                 ["速度", "传送带当前速度", "m/s"],
                 ["负载", "传送带当前负载", "kg"],
@@ -323,7 +315,7 @@
               }
             },
             {
-              "entityName": "传送带3",
+              "name": "传送带3",
               "stateVector": [
                 ["速度", "传送带当前速度", "m/s"],
                 ["负载", "传送带当前负载", "kg"],
@@ -337,12 +329,11 @@
           ]
         },
         {
-          "roleID": "camera",
-          "roleName": "监控摄像头",
-          "roleCount": 2,
+          "id": "camera",
+          "name": "监控摄像头",
           "entities": [
             {
-              "entityName": "摄像头1",
+              "name": "摄像头1",
               "stateVector": [
                 ["位置", "摄像头当前位置", "坐标"],
                 ["状态", "摄像头当前状态", "状态"],
@@ -354,7 +345,7 @@
               }
             },
             {
-              "entityName": "摄像头2",
+              "name": "摄像头2",
               "stateVector": [
                 ["位置", "摄像头当前位置", "坐标"],
                 ["状态", "摄像头当前状态", "状态"],
@@ -372,15 +363,13 @@
     {
       "id": "logistics",
       "name": "物流调度",
-      "roleCount": 3,
-      "agentRoles": [
+      "roles": [
         {
-          "roleID": "drone",
-          "roleName": "无人机",
-          "roleCount": 4,
+          "id": "drone",
+          "name": "无人机",
           "entities": [
             {
-              "entityName": "无人机1",
+              "name": "无人机1",
               "stateVector": [
                 ["位置", "无人机当前位置", "坐标"],
                 ["速度", "无人机当前速度", "km/h"],
@@ -392,7 +381,7 @@
               }
             },
             {
-              "entityName": "无人机2",
+              "name": "无人机2",
               "stateVector": [
                 ["位置", "无人机当前位置", "坐标"],
                 ["速度", "无人机当前速度", "km/h"],
@@ -404,7 +393,7 @@
               }
             },
             {
-              "entityName": "无人机3",
+              "name": "无人机3",
               "stateVector": [
                 ["位置", "无人机当前位置", "坐标"],
                 ["速度", "无人机当前速度", "km/h"],
@@ -416,7 +405,7 @@
               }
             },
             {
-              "entityName": "无人机4",
+              "name": "无人机4",
               "stateVector": [
                 ["位置", "无人机当前位置", "坐标"],
                 ["速度", "无人机当前速度", "km/h"],
@@ -430,12 +419,11 @@
           ]
         },
         {
-          "roleID": "truck",
-          "roleName": "货车",
-          "roleCount": 3,
+          "id": "truck",
+          "name": "货车",
           "entities": [
             {
-              "entityName": "货车1",
+              "name": "货车1",
               "stateVector": [
                 ["位置", "货车当前位置", "坐标"],
                 ["速度", "货车当前速度", "km/h"],
@@ -447,7 +435,7 @@
               }
             },
             {
-              "entityName": "货车2",
+              "name": "货车2",
               "stateVector": [
                 ["位置", "货车当前位置", "坐标"],
                 ["速度", "货车当前速度", "km/h"],
@@ -459,7 +447,7 @@
               }
             },
             {
-              "entityName": "货车3",
+              "name": "货车3",
               "stateVector": [
                 ["位置", "货车当前位置", "坐标"],
                 ["速度", "货车当前速度", "km/h"],
@@ -473,12 +461,11 @@
           ]
         },
         {
-          "roleID": "warehouse_manager",
-          "roleName": "仓库管理员",
-          "roleCount": 2,
+          "id": "warehouse_manager",
+          "name": "仓库管理员",
           "entities": [
             {
-              "entityName": "管理员1",
+              "name": "管理员1",
               "stateVector": [
                 ["位置", "管理员当前位置", "坐标"],
                 ["状态", "管理员当前状态", "状态"],
@@ -490,7 +477,7 @@
               }
             },
             {
-              "entityName": "管理员2",
+              "name": "管理员2",
               "stateVector": [
                 ["位置", "管理员当前位置", "坐标"],
                 ["状态", "管理员当前状态", "状态"],
