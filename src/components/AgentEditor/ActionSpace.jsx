@@ -18,7 +18,7 @@ const ActionSpace = ({ entities }) => {
     const [condition2, setCondition2] = useState(Array(entities.length).fill(''));
     const [execution1, setExecution1] = useState(Array(entities.length).fill(''));
     const [execution2, setExecution2] = useState(Array(entities.length).fill(''));
-    const [entityTexts, setEntityTexts] = useState(entities.map(entity => entity.name)); // 新增状态
+    const [entityTexts, setEntityTexts] = useState(entities.map(entity => entity.name)); // 初始化为实体名称
 
     const handleSelectChange = (index) => {
         const newVisible = [...visible];
@@ -59,7 +59,7 @@ const ActionSpace = ({ entities }) => {
 
         // 更新显示文本
         const newEntityTexts = [...entityTexts];
-        newEntityTexts[selectedActionIndex] = `${entities[selectedActionIndex].name} ${selectedOption}`;
+        newEntityTexts[selectedActionIndex] = `${selectedOption}`;
         setEntityTexts(newEntityTexts);
 
         handleSelectChange(selectedActionIndex); // 收起下拉框
@@ -74,7 +74,7 @@ const ActionSpace = ({ entities }) => {
 
             // 更新显示文本
             const newEntityTexts = [...entityTexts];
-            newEntityTexts[selectedActionIndex] = entities[selectedActionIndex].name;
+            newEntityTexts[selectedActionIndex] = null;
             setEntityTexts(newEntityTexts);
 
             handleSelectChange(selectedActionIndex); // 收起下拉框
@@ -143,7 +143,7 @@ const ActionSpace = ({ entities }) => {
                 {entities.map((entity, i) => (
                     <div key={i} className="dropdown-container">
                         <div className="dropdown-header" onClick={() => handleSelectChange(i)}>
-                            <span>{entityTexts[i]}</span> {/* 显示实体文本 */}
+                            <span>{entity.name} {entityTexts[i]}</span> {/* 显示 entity.name + entityTexts[i] */}
                             <div className="button-group">
                                 <Button type="link" className="dropdown-button">
                                     {visible[i] ? '▲' : '▼'}
