@@ -3,8 +3,8 @@ import { Button, Table } from 'antd';
 import stateLogo from '../../assets/stateVector.svg';
 import uploadLogo from '../../assets/upload.svg';
 
-const StateVector = ({ simulation }) => {
-    const [visible, setVisible] = useState(Array(simulation.VectorCount).fill(false));
+const StateVector = ({ entities }) => {
+    const [visible, setVisible] = useState(Array(entities.length).fill(false));
     const [selectedVector, setSelectedVector] = useState(null);
     const [selectedVectorIndex, setSelectedVectorIndex] = useState(null);
 
@@ -12,7 +12,7 @@ const StateVector = ({ simulation }) => {
         const newVisible = [...visible];
         newVisible[index] = !newVisible[index];
         setVisible(newVisible);
-        setSelectedVector(simulation.Vectors[index]);
+        setSelectedVector(entities[index]);
         setSelectedVectorIndex(index);
     };
 
@@ -23,10 +23,10 @@ const StateVector = ({ simulation }) => {
     ];
 
     const getTableData = (vector) => {
-        if (vector.Variables.length === 0) {
+        if (vector.stateVector.length === 0) {
             return [{ name: '', info: '', unit: '' }];
         }
-        return vector.Variables;
+        return vector.stateVector.map(([name, info, unit]) => ({ name, info, unit }));
     };
 
     return (
@@ -39,10 +39,10 @@ const StateVector = ({ simulation }) => {
                 <img src={uploadLogo} alt="Upload" className="upload-button-logo" />
             </div>
             <div className="dropdown-container-wrapper">
-                {Array.from({ length: simulation.VectorCount }, (_, i) => (
+                {entities.map((entity, i) => (
                     <div key={i} className="dropdown-container">
                         <div className="dropdown-header" onClick={() => handleSelectChange(i)}>
-                            <span>状态观测{i + 1}</span>
+                            <span>{entity.name}</span>
                             <Button type="link" className="dropdown-button">
                                 {visible[i] ? '▲' : '▼'}
                             </Button>
@@ -51,7 +51,7 @@ const StateVector = ({ simulation }) => {
                             <div className="table-container">
                                 <Table
                                     columns={columns}
-                                    dataSource={getTableData(selectedVector || { Variables: [] })}
+                                    dataSource={getTableData(entity)}
                                     pagination={false}
                                     scroll={{ y: 240 }}
                                     className="fixed-table"

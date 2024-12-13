@@ -4,7 +4,7 @@ import { nanoid } from 'nanoid';
 
 const { Option } = Select;
 
-const Sidebar = ({ scenarios }) => {
+const Sidebar = ({ scenarios, onEntitiesChange }) => {
     const [scenario, setScenario] = useState('');
     const [role, setRole] = useState('');
     const [type, setType] = useState('');
@@ -15,9 +15,10 @@ const Sidebar = ({ scenarios }) => {
     const [agentRoles, setAgentRoles] = useState([]);
     const [modelName, setModelName] = useState('待定');
     const [modelID, setModelID] = useState('xxx');
-    const [versionError, setVersionError] = useState('');
-    const [nameError, setNameError] = useState('');
     const [inputIncomplete, setInputIncomplete] = useState(false);
+    const [entityCount, setEntityCount] = useState(0); // 新增：实体总数
+    const [selectedEntityCount, setSelectedEntityCount] = useState(''); // 新增：选择的实体数量
+    const [assignedEntities, setAssignedEntities] = useState([]); // 新增：已分配的实体
 
     useEffect(() => {
         const selectedScenario = scenarios.find(s => s.id === scenario);
@@ -32,6 +33,8 @@ const Sidebar = ({ scenarios }) => {
         setVersion('');
         setAgentCount('');
         setSelectedAgent('');
+        setSelectedEntityCount('');
+        setAssignedEntities([]);
     };
 
     const handleRoleChange = (value) => {
@@ -41,6 +44,14 @@ const Sidebar = ({ scenarios }) => {
         setVersion('');
         setAgentCount('');
         setSelectedAgent('');
+        setSelectedEntityCount('');
+        setAssignedEntities([]);
+
+        // 获取实体总数
+        const selectedRole = agentRoles.find(r => r.id === value);
+        if (selectedRole) {
+            setEntityCount(selectedRole.entities.length);
+        }
     };
 
     const handleTypeChange = (value) => {
@@ -49,6 +60,8 @@ const Sidebar = ({ scenarios }) => {
         setVersion('');
         setAgentCount('');
         setSelectedAgent('');
+        setSelectedEntityCount('');
+        setAssignedEntities([]);
     };
 
     const handleNameChange = (e) => {
@@ -76,11 +89,19 @@ const Sidebar = ({ scenarios }) => {
     const handleAgentCountChange = (value) => {
         setAgentCount(value);
         setSelectedAgent('');
+        setSelectedEntityCount('');
+        setAssignedEntities([]);
     };
 
     const handleAgentChange = (value) => {
         setSelectedAgent(value);
+        setSelectedEntityCount('');
         updateModelName(name, version, value);
+    };
+
+    const handleEntityCountChange = (value) => {
+        setSelectedEntityCount(value);
+        assignEntities(value);
     };
 
     const getAgentTypeOptions = (role) => {
@@ -128,6 +149,28 @@ const Sidebar = ({ scenarios }) => {
             return [...Array.from({ length: parseInt(agentCount) }, (_, i) => `智能体${i + 1}`)];
         }
         return [''];
+    };
+
+    const getEntityCountOptions = (type, agentCount, assignedEntities) => {
+        if (type === '单智能体' || type === '同构多智能体') {
+            return [entityCount / agentCount];
+        } else if (type === '异构多智能体') {
+            const remainingEntities = entityCount - assignedEntities.reduce((sum, count) => sum + count, 0);
+            return Array.from({ length: remainingEntities }, (_, i) => (i + 1).toString());
+        }
+        return [''];
+    };
+
+    const assignEntities = (count) => {
+        if (type === '单智能体' || type === '同构多智能体') {
+            const entities = agentRoles.find(r => r.id === role).entities.slice(0, count);
+            onEntitiesChange(entities);
+        } else if (type === '异构多智能体') {
+            const entities = agentRoles.find(r => r.id === role).entities.slice(assignedEntities.reduce((sum, count) => sum + count, 0), count);
+            const newAssignedEntities = [...assignedEntities, count];
+            setAssignedEntities(newAssignedEntities);
+            onEntitiesChange(entities);
+        }
     };
 
     const checkInputCompleteness = (name, version) => {
@@ -230,6 +273,12 @@ const Sidebar = ({ scenarios }) => {
                 <div className="text">智能体模型</div>
                 <Select value={selectedAgent} onChange={handleAgentChange} className="w-full">
                     {getAgentOptions(agentCount).map((option) => (
+                        <Option key={option} value={option}>{option}</Option>
+                    ))}
+                </Select>
+                <div className="text">代理的实体数量</div>
+                <Select value={selectedEntityCount} onChange={handleEntityCountChange} className="w-full">
+                    {getEntityCountOptions(type, agentCount, assignedEntities).map((option) => (
                         <Option key={option} value={option}>{option}</Option>
                     ))}
                 </Select>
