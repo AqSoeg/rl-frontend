@@ -96,13 +96,31 @@ const Sidebar = ({ scenarios }) => {
     const getAgentCountOptions = (type) => {
         if (type === '单智能体') {
             return ['1'];
-        } else if (type === '同构多智能体' || type === '异构多智能体') {
+        } else if (type === '同构多智能体') {
             const selectedRole = agentRoles.find(r => r.id === role);
             if (selectedRole) {
-                return [...Array.from({ length: selectedRole.entities.length }, (_, i) => (i + 1).toString())];
+                const entityCount = selectedRole.entities.length;
+                const factors = getFactors(entityCount); // 获取实体数量的所有因子
+                return factors.map(factor => factor.toString());
+            }
+        } else if (type === '异构多智能体') {
+            const selectedRole = agentRoles.find(r => r.id === role);
+            if (selectedRole) {
+                const entityCount = selectedRole.entities.length;
+                return Array.from({ length: entityCount - 1 }, (_, i) => (i + 2).toString()); // 从2到实体总数
             }
         }
         return [''];
+    };
+
+    const getFactors = (number) => {
+        const factors = [];
+        for (let i = 2; i <= number; i++) { // 从2开始
+            if (number % i === 0) {
+                factors.push(i);
+            }
+        }
+        return factors;
     };
 
     const getAgentOptions = (agentCount) => {
@@ -132,7 +150,10 @@ const Sidebar = ({ scenarios }) => {
             formattedVersion += '.0';
         }
         if (name && version) {
-            if (type === '同构多智能体' || type === '异构多智能体') {
+            if (agentCount === '1') {
+                // 当智能体数量为1时，不添加“智能体1”后缀
+                setModelName(`${name} v${formattedVersion}`);
+            } else if (type === '同构多智能体' || type === '异构多智能体') {
                 setModelName(`${name} v${formattedVersion} ${selectedAgent}`);
             } else {
                 setModelName(`${name} v${formattedVersion}`);
