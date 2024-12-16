@@ -5,10 +5,11 @@ class AgentEditorStore {
     scenarioID = '';
     agentRoleID = '';
     agentType = '';
-    modelName = '';
-    modelVersion = '';
-    modelID = '';
+    agentName = ''; // 用于保存 agentName
+    agentVersion = '';
+    agentID = '';
     updateTime = '';
+    modelName = ''; // 用于保存 Sidebar.jsx 中的 modelName
 
     constructor() {
         makeAutoObservable(this);
@@ -26,53 +27,64 @@ class AgentEditorStore {
         this.agentType = agentType;
     }
 
-    setModelName(modelName) {
-        this.modelName = modelName;
+    setAgentName(agentName) {
+        this.agentName = agentName;
     }
 
-    setModelVersion(modelVersion) {
-        this.modelVersion = modelVersion;
+    setAgentVersion(agentVersion) {
+        this.agentVersion = agentVersion;
     }
 
-    setModelID(modelID) {
-        this.modelID = modelID;
+    setAgentID(agentID) {
+        this.agentID = agentID;
     }
 
     setUpdateTime(updateTime) {
         this.updateTime = updateTime;
     }
 
+    setModelName(modelName) { // 新增方法，用于设置 Sidebar.jsx 中的 modelName
+        this.modelName = modelName;
+    }
+
     saveModel = () => {
-        const modelData = {
-            scenarioID: this.scenarioID,
-            agentRoleID: this.agentRoleID,
-            agentType: this.agentType,
-            modelName: this.modelName,
-            modelVersion: this.modelVersion,
-            modelID: this.modelID,
-            updateTime: new Date().toISOString(),
-        };
+        // 弹出确认弹窗
+        const isConfirmed = window.confirm('是否确认保存模型？');
 
-        // 通过 WebSocket 发送数据到服务器
-        const socket = new WebSocket('ws://localhost:8080');
+        if (isConfirmed) {
+            const modelData = {
+                scenarioID: this.scenarioID,
+                agentRoleID: this.agentRoleID,
+                agentType: this.agentType,
+                agentName: this.agentName,
+                agentVersion: this.agentVersion,
+                agentID: this.agentID,
+                updateTime: new Date().toISOString(),
+            };
 
-        socket.onopen = () => {
-            console.log('WebSocket connection established');
-            socket.send(JSON.stringify(modelData));
-        };
+            // 通过 WebSocket 发送数据到服务器
+            const socket = new WebSocket('ws://localhost:8080');
 
-        socket.onmessage = (event) => {
-            const response = JSON.parse(event.data);
-            console.log('Server response:', response);
-            if (response.status === 'success') {
-                alert('Model saved successfully!');
-            }
-        };
+            socket.onopen = () => {
+                console.log('WebSocket connection established');
+                socket.send(JSON.stringify(modelData));
+            };
 
-        socket.onerror = (error) => {
-            console.error('WebSocket error:', error);
-            alert('Failed to save model. Please try again.');
-        };
+            socket.onmessage = (event) => {
+                const response = JSON.parse(event.data);
+                console.log('Server response:', response);
+                if (response.status === 'success') {
+                    alert(`${this.modelName} 已保存成功！`); // 使用 Sidebar.jsx 中的 modelName
+                }
+            };
+
+            socket.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                alert('Failed to save model. Please try again.');
+            };
+        } else {
+            alert('保存操作已取消！');
+        }
     };
 }
 
