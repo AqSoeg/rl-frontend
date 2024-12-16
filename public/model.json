@@ -1,0 +1,11 @@
+[
+  {
+    "scenarioID": "traffic",
+    "agentRoleID": "traffic_light",
+    "agentType": "单智能体",
+    "agentName": "agent",
+    "agentVersion": "1",
+    "agentID": "pqWdZexpDJsPJw5-",
+    "updateTime": "2024-12-16T11:17:38.028Z"
+  }
+]
