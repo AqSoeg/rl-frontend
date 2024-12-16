@@ -304,4 +304,4 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
     );
 };
 
-export default Sideba
+export default Sidebar;
