@@ -1,6 +1,8 @@
+// Sidebar.jsx
 import { useState, useEffect } from 'react';
 import { Select, Input, Alert } from 'antd';
 import { nanoid } from 'nanoid';
+import agentEditorStore from './AgentEditorStore';
 
 const { Option } = Select;
 
@@ -16,9 +18,9 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
     const [modelName, setModelName] = useState('待定');
     const [modelID, setModelID] = useState('xxx');
     const [inputIncomplete, setInputIncomplete] = useState(false);
-    const [entityCount, setEntityCount] = useState(0); // 新增：实体总数
-    const [selectedEntityCount, setSelectedEntityCount] = useState(''); // 新增：选择的实体数量
-    const [assignedEntities, setAssignedEntities] = useState([]); // 新增：已分配的实体
+    const [entityCount, setEntityCount] = useState(0);
+    const [selectedEntityCount, setSelectedEntityCount] = useState('');
+    const [assignedEntities, setAssignedEntities] = useState([]);
 
     useEffect(() => {
         const selectedScenario = scenarios.find(s => s.id === scenario);
@@ -27,6 +29,7 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
 
     const handleScenarioChange = (value) => {
         setScenario(value);
+        agentEditorStore.setScenarioID(value); // 更新 scenarioID
         setRole('');
         setType('');
         setName('');
@@ -39,6 +42,7 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
 
     const handleRoleChange = (value) => {
         setRole(value);
+        agentEditorStore.setAgentRoleID(value); // 更新 agentRoleID
         setType('');
         setName('');
         setVersion('');
@@ -47,7 +51,6 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
         setSelectedEntityCount('');
         setAssignedEntities([]);
 
-        // 获取实体总数
         const selectedRole = agentRoles.find(r => r.id === value);
         if (selectedRole) {
             setEntityCount(selectedRole.entities.length);
@@ -56,6 +59,7 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
 
     const handleTypeChange = (value) => {
         setType(value);
+        agentEditorStore.setAgentType(value); // 更新 agentType
         setName('');
         setVersion('');
         setAgentCount('');
@@ -67,6 +71,7 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
     const handleNameChange = (e) => {
         const newName = e.target.value.slice(0, 10);
         setName(newName);
+        agentEditorStore.setModelName(newName); // 更新 modelName
         if (newName.length >= 10) {
             alert('名称不能超过10个字符!');
         }
@@ -80,6 +85,7 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
             newVersion = parts[0] + '.' + parts[1].split('.')[0].slice(0, 2);
         }
         setVersion(newVersion);
+        agentEditorStore.setModelVersion(newVersion); // 更新 modelVersion
         if (newVersion !== e.target.value) {
             alert('版本号只能包含数字和小数点，小数位数不超过两位!');
         }
@@ -121,14 +127,14 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
             const selectedRole = agentRoles.find(r => r.id === role);
             if (selectedRole) {
                 const entityCount = selectedRole.entities.length;
-                const factors = getFactors(entityCount); // 获取实体数量的所有因子
+                const factors = getFactors(entityCount);
                 return factors.map(factor => factor.toString());
             }
         } else if (type === '异构多智能体') {
             const selectedRole = agentRoles.find(r => r.id === role);
             if (selectedRole) {
                 const entityCount = selectedRole.entities.length;
-                return Array.from({ length: entityCount - 1 }, (_, i) => (i + 2).toString()); // 从2到实体总数
+                return Array.from({ length: entityCount - 1 }, (_, i) => (i + 2).toString());
             }
         }
         return [''];
@@ -136,7 +142,7 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
 
     const getFactors = (number) => {
         const factors = [];
-        for (let i = 2; i <= number; i++) { // 从2开始
+        for (let i = 2; i <= number; i++) {
             if (number % i === 0) {
                 factors.push(i);
             }
@@ -194,7 +200,6 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
         }
         if (name && version) {
             if (agentCount === '1') {
-                // 当智能体数量为1时，不添加“智能体1”后缀
                 setModelName(`${name} v${formattedVersion}`);
             } else if (type === '同构多智能体' || type === '异构多智能体') {
                 setModelName(`${name} v${formattedVersion} ${selectedAgent}`);
@@ -208,7 +213,7 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
 
     const generateModelID = (scenario, role, type, version, agentCount, timestamp, selectedAgent) => {
         const inputString = `${scenario}${role}${type}${version}${agentCount}${timestamp}${selectedAgent}`;
-        const hash = nanoid(16); // 生成16位的唯一ID
+        const hash = nanoid(16);
         return hash;
     };
 
@@ -217,6 +222,7 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
             const timestamp = Date.now();
             const newModelID = generateModelID(scenario, role, type, version, agentCount, timestamp, selectedAgent);
             setModelID(newModelID);
+            agentEditorStore.setModelID(newModelID); // 更新 modelID
         }
     }, [scenario, role, type, version, agentCount, selectedAgent]);
 

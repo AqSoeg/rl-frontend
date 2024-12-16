@@ -1,3 +1,4 @@
+// AgentEditor.jsx
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Sidebar from './Sidebar';
@@ -6,12 +7,12 @@ import ActionSpace from './ActionSpace.jsx';
 import RewardFunction from "./RewardFunction.jsx";
 import ModelFunction from './ModelButton.jsx';
 import './AgentEditor.css';
+import agentEditorStore from './AgentEditorStore';
 
 const AgentEditor = () => {
     const [scenarios, setScenarios] = useState([]);
-    const [selectedEntities, setSelectedEntities] = useState([]); // 新增：用于存储选择的实体
+    const [selectedEntities, setSelectedEntities] = useState([]);
 
-    // 获取场景数据
     useEffect(() => {
         const fetchScenarios = async () => {
             try {
@@ -25,7 +26,6 @@ const AgentEditor = () => {
         fetchScenarios();
     }, []);
 
-    // 处理从Sidebar传递过来的实体数据
     const handleEntitiesChange = (entities) => {
         setSelectedEntities(entities);
     };
