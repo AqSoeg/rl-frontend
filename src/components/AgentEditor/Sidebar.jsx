@@ -1,4 +1,3 @@
-// Sidebar.jsx
 import { useState, useEffect } from 'react';
 import { Select, Input, Alert } from 'antd';
 import { nanoid } from 'nanoid';
@@ -171,11 +170,13 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
         if (type === '单智能体' || type === '同构多智能体') {
             const entities = agentRoles.find(r => r.id === role).entities.slice(0, count);
             onEntitiesChange(entities);
+            agentEditorStore.setSelectedEntities(entities); // 更新 selectedEntities
         } else if (type === '异构多智能体') {
             const entities = agentRoles.find(r => r.id === role).entities.slice(assignedEntities.reduce((sum, count) => sum + count, 0), count);
             const newAssignedEntities = [...assignedEntities, count];
             setAssignedEntities(newAssignedEntities);
             onEntitiesChange(entities);
+            agentEditorStore.setSelectedEntities(entities); // 更新 selectedEntities
         }
     };
 
@@ -303,4 +304,4 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
     );
 };
 
-export default Sidebar;
+export default Sideba

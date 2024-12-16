@@ -1,10 +1,9 @@
-// server.js
 import fs from 'fs';
 import { WebSocketServer } from 'ws';
 
 // 创建 WebSocket 服务器
 const wss = new WebSocketServer({ port: 8080 });
-const MODEL_FILE_PATH = './public/model.json'; // 模型文件路径
+const MODEL_FILE_PATH = 'tmp/model.json'; // 模型文件路径
 
 // 监听客户端连接
 wss.on('connection', (ws) => {

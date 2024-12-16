@@ -1,4 +1,3 @@
-// AgentEditorStore.js
 import { makeAutoObservable } from 'mobx';
 
 class AgentEditorStore {
@@ -10,6 +9,7 @@ class AgentEditorStore {
     agentID = '';
     updateTime = '';
     modelName = ''; // 用于保存 Sidebar.jsx 中的 modelName
+    selectedEntities = []; // 新增：用于记录用户选择的实体
 
     constructor() {
         makeAutoObservable(this);
@@ -47,6 +47,10 @@ class AgentEditorStore {
         this.modelName = modelName;
     }
 
+    setSelectedEntities(entities) { // 新增方法，用于设置用户选择的实体
+        this.selectedEntities = entities;
+    }
+
     saveModel = () => {
         // 弹出确认弹窗
         const isConfirmed = window.confirm('是否确认保存模型？');
@@ -60,6 +64,7 @@ class AgentEditorStore {
                 agentVersion: this.agentVersion,
                 agentID: this.agentID,
                 updateTime: new Date().toISOString(),
+                entities: this.selectedEntities, // 新增：包含用户选择的实体
             };
 
             // 通过 WebSocket 发送数据到服务器
