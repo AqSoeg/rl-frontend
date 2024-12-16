@@ -21,7 +21,7 @@ npm install
 
 1. 运行后端：`npx json-server --watch db.json --port 3000`。
 2. 运行网页：`npm run dev`。
-3. 运行 websocket 服务：`node server.js`。
+3. 运行 Web-Socket 服务：`node server.js`。
 
 
 ## 如果有新增的内容，先写在后面，便于合并
