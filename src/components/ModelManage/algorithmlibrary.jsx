@@ -149,7 +149,7 @@ const AlgorithmLibrary = () => {
   return (
     <Card title={
       <div style={{ backgroundColor: '#f0f0f0', fontSize: '40px', textAlign: 'center' }}>
-        智能体模型管理
+        算法模型管理
         <SettingOutlined style={{ marginLeft: 8 }} /> {/* 功能图标 */}
       </div>} bordered={true}>
       <span>检索：</span>
