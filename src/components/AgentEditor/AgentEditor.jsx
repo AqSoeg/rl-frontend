@@ -1,16 +1,18 @@
+// AgentEditor.jsx
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Sidebar from './Sidebar';
-import StateVector from './StateVector';
-import ActionSpace from './ActionSpace';
-import RewardFunction from './RewardFunction';
-import ModelFunction from "./ModelButton.jsx";
+import StateVector from './StateVector.jsx';
+import ActionSpace from './ActionSpace.jsx';
+import RewardFunction from "./RewardFunction.jsx";
+import ModelFunction from './ModelButton.jsx';
 import './AgentEditor.css';
+import agentEditorStore from './AgentEditorStore';
 
 const AgentEditor = () => {
     const [scenarios, setScenarios] = useState([]);
+    const [selectedEntities, setSelectedEntities] = useState([]);
 
-    // 获取场景数据
     useEffect(() => {
         const fetchScenarios = async () => {
             try {
@@ -24,12 +26,16 @@ const AgentEditor = () => {
         fetchScenarios();
     }, []);
 
+    const handleEntitiesChange = (entities) => {
+        setSelectedEntities(entities);
+    };
+
     return (
         <div className="container">
-            <Sidebar scenarios={scenarios} />
+            <Sidebar scenarios={scenarios} onEntitiesChange={handleEntitiesChange} />
             <div className="gradient-box">
-                {/*<StateVector />*/}
-                {/*<ActionSpace />*/}
+                <StateVector entities={selectedEntities} />
+                <ActionSpace entities={selectedEntities} />
                 {/*<RewardFunction />*/}
                 <ModelFunction />
             </div>
