@@ -1,73 +1,105 @@
+// right.jsx
 import React, { useState } from 'react';
-import { Card, Table, Button, Select,Space, Modal } from 'antd';
+import { Card, Table, Button, Select, Space, Modal } from 'antd';
 import { EyeOutlined, CheckCircleOutlined, DownloadOutlined, SettingOutlined } from '@ant-design/icons';
 import { observer } from 'mobx-react';
 import { intelligentStore } from './IntelligentStore';
-
 const { Option } = Select;
-const Right = observer(() => {
+
+const Right = observer(({ scenarios}) => { // 接收 scenarios 作为 props
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState(null);
+  const [agents, setAgents] = useState([]);
   const handleLoad = (key) => {
-    const agent = intelligentAgents.find(a => a.key === key);
+    const agent = agents.find(a => a.key === key);
     intelligentStore.loadAgent(agent);
   };
-  const intelligentAgents = [
-    { key: '1', scenario: '场景一', id: 'DCT-01', name: 'XX模型', version: 'v1.0', type: '多智能体模型', updateTime: '2024年9月1日 11:12:58' },
-    { key: '2', scenario: '场景一', id: 'DCT-02', name: '分布式XX模型', version: 'v1.0', type: '分布式多智能体', updateTime: '2024年9月1日 11:12:58' },
-    { key: '3', scenario: '场景二', id: 'GL-03', name: 'XX管理模型', version: 'v1.1', type: '单智能体', updateTime: '2024年9月1日 11:12:58' },
-    
-    // 更多智能体...
-  ];
-  
+
+  const dataSource = scenarios.flatMap(scenario =>
+    scenario.agentRoles.flatMap(role => role.entities.map(entity => ({
+      key: entity.entityId,
+      id: scenario.id,
+      agentId: entity.agentId,
+      AgentName: role.AgentName,
+      version: '1.0', // 假设版本号，或者从数据中获取
+      AgentType: role.AgentType,
+      updateTime: role.更新时间, // 确保时间格式正确
+    })))
+  );
   const columns = [
-    { title: '序号', dataIndex: 'key', key: 'key' },
-    { title: '想定场景', dataIndex: 'scenario', key: 'scenario' },
-    { title: '智能体ID', dataIndex: 'id', key: 'id' },
-    { title: '智能体名称', dataIndex: 'name', key: 'name' },
+    { title: '序号', dataIndex: 'key', key: 'key', render: (text, record, index) => index + 1 },
+    { title: '想定场景', dataIndex: 'id', key: 'id', render: (text, record) => {
+        const scenario = scenarios.find(s => s.id === record.id);
+        return scenario ? scenario.name : '未知场景';
+      }},
+    { title: '智能体ID', dataIndex: 'agentId', key: 'agentId' },
+    { title: '智能体名称', dataIndex: 'AgentName', key: 'AgentName' },
     { title: '版本', dataIndex: 'version', key: 'version' },
-    { title: '智能体类型', dataIndex: 'type', key: 'type' },
+    { title: '智能体类型', dataIndex: 'AgentType', key: 'AgentType' },
     { title: '更新时间', dataIndex: 'updateTime', key: 'updateTime' },
     {
-        title: '操作',
-        key: 'action',
-        render: (text, record) => (
-          <Space>
-            <Button icon={<EyeOutlined />} onClick={() => handleView(record)}>
-              查看
-            </Button>
-            <Button icon={<CheckCircleOutlined />} onClick={() => handleEffect(record.key)}>
-              效果
-            </Button>
-            <Button icon={<DownloadOutlined />} onClick={() => handleLoad(record.key)}>
-              载入
-            </Button>
-          </Space>
-        ),
+      title: '操作',
+      key: 'action',
+      render: (text, record) => (
+        <Space>
+          <Button icon={<EyeOutlined />} onClick={() => handleView(record)}>
+            查看
+          </Button>
+          <Button icon={<CheckCircleOutlined />} onClick={() => handleEffect(record.key)}>
+            效果
+          </Button>
+          <Button icon={<DownloadOutlined />} onClick={() => handleLoad(record.key)}>
+            载入
+          </Button>
+        </Space>
+      ),
     },
   ];
+
+  // 假设你想在表格中显示 scenarios 的信息，可以创建一个新列来显示场景名称
+  const extendedColumns = [
+    ...columns,
+    {
+      title: '场景名称',
+      key: 'sceneName',
+      render: (text, record) => {
+        const scenario = scenarios.find(s => s.id === record.sceneId);
+        return scenario ? scenario.name : '未知场景';
+      },
+    },
+  ];
+
   const handleView = (agent) => {
     setSelectedAgent(agent);
     setIsDetailModalVisible(true);
   };
-  
+
   const handleEffect = (key) => {
     message.info(`查看智能体 ${key} 的效果`);
     // 在这里添加查看效果的逻辑
   };
 
-  const handleOk=()=>{
-    setIsDetailModalVisible(false)
-  }
-  const handleCancel=()=>{
-    setIsDetailModalVisible(false)
-  }
+  const handleOk = () => {
+    setIsDetailModalVisible(false);
+  };
+
+  const handleCancel = () => {
+    setIsDetailModalVisible(false);
+  };
+
   const hyperParameterNames = [
-    'Actor学习率', 'Critic学习率', '折扣率', '模型保存频率', '日志打印频率',
-    '总训练步数', '超参数7', '超参数8', '超参数9', '超参数10'
+    'Actor学习率',
+    'Critic学习率',
+    '折扣率',
+    '模型保存频率',
+    '日志打印频率',
+    '总训练步数',
+    '超参数7',
+    '超参数8',
+    '超参数9',
+    '超参数10',
   ];
 
-  // 定义数值选项
   const valueOptions = {
     'Actor学习率': ['1e-2', '1e-3', '1e-4'],
     'Critic学习率': ['1e-2', '1e-3', '1e-4', '1e-5'],
@@ -80,7 +112,7 @@ const Right = observer(() => {
     '超参数9': ['value10', 'value11', 'value12'],
     '超参数10': ['value13', 'value14', 'value15'],
   };
-  //定义默认值选项
+
   const defaultParameterValues = {
     'Actor学习率': '1e-3',
     'Critic学习率': '1e-4',
@@ -93,35 +125,46 @@ const Right = observer(() => {
     '超参数9': '0.05',
     '超参数10': '0.06',
   };
+
   return (
     <div>
-      <Card title={
-      <div style={{ backgroundColor: '#f0f0f0', fontSize: '40px', textAlign: 'center' }}>
-        智能体载入
-        <SettingOutlined style={{ marginLeft: 8 }} /> {/* 功能图标 */}
-      </div>} bordered={true}>
-        <Table dataSource={intelligentAgents} columns={columns} pagination={{pageSize:3}} />
+      <Card
+        title={
+          <div style={{ backgroundColor: '#f0f0f0', fontSize: '40px', textAlign: 'center' }}>
+            智能体载入
+            <SettingOutlined style={{ marginLeft: 8 }} />
+          </div>
+        }
+        bordered={true}
+      >
+        <Table dataSource={dataSource} columns={extendedColumns} pagination={{ pageSize: 3 }} />
       </Card>
-      <Card title={
-      <div style={{ backgroundColor: '#f0f0f0', fontSize: '40px', textAlign: 'center' }}>
-        训练超参数
-        <SettingOutlined style={{ marginLeft: 8 }} /> {/* 功能图标 */}
-      </div>} bordered={true}>
-          <Space className="hyper-params" size="middle">
-            {hyperParameterNames.map((name, index) => (
-              <Space key={index} align="baseline">
-                <Select className='value' defaultValue={name}>
-                    <Option value={name}>{name}</Option>
-                </Select>
-                <span>:</span>
-                <Select className='value' defaultValue={defaultParameterValues[name]}>
-                  {valueOptions[name].map((value, idx) => (
-                    <Option key={`${name}-${idx}`} value={value}>{value}</Option>
-                  ))}
-                </Select>
-              </Space>
-            ))}
-          </Space>
+      <Card
+        title={
+          <div style={{ backgroundColor: '#f0f0f0', fontSize: '40px', textAlign: 'center' }}>
+            训练超参数
+            <SettingOutlined style={{ marginLeft: 8 }} />
+          </div>
+        }
+        bordered={true}
+      >
+        <Space className="hyper-params" size="middle">
+          {hyperParameterNames.map((name, index) => (
+            <Space key={index} align="baseline">
+              <Select className='value' defaultValue={name}>
+                <Option value={name}>{name}</Option>
+              </Select>
+              <span>:</span>
+              <Select className='value' defaultValue={defaultParameterValues[name]}>
+                {valueOptions[name].map((value, idx) => (
+                  <Option key={`${name}-${idx}`} value={value}>
+                    {value}
+                  </Option>
+                ))}
+              </Select>
+            </Space>
+          ))}
+        </Space>
       </Card>
       <div className='button'>
         <Button>
@@ -141,12 +184,12 @@ const Right = observer(() => {
         <div>
           {selectedAgent && (
             <div>
-              <p><strong>智能体名称：</strong>{selectedAgent.name}</p>
-              <p><strong>智能体ID：</strong>{selectedAgent.id}</p>
+              <p><strong>智能体名称：</strong>{selectedAgent.modelName}</p>
+              <p><strong>智能体ID：</strong>{selectedAgent.modelId}</p>
               <p><strong>版本：</strong>{selectedAgent.version}</p>
-              <p><strong>智能体类型：</strong>{selectedAgent.type}</p>
+              <p><strong>智能体类型：</strong>{selectedAgent.agentType}</p>
               <p><strong>更新时间：</strong>{selectedAgent.updateTime}</p>
-              <p><strong>想定场景：</strong>{selectedAgent.scenario}</p>
+              <p><strong>想定场景：</strong>{selectedAgent.sceneId}</p>
             </div>
           )}
         </div>

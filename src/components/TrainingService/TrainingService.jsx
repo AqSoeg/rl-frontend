@@ -7,29 +7,29 @@ import './TrainingService.css'; // 引入CSS文件
 const TrainingService = () => {  
   const [scenarios, setScenarios] = useState([]);
 
-  // 获取场景数据
-  useEffect(() => {
-      const fetchScenarios = async () => {
-          try {
-              const response = await axios.get('http://localhost:3000/scenarios');
-              setScenarios(response.data);
-          } catch (error) {
-              console.error('Error fetching scenarios:', error);
-          }
-      };
+  
 
-      fetchScenarios();
+  useEffect(() => {
+    const fetchScenarios = async () => {
+        try {
+            const response = await axios.get('http://localhost:3001/scenarios');
+            setScenarios(response.data);
+        } catch (error) {
+            console.error('Error fetching scenarios:', error);
+        }
+    };
+    fetchScenarios();
   }, []);
   return (
     <div className='trainingservice'>
         <div className='left'>
             <Left scenarios={scenarios}/>
         </div>
-        <div className='middle'>
+        <div className='middle' scenarios={scenarios}>
             <Middle />
         </div>
         <div className='right'>
-            <Right />
+            <Right scenarios={scenarios}/>
         </div>
     </div>
   );

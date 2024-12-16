@@ -1,29 +1,41 @@
-import React, { useState } from 'react';
-import { Table, Button, Modal, Form, Input, DatePicker, Card, Select } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Table, Button, Modal, Form, Input, Card, Select } from 'antd';
 import { PlusOutlined, SettingOutlined } from '@ant-design/icons';
 import moment from 'moment';
+import axios from 'axios';
 
 const AlgorithmLibrary = () => {
-  const [models, setModels] = useState([
-    { key: '1', scenario: '场景1', id: 'DCT-01', name: 'XX模型', type: '多智能体模型', structure: 'Actor-Critic', version: 'v1.0', input: '', output: '', updateTime: '2024年9月1日 11:12:58' },
-    { key: '2', scenario: '场景1', id: 'DCT-02', name: '分布式XX模型', type: '分布式多智能体', structure: '分布式Actor-Critic', version: 'v1.1', input: '', output: '', updateTime: '2024年9月1日 11:12:58' },
-    { key: '3', scenario: '场景2', id: 'GL-03', name: 'XX管理模型', type: '单智能体', structure: 'Actor-Critic', version: 'v1.0', input: '', output: '', updateTime: '2024年9月1日 11:12:58' },
-    // 更多模型数据...
-  ]);
-
+  const [models, setModels] = useState([]);
+  const [filteredModels, setFilteredModels] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentModel, setCurrentModel] = useState(null);
   const [searchText, setSearchText] = useState('');
-  const [searchField, setSearchField] = useState(''); // 默认搜索字段
+  const [searchField, setSearchField] = useState('modelId'); // 默认搜索字段
   const [form] = Form.useForm();
   const [isEditing, setIsEditing] = useState(false);
 
+  useEffect(() => {
+    const fetchModels = async () => {
+      try {
+        const response = await axios.get('http://localhost:3000/agents');
+        const modelsWithKey = response.data.map((model, index) => ({
+          ...model,
+          key: `${index + 1}`, // 确保 key 是字符串类型
+        }));
+        setModels(modelsWithKey);
+        setFilteredModels(modelsWithKey); // 初始化过滤后的数据
+      } catch (error) {
+        console.error('Error fetching models:', error);
+      }
+    };
+    fetchModels();
+  }, []);
 
   const showModal = (model) => {
     setCurrentModel(model);
     form.setFieldsValue(model);
     setIsModalVisible(true);
-    setIsEditing(false)
+    setIsEditing(false);
   };
 
   const handleOk = () => {
@@ -33,13 +45,15 @@ const AlgorithmLibrary = () => {
       setIsModalVisible(false);
     }
   };
+
   const handleFinish = (values) => {
-    let newModels;
+    let updatedModels;
     
     if (!isEditing) {
       // 更新现有模型时，先更新对应的模型，然后更新所有模型的 key
-      newModels = models.map(modelItem =>
-        modelItem.key === currentModel.key ? { ...modelItem, ...values } : modelItem
+      const now = moment().format('YYYY年MM月DD日 HH:mm:ss');
+      updatedModels = models.map(modelItem =>
+        modelItem.key === currentModel.key ? { ...modelItem, ...values, updateTime: now } : modelItem
       );
     } else {
       // 添加新模型时，首先添加新模型，然后更新所有模型的 key
@@ -47,67 +61,77 @@ const AlgorithmLibrary = () => {
       const newModel = {
         ...values,
         key: `${models.length + 1}`,
-        id: values.id || `NEW-${Date.now()}`, // 如果没有提供ID，则使用时间戳生成一个临时ID
+        modelId: values.id || `NEW-${Date.now()}`, // 如果没有提供ID，则使用时间戳生成一个临时ID
         updateTime: now,
       };
-      newModels = [...models, newModel];
+      updatedModels = [...models, newModel];
     }
-  
+
     // 更新所有模型的 key 和 序号，以保持连续性
-    newModels = newModels.map((model, index) => ({
+    updatedModels = updatedModels.map((model, index) => ({
       ...model,
       key: `${index + 1}`, // 确保 key 是字符串类型
     }));
-  
-    setModels(newModels); // 使用新的规则列表更新状态
-  
+
+    setModels(updatedModels); // 使用新的规则列表更新状态
+    setFilteredModels(updatedModels); // 同步过滤后的数据
     setIsModalVisible(false);
   };
 
   const handleCancel = () => {
     setIsModalVisible(false);
   };
+
   const handleDelete = (model) => {
-    let updatedModels = models.filter(m => m.key !== model.key);
-    // 更新所有规则的 key 和 序号，以保持连续性
+    let updatedModels = filteredModels.filter(m => m.key !== model.key);
+    // 更新所有模型的 key 和 序号，以保持连续性
     updatedModels = updatedModels.map((model, index) => ({
       ...model,
       key: `${index + 1}`, // 确保 key 是字符串类型
     }));
     setModels(updatedModels);
+    setFilteredModels(updatedModels); // 同步过滤后的数据
   };
 
   const handleSearch = () => {
     const filteredModels = models.filter(model =>
-      model[searchField].includes(searchText)
+      String(model[searchField]).includes(searchText)
     );
-    setModels(filteredModels);
+    setFilteredModels(filteredModels);
   };
+
   const addModel = () => {
-    // 创建一个新的规则对象，确保key和id是唯一的
+    // 创建一个新的模型对象，确保key和id是唯一的
     const newModel = {
       key: '',
-      scenario: '', // 默认为空，待用户填写
-      id: '', // 默认为空，待用户填写
-      name: '', // 默认为空，待用户填写
-      type: '', // 默认为空，待用户填写
+      sceneId: '', // 默认为空，待用户填写
+      modelId: '', // 默认为空，待用户填写
+      modelName: '', // 默认为空，待用户填写
+      agentType: '', // 默认为空，待用户填写
       structure: '', // 默认为空，待用户填写
       version: '', // 默认为空，待用户填写
       input: '',
       output: '',
       route: '',
+      updateTime: '', // 默认为空，将在保存时填充
     };
     setCurrentModel(newModel);
     form.setFieldsValue(newModel);
     setIsModalVisible(true);
     setIsEditing(true); // 标记为编辑状态，这样表单字段就是可编辑的
-  }
+  };
+
   const columns = [
-    { title: '序号', dataIndex: 'key', key: 'key' },
-    { title: '想定场景', dataIndex: 'scenario', key: 'scenario' },
-    { title: '智能体ID', dataIndex: 'id', key: 'id' },
-    { title: '智能体名称', dataIndex: 'name', key: 'name' },
-    { title: '智能体类型', dataIndex: 'type', key: 'type' },
+    {
+      title: '序号',
+      dataIndex: 'key',
+      key: 'key',
+      render: (text, record, index) => index + 1, // 动态计算序号
+    },
+    { title: '想定场景', dataIndex: 'sceneId', key: 'sceneId' },
+    { title: '智能体ID', dataIndex: 'modelId', key: 'modelId' },
+    { title: '智能体名称', dataIndex: 'modelName', key: 'modelName' },
+    { title: '智能体类型', dataIndex: 'agentType', key: 'agentType' },
     { title: '模型结构', dataIndex: 'structure', key: 'structure' },
     { title: '版本', dataIndex: 'version', key: 'version' },
     { title: '输入', dataIndex: 'input', key: 'input' },
@@ -130,14 +154,12 @@ const AlgorithmLibrary = () => {
       </div>} bordered={true}>
       <span>检索：</span>
       <Select value={searchField} onChange={setSearchField} style={{ width: 120, marginRight: 8 }}>
-        <Select.Option value="scenario">想定场景</Select.Option>
-        <Select.Option value="id">智能体ID</Select.Option>
-        <Select.Option value="name">智能体名称</Select.Option>
-        <Select.Option value="type">智能体类型</Select.Option>
+        <Select.Option value="sceneId">想定场景</Select.Option>
+        <Select.Option value="modelId">智能体ID</Select.Option>
+        <Select.Option value="modelName">智能体名称</Select.Option>
+        <Select.Option value="agentType">智能体类型</Select.Option>
         <Select.Option value="structure">模型结构</Select.Option>
         <Select.Option value="updateTime">更新时间</Select.Option>
-
-        {/* 添加其他搜索条件 */}
       </Select>
       <Input
         placeholder="单行输入"
@@ -146,16 +168,16 @@ const AlgorithmLibrary = () => {
         style={{ width: 200, marginRight: 8 }}
       />
       <Button type="primary" onClick={handleSearch}>搜索</Button>
-      <Table columns={columns} dataSource={models} />
+      <Table columns={columns} dataSource={filteredModels} pagination={{ pageSize: 5 }} />
       <Modal title={isEditing ? "新增模型" : "模型详情"} visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
         <Form form={form} initialValues={currentModel} onFinish={handleFinish}>
-          <Form.Item label="智能体ID" name="id">
+          <Form.Item label="智能体ID" name="modelId">
             <Input disabled={!isEditing} />
           </Form.Item>
-          <Form.Item label="智能体名称" name="name">
+          <Form.Item label="智能体名称" name="modelName">
             <Input disabled={!isEditing} />
           </Form.Item>
-          <Form.Item label="智能体类型" name="type">
+          <Form.Item label="智能体类型" name="agentType">
             <Input disabled={!isEditing} />
           </Form.Item>
           <Form.Item label="模型结构" name="structure">
@@ -175,11 +197,11 @@ const AlgorithmLibrary = () => {
               <Input disabled={!isEditing} />
             </Form.Item>
           ) : null}
-          {isEditing ? (
+          {isEditing && (
             <Form.Item label="存储路径" name="route">
               <Input disabled={!isEditing} />
             </Form.Item>
-          ) : null}
+          )}
         </Form>
       </Modal>
       <Button type="primary" icon={<PlusOutlined />} onClick={addModel} style={{ marginBottom: 20 }}>

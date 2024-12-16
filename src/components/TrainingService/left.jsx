@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { Select, Button, Modal } from 'antd';
-import { observer } from 'mobx-react';
 import { intelligentStore } from './IntelligentStore';
 const { Option } = Select;
 
-const Left = observer(() => {
+const Left = ({scenarios}) => {
   const [trainingMode, setTrainingMode] = useState('offline');
   const [algorithmType, setAlgorithmType] = useState('shared');
   const [visible, setVisible] = useState(false);
@@ -34,10 +33,12 @@ const Left = observer(() => {
       <div className='left'>
         <div className="form-item">
           <label>想定场景</label>
-          <Select placeholder="请选择">
-            <Option value="scenario1">场景1</Option>
-            <Option value="scenario2">场景2</Option>
-            <Option value="scenario3">场景3</Option>
+            <Select placeholder="请选择" >
+            {scenarios.map((scenario,index ) => (
+              <Option key={scenario.name} value={scenario.name}>
+                {scenario.name}
+              </Option>
+            ))}
           </Select>
         </div>
 
@@ -119,6 +120,6 @@ const Left = observer(() => {
         </div>
       </div>
   );
-});
+};
 
 export default Left;

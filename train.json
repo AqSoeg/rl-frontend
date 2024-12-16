@@ -1,0 +1,244 @@
+{
+  "scenarios":[
+    {
+      "id": "traffic",
+      "name": "城市交通",
+      "agentRoles": [
+        {
+          "roleId": "traffic_light",
+          "roleName": "红绿灯",
+          "AgentId": "agent",
+          "AgentName": "模型一",
+          "AgentType": "同构多智能体",
+          "TrainType": "在线学习",
+          "parameterSelect": {
+            "parameterId": "DQN",
+            "parameterName": "深度Q网络",
+            "paramrter": {
+              "学习率": "0.001",
+              "折扣因子": "0.99",
+              "探索率": "0.1"
+            }
+          },
+          
+          "entities": [
+            {
+              "entityId": "1",
+              "entityName": "红绿灯1",
+              "agentId": "agent1"
+            },
+            {
+              "entityId": "2",
+              "entityName": "红绿灯2",
+              "agentId": "agent2"
+            },
+            {
+              "entityId": "3",
+              "entityName": "红绿灯3",
+              "agentId": "agent3"
+            },
+            {
+              "entityId": "4",
+              "entityName": "红绿灯4",
+              "agentId": "agent4"
+            }
+          ],
+          "更新时间": "2024年12月14日 11:12:58"
+        },
+        {
+          "roleId": "vehicle",
+          "roleName": "车辆",
+          "AgentId": "agent2",
+          "AgentName": "模型二",
+          "AgentType": "单智能体",
+          "TrainType": "监督学习",
+          "parameterSelect": {
+            "parameterId": "CNN",
+            "parameterName": "卷积神经网络",
+            "parameter": {
+              "学习率": "0.0001",
+              "批次大小": "32",
+              "迭代次数": "100"
+            }
+          },
+          "entities": [
+            {
+              "entityId": "5",
+              "entityName": "车辆1"
+            },
+            {
+              "entityId": "6",
+              "entityName": "车辆2"
+            }
+          ],
+          "更新时间": "2024年12月14日 11:15:00"
+        }
+      ]
+    },
+    {
+      "id": "logistics",
+      "name": "物流调度",
+      "agentRoles": [
+        {
+          "roleId": "truck",
+          "roleName": "货车",
+          "AgentId": "agent",
+          "AgentName": "模型四",
+          "AgentType": "单智能体",
+          "TrainType": "强化学习",
+          "parameterSelect": {
+            "parameterId": "A2C",
+            "parameterName": "优势演员评论家",
+            "parameter": {
+              "学习率": "0.0002",
+              "折扣因子": "0.98",
+              "探索率": "0.2"
+            }
+          },
+          "entities": [
+            {
+              "entityId": "1",
+              "entityName": "货车1",
+              "agentId": "truck1"
+            },
+            {
+              "entityId": "2",
+              "entityName": "货车2",
+              "agentId": "truck2"
+            }
+          ],
+          "更新时间": "2024年12月14日 12:15:00"
+        },
+        {
+          "roleId": "drone",
+          "roleName": "无人机",
+          "AgentId": "agent",
+          "AgentName": "模型三",
+          "AgentType": "单智能体",
+          "TrainType": "强化学习",
+          "parameterSelect": {
+            "parameterId": "PPO",
+            "parameterName": "近端策略优化",
+            "parameter": {
+              "学习率": "0.0003",
+              "折扣因子": "0.95",
+              "探索率": "0.05"
+            }
+          },
+          "entities": [
+            {
+              "entityId": "1",
+              "entityName": "无人机1",
+              "agentId": "drone1"
+            },
+            {
+              "entityId": "2",
+              "entityName": "无人机2",
+              "agentId": "drone2"
+            }
+          ],
+          "更新时间": "2024年12月14日 12:05:00"
+        }
+      ]
+    },
+    {
+      "id": "manufacturing",
+      "name": "工业生产线",
+      "agentRoles": [
+        {
+          "roleId": "camera",
+          "roleName": "监控摄像头",
+          "AgentId": "agent",
+          "AgentName": "模型六",
+          "AgentType": "单智能体",
+          "TrainType": "监督学习",
+          "parameterSelect": {
+            "parameterId": "YOLO",
+            "parameterName": "你只活一次",
+            "parameter": {
+              "学习率": "0.0001",
+              "批次大小": "16",
+              "迭代次数": "200"
+            }
+          },
+          "entities": [
+            {
+              "entityId": "1",
+              "entityName": "摄像头1",
+              "agentId": "camera1"
+            },
+            {
+              "entityId": "2",
+              "entityName": "摄像头2",
+              "agentId": "camera2"
+            }
+          ],
+          "更新时间": "2024年12月14日 12:20:00"
+        },
+        {
+          "roleId": "conveyor_belt",
+          "roleName": "传送带",
+          "AgentId": "agent",
+          "AgentName": "模型五",
+          "AgentType": "单智能体",
+          "TrainType": "无监督学习",
+          "parameterSelect": {
+            "parameterId": "RNN",
+            "parameterName": "循环神经网络",
+            "parameter": {
+              "学习率": "0.0005",
+              "隐藏层大小": "64",
+              "时间步长": "10"
+            }
+          },
+          "entities": [
+            {
+              "entityId": "1",
+              "entityName": "传送带1",
+              "agentId": "conveyor1"
+            },
+            {
+              "entityId": "2",
+              "entityName": "传送带2",
+              "agentId": "conveyor2"
+            }
+          ],
+          "更新时间": "2024年12月14日 12:10:00"
+        },
+        {
+          "roleId": "robot",
+          "roleName": "机器人",
+          "AgentId": "agent",
+          "AgentName": "模型二",
+          "AgentType": "单智能体",
+          "TrainType": "监督学习",
+          "parameterSelect": {
+            "parameterId": "CNN",
+            "parameterName": "卷积神经网络",
+            "parameter": {
+              "学习率": "0.0001",
+              "批次大小": "32",
+              "迭代次数": "100"
+            }
+          },
+          "entities": [
+            {
+              "entityId": "1",
+              "entityName": "机器人1",
+              "agentId": "robot1"
+            },
+            {
+              "entityId": "2",
+              "entityName": "机器人2",
+              "agentId": "robot2"
+            }
+          ],
+          "更新时间": "2024年12月14日 12:00:00"
+        }
+      ]
+    }
+    
+
+  ]
+}
+  
