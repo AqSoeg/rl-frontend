@@ -5,19 +5,20 @@ import uploadLogo from '../../assets/upload.svg';
 
 const { Option } = Select;
 
-const ActionSpace = ({ mockAction }) => {
-    const [visible, setVisible] = useState(Array(mockAction.ActionCount).fill(false));
-    const [selectedAction, setSelectedAction] = useState(Array(mockAction.ActionCount).fill(null));
+const ActionSpace = ({ entities }) => {
+    const [visible, setVisible] = useState(Array(entities.length).fill(false));
+    const [selectedAction, setSelectedAction] = useState(Array(entities.length).fill(null));
     const [selectedActionIndex, setSelectedActionIndex] = useState(null);
     const [selectedType, setSelectedType] = useState(null);
     const [selectedOption, setSelectedOption] = useState(null);
     const [meaning, setMeaning] = useState('');
-    const [ruleVisible, setRuleVisible] = useState(Array(mockAction.ActionCount).fill(false));
-    const [ruleType, setRuleType] = useState(Array(mockAction.ActionCount).fill(null));
-    const [condition1, setCondition1] = useState(Array(mockAction.ActionCount).fill(''));
-    const [condition2, setCondition2] = useState(Array(mockAction.ActionCount).fill(''));
-    const [execution1, setExecution1] = useState(Array(mockAction.ActionCount).fill(''));
-    const [execution2, setExecution2] = useState(Array(mockAction.ActionCount).fill(''));
+    const [ruleVisible, setRuleVisible] = useState(Array(entities.length).fill(false));
+    const [ruleType, setRuleType] = useState(Array(entities.length).fill(null));
+    const [condition1, setCondition1] = useState(Array(entities.length).fill(''));
+    const [condition2, setCondition2] = useState(Array(entities.length).fill(''));
+    const [execution1, setExecution1] = useState(Array(entities.length).fill(''));
+    const [execution2, setExecution2] = useState(Array(entities.length).fill(''));
+    const [entityTexts, setEntityTexts] = useState(entities.map(entity => entity.name)); // 初始化为实体名称
 
     const handleSelectChange = (index) => {
         const newVisible = [...visible];
@@ -37,9 +38,8 @@ const ActionSpace = ({ mockAction }) => {
 
     const handleOptionChange = (value) => {
         setSelectedOption(value);
-        const optionMeaning = mockAction.Actions[selectedActionIndex]?.types
-            .find((type) => type.name === selectedType)
-            ?.options.find((option) => option.name === value)?.meaning;
+        const optionMeaning = entities[selectedActionIndex]?.actionSpace[selectedType]
+            .find((option) => option === value);
         setMeaning(optionMeaning || '');
     };
 
@@ -56,6 +56,12 @@ const ActionSpace = ({ mockAction }) => {
             meaning: meaning,
         };
         setSelectedAction(newSelectedAction);
+
+        // 更新显示文本
+        const newEntityTexts = [...entityTexts];
+        newEntityTexts[selectedActionIndex] = `${selectedOption}`;
+        setEntityTexts(newEntityTexts);
+
         handleSelectChange(selectedActionIndex); // 收起下拉框
     };
 
@@ -65,6 +71,12 @@ const ActionSpace = ({ mockAction }) => {
             const newSelectedAction = [...selectedAction];
             newSelectedAction[selectedActionIndex] = null;
             setSelectedAction(newSelectedAction);
+
+            // 更新显示文本
+            const newEntityTexts = [...entityTexts];
+            newEntityTexts[selectedActionIndex] = null;
+            setEntityTexts(newEntityTexts);
+
             handleSelectChange(selectedActionIndex); // 收起下拉框
         }
     };
@@ -128,10 +140,10 @@ const ActionSpace = ({ mockAction }) => {
                 <img src={uploadLogo} alt="Upload" className="upload-button-logo" />
             </div>
             <div className="dropdown-container-wrapper">
-                {Array.from({ length: mockAction.ActionCount }, (_, i) => (
+                {entities.map((entity, i) => (
                     <div key={i} className="dropdown-container">
                         <div className="dropdown-header" onClick={() => handleSelectChange(i)}>
-                            <span>动作{i + 1}</span>
+                            <span>{entity.name} {entityTexts[i]}</span> {/* 显示 entity.name + entityTexts[i] */}
                             <div className="button-group">
                                 <Button type="link" className="dropdown-button">
                                     {visible[i] ? '▲' : '▼'}
@@ -157,9 +169,9 @@ const ActionSpace = ({ mockAction }) => {
                                         onChange={handleTypeChange}
                                         value={selectedType || selectedAction[i]?.selectedType || null}
                                     >
-                                        {mockAction.Actions[i]?.types.map((type, index) => (
-                                            <Option key={index} value={type.name}>
-                                                {type.name}
+                                        {Object.keys(entity.actionSpace).map((type, index) => (
+                                            <Option key={index} value={type}>
+                                                {type}
                                             </Option>
                                         ))}
                                     </Select>
@@ -172,13 +184,11 @@ const ActionSpace = ({ mockAction }) => {
                                         value={selectedOption || selectedAction[i]?.selectedOption || null}
                                         disabled={!selectedType}
                                     >
-                                        {selectedType && mockAction.Actions[i]?.types
-                                            .find((type) => type.name === selectedType)
-                                            ?.options.map((option, index) => (
-                                                <Option key={index} value={option.name}>
-                                                    {option.name}
-                                                </Option>
-                                            ))}
+                                        {selectedType && entity.actionSpace[selectedType].map((option, index) => (
+                                            <Option key={index} value={option}>
+                                                {option}
+                                            </Option>
+                                        ))}
                                     </Select>
                                 </div>
                                 <div className="action-row">
