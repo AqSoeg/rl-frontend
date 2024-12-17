@@ -32,7 +32,12 @@ const AgentEditor = () => {
             const selectedAgent = entityAssignmentStore.selectedAgent;
             if (selectedAgent) {
                 const assignedEntities = entityAssignmentStore.assignedEntities[selectedAgent] || [];
-                setSelectedEntities(assignedEntities);
+                // 获取实体的完整数据
+                const fullEntities = scenarios
+                    .flatMap(scenario => scenario.roles)
+                    .flatMap(role => role.entities)
+                    .filter(entity => assignedEntities.includes(entity.name));
+                setSelectedEntities(fullEntities);
             } else {
                 setSelectedEntities([]);
             }
@@ -45,7 +50,7 @@ const AgentEditor = () => {
 
         // 组件卸载时取消订阅
         return () => unsubscribe();
-    }, []);
+    }, [scenarios]);
 
     return (
         <div className="container">
