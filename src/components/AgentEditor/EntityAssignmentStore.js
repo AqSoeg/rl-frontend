@@ -1,50 +1,45 @@
-import { useState, useEffect } from 'react';
+// EntityAssignmentStore.js
+import { makeAutoObservable } from 'mobx';
 
-const EntityAssignmentStore = () => {
-    const [assignedEntities, setAssignedEntities] = useState({}); // 保存分配的实体
-    const [currentAgent, setCurrentAgent] = useState(null); // 当前选中的智能体模型
+class EntityAssignmentStore {
+    assignedEntities = {}; // 存储分配的实体
+    selectedAgent = null; // 当前选中的智能体模型
+    isAgentSelected = false; // 是否已经选择了智能体模型
+    listeners = []; // 订阅者列表
 
-    // 更新分配的实体
-    const updateAssignedEntities = (agent, entities) => {
-        setAssignedEntities(prev => ({
-            ...prev,
-            [agent]: entities,
-        }));
-    };
+    constructor() {
+        makeAutoObservable(this);
+    }
 
-    // 清空分配的实体
-    const clearAssignedEntities = () => {
-        setAssignedEntities({});
-        setCurrentAgent(null);
-    };
+    setAssignedEntities(entities) {
+        this.assignedEntities = entities;
+        this.notifyListeners(); // 通知订阅者
+    }
 
-    // 切换当前选中的智能体模型
-    const switchAgent = (agent) => {
-        setCurrentAgent(agent);
-    };
+    setSelectedAgent(agent) {
+        this.selectedAgent = agent;
+        this.isAgentSelected = true; // 当选择智能体模型时，设置为 true
+        this.notifyListeners(); // 通知订阅者
+    }
 
-    // 获取当前选中的实体
-    const getCurrentEntities = () => {
-        if (currentAgent && assignedEntities[currentAgent]) {
-            return assignedEntities[currentAgent];
-        }
-        return [];
-    };
+    clearAssignment() {
+        this.assignedEntities = {};
+        this.selectedAgent = null;
+        this.isAgentSelected = false; // 清空时重置为 false
+        this.notifyListeners(); // 通知订阅者
+    }
 
-    // 清空当前选中的实体
-    const clearCurrentEntities = () => {
-        setCurrentAgent(null);
-    };
+    subscribe(listener) {
+        this.listeners.push(listener);
+        return () => {
+            this.listeners = this.listeners.filter(l => l !== listener);
+        };
+    }
 
-    return {
-        assignedEntities,
-        currentAgent,
-        updateAssignedEntities,
-        clearAssignedEntities,
-        switchAgent,
-        getCurrentEntities,
-        clearCurrentEntities,
-    };
-};
+    notifyListeners() {
+        this.listeners.forEach(listener => listener());
+    }
+}
 
-export default EntityAssignmentStore;
+const entityAssignmentStore = new EntityAssignmentStore();
+export default entityAssignmentStore;

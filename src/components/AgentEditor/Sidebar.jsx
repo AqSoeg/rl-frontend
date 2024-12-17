@@ -1,7 +1,9 @@
+// Sidebar.jsx
 import { useState, useEffect } from 'react';
 import { Select, Input, Alert, Button } from 'antd';
 import { nanoid } from 'nanoid';
 import agentEditorStore from './AgentEditorStore';
+import entityAssignmentStore from './EntityAssignmentStore'; // 引入实体分配状态管理
 import EntityAssignmentModal from './EntityAssignmentModal'; // 引入弹窗组件
 
 const { Option } = Select;
@@ -19,8 +21,6 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
     const [modelID, setModelID] = useState('xxx');
     const [inputIncomplete, setInputIncomplete] = useState(false);
     const [entityCount, setEntityCount] = useState(0);
-    const [assignedEntities, setAssignedEntities] = useState([]);
-    const [entitiesAssigned, setEntitiesAssigned] = useState(false); // 新增状态，用于跟踪实体是否已分配
     const [modalVisible, setModalVisible] = useState(false); // 控制弹窗显示
 
     useEffect(() => {
@@ -35,8 +35,7 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
         setType('');
         setAgentCount('');
         setSelectedAgent('');
-        setAssignedEntities([]);
-        setEntitiesAssigned(false); // 重置实体分配状态
+        entityAssignmentStore.clearAssignment(); // 清空实体分配状态
     };
 
     const handleRoleChange = (value) => {
@@ -45,8 +44,7 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
         setType('');
         setAgentCount('');
         setSelectedAgent('');
-        setAssignedEntities([]);
-        setEntitiesAssigned(false); // 重置实体分配状态
+        entityAssignmentStore.clearAssignment(); // 清空实体分配状态
 
         const selectedRole = agentRoles.find(r => r.id === value);
         if (selectedRole) {
@@ -59,8 +57,7 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
         agentEditorStore.setAgentType(value);
         setAgentCount('');
         setSelectedAgent('');
-        setAssignedEntities([]);
-        setEntitiesAssigned(false); // 重置实体分配状态
+        entityAssignmentStore.clearAssignment(); // 清空实体分配状态
     };
 
     const handleNameChange = (e) => {
@@ -90,13 +87,13 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
     const handleAgentCountChange = (value) => {
         setAgentCount(value);
         setSelectedAgent('');
-        setAssignedEntities([]);
-        setEntitiesAssigned(false); // 重置实体分配状态
+        entityAssignmentStore.clearAssignment(); // 清空实体分配状态
     };
 
     const handleAgentChange = (value) => {
-        if (entitiesAssigned) { // 只有当实体已分配时，才能选择智能体模型
+        if (Object.keys(entityAssignmentStore.assignedEntities).length > 0) { // 只有当实体已分配时，才能选择智能体模型
             setSelectedAgent(value);
+            entityAssignmentStore.setSelectedAgent(value); // 更新选中的智能体模型
             updateModelName(name, version, value);
         } else {
             alert('请先分配实体后再选择智能体模型！');
@@ -156,8 +153,7 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
 
     const handleModalConfirm = (selectedEntities) => {
         // 处理弹窗确认后的逻辑
-        setAssignedEntities(Object.values(selectedEntities).flat());
-        setEntitiesAssigned(true);
+        entityAssignmentStore.setAssignedEntities(selectedEntities); // 更新实体分配状态
         setModalVisible(false);
         onEntitiesChange(Object.values(selectedEntities).flat()); // 更新选中的实体
     };
@@ -278,7 +274,7 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
                     分配实体
                 </Button>
                 <div className="text">智能体模型</div>
-                <Select value={selectedAgent} onChange={handleAgentChange} className="w-full" disabled={!entitiesAssigned}>
+                <Select value={selectedAgent} onChange={handleAgentChange} className="w-full" disabled={Object.keys(entityAssignmentStore.assignedEntities).length === 0}>
                     {getAgentOptions(agentCount).map((option) => (
                         <Option key={option} value={option}>{option}</Option>
                     ))}

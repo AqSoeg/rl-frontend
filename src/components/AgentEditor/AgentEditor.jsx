@@ -1,3 +1,4 @@
+// AgentEditor.jsx
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Sidebar from './Sidebar';
@@ -6,6 +7,7 @@ import ActionSpace from './ActionSpace.jsx';
 import RewardFunction from "./RewardFunction.jsx";
 import ModelFunction from './ModelButton.jsx';
 import './AgentEditor.css';
+import entityAssignmentStore from './EntityAssignmentStore'; // 引入实体分配状态管理
 
 const AgentEditor = () => {
     const [scenarios, setScenarios] = useState([]);
@@ -24,13 +26,30 @@ const AgentEditor = () => {
         fetchScenarios();
     }, []);
 
-    const handleEntitiesChange = (entities) => {
-        setSelectedEntities(entities); // 更新选中的实体
-    };
+    useEffect(() => {
+        // 监听实体分配状态的变化
+        const updateSelectedEntities = () => {
+            const selectedAgent = entityAssignmentStore.selectedAgent;
+            if (selectedAgent) {
+                const assignedEntities = entityAssignmentStore.assignedEntities[selectedAgent] || [];
+                setSelectedEntities(assignedEntities);
+            } else {
+                setSelectedEntities([]);
+            }
+        };
+
+        updateSelectedEntities();
+
+        // 订阅实体分配状态的变化
+        const unsubscribe = entityAssignmentStore.subscribe(updateSelectedEntities);
+
+        // 组件卸载时取消订阅
+        return () => unsubscribe();
+    }, []);
 
     return (
         <div className="container">
-            <Sidebar scenarios={scenarios} onEntitiesChange={handleEntitiesChange} />
+            <Sidebar scenarios={scenarios} />
             <div className="gradient-box">
                 <StateVector entities={selectedEntities} /> {/* 动态传递选中的实体 */}
                 <ActionSpace entities={selectedEntities} /> {/* 动态传递选中的实体 */}

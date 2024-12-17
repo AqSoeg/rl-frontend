@@ -1,7 +1,9 @@
-import { useState } from 'react';
+// ActionSpace.jsx
+import { useState, useEffect } from 'react';
 import { Button, Select, Input } from 'antd';
 import actionLogo from '../../assets/actionSpace.svg';
 import uploadLogo from '../../assets/upload.svg';
+import entityAssignmentStore from './EntityAssignmentStore'; // 引入实体分配状态管理
 
 const { Option } = Select;
 
@@ -19,6 +21,16 @@ const ActionSpace = ({ entities }) => {
     const [execution1, setExecution1] = useState(Array(entities.length).fill(''));
     const [execution2, setExecution2] = useState(Array(entities.length).fill(''));
     const [entityTexts, setEntityTexts] = useState(entities.map(entity => entity.name)); // 初始化为实体名称
+
+    useEffect(() => {
+        if (entityAssignmentStore.isAgentSelected) {
+            const selectedAgent = entityAssignmentStore.selectedAgent;
+            const assignedEntities = entityAssignmentStore.assignedEntities[selectedAgent] || [];
+            setVisible(Array(assignedEntities.length).fill(false));
+        } else {
+            setVisible([]);
+        }
+    }, [entityAssignmentStore.isAgentSelected, entityAssignmentStore.selectedAgent, entityAssignmentStore.assignedEntities]);
 
     const handleSelectChange = (index) => {
         const newVisible = [...visible];
@@ -140,7 +152,7 @@ const ActionSpace = ({ entities }) => {
                 <img src={uploadLogo} alt="Upload" className="upload-button-logo" />
             </div>
             <div className="dropdown-container-wrapper">
-                {entities.map((entity, i) => (
+                {entityAssignmentStore.isAgentSelected && entities.map((entity, i) => (
                     <div key={i} className="dropdown-container">
                         <div className="dropdown-header" onClick={() => handleSelectChange(i)}>
                             <span>{entity.name} {entityTexts[i]}</span> {/* 显示 entity.name + entityTexts[i] */}
