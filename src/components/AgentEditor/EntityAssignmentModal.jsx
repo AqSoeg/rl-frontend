@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Modal, Alert, List, Checkbox } from 'antd';
 
-const EntityAssignmentModal = ({ visible, onCancel, onConfirm, entityCount, agentCount, agentType, entities }) => {
+const EntityAssignmentModal = ({ open, onCancel, onConfirm, entityCount, agentCount, agentType, entities }) => {
     const [selectedEntities, setSelectedEntities] = useState({});
     const [errorMessage, setErrorMessage] = useState('');
     const [currentAgent, setCurrentAgent] = useState(''); // 当前选中的智能体模型
 
     useEffect(() => {
         // 初始化选中实体的状态
-        if (visible) {
+        if (open) {
             const initialSelectedEntities = {};
             for (let i = 1; i <= agentCount; i++) {
                 initialSelectedEntities[`智能体${i}`] = [];
@@ -23,7 +23,7 @@ const EntityAssignmentModal = ({ visible, onCancel, onConfirm, entityCount, agen
                 });
             }
         }
-    }, [visible, agentCount, agentType, entities]);
+    }, [open, agentCount, agentType, entities]);
 
     const handleEntitySelect = (agent, entity) => {
         const currentSelected = selectedEntities[agent] || []; // 确保 currentSelected 不为 undefined
@@ -97,7 +97,7 @@ const EntityAssignmentModal = ({ visible, onCancel, onConfirm, entityCount, agen
     return (
         <Modal
             title="分配实体"
-            visible={visible}
+            open={open} // 使用 open 属性替代 visible
             onCancel={onCancel}
             onOk={handleConfirm}
             okText="确认"

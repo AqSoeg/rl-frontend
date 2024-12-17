@@ -52,9 +52,14 @@ const AgentEditor = () => {
         return () => unsubscribe();
     }, [scenarios]);
 
+    // 定义 onEntitiesChange 函数
+    const handleEntitiesChange = (entities) => {
+        setSelectedEntities(entities);
+    };
+
     return (
         <div className="container">
-            <Sidebar scenarios={scenarios} />
+            <Sidebar scenarios={scenarios} onEntitiesChange={handleEntitiesChange} /> {/* 传递 onEntitiesChange */}
             <div className="gradient-box">
                 <StateVector entities={selectedEntities} /> {/* 动态传递选中的实体 */}
                 <ActionSpace entities={selectedEntities} /> {/* 动态传递选中的实体 */}

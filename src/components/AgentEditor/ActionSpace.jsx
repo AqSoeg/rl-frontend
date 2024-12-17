@@ -153,7 +153,7 @@ const ActionSpace = ({ entities }) => {
             </div>
             <div className="dropdown-container-wrapper">
                 {entityAssignmentStore.isAgentSelected && entities.map((entity, i) => (
-                    <div key={i} className="dropdown-container">
+                    <div key={i} className="dropdown-container"> {/* 添加 key */}
                         <div className="dropdown-header" onClick={() => handleSelectChange(i)}>
                             <span>{entity.name} {entityTexts[i]}</span> {/* 显示 entity.name + entityTexts[i] */}
                             <div className="button-group">
@@ -182,7 +182,7 @@ const ActionSpace = ({ entities }) => {
                                         value={selectedType || selectedAction[i]?.selectedType || null}
                                     >
                                         {Object.keys(entity.actionSpace).map((type, index) => (
-                                            <Option key={index} value={type}>
+                                            <Option key={index} value={type}> {/* 添加 key */}
                                                 {type}
                                             </Option>
                                         ))}
@@ -197,7 +197,7 @@ const ActionSpace = ({ entities }) => {
                                         disabled={!selectedType}
                                     >
                                         {selectedType && entity.actionSpace[selectedType].map((option, index) => (
-                                            <Option key={index} value={option}>
+                                            <Option key={index} value={option}> {/* 添加 key */}
                                                 {option}
                                             </Option>
                                         ))}
@@ -231,10 +231,10 @@ const ActionSpace = ({ entities }) => {
                                         onChange={(value) => handleRuleTypeChange(i, value)}
                                         value={ruleType[i] || null}
                                     >
-                                        <Option value="IF ELSE">IF ELSE</Option>
-                                        <Option value="WHILE">WHILE</Option>
-                                        <Option value="MAX">MAX</Option>
-                                        <Option value="MIN">MIN</Option>
+                                        <Option key="IF ELSE" value="IF ELSE">IF ELSE</Option> {/* 添加 key */}
+                                        <Option key="WHILE" value="WHILE">WHILE</Option> {/* 添加 key */}
+                                        <Option key="MAX" value="MAX">MAX</Option> {/* 添加 key */}
+                                        <Option key="MIN" value="MIN">MIN</Option> {/* 添加 key */}
                                     </Select>
                                 </div>
                                 <div className="rule-row">

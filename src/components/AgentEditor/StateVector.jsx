@@ -38,7 +38,7 @@ const StateVector = ({ entities }) => {
         if (vector.stateVector.length === 0) {
             return [{ name: '', info: '', unit: '' }];
         }
-        return vector.stateVector.map(([name, info, unit]) => ({ name, info, unit }));
+        return vector.stateVector.map(([name, info, unit], idx) => ({ name, info, unit, key: idx })); // 添加 key
     };
 
     return (
@@ -52,7 +52,7 @@ const StateVector = ({ entities }) => {
             </div>
             <div className="dropdown-container-wrapper">
                 {entityAssignmentStore.isAgentSelected && entities.map((entity, i) => (
-                    <div key={i} className="dropdown-container">
+                    <div key={i} className="dropdown-container"> {/* 添加 key */}
                         <div className="dropdown-header" onClick={() => handleSelectChange(i)}>
                             <span>{entity.name}</span>
                             <Button type="link" className="dropdown-button">

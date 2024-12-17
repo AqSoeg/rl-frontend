@@ -1,4 +1,3 @@
-// Sidebar.jsx
 import { useState, useEffect } from 'react';
 import { Select, Input, Alert, Button } from 'antd';
 import { nanoid } from 'nanoid';
@@ -21,7 +20,7 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
     const [modelID, setModelID] = useState('xxx');
     const [inputIncomplete, setInputIncomplete] = useState(false);
     const [entityCount, setEntityCount] = useState(0);
-    const [modalVisible, setModalVisible] = useState(false); // 控制弹窗显示
+    const [modalOpen, setModalOpen] = useState(false); // 控制弹窗显示，使用 open 替代 visible
 
     useEffect(() => {
         const selectedScenario = scenarios.find(s => s.id === scenario);
@@ -148,18 +147,18 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
     };
 
     const assignEntities = () => {
-        setModalVisible(true); // 打开弹窗
+        setModalOpen(true); // 打开弹窗，使用 open 替代 visible
     };
 
     const handleModalConfirm = (selectedEntities) => {
         // 处理弹窗确认后的逻辑
         entityAssignmentStore.setAssignedEntities(selectedEntities); // 更新实体分配状态
-        setModalVisible(false);
+        setModalOpen(false);
         onEntitiesChange(Object.values(selectedEntities).flat()); // 更新选中的实体
     };
 
     const handleModalCancel = () => {
-        setModalVisible(false); // 关闭弹窗
+        setModalOpen(false); // 关闭弹窗，使用 open 替代 visible
     };
 
     const checkInputCompleteness = (name, version) => {
@@ -287,7 +286,7 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
 
             {/* 弹窗组件 */}
             <EntityAssignmentModal
-                visible={modalVisible}
+                open={modalOpen} // 使用 open 替代 visible
                 onCancel={handleModalCancel}
                 onConfirm={handleModalConfirm}
                 entityCount={entityCount}
