@@ -9,7 +9,6 @@ const { Option } = Select;
 
 const ActionSpace = ({ entities }) => {
     const [visible, setVisible] = useState(Array(entities.length).fill(false));
-    const [selectedAction, setSelectedAction] = useState(Array(entities.length).fill(null));
     const [selectedActionIndex, setSelectedActionIndex] = useState(null);
     const [selectedType, setSelectedType] = useState(null);
     const [selectedOption, setSelectedOption] = useState(null);
@@ -20,7 +19,6 @@ const ActionSpace = ({ entities }) => {
     const [condition2, setCondition2] = useState(Array(entities.length).fill(''));
     const [execution1, setExecution1] = useState(Array(entities.length).fill(''));
     const [execution2, setExecution2] = useState(Array(entities.length).fill(''));
-    const [entityTexts, setEntityTexts] = useState(entities.map(entity => entity.name)); // 初始化为实体名称
 
     useEffect(() => {
         if (entityAssignmentStore.isAgentSelected) {
@@ -37,9 +35,9 @@ const ActionSpace = ({ entities }) => {
         newVisible[index] = !newVisible[index];
         setVisible(newVisible);
         setSelectedActionIndex(index);
-        setSelectedType(selectedAction[index]?.selectedType || null);
-        setSelectedOption(selectedAction[index]?.selectedOption || null);
-        setMeaning(selectedAction[index]?.meaning || '');
+        setSelectedType(null);
+        setSelectedOption(null);
+        setMeaning('');
     };
 
     const handleTypeChange = (value) => {
@@ -61,35 +59,27 @@ const ActionSpace = ({ entities }) => {
             return;
         }
 
-        const newSelectedAction = [...selectedAction];
-        newSelectedAction[selectedActionIndex] = {
-            selectedType: selectedType,
-            selectedOption: selectedOption,
-            meaning: meaning,
-        };
-        setSelectedAction(newSelectedAction);
+        // 处理确认逻辑
+        console.log('确认选择:', {
+            selectedType,
+            selectedOption,
+            meaning,
+        });
 
-        // 更新显示文本
-        const newEntityTexts = [...entityTexts];
-        newEntityTexts[selectedActionIndex] = `${selectedOption}`;
-        setEntityTexts(newEntityTexts);
-
-        handleSelectChange(selectedActionIndex); // 收起下拉框
+        // 收起下拉框
+        handleSelectChange(selectedActionIndex);
     };
 
     const handleCancel = () => {
         const confirmCancel = window.confirm('是否取消该动作？');
         if (confirmCancel) {
-            const newSelectedAction = [...selectedAction];
-            newSelectedAction[selectedActionIndex] = null;
-            setSelectedAction(newSelectedAction);
+            // 重置选择
+            setSelectedType(null);
+            setSelectedOption(null);
+            setMeaning('');
 
-            // 更新显示文本
-            const newEntityTexts = [...entityTexts];
-            newEntityTexts[selectedActionIndex] = null;
-            setEntityTexts(newEntityTexts);
-
-            handleSelectChange(selectedActionIndex); // 收起下拉框
+            // 收起下拉框
+            handleSelectChange(selectedActionIndex);
         }
     };
 
@@ -153,9 +143,9 @@ const ActionSpace = ({ entities }) => {
             </div>
             <div className="dropdown-container-wrapper">
                 {entityAssignmentStore.isAgentSelected && entities.map((entity, i) => (
-                    <div key={i} className="dropdown-container"> {/* 添加 key */}
+                    <div key={i} className="dropdown-container">
                         <div className="dropdown-header" onClick={() => handleSelectChange(i)}>
-                            <span>{entity.name} {entityTexts[i]}</span> {/* 显示 entity.name + entityTexts[i] */}
+                            <span>{entity.name}</span> {/* 仅显示实体名称，不显示用户选择的动作 */}
                             <div className="button-group">
                                 <Button type="link" className="dropdown-button">
                                     {visible[i] ? '▲' : '▼'}
@@ -179,10 +169,10 @@ const ActionSpace = ({ entities }) => {
                                     <Select
                                         style={{ width: 200 }}
                                         onChange={handleTypeChange}
-                                        value={selectedType || selectedAction[i]?.selectedType || null}
+                                        value={selectedType}
                                     >
                                         {Object.keys(entity.actionSpace).map((type, index) => (
-                                            <Option key={index} value={type}> {/* 添加 key */}
+                                            <Option key={index} value={type}>
                                                 {type}
                                             </Option>
                                         ))}
@@ -193,11 +183,11 @@ const ActionSpace = ({ entities }) => {
                                     <Select
                                         style={{ width: 200 }}
                                         onChange={handleOptionChange}
-                                        value={selectedOption || selectedAction[i]?.selectedOption || null}
+                                        value={selectedOption}
                                         disabled={!selectedType}
                                     >
                                         {selectedType && entity.actionSpace[selectedType].map((option, index) => (
-                                            <Option key={index} value={option}> {/* 添加 key */}
+                                            <Option key={index} value={option}>
                                                 {option}
                                             </Option>
                                         ))}
@@ -231,10 +221,10 @@ const ActionSpace = ({ entities }) => {
                                         onChange={(value) => handleRuleTypeChange(i, value)}
                                         value={ruleType[i] || null}
                                     >
-                                        <Option key="IF ELSE" value="IF ELSE">IF ELSE</Option> {/* 添加 key */}
-                                        <Option key="WHILE" value="WHILE">WHILE</Option> {/* 添加 key */}
-                                        <Option key="MAX" value="MAX">MAX</Option> {/* 添加 key */}
-                                        <Option key="MIN" value="MIN">MIN</Option> {/* 添加 key */}
+                                        <Option key="IF ELSE" value="IF ELSE">IF ELSE</Option>
+                                        <Option key="WHILE" value="WHILE">WHILE</Option>
+                                        <Option key="MAX" value="MAX">MAX</Option>
+                                        <Option key="MIN" value="MIN">MIN</Option>
                                     </Select>
                                 </div>
                                 <div className="rule-row">
