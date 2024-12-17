@@ -149,28 +149,28 @@ const ActionSpace = ({ entities }) => {
             <div className="dropdown-container-wrapper">
                 {entityAssignmentStore.isAgentSelected && entities.flatMap((entity, entityIndex) =>
                     entity.actionSpace.map((actionSpace, actionIndex) => {
-                        const index = entityIndex + actionIndex;
+                        const uniqueKey = `${entityIndex}-${actionIndex}`; // 生成唯一的 key
                         return (
-                            <div key={index} className="dropdown-container">
-                                <div className="dropdown-header" onClick={() => handleSelectChange(index)}>
+                            <div key={uniqueKey} className="dropdown-container">
+                                <div className="dropdown-header" onClick={() => handleSelectChange(uniqueKey)}>
                                     <span>{entity.name}：{actionSpace[0]}</span> {/* 显示实体名和动作种类 */}
                                     <div className="button-group">
                                         <Button type="link" className="dropdown-button">
-                                            {visible[index] ? '▲' : '▼'}
+                                            {visible[uniqueKey] ? '▲' : '▼'}
                                         </Button>
                                         <div className="blue-divider"></div>
                                         <div
-                                            className={`rule-button ${ruleVisible[index] ? 'active' : ''}`}
+                                            className={`rule-button ${ruleVisible[uniqueKey] ? 'active' : ''}`}
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                handleRuleClick(index);
+                                                handleRuleClick(uniqueKey);
                                             }}
                                         >
                                             行为规则
                                         </div>
                                     </div>
                                 </div>
-                                {visible[index] && (
+                                {visible[uniqueKey] && (
                                     <div className="action-container">
                                         <div className="action-row">
                                             <span>动作种类：</span>
@@ -209,14 +209,14 @@ const ActionSpace = ({ entities }) => {
                                         </div>
                                     </div>
                                 )}
-                                {ruleVisible[index] && (
+                                {ruleVisible[uniqueKey] && (
                                     <div className="rule-container">
                                         <div className="rule-row">
                                             <span>规则类型：</span>
                                             <Select
                                                 style={{ width: 200 }}
-                                                onChange={(value) => handleRuleTypeChange(index, value)}
-                                                value={ruleType[index] || null}
+                                                onChange={(value) => handleRuleTypeChange(uniqueKey, value)}
+                                                value={ruleType[uniqueKey] || null}
                                             >
                                                 <Option key="IF ELSE" value="IF ELSE">IF ELSE</Option>
                                                 <Option key="WHILE" value="WHILE">WHILE</Option>
@@ -228,8 +228,8 @@ const ActionSpace = ({ entities }) => {
                                             <span>条件1：</span>
                                             <Input
                                                 placeholder="单行输入"
-                                                value={condition1[index]}
-                                                onChange={(e) => handleCondition1Change(index, e.target.value)}
+                                                value={condition1[uniqueKey]}
+                                                onChange={(e) => handleCondition1Change(uniqueKey, e.target.value)}
                                                 className="common-input"
                                             />
                                         </div>
@@ -237,8 +237,8 @@ const ActionSpace = ({ entities }) => {
                                             <span>条件2：</span>
                                             <Input
                                                 placeholder="单行输入"
-                                                value={condition2[index]}
-                                                onChange={(e) => handleCondition2Change(index, e.target.value)}
+                                                value={condition2[uniqueKey]}
+                                                onChange={(e) => handleCondition2Change(uniqueKey, e.target.value)}
                                                 className="common-input"
                                             />
                                         </div>
@@ -246,8 +246,8 @@ const ActionSpace = ({ entities }) => {
                                             <span>执行内容1：</span>
                                             <Input
                                                 placeholder="单行输入"
-                                                value={execution1[index]}
-                                                onChange={(e) => handleExecution1Change(index, e.target.value)}
+                                                value={execution1[uniqueKey]}
+                                                onChange={(e) => handleExecution1Change(uniqueKey, e.target.value)}
                                                 className="common-input"
                                             />
                                         </div>
@@ -255,16 +255,16 @@ const ActionSpace = ({ entities }) => {
                                             <span>执行内容2：</span>
                                             <Input
                                                 placeholder="单行输入"
-                                                value={execution2[index]}
-                                                onChange={(e) => handleExecution2Change(index, e.target.value)}
+                                                value={execution2[uniqueKey]}
+                                                onChange={(e) => handleExecution2Change(uniqueKey, e.target.value)}
                                                 className="common-input"
                                             />
                                         </div>
                                         <div className="rule-buttons">
-                                            <Button type="primary" onClick={() => handleRuleConfirm(index)}>
+                                            <Button type="primary" onClick={() => handleRuleConfirm(uniqueKey)}>
                                                 确定
                                             </Button>
-                                            <Button onClick={() => handleRuleCancel(index)}>
+                                            <Button onClick={() => handleRuleCancel(uniqueKey)}>
                                                 取消
                                             </Button>
                                         </div>
