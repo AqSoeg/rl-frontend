@@ -10,6 +10,7 @@ class AgentEditorStore {
     updateTime = '';
     modelName = ''; // 用于保存 Sidebar.jsx 中的 modelName
     selectedEntities = []; // 新增：用于记录用户选择的实体
+    isEntityCountEmpty = true; // 新增：用于跟踪代理的实体数量是否为空
 
     constructor() {
         makeAutoObservable(this);
@@ -49,9 +50,16 @@ class AgentEditorStore {
 
     setSelectedEntities(entities) { // 新增方法，用于设置用户选择的实体
         this.selectedEntities = entities;
+        this.isEntityCountEmpty = entities.length === 0; // 更新 isEntityCountEmpty 状态
     }
 
     saveModel = () => {
+        // 检查 isEntityCountEmpty 状态
+        if (this.isEntityCountEmpty) {
+            alert('代理的实体数量不能为空，请选择实体后再保存模型！');
+            return;
+        }
+
         // 弹出确认弹窗
         const isConfirmed = window.confirm('是否确认保存模型？');
 

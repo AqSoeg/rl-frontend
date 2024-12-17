@@ -430,3 +430,63 @@
 .edit-button:hover .arrow-icon {
     transform: translateX(5px);
 }
+
+/* EntityAssignmentModal.css */
+
+/* 块（Block） */
+.entity-assignment-modal {
+    /* 模态框的样式 */
+}
+
+.entity-assignment-modal__content {
+    display: flex;
+    justify-content: space-between;
+}
+
+.entity-assignment-modal__column {
+    width: 45%;
+}
+
+.entity-assignment-modal__title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+/* 元素（Element） */
+.entity-assignment-modal__alert {
+    margin-bottom: 16px;
+}
+
+.entity-assignment-modal__agent-item {
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.entity-assignment-modal__agent-item--active {
+    background-color: #f0f0f0;
+}
+
+.entity-assignment-modal__agent-content {
+    width: 100%;
+}
+
+.entity-assignment-modal__entity-name {
+    margin-right: 8px;
+}
+
+.entity-assignment-modal__entity-item {
+    display: flex;
+    align-items: center;
+}
+
+.entity-assignment-modal__checkbox {
+    margin-right: 8px;
+}
+
+.entity-assignment-modal__assigned-label {
+    margin-left: 8px;
+    color: gray;
+}

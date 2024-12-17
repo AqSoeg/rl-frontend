@@ -9,7 +9,7 @@ import './AgentEditor.css';
 
 const AgentEditor = () => {
     const [scenarios, setScenarios] = useState([]);
-    const [selectedEntities, setSelectedEntities] = useState([]);
+    const [selectedEntities, setSelectedEntities] = useState([]); // 选中的实体
 
     useEffect(() => {
         const fetchScenarios = async () => {
@@ -25,15 +25,15 @@ const AgentEditor = () => {
     }, []);
 
     const handleEntitiesChange = (entities) => {
-        setSelectedEntities(entities);
+        setSelectedEntities(entities); // 更新选中的实体
     };
 
     return (
         <div className="container">
             <Sidebar scenarios={scenarios} onEntitiesChange={handleEntitiesChange} />
             <div className="gradient-box">
-                <StateVector entities={selectedEntities} />
-                <ActionSpace entities={selectedEntities} />
+                <StateVector entities={selectedEntities} /> {/* 动态传递选中的实体 */}
+                <ActionSpace entities={selectedEntities} /> {/* 动态传递选中的实体 */}
                 {/*<RewardFunction />*/}
                 <ModelFunction />
             </div>
