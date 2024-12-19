@@ -1,10 +1,8 @@
-// AgentEditor.jsx
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Sidebar from './Sidebar';
 import StateVector from './StateVector.jsx';
 import ActionSpace from './ActionSpace.jsx';
-import RewardFunction from "./RewardFunction.jsx";
 import ModelFunction from './ModelButton.jsx';
 import './AgentEditor.css';
 import entityAssignmentStore from './EntityAssignmentStore'; // 引入实体分配状态管理
@@ -12,6 +10,11 @@ import entityAssignmentStore from './EntityAssignmentStore'; // 引入实体分�
 const AgentEditor = () => {
     const [scenarios, setScenarios] = useState([]);
     const [selectedEntities, setSelectedEntities] = useState([]); // 选中的实体
+
+    // 页面加载时清空 entityAssignmentStore 的状态
+    useEffect(() => {
+        entityAssignmentStore.clearAssignment(); // 清空实体分配状态
+    }, []);
 
     useEffect(() => {
         const fetchScenarios = async () => {
@@ -63,7 +66,6 @@ const AgentEditor = () => {
             <div className="gradient-box">
                 <StateVector entities={selectedEntities} /> {/* 动态传递选中的实体 */}
                 <ActionSpace entities={selectedEntities} /> {/* 动态传递选中的实体 */}
-                {/*<RewardFunction />*/}
                 <ModelFunction />
             </div>
         </div>

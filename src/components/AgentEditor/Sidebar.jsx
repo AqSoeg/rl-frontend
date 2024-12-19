@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Select, Input, Alert, Button } from 'antd';
-import { nanoid } from 'nanoid';
+import { customAlphabet } from 'nanoid';
 import entityAssignmentStore from './EntityAssignmentStore';
 import EntityAssignmentModal from './EntityAssignmentModal';
 import sidebarStore from './SidebarStore'; // 引入 SidebarStore
@@ -29,11 +29,20 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
 
     const handleScenarioChange = (value) => {
         setScenario(value);
+        setRole('');
+        setType('');
+        setAgentCount('');
+        setSelectedAgent('');
+        entityAssignmentStore.clearAssignment(); // 清空实体分配状态
         sidebarStore.setScenario(value); // 更新 SidebarStore 的状态
     };
 
     const handleRoleChange = (value) => {
         setRole(value);
+        setType('');
+        setAgentCount('');
+        setSelectedAgent('');
+        entityAssignmentStore.clearAssignment(); // 清空实体分配状态
         sidebarStore.setRole(value); // 更新 SidebarStore 的状态
 
         const selectedRole = agentRoles.find(r => r.id === value);
@@ -44,6 +53,9 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
 
     const handleTypeChange = (value) => {
         setType(value);
+        setAgentCount('');
+        setSelectedAgent('');
+        entityAssignmentStore.clearAssignment(); // 清空实体分配状态
         sidebarStore.setType(value); // 更新 SidebarStore 的状态
     };
 
@@ -73,12 +85,15 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
 
     const handleAgentCountChange = (value) => {
         setAgentCount(value);
+        setSelectedAgent('');
+        entityAssignmentStore.clearAssignment(); // 清空实体分配状态
         sidebarStore.setAgentCount(value); // 更新 SidebarStore 的状态
     };
 
     const handleAgentChange = (value) => {
         if (Object.keys(entityAssignmentStore.assignedEntities).length > 0) {
             setSelectedAgent(value);
+            entityAssignmentStore.setSelectedAgent(value); // 更新选中的智能体模型
             sidebarStore.setSelectedAgent(value); // 更新 SidebarStore 的状态
             updateModelName(name, version, value);
         } else {
@@ -179,10 +194,29 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
         }
     };
 
-    const generateModelID = (scenario, role, type, version, agentCount, timestamp, selectedAgent) => {
-        const inputString = `${scenario}${role}${type}${version}${agentCount}${timestamp}${selectedAgent}`;
-        const hash = nanoid(16);
-        return hash;
+    const generateModelID = (scenarioID, roleID, type, version, agentCount, timestamp, selectedAgent) => {
+        let typeNumber;
+        switch (type) {
+            case '单智能体':
+                typeNumber = '0';
+                break;
+            case '同构多智能体':
+                typeNumber = '1';
+                break;
+            case '异构多智能体':
+                typeNumber = '2';
+                break;
+            default:
+                typeNumber = '0'; // 默认值为 0
+        }
+
+        const inputString = `${scenarioID}${roleID}${typeNumber}${version}${agentCount}${timestamp}`;
+        const agentNumber = selectedAgent.replace('智能体', ''); // 提取智能体模型的编号
+        const agentNumberLength = agentNumber.length; // 获取智能体编号的长度
+        const nanoidLength = 16 - agentNumberLength;
+        const nanoid = customAlphabet(inputString, nanoidLength);
+        const modelID = `${nanoid()}${agentNumber}`;
+        return modelID;
     };
 
     useEffect(() => {
