@@ -66,7 +66,7 @@ const AgentEditor = () => {
             <div className="gradient-box">
                 <StateVector entities={selectedEntities} /> {/* 动态传递选中的实体 */}
                 <ActionSpace entities={selectedEntities} /> {/* 动态传递选中的实体 */}
-                <ModelFunction />
+                <ModelFunction scenarios={scenarios} /> {/* 传递 scenarios */}
             </div>
         </div>
     );

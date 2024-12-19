@@ -2,41 +2,65 @@
   {
     "scenarioID": "traffic",
     "agentRoleID": "traffic_light",
-    "agentType": "单智能体",
-    "agentName": "agent",
+    "agentType": "同构多智能体",
+    "agentName": "1",
     "agentVersion": "1",
-    "agentID": "ZDTOf16mC-wWAJEY",
+    "agentID": "ri0trtfia944iic1",
     "agentModelName": "智能体1",
     "entityAssignments": [
       {
         "智能体1": [
-          "红绿灯1",
-          "红绿灯2",
-          "红绿灯3",
+          "红绿灯1"
+        ]
+      },
+      {
+        "智能体2": [
+          "红绿灯2"
+        ]
+      },
+      {
+        "智能体3": [
+          "红绿灯3"
+        ]
+      },
+      {
+        "智能体4": [
           "红绿灯4"
         ]
       }
     ],
-    "updateTime": "2024-12-16T11:54:55.674Z"
+    "updateTime": "2024-12-19T11:01:26.319Z"
   },
   {
     "scenarioID": "traffic",
     "agentRoleID": "traffic_light",
-    "agentType": "单智能体",
+    "agentType": "同构多智能体",
     "agentName": "1",
     "agentVersion": "1",
-    "agentID": "bAihszPsrZMk-Sk智能体1$",
+    "agentID": "ta6rir7t37414181",
     "agentModelName": "智能体1",
     "entityAssignments": [
       {
         "智能体1": [
-          "红绿灯1",
-          "红绿灯2",
-          "红绿灯3",
+          "红绿灯1"
+        ]
+      },
+      {
+        "智能体2": [
+          "红绿灯2"
+        ]
+      },
+      {
+        "智能体3": [
+          "红绿灯3"
+        ]
+      },
+      {
+        "智能体4": [
           "红绿灯4"
         ]
       }
     ],
-    "updateTime": "2024-12-19T09:17:21.404Z"
+    "updateTime": "2024-12-19T12:39:58.537Z"
   }
 ]

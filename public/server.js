@@ -15,11 +15,17 @@ wss.on('connection', (ws) => {
             const data = JSON.parse(message);
             console.log('Received data from client:', data);
 
-            // 保存数据到文件
-            saveModelData(data);
+            if (data.type === 'getModels') {
+                // 读取 model.json 文件并发送给客户端
+                const models = readModelData();
+                ws.send(JSON.stringify({ type: 'models', models }));
+            } else {
+                // 保存数据到文件
+                saveModelData(data);
 
-            // 向客户端发送确认消息
-            ws.send(JSON.stringify({ status: 'success', message: 'Model saved successfully' }));
+                // 向客户端发送确认消息
+                ws.send(JSON.stringify({ status: 'success', message: 'Model saved successfully' }));
+            }
         } catch (error) {
             console.error('Error processing client message:', error);
             ws.send(JSON.stringify({ status: 'error', message: 'Invalid JSON data' }));
@@ -36,6 +42,21 @@ wss.on('connection', (ws) => {
         console.error('WebSocket error:', error);
     });
 });
+
+// 读取 model.json 文件内容
+function readModelData() {
+    try {
+        if (fs.existsSync(MODEL_FILE_PATH)) {
+            const fileContent = fs.readFileSync(MODEL_FILE_PATH, 'utf-8');
+            return JSON.parse(fileContent);
+        } else {
+            return [];
+        }
+    } catch (error) {
+        console.error('Error reading model data:', error);
+        return [];
+    }
+}
 
 // 保存模型数据到 model.json 文件
 function saveModelData(data) {
