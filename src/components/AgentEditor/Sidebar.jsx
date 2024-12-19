@@ -153,7 +153,13 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
     };
 
     const handleModalConfirm = (selectedEntities) => {
-        entityAssignmentStore.setAssignedEntities(selectedEntities);
+        if (Object.keys(entityAssignmentStore.assignedEntities).length > 0) {
+            entityAssignmentStore.updateAssignedEntities(selectedEntities); // 更新分配的实体
+        } else {
+            entityAssignmentStore.setAssignedEntities(selectedEntities); // 首次分配实体
+        }
+        entityAssignmentStore.resetSelectedAgent(); // 重置选中的智能体模型
+        setSelectedAgent(''); // 重置本地状态
         setModalOpen(false);
         onEntitiesChange(Object.values(selectedEntities).flat());
     };
