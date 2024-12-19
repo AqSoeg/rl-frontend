@@ -6,6 +6,24 @@
     "agentName": "agent",
     "agentVersion": "1",
     "agentID": "ZDTOf16mC-wWAJEY",
+    "agentModelName": "智能体1",
+    "entityAssignments": [
+      {"智能体1": ["红绿灯1", "红绿灯2", "红绿灯3", "红绿灯4"]}
+    ],
+    "updateTime": "2024-12-16T11:54:55.674Z"
+  },
+  {
+    "scenarioID": "traffic",
+    "agentRoleID": "traffic_light",
+    "agentType": "同构多智能体",
+    "agentName": "agentX",
+    "agentVersion": "2",
+    "agentID": "ZDTOf17dW-wWAJEY",
+    "agentModelName": "智能体1",
+    "entityAssignments": [
+      {"智能体1": ["红绿灯1", "红绿灯3"]},
+      {"智能体2": ["红绿灯2", "红绿灯4"]}
+    ],
     "updateTime": "2024-12-16T11:54:55.674Z"
   }
 ]
