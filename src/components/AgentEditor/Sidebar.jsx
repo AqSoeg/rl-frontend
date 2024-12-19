@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Select, Input, Alert, Button } from 'antd';
 import { nanoid } from 'nanoid';
-import agentEditorStore from './AgentEditorStore';
 import entityAssignmentStore from './EntityAssignmentStore'; // 引入实体分配状态管理
 import EntityAssignmentModal from './EntityAssignmentModal'; // 引入弹窗组件
 
@@ -29,7 +28,6 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
 
     const handleScenarioChange = (value) => {
         setScenario(value);
-        agentEditorStore.setScenarioID(value);
         setRole('');
         setType('');
         setAgentCount('');
@@ -39,7 +37,6 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
 
     const handleRoleChange = (value) => {
         setRole(value);
-        agentEditorStore.setAgentRoleID(value);
         setType('');
         setAgentCount('');
         setSelectedAgent('');
@@ -53,7 +50,6 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
 
     const handleTypeChange = (value) => {
         setType(value);
-        agentEditorStore.setAgentType(value);
         setAgentCount('');
         setSelectedAgent('');
         entityAssignmentStore.clearAssignment(); // 清空实体分配状态
@@ -62,7 +58,6 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
     const handleNameChange = (e) => {
         const newName = e.target.value.slice(0, 10);
         setName(newName);
-        agentEditorStore.setAgentName(newName); // 更新 agentName
         if (newName.length >= 10) {
             alert('名称不能超过10个字符!');
         }
@@ -76,7 +71,6 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
             newVersion = parts[0] + '.' + parts[1].split('.')[0].slice(0, 2);
         }
         setVersion(newVersion);
-        agentEditorStore.setAgentVersion(newVersion); // 更新 agentVersion
         if (newVersion !== e.target.value) {
             alert('版本号只能包含数字和小数点，小数位数不超过两位!');
         }
@@ -168,11 +162,9 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
         }
         if (name && version) {
             setModelName(`${name} v${formattedVersion}`);
-            agentEditorStore.setModelName(`${name} v${formattedVersion}`); // 更新 modelName
             setInputIncomplete(false);
         } else {
             setModelName('待定');
-            agentEditorStore.setModelName('待定'); // 更新 modelName
             setInputIncomplete(true);
         }
     };
@@ -185,17 +177,13 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
         if (name && version) {
             if (agentCount === '1') {
                 setModelName(`${name} v${formattedVersion}`);
-                agentEditorStore.setModelName(`${name} v${formattedVersion}`); // 更新 modelName
             } else if (type === '同构多智能体' || type === '异构多智能体') {
                 setModelName(`${name} v${formattedVersion} ${selectedAgent}`);
-                agentEditorStore.setModelName(`${name} v${formattedVersion} ${selectedAgent}`); // 更新 modelName
             } else {
                 setModelName(`${name} v${formattedVersion}`);
-                agentEditorStore.setModelName(`${name} v${formattedVersion}`); // 更新 modelName
             }
         } else {
             setModelName('待定');
-            agentEditorStore.setModelName('待定'); // 更新 modelName
         }
     };
 
@@ -210,7 +198,6 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
             const timestamp = Date.now();
             const newModelID = generateModelID(scenario, role, type, version, agentCount, timestamp, selectedAgent);
             setModelID(newModelID);
-            agentEditorStore.setAgentID(newModelID); // 更新 agentID
         }
     }, [scenario, role, type, version, agentCount, selectedAgent]);
 
