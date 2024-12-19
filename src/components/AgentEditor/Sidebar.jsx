@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Select, Input, Alert, Button } from 'antd';
 import { nanoid } from 'nanoid';
-import entityAssignmentStore from './EntityAssignmentStore'; // 引入实体分配状态管理
-import EntityAssignmentModal from './EntityAssignmentModal'; // 引入弹窗组件
+import entityAssignmentStore from './EntityAssignmentStore';
+import EntityAssignmentModal from './EntityAssignmentModal';
+import sidebarStore from './SidebarStore'; // 引入 SidebarStore
 
 const { Option } = Select;
 
@@ -10,8 +11,8 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
     const [scenario, setScenario] = useState('');
     const [role, setRole] = useState('');
     const [type, setType] = useState('');
-    const [name, setName] = useState(''); // 智能体名称
-    const [version, setVersion] = useState(''); // 智能体版本
+    const [name, setName] = useState('');
+    const [version, setVersion] = useState('');
     const [agentCount, setAgentCount] = useState('');
     const [selectedAgent, setSelectedAgent] = useState('');
     const [agentRoles, setAgentRoles] = useState([]);
@@ -19,7 +20,7 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
     const [modelID, setModelID] = useState('xxx');
     const [inputIncomplete, setInputIncomplete] = useState(false);
     const [entityCount, setEntityCount] = useState(0);
-    const [modalOpen, setModalOpen] = useState(false); // 控制弹窗显示，使用 open 替代 visible
+    const [modalOpen, setModalOpen] = useState(false);
 
     useEffect(() => {
         const selectedScenario = scenarios.find(s => s.id === scenario);
@@ -28,19 +29,12 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
 
     const handleScenarioChange = (value) => {
         setScenario(value);
-        setRole('');
-        setType('');
-        setAgentCount('');
-        setSelectedAgent('');
-        entityAssignmentStore.clearAssignment(); // 清空实体分配状态
+        sidebarStore.setScenario(value); // 更新 SidebarStore 的状态
     };
 
     const handleRoleChange = (value) => {
         setRole(value);
-        setType('');
-        setAgentCount('');
-        setSelectedAgent('');
-        entityAssignmentStore.clearAssignment(); // 清空实体分配状态
+        sidebarStore.setRole(value); // 更新 SidebarStore 的状态
 
         const selectedRole = agentRoles.find(r => r.id === value);
         if (selectedRole) {
@@ -50,14 +44,13 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
 
     const handleTypeChange = (value) => {
         setType(value);
-        setAgentCount('');
-        setSelectedAgent('');
-        entityAssignmentStore.clearAssignment(); // 清空实体分配状态
+        sidebarStore.setType(value); // 更新 SidebarStore 的状态
     };
 
     const handleNameChange = (e) => {
         const newName = e.target.value.slice(0, 10);
         setName(newName);
+        sidebarStore.setName(newName); // 更新 SidebarStore 的状态
         if (newName.length >= 10) {
             alert('名称不能超过10个字符!');
         }
@@ -71,6 +64,7 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
             newVersion = parts[0] + '.' + parts[1].split('.')[0].slice(0, 2);
         }
         setVersion(newVersion);
+        sidebarStore.setVersion(newVersion); // 更新 SidebarStore 的状态
         if (newVersion !== e.target.value) {
             alert('版本号只能包含数字和小数点，小数位数不超过两位!');
         }
@@ -79,14 +73,13 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
 
     const handleAgentCountChange = (value) => {
         setAgentCount(value);
-        setSelectedAgent('');
-        entityAssignmentStore.clearAssignment(); // 清空实体分配状态
+        sidebarStore.setAgentCount(value); // 更新 SidebarStore 的状态
     };
 
     const handleAgentChange = (value) => {
-        if (Object.keys(entityAssignmentStore.assignedEntities).length > 0) { // 只有当实体已分配时，才能选择智能体模型
+        if (Object.keys(entityAssignmentStore.assignedEntities).length > 0) {
             setSelectedAgent(value);
-            entityAssignmentStore.setSelectedAgent(value); // 更新选中的智能体模型
+            sidebarStore.setSelectedAgent(value); // 更新 SidebarStore 的状态
             updateModelName(name, version, value);
         } else {
             alert('请先分配实体后再选择智能体模型！');
@@ -141,18 +134,17 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
     };
 
     const assignEntities = () => {
-        setModalOpen(true); // 打开弹窗，使用 open 替代 visible
+        setModalOpen(true);
     };
 
     const handleModalConfirm = (selectedEntities) => {
-        // 处理弹窗确认后的逻辑
-        entityAssignmentStore.setAssignedEntities(selectedEntities); // 更新实体分配状态
+        entityAssignmentStore.setAssignedEntities(selectedEntities);
         setModalOpen(false);
-        onEntitiesChange(Object.values(selectedEntities).flat()); // 更新选中的实体
+        onEntitiesChange(Object.values(selectedEntities).flat());
     };
 
     const handleModalCancel = () => {
-        setModalOpen(false); // 关闭弹窗，使用 open 替代 visible
+        setModalOpen(false);
     };
 
     const checkInputCompleteness = (name, version) => {
@@ -198,6 +190,7 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
             const timestamp = Date.now();
             const newModelID = generateModelID(scenario, role, type, version, agentCount, timestamp, selectedAgent);
             setModelID(newModelID);
+            sidebarStore.setModelID(newModelID); // 更新 SidebarStore 的状态
         }
     }, [scenario, role, type, version, agentCount, selectedAgent]);
 
@@ -271,9 +264,8 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
                 <div className="text">模型ID：{modelID}</div>
             </div>
 
-            {/* 弹窗组件 */}
             <EntityAssignmentModal
-                open={modalOpen} // 使用 open 替代 visible
+                open={modalOpen}
                 onCancel={handleModalCancel}
                 onConfirm={handleModalConfirm}
                 entityCount={entityCount}
