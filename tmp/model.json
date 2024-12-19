@@ -62,5 +62,47 @@
       }
     ],
     "updateTime": "2024-12-19T12:39:58.537Z"
+  },
+  {
+    "scenarioID": "traffic",
+    "agentRoleID": "traffic_light",
+    "agentType": "异构多智能体",
+    "agentName": "1",
+    "agentVersion": "1",
+    "agentID": "lc1gc24rfit615h1",
+    "agentModelName": "智能体1",
+    "entityAssignments": [
+      {
+        "智能体1": [
+          "红绿灯1",
+          "红绿灯2",
+          "红绿灯3"
+        ]
+      },
+      {
+        "智能体2": [
+          "红绿灯4"
+        ]
+      }
+    ],
+    "updateTime": "2024-12-19T12:46:24.313Z"
+  },
+  {
+    "scenarioID": "traffic",
+    "agentRoleID": "police",
+    "agentType": "单智能体",
+    "agentName": "",
+    "agentVersion": "1",
+    "agentID": "11061lcefct72of1",
+    "agentModelName": "智能体1",
+    "entityAssignments": [
+      {
+        "智能体1": [
+          "交警1",
+          "交警2"
+        ]
+      }
+    ],
+    "updateTime": "2024-12-19T12:47:39.228Z"
   }
 ]
