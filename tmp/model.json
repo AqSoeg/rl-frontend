@@ -1,0 +1,66 @@
+[
+  {
+    "scenarioID": "traffic",
+    "agentRoleID": "traffic_light",
+    "agentType": "同构多智能体",
+    "agentName": "1",
+    "agentVersion": "1",
+    "agentID": "ri0trtfia944iic1",
+    "agentModelName": "智能体1",
+    "entityAssignments": [
+      {
+        "智能体1": [
+          "红绿灯1"
+        ]
+      },
+      {
+        "智能体2": [
+          "红绿灯2"
+        ]
+      },
+      {
+        "智能体3": [
+          "红绿灯3"
+        ]
+      },
+      {
+        "智能体4": [
+          "红绿灯4"
+        ]
+      }
+    ],
+    "updateTime": "2024-12-19T11:01:26.319Z"
+  },
+  {
+    "scenarioID": "traffic",
+    "agentRoleID": "traffic_light",
+    "agentType": "同构多智能体",
+    "agentName": "1",
+    "agentVersion": "1",
+    "agentID": "ta6rir7t37414181",
+    "agentModelName": "智能体1",
+    "entityAssignments": [
+      {
+        "智能体1": [
+          "红绿灯1"
+        ]
+      },
+      {
+        "智能体2": [
+          "红绿灯2"
+        ]
+      },
+      {
+        "智能体3": [
+          "红绿灯3"
+        ]
+      },
+      {
+        "智能体4": [
+          "红绿灯4"
+        ]
+      }
+    ],
+    "updateTime": "2024-12-19T12:39:58.537Z"
+  }
+]

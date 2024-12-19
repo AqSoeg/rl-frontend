@@ -1,8 +1,9 @@
-// Sidebar.jsx
 import { useState, useEffect } from 'react';
-import { Select, Input, Alert } from 'antd';
-import { nanoid } from 'nanoid';
-import agentEditorStore from './AgentEditorStore';
+import { Select, Input, Alert, Button } from 'antd';
+import { customAlphabet } from 'nanoid';
+import entityAssignmentStore from './EntityAssignmentStore';
+import EntityAssignmentModal from './EntityAssignmentModal';
+import sidebarStore from './SidebarStore'; // 引入 SidebarStore
 
 const { Option } = Select;
 
@@ -19,8 +20,7 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
     const [modelID, setModelID] = useState('xxx');
     const [inputIncomplete, setInputIncomplete] = useState(false);
     const [entityCount, setEntityCount] = useState(0);
-    const [selectedEntityCount, setSelectedEntityCount] = useState('');
-    const [assignedEntities, setAssignedEntities] = useState([]);
+    const [modalOpen, setModalOpen] = useState(false);
 
     useEffect(() => {
         const selectedScenario = scenarios.find(s => s.id === scenario);
@@ -29,27 +29,21 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
 
     const handleScenarioChange = (value) => {
         setScenario(value);
-        agentEditorStore.setScenarioID(value);
         setRole('');
         setType('');
-        setName('');
-        setVersion('');
         setAgentCount('');
         setSelectedAgent('');
-        setSelectedEntityCount('');
-        setAssignedEntities([]);
+        entityAssignmentStore.clearAssignment(); // 清空实体分配状态
+        sidebarStore.setScenario(value); // 更新 SidebarStore 的状态
     };
 
     const handleRoleChange = (value) => {
         setRole(value);
-        agentEditorStore.setAgentRoleID(value);
         setType('');
-        setName('');
-        setVersion('');
         setAgentCount('');
         setSelectedAgent('');
-        setSelectedEntityCount('');
-        setAssignedEntities([]);
+        entityAssignmentStore.clearAssignment(); // 清空实体分配状态
+        sidebarStore.setRole(value); // 更新 SidebarStore 的状态
 
         const selectedRole = agentRoles.find(r => r.id === value);
         if (selectedRole) {
@@ -59,19 +53,16 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
 
     const handleTypeChange = (value) => {
         setType(value);
-        agentEditorStore.setAgentType(value);
-        setName('');
-        setVersion('');
         setAgentCount('');
         setSelectedAgent('');
-        setSelectedEntityCount('');
-        setAssignedEntities([]);
+        entityAssignmentStore.clearAssignment(); // 清空实体分配状态
+        sidebarStore.setType(value); // 更新 SidebarStore 的状态
     };
 
     const handleNameChange = (e) => {
         const newName = e.target.value.slice(0, 10);
         setName(newName);
-        agentEditorStore.setAgentName(newName); // 更新 agentName
+        sidebarStore.setName(newName); // 更新 SidebarStore 的状态
         if (newName.length >= 10) {
             alert('名称不能超过10个字符!');
         }
@@ -85,7 +76,7 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
             newVersion = parts[0] + '.' + parts[1].split('.')[0].slice(0, 2);
         }
         setVersion(newVersion);
-        agentEditorStore.setAgentVersion(newVersion); // 更新 agentVersion
+        sidebarStore.setVersion(newVersion); // 更新 SidebarStore 的状态
         if (newVersion !== e.target.value) {
             alert('版本号只能包含数字和小数点，小数位数不超过两位!');
         }
@@ -95,19 +86,19 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
     const handleAgentCountChange = (value) => {
         setAgentCount(value);
         setSelectedAgent('');
-        setSelectedEntityCount('');
-        setAssignedEntities([]);
+        entityAssignmentStore.clearAssignment(); // 清空实体分配状态
+        sidebarStore.setAgentCount(value); // 更新 SidebarStore 的状态
     };
 
     const handleAgentChange = (value) => {
-        setSelectedAgent(value);
-        setSelectedEntityCount('');
-        updateModelName(name, version, value);
-    };
-
-    const handleEntityCountChange = (value) => {
-        setSelectedEntityCount(value);
-        assignEntities(value);
+        if (Object.keys(entityAssignmentStore.assignedEntities).length > 0) {
+            setSelectedAgent(value);
+            entityAssignmentStore.setSelectedAgent(value); // 更新选中的智能体模型
+            sidebarStore.setSelectedAgent(value); // 更新 SidebarStore 的状态
+            updateModelName(name, version, value);
+        } else {
+            alert('请先分配实体后再选择智能体模型！');
+        }
     };
 
     const getAgentTypeOptions = (role) => {
@@ -157,26 +148,24 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
         return [''];
     };
 
-    const getEntityCountOptions = (type, agentCount, assignedEntities) => {
-        if (type === '单智能体' || type === '同构多智能体') {
-            return [entityCount / agentCount];
-        } else if (type === '异构多智能体') {
-            const remainingEntities = entityCount - assignedEntities.reduce((sum, count) => sum + count, 0);
-            return Array.from({ length: remainingEntities }, (_, i) => (i + 1).toString());
-        }
-        return [''];
+    const assignEntities = () => {
+        setModalOpen(true);
     };
 
-    const assignEntities = (count) => {
-        if (type === '单智能体' || type === '同构多智能体') {
-            const entities = agentRoles.find(r => r.id === role).entities.slice(0, count);
-            onEntitiesChange(entities);
-        } else if (type === '异构多智能体') {
-            const entities = agentRoles.find(r => r.id === role).entities.slice(assignedEntities.reduce((sum, count) => sum + count, 0), count);
-            const newAssignedEntities = [...assignedEntities, count];
-            setAssignedEntities(newAssignedEntities);
-            onEntitiesChange(entities);
+    const handleModalConfirm = (selectedEntities) => {
+        if (Object.keys(entityAssignmentStore.assignedEntities).length > 0) {
+            entityAssignmentStore.updateAssignedEntities(selectedEntities); // 更新分配的实体
+        } else {
+            entityAssignmentStore.setAssignedEntities(selectedEntities); // 首次分配实体
         }
+        entityAssignmentStore.resetSelectedAgent(); // 重置选中的智能体模型
+        setSelectedAgent(''); // 重置本地状态
+        setModalOpen(false);
+        onEntitiesChange(Object.values(selectedEntities).flat());
+    };
+
+    const handleModalCancel = () => {
+        setModalOpen(false);
     };
 
     const checkInputCompleteness = (name, version) => {
@@ -186,11 +175,9 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
         }
         if (name && version) {
             setModelName(`${name} v${formattedVersion}`);
-            agentEditorStore.setModelName(`${name} v${formattedVersion}`); // 更新 modelName
             setInputIncomplete(false);
         } else {
             setModelName('待定');
-            agentEditorStore.setModelName('待定'); // 更新 modelName
             setInputIncomplete(true);
         }
     };
@@ -203,24 +190,39 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
         if (name && version) {
             if (agentCount === '1') {
                 setModelName(`${name} v${formattedVersion}`);
-                agentEditorStore.setModelName(`${name} v${formattedVersion}`); // 更新 modelName
             } else if (type === '同构多智能体' || type === '异构多智能体') {
                 setModelName(`${name} v${formattedVersion} ${selectedAgent}`);
-                agentEditorStore.setModelName(`${name} v${formattedVersion} ${selectedAgent}`); // 更新 modelName
             } else {
                 setModelName(`${name} v${formattedVersion}`);
-                agentEditorStore.setModelName(`${name} v${formattedVersion}`); // 更新 modelName
             }
         } else {
             setModelName('待定');
-            agentEditorStore.setModelName('待定'); // 更新 modelName
         }
     };
 
-    const generateModelID = (scenario, role, type, version, agentCount, timestamp, selectedAgent) => {
-        const inputString = `${scenario}${role}${type}${version}${agentCount}${timestamp}${selectedAgent}`;
-        const hash = nanoid(16);
-        return hash;
+    const generateModelID = (scenarioID, roleID, type, version, agentCount, timestamp, selectedAgent) => {
+        let typeNumber;
+        switch (type) {
+            case '单智能体':
+                typeNumber = '0';
+                break;
+            case '同构多智能体':
+                typeNumber = '1';
+                break;
+            case '异构多智能体':
+                typeNumber = '2';
+                break;
+            default:
+                typeNumber = '0'; // 默认值为 0
+        }
+
+        const inputString = `${scenarioID}${roleID}${typeNumber}${version}${agentCount}${timestamp}`;
+        const agentNumber = selectedAgent.replace('智能体', ''); // 提取智能体模型的编号
+        const agentNumberLength = agentNumber.length; // 获取智能体编号的长度
+        const nanoidLength = 16 - agentNumberLength;
+        const nanoid = customAlphabet(inputString, nanoidLength);
+        const modelID = `${nanoid()}${agentNumber}`;
+        return modelID;
     };
 
     useEffect(() => {
@@ -228,7 +230,7 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
             const timestamp = Date.now();
             const newModelID = generateModelID(scenario, role, type, version, agentCount, timestamp, selectedAgent);
             setModelID(newModelID);
-            agentEditorStore.setAgentID(newModelID); // 更新 agentID
+            sidebarStore.setModelID(newModelID); // 更新 SidebarStore 的状态
         }
     }, [scenario, role, type, version, agentCount, selectedAgent]);
 
@@ -282,15 +284,17 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
                         <Option key={option} value={option}>{option}</Option>
                     ))}
                 </Select>
+                <Button
+                    type="primary"
+                    onClick={assignEntities}
+                    disabled={!agentCount}
+                    className="mt-2"
+                >
+                    分配实体
+                </Button>
                 <div className="text">智能体模型</div>
-                <Select value={selectedAgent} onChange={handleAgentChange} className="w-full">
+                <Select value={selectedAgent} onChange={handleAgentChange} className="w-full" disabled={Object.keys(entityAssignmentStore.assignedEntities).length === 0}>
                     {getAgentOptions(agentCount).map((option) => (
-                        <Option key={option} value={option}>{option}</Option>
-                    ))}
-                </Select>
-                <div className="text">代理的实体数量</div>
-                <Select value={selectedEntityCount} onChange={handleEntityCountChange} className="w-full">
-                    {getEntityCountOptions(type, agentCount, assignedEntities).map((option) => (
                         <Option key={option} value={option}>{option}</Option>
                     ))}
                 </Select>
@@ -299,6 +303,16 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
                 <div className="text">模型名称：{modelName}</div>
                 <div className="text">模型ID：{modelID}</div>
             </div>
+
+            <EntityAssignmentModal
+                open={modalOpen}
+                onCancel={handleModalCancel}
+                onConfirm={handleModalConfirm}
+                entityCount={entityCount}
+                agentCount={agentCount}
+                agentType={type}
+                entities={agentRoles.find(r => r.id === role)?.entities || []}
+            />
         </div>
     );
 };
