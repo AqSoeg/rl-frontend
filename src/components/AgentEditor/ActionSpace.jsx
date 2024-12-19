@@ -1,83 +1,90 @@
-import { useState } from 'react';
+// ActionSpace.jsx
+import { useState, useEffect } from 'react';
 import { Button, Select, Input } from 'antd';
 import actionLogo from '../../assets/actionSpace.svg';
 import uploadLogo from '../../assets/upload.svg';
+import entityAssignmentStore from './EntityAssignmentStore'; // 引入实体分配状态管理
 
 const { Option } = Select;
 
 const ActionSpace = ({ entities }) => {
-    const [visible, setVisible] = useState(Array(entities.length).fill(false));
-    const [selectedAction, setSelectedAction] = useState(Array(entities.length).fill(null));
+    const [visible, setVisible] = useState([]);
     const [selectedActionIndex, setSelectedActionIndex] = useState(null);
-    const [selectedType, setSelectedType] = useState(null);
     const [selectedOption, setSelectedOption] = useState(null);
     const [meaning, setMeaning] = useState('');
-    const [ruleVisible, setRuleVisible] = useState(Array(entities.length).fill(false));
-    const [ruleType, setRuleType] = useState(Array(entities.length).fill(null));
-    const [condition1, setCondition1] = useState(Array(entities.length).fill(''));
-    const [condition2, setCondition2] = useState(Array(entities.length).fill(''));
-    const [execution1, setExecution1] = useState(Array(entities.length).fill(''));
-    const [execution2, setExecution2] = useState(Array(entities.length).fill(''));
-    const [entityTexts, setEntityTexts] = useState(entities.map(entity => entity.name)); // 初始化为实体名称
+    const [ruleVisible, setRuleVisible] = useState([]);
+    const [ruleType, setRuleType] = useState([]);
+    const [condition1, setCondition1] = useState([]);
+    const [condition2, setCondition2] = useState([]);
+    const [execution1, setExecution1] = useState([]);
+    const [execution2, setExecution2] = useState([]);
+
+    useEffect(() => {
+        if (entityAssignmentStore.isAgentSelected) {
+            const selectedAgent = entityAssignmentStore.selectedAgent;
+            const assignedEntities = entityAssignmentStore.assignedEntities[selectedAgent] || [];
+
+            // 初始化 visible 和 ruleVisible 数组
+            const actionSpaces = assignedEntities.flatMap(entity => entity.actionSpace);
+            setVisible(Array(actionSpaces.length).fill(false));
+            setRuleVisible(Array(actionSpaces.length).fill(false));
+            setRuleType(Array(actionSpaces.length).fill(null));
+            setCondition1(Array(actionSpaces.length).fill(''));
+            setCondition2(Array(actionSpaces.length).fill(''));
+            setExecution1(Array(actionSpaces.length).fill(''));
+            setExecution2(Array(actionSpaces.length).fill(''));
+        } else {
+            setVisible([]);
+            setRuleVisible([]);
+            setRuleType([]);
+            setCondition1([]);
+            setCondition2([]);
+            setExecution1([]);
+            setExecution2([]);
+        }
+    }, [entityAssignmentStore.isAgentSelected, entityAssignmentStore.selectedAgent, entityAssignmentStore.assignedEntities]);
 
     const handleSelectChange = (index) => {
         const newVisible = [...visible];
         newVisible[index] = !newVisible[index];
         setVisible(newVisible);
         setSelectedActionIndex(index);
-        setSelectedType(selectedAction[index]?.selectedType || null);
-        setSelectedOption(selectedAction[index]?.selectedOption || null);
-        setMeaning(selectedAction[index]?.meaning || '');
-    };
-
-    const handleTypeChange = (value) => {
-        setSelectedType(value);
-        setSelectedOption(null); // 重置选中的选项
-        setMeaning(''); // 重置含义
+        setSelectedOption(null);
+        setMeaning('');
     };
 
     const handleOptionChange = (value) => {
         setSelectedOption(value);
-        const optionMeaning = entities[selectedActionIndex]?.actionSpace[selectedType]
-            .find((option) => option === value);
-        setMeaning(optionMeaning || '');
+        const actionSpace = entities.flatMap(entity => entity.actionSpace)[selectedActionIndex];
+        const optionMeaning = actionSpace[3] || ''; // 含义从 actionSpace 的第四个元素获取
+        setMeaning(optionMeaning);
     };
 
     const handleConfirm = () => {
-        if (!selectedType || !selectedOption) {
+        if (!selectedOption) {
             alert('请选择完毕后再确认，否则取消！');
             return;
         }
 
-        const newSelectedAction = [...selectedAction];
-        newSelectedAction[selectedActionIndex] = {
-            selectedType: selectedType,
-            selectedOption: selectedOption,
-            meaning: meaning,
-        };
-        setSelectedAction(newSelectedAction);
+        // 处理确认逻辑
+        console.log('确认选择:', {
+            selectedOption,
+            meaning,
+        });
 
-        // 更新显示文本
-        const newEntityTexts = [...entityTexts];
-        newEntityTexts[selectedActionIndex] = `${selectedOption}`;
-        setEntityTexts(newEntityTexts);
-
-        handleSelectChange(selectedActionIndex); // 收起下拉框
+        // 收起下拉框
+        handleSelectChange(selectedActionIndex);
     };
 
     const handleCancel = () => {
         const confirmCancel = window.confirm('是否取消该动作？');
         if (confirmCancel) {
-            const newSelectedAction = [...selectedAction];
-            newSelectedAction[selectedActionIndex] = null;
-            setSelectedAction(newSelectedAction);
+            // 重置选择
+            setSelectedOption(null);
+            setMeaning('');
 
-            // 更新显示文本
-            const newEntityTexts = [...entityTexts];
-            newEntityTexts[selectedActionIndex] = null;
-            setEntityTexts(newEntityTexts);
-
-            handleSelectChange(selectedActionIndex); // 收起下拉框
+            // 收起下拉框
+            handleSelectChange(selectedActionIndex);
         }
     };
 
@@ -140,139 +147,133 @@ const ActionSpace = ({ entities }) => {
                 <img src={uploadLogo} alt="Upload" className="upload-button-logo" />
             </div>
             <div className="dropdown-container-wrapper">
-                {entities.map((entity, i) => (
-                    <div key={i} className="dropdown-container">
-                        <div className="dropdown-header" onClick={() => handleSelectChange(i)}>
-                            <span>{entity.name} {entityTexts[i]}</span> {/* 显示 entity.name + entityTexts[i] */}
-                            <div className="button-group">
-                                <Button type="link" className="dropdown-button">
-                                    {visible[i] ? '▲' : '▼'}
-                                </Button>
-                                <div className="blue-divider"></div>
-                                <div
-                                    className={`rule-button ${ruleVisible[i] ? 'active' : ''}`}
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleRuleClick(i);
-                                    }}
-                                >
-                                    行为规则
+                {entityAssignmentStore.isAgentSelected && entities.flatMap((entity, entityIndex) =>
+                    entity.actionSpace.map((actionSpace, actionIndex) => {
+                        const uniqueKey = `${entityIndex}-${actionIndex}`; // 生成唯一的 key
+                        return (
+                            <div key={uniqueKey} className="dropdown-container">
+                                <div className="dropdown-header" onClick={() => handleSelectChange(uniqueKey)}>
+                                    <span>{entity.name}：{actionSpace[0]}</span> {/* 显示实体名和动作种类 */}
+                                    <div className="button-group">
+                                        <Button type="link" className="dropdown-button">
+                                            {visible[uniqueKey] ? '▲' : '▼'}
+                                        </Button>
+                                        <div className="blue-divider"></div>
+                                        <div
+                                            className={`rule-button ${ruleVisible[uniqueKey] ? 'active' : ''}`}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                handleRuleClick(uniqueKey);
+                                            }}
+                                        >
+                                            行为规则
+                                        </div>
+                                    </div>
                                 </div>
+                                {visible[uniqueKey] && (
+                                    <div className="action-container">
+                                        <div className="action-row">
+                                            <span>动作种类：</span>
+                                            <span className="action-type-text">{actionSpace[1]}</span> {/* 显示动作种类文本 */}
+                                        </div>
+                                        <div className="action-row">
+                                            <span>可选动作：</span>
+                                            <Select
+                                                style={{ width: 200 }}
+                                                onChange={handleOptionChange}
+                                                value={selectedOption}
+                                            >
+                                                {actionSpace[2].map((option, optionIndex) => (
+                                                    <Option key={optionIndex} value={option}>
+                                                        {option}
+                                                    </Option>
+                                                ))}
+                                            </Select>
+                                        </div>
+                                        <div className="action-row">
+                                            <span className="meaning-label">含义：</span>
+                                            <Input
+                                                placeholder={meaning ? meaning : "单行输入"}
+                                                value={meaning}
+                                                onChange={(e) => setMeaning(e.target.value)}
+                                                className="meaning-input"
+                                            />
+                                        </div>
+                                        <div className="action-buttons">
+                                            <Button type="primary" onClick={handleConfirm}>
+                                                确定
+                                            </Button>
+                                            <Button onClick={handleCancel}>
+                                                取消
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
+                                {ruleVisible[uniqueKey] && (
+                                    <div className="rule-container">
+                                        <div className="rule-row">
+                                            <span>规则类型：</span>
+                                            <Select
+                                                style={{ width: 200 }}
+                                                onChange={(value) => handleRuleTypeChange(uniqueKey, value)}
+                                                value={ruleType[uniqueKey] || null}
+                                            >
+                                                <Option key="IF ELSE" value="IF ELSE">IF ELSE</Option>
+                                                <Option key="WHILE" value="WHILE">WHILE</Option>
+                                                <Option key="MAX" value="MAX">MAX</Option>
+                                                <Option key="MIN" value="MIN">MIN</Option>
+                                            </Select>
+                                        </div>
+                                        <div className="rule-row">
+                                            <span>条件1：</span>
+                                            <Input
+                                                placeholder="单行输入"
+                                                value={condition1[uniqueKey]}
+                                                onChange={(e) => handleCondition1Change(uniqueKey, e.target.value)}
+                                                className="common-input"
+                                            />
+                                        </div>
+                                        <div className="rule-row">
+                                            <span>条件2：</span>
+                                            <Input
+                                                placeholder="单行输入"
+                                                value={condition2[uniqueKey]}
+                                                onChange={(e) => handleCondition2Change(uniqueKey, e.target.value)}
+                                                className="common-input"
+                                            />
+                                        </div>
+                                        <div className="rule-row">
+                                            <span>执行内容1：</span>
+                                            <Input
+                                                placeholder="单行输入"
+                                                value={execution1[uniqueKey]}
+                                                onChange={(e) => handleExecution1Change(uniqueKey, e.target.value)}
+                                                className="common-input"
+                                            />
+                                        </div>
+                                        <div className="rule-row">
+                                            <span>执行内容2：</span>
+                                            <Input
+                                                placeholder="单行输入"
+                                                value={execution2[uniqueKey]}
+                                                onChange={(e) => handleExecution2Change(uniqueKey, e.target.value)}
+                                                className="common-input"
+                                            />
+                                        </div>
+                                        <div className="rule-buttons">
+                                            <Button type="primary" onClick={() => handleRuleConfirm(uniqueKey)}>
+                                                确定
+                                            </Button>
+                                            <Button onClick={() => handleRuleCancel(uniqueKey)}>
+                                                取消
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                        </div>
-                        {visible[i] && (
-                            <div className="action-container">
-                                <div className="action-row">
-                                    <span>动作种类：</span>
-                                    <Select
-                                        style={{ width: 200 }}
-                                        onChange={handleTypeChange}
-                                        value={selectedType || selectedAction[i]?.selectedType || null}
-                                    >
-                                        {Object.keys(entity.actionSpace).map((type, index) => (
-                                            <Option key={index} value={type}>
-                                                {type}
-                                            </Option>
-                                        ))}
-                                    </Select>
-                                </div>
-                                <div className="action-row">
-                                    <span>可选动作：</span>
-                                    <Select
-                                        style={{ width: 200 }}
-                                        onChange={handleOptionChange}
-                                        value={selectedOption || selectedAction[i]?.selectedOption || null}
-                                        disabled={!selectedType}
-                                    >
-                                        {selectedType && entity.actionSpace[selectedType].map((option, index) => (
-                                            <Option key={index} value={option}>
-                                                {option}
-                                            </Option>
-                                        ))}
-                                    </Select>
-                                </div>
-                                <div className="action-row">
-                                    <span className="meaning-label">含义：</span>
-                                    <Input
-                                        placeholder={meaning ? meaning : "单行输入"}
-                                        value={meaning}
-                                        disabled={!selectedOption}
-                                        className="meaning-input"
-                                    />
-                                </div>
-                                <div className="action-buttons">
-                                    <Button type="primary" onClick={handleConfirm}>
-                                        确定
-                                    </Button>
-                                    <Button onClick={handleCancel}>
-                                        取消
-                                    </Button>
-                                </div>
-                            </div>
-                        )}
-                        {ruleVisible[i] && (
-                            <div className="rule-container">
-                                <div className="rule-row">
-                                    <span>规则类型：</span>
-                                    <Select
-                                        style={{ width: 200 }}
-                                        onChange={(value) => handleRuleTypeChange(i, value)}
-                                        value={ruleType[i] || null}
-                                    >
-                                        <Option value="IF ELSE">IF ELSE</Option>
-                                        <Option value="WHILE">WHILE</Option>
-                                        <Option value="MAX">MAX</Option>
-                                        <Option value="MIN">MIN</Option>
-                                    </Select>
-                                </div>
-                                <div className="rule-row">
-                                    <span>条件1：</span>
-                                    <Input
-                                        placeholder="单行输入"
-                                        value={condition1[i]}
-                                        onChange={(e) => handleCondition1Change(i, e.target.value)}
-                                        className="common-input"
-                                    />
-                                </div>
-                                <div className="rule-row">
-                                    <span>条件2：</span>
-                                    <Input
-                                        placeholder="单行输入"
-                                        value={condition2[i]}
-                                        onChange={(e) => handleCondition2Change(i, e.target.value)}
-                                        className="common-input"
-                                    />
-                                </div>
-                                <div className="rule-row">
-                                    <span>执行内容1：</span>
-                                    <Input
-                                        placeholder="单行输入"
-                                        value={execution1[i]}
-                                        onChange={(e) => handleExecution1Change(i, e.target.value)}
-                                        className="common-input"
-                                    />
-                                </div>
-                                <div className="rule-row">
-                                    <span>执行内容2：</span>
-                                    <Input
-                                        placeholder="单行输入"
-                                        value={execution2[i]}
-                                        onChange={(e) => handleExecution2Change(i, e.target.value)}
-                                        className="common-input"
-                                    />
-                                </div>
-                                <div className="rule-buttons">
-                                    <Button type="primary" onClick={() => handleRuleConfirm(i)}>
-                                        确定
-                                    </Button>
-                                    <Button onClick={() => handleRuleCancel(i)}>
-                                        取消
-                                    </Button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                ))}
+                        );
+                    })
+                )}
             </div>
         </div>
     );

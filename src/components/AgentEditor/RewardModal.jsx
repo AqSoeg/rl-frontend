@@ -1,6 +1,6 @@
-const RewardModal = ({ visible, onCancel, equation, onEquationChange }) => {
+const RewardModal = ({ visible, onCancel, onConfirm, equation, onEquationChange }) => {
     const equationSymbols = [
-        '=', '≈', '[', ']', '(', ')', '+', '-', '*', '÷', '±', '∈',
+        "+", "-", "×", "÷", "^", "√", "sin", "cos", "tan", "log", "ln", "∏", "∑", "∧", "∨", "¬", "⊕", "[", "]", "(", ")", "=", "≈", "∂", "e", "π", "∈", "±"
     ];
     const letterSymbols = [
         "s'", "a'", 'Q', 'Q̄', 't', 'T', 'ω', 'a_t', 's_t', 'r', 'μ', 'π',
@@ -17,7 +17,6 @@ const RewardModal = ({ visible, onCancel, equation, onEquationChange }) => {
             <div className="reward-modal">
                 <div className="reward-modal-header">
                     <h2>奖励函数公式编辑器</h2>
-                    {/* Removed window-controls div */}
                 </div>
                 <div className="symbol-groups">
                     <div className="symbol-group">
@@ -40,10 +39,10 @@ const RewardModal = ({ visible, onCancel, equation, onEquationChange }) => {
                 <div className="equation-preview">
                     {equation}
                 </div>
-                <button className="edit-button" onClick={onCancel}>
-                    编辑面板
-                    <span className="arrow-icon">→</span>
-                </button>
+                <div className="modal-buttons">
+                    <button className="confirm-button" onClick={onConfirm}>确认</button>
+                    <button className="cancel-button" onClick={onCancel}>取消</button>
+                </div>
             </div>
         </div>
     );

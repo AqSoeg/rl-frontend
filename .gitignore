@@ -4,6 +4,9 @@
 # Node.js 依赖文件
 node_modules/
 
+# 临时文件
+tmp/
+
 # 构建输出目录
 build/
 dist/
