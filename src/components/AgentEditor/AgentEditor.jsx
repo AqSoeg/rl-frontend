@@ -5,7 +5,8 @@ import StateVector from './StateVector.jsx';
 import ActionSpace from './ActionSpace.jsx';
 import ModelFunction from './ModelButton.jsx';
 import './AgentEditor.css';
-import entityAssignmentStore from './EntityAssignmentStore'; // 引入实体分配状态管理
+import entityAssignmentStore from './EntityAssignmentStore';
+import RewardFunction from "./RewardFunction.jsx"; // 引入实体分配状态管理
 
 const AgentEditor = () => {
     const [scenarios, setScenarios] = useState([]);
@@ -66,6 +67,7 @@ const AgentEditor = () => {
             <div className="gradient-box">
                 <StateVector entities={selectedEntities} /> {/* 动态传递选中的实体 */}
                 <ActionSpace entities={selectedEntities} /> {/* 动态传递选中的实体 */}
+                <RewardFunction />
                 <ModelFunction scenarios={scenarios} /> {/* 传递 scenarios */}
             </div>
         </div>
