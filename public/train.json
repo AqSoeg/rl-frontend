@@ -1,0 +1,272 @@
+{
+  "algorithms": [
+    {
+      "type": "shared_multi_agent",
+      "type_name": "共享多智能体",
+      "name": "MAPPO",
+      "hyper-parameters": [
+        {
+          "id": "actor_learning_rate",
+          "name": "Actor学习效率",
+          "value": [1000, 100, 1000, 10000],
+          "default": 1000
+        },
+        {
+          "id": "critic_learning_rate",
+          "name": "Critic学习率",
+          "value": [10000, 100, 1000, 10000, 100000],
+          "default": 10000
+        },
+        {
+          "id": "gamma",
+          "name": "折扣因子",
+          "value": [0.9, 0.8, 0.9, 0.95, 0.99],
+          "default": 0.9
+        },
+        {
+          "id": "epsilon",
+          "name": "截断比率",
+          "value": [0.1, 0.1, 0.2],
+          "default": 0.1
+        },
+        {
+          "id": "batch_size",
+          "name": "批量大小",
+          "value": [64, 32, 64, 128, 256],
+          "default": 64
+        },
+        {
+          "id": "ppo_epochs",
+          "name": "更新步数",
+          "value": [15, 5, 15, 25],
+          "default": 15
+        },
+        {
+          "id": "lambda",
+          "name": "GAE参数",
+          "value": [0.95, 0.9, 0.95, 0.99],
+          "default": 0.95
+        },
+        {
+          "id": "train_interval",
+          "name": "训练间隔",
+          "value": [100, 100, 200],
+          "default": 100
+        },
+        {
+          "id": "save_interval",
+          "name": "保存间隔",
+          "value": [1000, 1000, 5000],
+          "default": 1000
+        },
+        {
+          "id": "total_step",
+          "name": "总步数",
+          "value": [1000000, 1000000, 5000000, 10000000],
+          "default": 1000000
+        }
+      ]
+    },
+    {
+      "type": "distributed_multi_agent",
+      "type_name": "分布式多智能体",
+      "name": "MADDPG",
+      "hyper-parameters": [
+        {
+          "id": "actor_learning_rate",
+          "name": "Actor学习率",
+          "value": [1000, 100, 1000, 10000],
+          "default": 1000
+        },
+        {
+          "id": "critic_learning_rate",
+          "name": "Critic学习率",
+          "value": [10000, 100, 1000, 10000, 100000],
+          "default": 10000
+        },
+        {
+          "id": "gamma",
+          "name": "折扣因子",
+          "value": [0.9, 0.8, 0.9, 0.95, 0.99],
+          "default": 0.9
+        },
+        {
+          "id": "epsilon",
+          "name": "截断比率",
+          "value": [0.1, 0.1, 0.2],
+          "default": 0.1
+        },
+        {
+          "id": "batch_size",
+          "name": "批量大小",
+          "value": [64, 32, 64, 128, 256],
+          "default": 64
+        },
+        {
+          "id": "ppo_epochs",
+          "name": "更新步数",
+          "value": [15, 5, 15, 25],
+          "default": 15
+        },
+        {
+          "id": "lambda",
+          "name": "GAE参数",
+          "value": [0.95, 0.9, 0.95, 0.99],
+          "default": 0.95
+        },
+        {
+          "id": "train_interval",
+          "name": "训练间隔",
+          "value": [100, 100, 200],
+          "default": 100
+        },
+        {
+          "id": "save_interval",
+          "name": "保存间隔",
+          "value": [1000, 1000, 5000],
+          "default": 1000
+        },
+        {
+          "id": "total_step",
+          "name": "总步数",
+          "value": [1000000, 1000000, 5000000, 10000000],
+          "default": 1000000
+        }
+      ]
+    },
+    {
+      "type": "single_agent",
+      "type_name": "单智能体",
+      "name": "PPO",
+      "hyper-parameters": [
+        {
+          "id": "actor_learning_rate",
+          "name": "Actor学习率",
+          "value": [1000, 100, 1000, 10000],
+          "default": 1000
+        },
+        {
+          "id": "critic_learning_rate",
+          "name": "Critic学习率",
+          "value": [10000, 100, 1000, 10000, 100000],
+          "default": 10000
+        },
+        {
+          "id": "gamma",
+          "name": "折扣因子",
+          "value": [0.9, 0.8, 0.9, 0.95, 0.99],
+          "default": 0.9
+        },
+        {
+          "id": "epsilon",
+          "name": "截断比率",
+          "value": [0.1, 0.1, 0.2],
+          "default": 0.1
+        },
+        {
+          "id": "batch_size",
+          "name": "批量大小",
+          "value": [64, 32, 64, 128, 256],
+          "default": 64
+        },
+        {
+          "id": "ppo_epochs",
+          "name": "更新步数",
+          "value": [15, 5, 15, 25],
+          "default": 15
+        },
+        {
+          "id": "lambda",
+          "name": "GAE参数",
+          "value": [0.95, 0.9, 0.95, 0.99],
+          "default": 0.95
+        },
+        {
+          "id": "train_interval",
+          "name": "训练间隔",
+          "value": [100, 100, 200],
+          "default": 100
+        },
+        {
+          "id": "save_interval",
+          "name": "保存间隔",
+          "value": [1000, 1000, 5000],
+          "default": 1000
+        },
+        {
+          "id": "total_step",
+          "name": "总步数",
+          "value": [1000000, 1000000, 5000000, 10000000],
+          "default": 1000000
+        }
+      ]
+    },
+    {
+      "type": "single_agent",
+      "type_name": "单智能体",
+      "name": "DDPG",
+      "hyper-parameters": [
+        {
+          "id": "actor_learning_rate",
+          "name": "Actor学习率",
+          "value": [1000, 100, 1000, 10000],
+          "default": 1000
+        },
+        {
+          "id": "critic_learning_rate",
+          "name": "Critic学习率",
+          "value": [10000, 100, 1000, 10000, 100000],
+          "default": 10000
+        },
+        {
+          "id": "gamma",
+          "name": "折扣因子",
+          "value": [0.9, 0.8, 0.9, 0.95, 0.99],
+          "default": 0.9
+        },
+        {
+          "id": "epsilon",
+          "name": "截断比率",
+          "value": [0.1, 0.1, 0.2],
+          "default": 0.1
+        },
+        {
+          "id": "batch_size",
+          "name": "批量大小",
+          "value": [64, 32, 64, 128, 256],
+          "default": 64
+        },
+        {
+          "id": "ppo_epochs",
+          "name": "更新步数",
+          "value": [15, 5, 15, 25],
+          "default": 15
+        },
+        {
+          "id": "lambda",
+          "name": "GAE参数",
+          "value": [0.95, 0.9, 0.95, 0.99],
+          "default": 0.95
+        },
+        {
+          "id": "train_interval",
+          "name": "训练间隔",
+          "value": [100, 100, 200],
+          "default": 100
+        },
+        {
+          "id": "save_interval",
+          "name": "保存间隔",
+          "value": [1000, 1000, 5000],
+          "default": 1000
+        },
+        {
+          "id": "total_step",
+          "name": "总步数",
+          "value": [1000000, 1000000, 5000000, 10000000],
+          "default": 1000000
+        }
+      ]
+    }
+  ]
+}

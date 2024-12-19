@@ -7,26 +7,21 @@ import './ModelManagement.css';
 import axios from 'axios';
 const ModelManagement = () => {
   const [activeComponent, setActiveComponent] = useState('ModelLibrary');
-  const REFRESH_INTERVAL = 30000;
   const [data, setData] = useState(null);
     // 组件挂载时只发起一次请求获取数据
-  const fetchData = async () => {
-    try {
-      const response = await axios.get('http://localhost:3000/scenarios');
-      setData(response.data);
-    } catch (error) {
-      console.error('There was an error fetching the data!', error);
-    } 
-  };
+ 
 
-  useEffect(() => {
-    // 组件挂载时立即获取数据
-    fetchData();
-    // 设置定时器，定期刷新数据
-    const intervalId = setInterval(fetchData, REFRESH_INTERVAL);
-    // 清除定时器，防止内存泄漏
-    return () => clearInterval(intervalId);
-  }, []); // 空依赖数组确保只执行一次
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const response = await axios.get('http://localhost:3001/1');
+          setData(response.data);
+        } catch (error) {
+          console.error('There was an error fetching the data!', error);
+        }
+      };
+      fetchData(); // 调用函数以执行数据获取
+    }, []); 
 
   const handleButtonClick = (componentName) => {
     setActiveComponent(componentName);
