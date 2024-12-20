@@ -20,9 +20,10 @@ npm install
 
 ## 项目运行
 
-1. 运行后端：`npx json-server --watch public/db.json --port 3000`。
-'npx json-server --watch public/train.json --port 3001'
-'npx json-server --watch tmp/model.json --port 3002'
+1. 运行后端：
+- `npx json-server --watch public/db.json --port 3000`； 
+- `npx json-server --watch public/train.json --port 3001`； 
+- `npx json-server --watch tmp/model.json --port 3002`。 
 2. 运行网页：`npm run dev`。
 3. 运行 Web-Socket 服务：`node public/server.js`。
 
