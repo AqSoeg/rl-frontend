@@ -24,18 +24,43 @@ const Right = ({ selectedAlgorithm,selectedScenario }) => { // 接收 scenarios 
 
   const fetchAgents = async () => {
     try {
-      // 替换为实际的API URL
-      const jsonData= await axios.get('http://localhost:3001/1'); 
-      console.log('jsonData:', jsonData);
-      console.log('jsonData type:', typeof jsonData);
-      const agentsArray = Object.values(jsonData);
-      // 根据 selectedScenario 筛选出相关的智能体
-      const filteredAgents = agentsArray.filter(agent => agent.scenarioID === selectedScenario.id);
-      setAgents(filteredAgents);
+        console.log('Fetching agents for scenario:', selectedScenario); // 调试输出
+
+        // 首先获取 model.json 数据
+        const modelResponse = await axios.get('tmp/model.json');
+        const models = modelResponse.data; // 假设 data 是一个数组
+
+        // 动态构建URLs，这里假设 model.json 中的每个对象都有一个 id 属性用来构造URL
+        const urls = models.map(model => `http://localhost:3001/${model.id || models.indexOf(model)}`);
+
+        // 使用Promise.all并发请求所有URL的数据
+        const responses = await Promise.all(urls.map(url => axios.get(url)));
+
+        // 打印原始响应，以便验证其结构
+        console.log('Raw responses:', responses);
+
+        // 将所有响应的数据聚合到一个数组中
+        let allData = [];
+        for (let response of responses) {
+            // 直接将response.data作为数组添加，假设它已经是正确的格式
+            allData = allData.concat(response.data);
+        }
+
+        // 打印合并后的数据，以便验证过滤前的数据量
+        console.log('All data combined:', allData);
+
+        // 根据 selectedScenario 筛选出相关的智能体
+        const filteredAgents = allData.filter(agent => agent.scenarioID === selectedScenario.id);
+
+        // 打印筛选后的数据，以便验证最终数量
+        console.log('Filtered agents:', filteredAgents);
+
+        // 更新状态
+        setAgents(filteredAgents);
     } catch (error) {
-      console.error("Error fetching agents:", error);
+        console.error("Error fetching agents:", error);
     }
-  };
+};
 
   const scenarioColumns = [
     {
@@ -125,7 +150,7 @@ const Right = ({ selectedAlgorithm,selectedScenario }) => { // 接收 scenarios 
             columns={scenarioColumns}
             dataSource={agents.map((agent, index) => ({ ...agent, key: index }))}
             pagination={{
-              pageSize: 3,
+              pageSize: 2,
               showQuickJumper: true,
             }}
             bordered

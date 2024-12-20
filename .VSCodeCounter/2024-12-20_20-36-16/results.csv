@@ -1,0 +1,45 @@
+"filename", "language", "HTML", "Markdown", "JSON", "JavaScript", "JavaScript JSX", "XML", "CSS", "comment", "blank", "total"
+"c:\Users\20245227122\Desktop\frontend\README.md", "Markdown", 0, 23, 0, 0, 0, 0, 0, 0, 6, 29
+"c:\Users\20245227122\Desktop\frontend\eslint.config.js", "JavaScript", 0, 0, 0, 37, 0, 0, 0, 0, 2, 39
+"c:\Users\20245227122\Desktop\frontend\index.html", "HTML", 13, 0, 0, 0, 0, 0, 0, 0, 3, 16
+"c:\Users\20245227122\Desktop\frontend\public\db.json", "JSON", 0, 0, 496, 0, 0, 0, 0, 0, 0, 496
+"c:\Users\20245227122\Desktop\frontend\public\server.js", "JavaScript", 0, 0, 0, 61, 0, 0, 0, 14, 13, 88
+"c:\Users\20245227122\Desktop\frontend\public\train.json", "JSON", 0, 0, 272, 0, 0, 0, 0, 0, 0, 272
+"c:\Users\20245227122\Desktop\frontend\public\vite.svg", "XML", 0, 0, 0, 0, 0, 1, 0, 0, 0, 1
+"c:\Users\20245227122\Desktop\frontend\src\App.css", "CSS", 0, 0, 0, 0, 0, 0, 105, 4, 17, 126
+"c:\Users\20245227122\Desktop\frontend\src\App.jsx", "JavaScript JSX", 0, 0, 0, 0, 77, 0, 0, 0, 11, 88
+"c:\Users\20245227122\Desktop\frontend\src\assets\actionSpace.svg", "XML", 0, 0, 0, 0, 0, 1, 0, 0, 0, 1
+"c:\Users\20245227122\Desktop\frontend\src\assets\addFunction.svg", "XML", 0, 0, 0, 0, 0, 1, 0, 0, 0, 1
+"c:\Users\20245227122\Desktop\frontend\src\assets\react.svg", "XML", 0, 0, 0, 0, 0, 1, 0, 0, 0, 1
+"c:\Users\20245227122\Desktop\frontend\src\assets\rewardFunction.svg", "XML", 0, 0, 0, 0, 0, 1, 0, 0, 0, 1
+"c:\Users\20245227122\Desktop\frontend\src\assets\settings.svg", "XML", 0, 0, 0, 0, 0, 1, 0, 0, 0, 1
+"c:\Users\20245227122\Desktop\frontend\src\assets\stateVector.svg", "XML", 0, 0, 0, 0, 0, 1, 0, 0, 0, 1
+"c:\Users\20245227122\Desktop\frontend\src\assets\upload.svg", "XML", 0, 0, 0, 0, 0, 1, 0, 0, 0, 1
+"c:\Users\20245227122\Desktop\frontend\src\components\AgentEditor\ActionSpace.jsx", "JavaScript JSX", 0, 0, 0, 0, 254, 0, 0, 7, 21, 282
+"c:\Users\20245227122\Desktop\frontend\src\components\AgentEditor\ActionSpaceStore.js", "JavaScript", 0, 0, 0, 68, 0, 0, 0, 12, 14, 94
+"c:\Users\20245227122\Desktop\frontend\src\components\AgentEditor\AgentEditor.css", "CSS", 0, 0, 0, 0, 0, 0, 395, 26, 71, 492
+"c:\Users\20245227122\Desktop\frontend\src\components\AgentEditor\AgentEditor.jsx", "JavaScript JSX", 0, 0, 0, 0, 58, 0, 0, 6, 11, 75
+"c:\Users\20245227122\Desktop\frontend\src\components\AgentEditor\EntityAssignmentModal.jsx", "JavaScript JSX", 0, 0, 0, 0, 144, 0, 0, 9, 15, 168
+"c:\Users\20245227122\Desktop\frontend\src\components\AgentEditor\EntityAssignmentStore.js", "JavaScript", 0, 0, 0, 55, 0, 0, 0, 9, 11, 75
+"c:\Users\20245227122\Desktop\frontend\src\components\AgentEditor\ModelButton.jsx", "JavaScript JSX", 0, 0, 0, 0, 159, 0, 0, 22, 29, 210
+"c:\Users\20245227122\Desktop\frontend\src\components\AgentEditor\RewardFunction.jsx", "JavaScript JSX", 0, 0, 0, 0, 75, 0, 0, 0, 8, 83
+"c:\Users\20245227122\Desktop\frontend\src\components\AgentEditor\RewardModal.jsx", "JavaScript JSX", 0, 0, 0, 0, 47, 0, 0, 0, 4, 51
+"c:\Users\20245227122\Desktop\frontend\src\components\AgentEditor\Sidebar.jsx", "JavaScript JSX", 0, 0, 0, 0, 294, 0, 0, 0, 26, 320
+"c:\Users\20245227122\Desktop\frontend\src\components\AgentEditor\SidebarStore.js", "JavaScript", 0, 0, 0, 78, 0, 0, 0, 14, 16, 108
+"c:\Users\20245227122\Desktop\frontend\src\components\AgentEditor\StateVector.jsx", "JavaScript JSX", 0, 0, 0, 0, 72, 0, 0, 1, 7, 80
+"c:\Users\20245227122\Desktop\frontend\src\components\ModelManage\ModelManagement.css", "CSS", 0, 0, 0, 0, 0, 0, 39, 3, 7, 49
+"c:\Users\20245227122\Desktop\frontend\src\components\ModelManage\ModelManagement.jsx", "JavaScript JSX", 0, 0, 0, 0, 46, 0, 0, 6, 13, 65
+"c:\Users\20245227122\Desktop\frontend\src\components\ModelManage\algorithmlibrary.jsx", "JavaScript JSX", 0, 0, 0, 0, 194, 0, 0, 5, 15, 214
+"c:\Users\20245227122\Desktop\frontend\src\components\ModelManage\behaviorlibrary.jsx", "JavaScript JSX", 0, 0, 0, 0, 224, 0, 0, 6, 15, 245
+"c:\Users\20245227122\Desktop\frontend\src\components\ModelManage\modellibrary.jsx", "JavaScript JSX", 0, 0, 0, 0, 157, 0, 0, 3, 17, 177
+"c:\Users\20245227122\Desktop\frontend\src\components\ModelManage\offlinedatabase.jsx", "JavaScript JSX", 0, 0, 0, 0, 195, 0, 0, 5, 15, 215
+"c:\Users\20245227122\Desktop\frontend\src\components\TrainingService\1.jsx", "JavaScript JSX", 0, 0, 0, 0, 30, 0, 0, 55, 14, 99
+"c:\Users\20245227122\Desktop\frontend\src\components\TrainingService\IntelligentStore.jsx", "JavaScript JSX", 0, 0, 0, 0, 11, 0, 0, 0, 4, 15
+"c:\Users\20245227122\Desktop\frontend\src\components\TrainingService\TrainingService.css", "CSS", 0, 0, 0, 0, 0, 0, 90, 1, 18, 109
+"c:\Users\20245227122\Desktop\frontend\src\components\TrainingService\TrainingService.jsx", "JavaScript JSX", 0, 0, 0, 0, 63, 0, 0, 0, 5, 68
+"c:\Users\20245227122\Desktop\frontend\src\components\TrainingService\left.jsx", "JavaScript JSX", 0, 0, 0, 0, 173, 0, 0, 4, 14, 191
+"c:\Users\20245227122\Desktop\frontend\src\components\TrainingService\middle.jsx", "JavaScript JSX", 0, 0, 0, 0, 113, 0, 0, 26, 18, 157
+"c:\Users\20245227122\Desktop\frontend\src\components\TrainingService\right.jsx", "JavaScript JSX", 0, 0, 0, 0, 185, 0, 0, 17, 27, 229
+"c:\Users\20245227122\Desktop\frontend\src\main.jsx", "JavaScript JSX", 0, 0, 0, 0, 3, 0, 0, 0, 2, 5
+"c:\Users\20245227122\Desktop\frontend\vite.config.js", "JavaScript", 0, 0, 0, 5, 0, 0, 0, 1, 2, 8
+"Total", "-", 13, 23, 768, 304, 2574, 8, 629, 256, 471, 5046

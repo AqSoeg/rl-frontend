@@ -9,19 +9,36 @@ const ModelManagement = () => {
   const [activeComponent, setActiveComponent] = useState('ModelLibrary');
   const [data, setData] = useState(null);
     // 组件挂载时只发起一次请求获取数据
+    
  
+
 
     useEffect(() => {
       const fetchData = async () => {
         try {
-          const response = await axios.get('http://localhost:3001/1');
-          setData(response.data);
+          // Fetch model.json data first
+          const modelResponse = await axios.get('tmp/model.json');
+          const models = modelResponse.data; // 假设 data 是一个数组
+  
+          // Dynamically build URLs based on the number of items in model.json
+          const urls = models.map(model => `http://localhost:3001/${model.id || models.indexOf(model)}`);
+  
+          // Use Promise.all to fetch data from all URLs in parallel
+          const responses = await Promise.all(urls.map(url => axios.get(url)));
+  
+          // Aggregate the data from all responses into a single array
+          const allData = responses.map(response => response.data).flat(); // 使用 flat() 方法将多维数组转换为一维数组
+  
+          // Set the aggregated data
+          setData(allData);
         } catch (error) {
           console.error('There was an error fetching the data!', error);
         }
       };
-      fetchData(); // 调用函数以执行数据获取
-    }, []); 
+  
+      fetchData(); // Call the function to execute data fetching
+    }, []); // Empty dependency array ensures this effect runs only once on component mount
+
 
   const handleButtonClick = (componentName) => {
     setActiveComponent(componentName);
