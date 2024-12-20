@@ -25,7 +25,8 @@ const RewardFunction = () => {
             setRewardWhoOpen(true); // 使用 open
         } else {
             // 智能体数量为 1 时，默认是团队奖励
-            setRewardType('团队奖励');
+            setRewardType('个人奖励');
+            setSelectedAgent('智能体1');
             setModalOpen(true); // 使用 open
         }
     };
