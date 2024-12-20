@@ -172,39 +172,40 @@ const RewardFunction = () => {
             </Modal>
 
             {/* RewardModal 弹窗 */}
-            <Modal
-                title="奖励函数公式编辑器"
-                open={modalOpen} // 使用 open 代替 visible
-                onCancel={handleCancel}
-                footer={[
-                    <Button key="cancel" onClick={handleCancel}>取消</Button>,
-                    <Button key="confirm" type="primary" onClick={handleConfirm}>确认</Button>,
-                ]}
-            >
-                <div className="equation-preview">
-                    {equation}
-                </div>
-                <div className="symbol-groups">
-                    <div className="symbol-group">
-                        {["+", "-", "×", "÷", "^", "√", "sin", "cos", "tan", "log", "ln", "∏", "∑", "∧", "∨", "¬", "⊕", "[", "]", "(", ")", "=", "≈", "∂", "e", "π", "∈", "±"].map((symbol, index) => (
-                            <button key={index}
-                                    onClick={() => handleEquationChange({target: {value: equation + symbol}})}>{symbol}</button>
-                        ))}
+            {modalOpen && (
+                <div className="reward-modal-overlay">
+                    <div className="reward-modal">
+                        <div className="reward-modal-header">奖励函数公式编辑器</div>
+                        <div className="equation-preview">
+                            {equation}
+                        </div>
+                        <div className="symbol-groups">
+                            <div className="symbol-group">
+                                {["+", "-", "×", "÷", "^", "√", "sin", "cos", "tan", "log", "ln", "∏", "∑", "∧", "∨", "¬", "⊕", "[", "]", "(", ")", "=", "≈", "∂", "e", "π", "∈", "±"].map((symbol, index) => (
+                                    <button key={index}
+                                            onClick={() => handleEquationChange({target: {value: equation + symbol}})}>{symbol}</button>
+                                ))}
+                            </div>
+                            <div className="symbol-group">
+                                {["s'", "a'", 'Q', 'Q̄', 't', 'T', 'ω', 'a_t', 's_t', 'r', 'μ', 'π'].map((symbol, index) => (
+                                    <button key={index}
+                                            onClick={() => handleEquationChange({target: {value: equation + symbol}})}>{symbol}</button>
+                                ))}
+                            </div>
+                        </div>
+                        <textarea
+                            className="equation-input"
+                            value={equation}
+                            onChange={handleEquationChange}
+                            placeholder="在此输入或编辑公式"
+                        />
+                        <div className="modal-buttons"> {/* 应用 .modal-buttons 样式 */}
+                            <Button onClick={handleCancel}>取消</Button>
+                            <Button type="primary" onClick={handleConfirm}>确认</Button>
+                        </div>
                     </div>
-                    <div className="symbol-group">
-                        {["s'", "a'", 'Q', 'Q̄', 't', 'T', 'ω', 'a_t', 's_t', 'r', 'μ', 'π'].map((symbol, index) => (
-                            <button key={index}
-                                    onClick={() => handleEquationChange({target: {value: equation + symbol}})}>{symbol}</button>
-                        ))}
-                    </div>
                 </div>
-                <textarea
-                    className="equation-input"
-                    value={equation}
-                    onChange={handleEquationChange}
-                    placeholder="在此输入或编辑公式"
-                />
-            </Modal>
+            )}
         </div>
     );
 };
