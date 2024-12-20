@@ -6,6 +6,7 @@ node_modules/
 
 # 临时文件
 tmp/
+.VSCodeCounter/
 
 # 构建输出目录
 build/
