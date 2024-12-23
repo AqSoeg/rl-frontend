@@ -1,6 +1,6 @@
-// SidebarStore.js
 import { makeAutoObservable } from 'mobx';
 import entityAssignmentStore from './EntityAssignmentStore';
+import rewardFunctionStore from './RewardFunctionStore'; // 引入 RewardFunctionStore
 
 class SidebarStore {
     scenario = ''; // 想定场景
@@ -20,18 +20,21 @@ class SidebarStore {
     setScenario(scenario) {
         this.scenario = scenario;
         this.clearExceptScenario();
+        rewardFunctionStore.clearRewards(); // 清空奖励函数状态
     }
 
     // 设置智能体角色
     setRole(role) {
         this.role = role;
         this.clearExceptScenarioAndRole();
+        rewardFunctionStore.clearRewards(); // 清空奖励函数状态
     }
 
     // 设置智能体类型
     setType(type) {
         this.type = type;
         this.clearExceptScenarioRoleAndType();
+        rewardFunctionStore.clearRewards(); // 清空奖励函数状态
     }
 
     // 设置智能体名称
@@ -48,6 +51,7 @@ class SidebarStore {
     setAgentCount(agentCount) {
         this.agentCount = agentCount;
         this.clearExceptScenarioRoleTypeAndAgentCount();
+        rewardFunctionStore.clearRewards(); // 清空奖励函数状态
     }
 
     // 设置智能体模型

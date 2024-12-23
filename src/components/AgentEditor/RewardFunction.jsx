@@ -1,100 +1,129 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button, Select, Modal, Form } from 'antd';
 import rewardLogo from '../../assets/rewardFunction.svg';
 import uploadLogo from '../../assets/upload.svg';
 import addFunctionLogo from '../../assets/addFunction.svg';
 import sidebarStore from './SidebarStore';
+import rewardFunctionStore from './RewardFunctionStore'; // 引入 RewardFunctionStore
+import { observer } from 'mobx-react';
 
 const { Option } = Select;
 
-const RewardFunction = () => {
-    const [visible, setVisible] = useState(Array(sidebarStore.agentCount).fill(false));
-    const [selectedReward, setSelectedReward] = useState([]);
-    const [selectedRewardIndex, setSelectedRewardIndex] = useState(null);
-    const [equation, setEquation] = useState('');
-    const [modalOpen, setModalOpen] = useState(false); // 使用 open 代替 visible
-    const [rewardWhoOpen, setRewardWhoOpen] = useState(false); // 使用 open 代替 visible
-    const [rewardType, setRewardType] = useState('');
-    const [selectedAgent, setSelectedAgent] = useState('');
+const RewardFunction = observer(() => {
+    const [equation, setEquation] = useState(''); // 公式内容
+    const [modalOpen, setModalOpen] = useState(false); // 控制 RewardModal 的打开与关闭
+    const [rewardWhoOpen, setRewardWhoOpen] = useState(false); // 控制 RewardWho 弹窗的打开与关闭
+    const [rewardType, setRewardType] = useState(''); // 奖励类型
+    const [selectedAgent, setSelectedAgent] = useState(''); // 选中的智能体
+    const [editingIndex, setEditingIndex] = useState(null); // 用于记录当前编辑的下拉框索引
 
     // 检查智能体数量是否大于 0
     const isAddButtonEnabled = sidebarStore.agentCount > 0;
 
+    // 监听 SidebarStore 的状态变化
+    useEffect(() => {
+        if (sidebarStore.agentCount || sidebarStore.type || sidebarStore.role || sidebarStore.scenario) {
+            rewardFunctionStore.clearRewards(); // 清空奖励函数状态
+        }
+    }, [sidebarStore.agentCount, sidebarStore.type, sidebarStore.role, sidebarStore.scenario]);
+
+    // 处理新增奖励函数
     const handleAddReward = () => {
-        if (sidebarStore.agentCount > 1) {
-            setRewardWhoOpen(true); // 使用 open
+        if (sidebarStore.type === '同构多智能体') {
+            // 如果是同构多智能体，直接打开 RewardModal 并设置为团队奖励
+            setRewardType('团队奖励');
+            setModalOpen(true);
+        } else if (sidebarStore.agentCount > 1) {
+            setRewardWhoOpen(true);
         } else {
             // 智能体数量为 1 时，默认是团队奖励
-            setRewardType('个人奖励');
+            setRewardType('团队奖励');
             setSelectedAgent('智能体1');
-            setModalOpen(true); // 使用 open
+            setModalOpen(true);
         }
+        setEquation(''); // 新增时，公式内容为空
     };
 
+    // 处理 RewardWho 弹窗确认
     const handleRewardWhoConfirm = (type, agent) => {
         setRewardType(type);
         setSelectedAgent(agent);
-        setRewardWhoOpen(false); // 使用 open
-        setModalOpen(true); // 使用 open
+        setRewardWhoOpen(false);
+        setModalOpen(true);
+        setEquation(''); // 新增时，公式内容为空
     };
 
+    // 处理 RewardWho 弹窗取消
     const handleRewardWhoCancel = () => {
-        setRewardWhoOpen(false); // 使用 open
+        setRewardWhoOpen(false);
     };
 
+    // 处理奖励类型变化
     const handleRewardTypeChange = (value) => {
         setRewardType(value);
     };
 
+    // 处理智能体选择变化
     const handleAgentChange = (value) => {
         setSelectedAgent(value);
     };
 
+    // 处理确认按钮点击
     const handleConfirm = () => {
         if (!equation) {
             alert('请填写公式后再确认，否则取消！');
             return;
         }
 
-        const newSelectedReward = [...selectedReward];
-        newSelectedReward.push({
+        const newReward = {
             equation: equation,
             type: rewardType,
             agent: selectedAgent,
-        });
-        setSelectedReward(newSelectedReward);
-        setModalOpen(false); // 使用 open
-    };
+        };
 
-    const handleCancel = () => {
-        const confirmCancel = window.confirm('是否取消编辑该奖赏函数？');
-        if (confirmCancel) {
-            setModalOpen(false); // 使用 open
+        if (editingIndex !== null) {
+            // 如果正在编辑，更新原来的奖励函数
+            rewardFunctionStore.editReward(editingIndex, newReward);
+            setEditingIndex(null); // 重置编辑状态
+        } else {
+            // 否则添加新的奖励函数
+            rewardFunctionStore.addReward(newReward);
         }
+
+        setModalOpen(false);
+        setEquation(''); // 清空公式输入框
     };
 
+    // 处理取消按钮点击
+    const handleCancel = () => {
+        setModalOpen(false); // 直接关闭弹窗
+        setEditingIndex(null); // 重置编辑状态
+        setEquation(''); // 清空公式输入框
+    };
+
+    // 处理公式输入变化
     const handleEquationChange = (e) => setEquation(e.target.value);
 
+    // 处理下拉框点击
     const handleDropdownClick = (index) => {
-        const newVisible = [...visible];
-        newVisible[index] = !newVisible[index];
-        setVisible(newVisible);
-        setSelectedRewardIndex(index);
+        rewardFunctionStore.toggleDropdown(index);
     };
 
+    // 处理编辑按钮点击
     const handleEdit = (index) => {
-        setEquation(selectedReward[index].equation);
-        setRewardType(selectedReward[index].type);
-        setSelectedAgent(selectedReward[index].agent);
-        setModalOpen(true); // 使用 open
+        const reward = rewardFunctionStore.selectedReward[index];
+        setEquation(reward.equation); // 设置为之前的公式
+        setRewardType(reward.type); // 设置为之前的奖励类型
+        setSelectedAgent(reward.agent); // 设置为之前的智能体
+        setEditingIndex(index); // 设置当前编辑的下拉框索引
+        setModalOpen(true);
     };
 
+    // 处理删除按钮点击
     const handleDelete = (index) => {
         const confirmDelete = window.confirm('是否确认删除该奖赏函数？');
         if (confirmDelete) {
-            const newSelectedReward = [...selectedReward];
-            newSelectedReward.splice(index, 1);
-            setSelectedReward(newSelectedReward);
+            rewardFunctionStore.deleteReward(index);
         }
     };
 
@@ -117,21 +146,20 @@ const RewardFunction = () => {
                     }}
                 />
                 <img src={uploadLogo} alt="Upload" className="upload-button-logo"/>
-
             </div>
             <div className="dropdown-container-wrapper">
-                {selectedReward.map((reward, index) => (
+                {rewardFunctionStore.selectedReward.map((reward, index) => (
                     <div key={index} className="dropdown-container">
                         <div className="dropdown-header" onClick={() => handleDropdownClick(index)}>
-                            <span>{reward.equation}</span> {/* 下拉框名是公式 */}
+                            <span>{reward.equation}</span>
                             <Button type="link" className="dropdown-button">
-                                {visible[index] ? '▲' : '▼'}
+                                {rewardFunctionStore.visible[index] ? '▲' : '▼'}
                             </Button>
                         </div>
-                        {visible[index] && (
+                        {rewardFunctionStore.visible[index] && (
                             <div className="dropdown-content">
                                 <div>
-                                    {reward.type === '团队奖励' ? '团队奖励' : `个人奖励 - ${reward.agent}`} {/* 第一行显示奖励信息和智能体 */}
+                                    {reward.type === '团队奖励' ? '团队奖励' : `个人奖励 - ${reward.agent}`}
                                 </div>
                                 <div>
                                     <Button type="link" onClick={() => handleEdit(index)}>编辑</Button>
@@ -146,7 +174,7 @@ const RewardFunction = () => {
             {/* RewardWho 弹窗 */}
             <Modal
                 title="选择奖励类型"
-                open={rewardWhoOpen} // 使用 open 代替 visible
+                open={rewardWhoOpen}
                 onCancel={handleRewardWhoCancel}
                 footer={[
                     <Button key="cancel" onClick={handleRewardWhoCancel}>取消</Button>,
@@ -200,7 +228,7 @@ const RewardFunction = () => {
                             onChange={handleEquationChange}
                             placeholder="在此输入或编辑公式"
                         />
-                        <div className="modal-buttons"> {/* 应用 .modal-buttons 样式 */}
+                        <div className="modal-buttons">
                             <Button onClick={handleCancel}>取消</Button>
                             <Button type="primary" onClick={handleConfirm}>确认</Button>
                         </div>
@@ -209,6 +237,6 @@ const RewardFunction = () => {
             )}
         </div>
     );
-};
+});
 
 export default RewardFunction;
