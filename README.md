@@ -7,7 +7,7 @@ cd frontend
 npm install
 ```
 
-## 工具安装
+## 工具安装（可以直接 `npm install`）
 
 1. 安装路由管理：`npm install react-router-dom`。
 2. 安装 [Ant Design](https://ant.design/docs/react/use-with-vite-cn)：`npm install antd --save`。
