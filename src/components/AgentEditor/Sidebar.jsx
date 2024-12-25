@@ -219,9 +219,9 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
         const inputString = `${scenarioID}${roleID}${typeNumber}${version}${agentCount}${timestamp}`;
         const agentNumber = selectedAgent.replace('智能体', ''); // 提取智能体模型的编号
         const agentNumberLength = agentNumber.length; // 获取智能体编号的长度
-        const nanoidLength = 16 - agentNumberLength;
+        const nanoidLength = 16 - agentNumberLength - 1;
         const nanoid = customAlphabet(inputString, nanoidLength);
-        const modelID = `${nanoid()}${agentNumber}`;
+        const modelID = `${nanoid()}` + `-` + `${agentNumber}`;
         return modelID;
     };
 
