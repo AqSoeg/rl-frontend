@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Select, Input, Alert, Button } from 'antd';
-import { customAlphabet } from 'nanoid';
 import entityAssignmentStore from './EntityAssignmentStore';
 import EntityAssignmentModal from './EntityAssignmentModal';
 import sidebarStore from './SidebarStore'; // 引入 SidebarStore
@@ -204,7 +203,7 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
         }
     };
 
-    const generateModelID = (scenarioID, roleID, type, version, agentCount, timestamp, selectedAgent) => {
+    const generateModelID = (scenarioID, roleID, type, agentCount, selectedAgent) => {
         let typeNumber;
         switch (type) {
             case '单智能体':
@@ -220,12 +219,8 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
                 typeNumber = '0'; // 默认值为 0
         }
 
-        const inputString = `${scenarioID}${roleID}${typeNumber}${version}${agentCount}${timestamp}`;
         const agentNumber = selectedAgent.replace('智能体', ''); // 提取智能体模型的编号
-        const agentNumberLength = agentNumber.length; // 获取智能体编号的长度
-        const nanoidLength = 16 - agentNumberLength - 1;
-        const nanoid = customAlphabet(inputString, nanoidLength);
-        const modelID = `${nanoid()}` + `-` + `${agentNumber}`;
+        const modelID = `${scenarioID}-${roleID}-${typeNumber}-${agentCount}-${agentNumber}`;
         return modelID;
     };
 
