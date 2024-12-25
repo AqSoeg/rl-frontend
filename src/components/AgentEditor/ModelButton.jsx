@@ -86,7 +86,7 @@ const ModelFunction = ({ scenarios }) => {
     // 处理保存模型
     const handleSaveModel = () => {
         if (!sidebarStore.canSaveModel()) {
-            alert('请先选择智能体模型后再保存模型！');
+            alert('请填写完整信息后再保存模型！');
             return;
         }
 

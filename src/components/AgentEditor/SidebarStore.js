@@ -104,7 +104,7 @@ class SidebarStore {
 
     // 检查是否可以保存模型
     canSaveModel() {
-        return this.selectedAgent !== '';
+        return this.selectedAgent !== '' && this.modelID !== '';
     }
 }
 
