@@ -179,6 +179,8 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
         } else {
             setModelName('待定');
             setInputIncomplete(true);
+            setModelID('xxx'); // 重置模型ID为默认值
+            sidebarStore.setModelID('xxx'); // 更新 SidebarStore 的状态
         }
     };
 
@@ -197,6 +199,8 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
             }
         } else {
             setModelName('待定');
+            setModelID('xxx'); // 重置模型ID为默认值
+            sidebarStore.setModelID('xxx'); // 更新 SidebarStore 的状态
         }
     };
 
