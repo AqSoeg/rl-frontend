@@ -11,7 +11,9 @@ const ActionSpace = ({ entities }) => {
     const [visible, setVisible] = useState({});
     const [selectedActionIndex, setSelectedActionIndex] = useState(null);
     const [selectedOption, setSelectedOption] = useState({});
+    const [confirmedOption, setConfirmedOption] = useState({}); // 用于保存确认后的选项
     const [meaning, setMeaning] = useState({});
+    const [confirmedMeaning, setConfirmedMeaning] = useState({}); // 用于保存确认后的含义
     const [ruleVisible, setRuleVisible] = useState({});
     const [ruleType, setRuleType] = useState({});
     const [condition1, setCondition1] = useState({});
@@ -34,7 +36,9 @@ const ActionSpace = ({ entities }) => {
             const initialExecution1 = {};
             const initialExecution2 = {};
             const initialSelectedOption = {};
+            const initialConfirmedOption = {}; // 初始化确认后的选项
             const initialMeaning = {};
+            const initialConfirmedMeaning = {}; // 初始化确认后的含义
 
             actionSpaces.forEach((_, index) => {
                 initialVisible[index] = false;
@@ -45,7 +49,9 @@ const ActionSpace = ({ entities }) => {
                 initialExecution1[index] = '';
                 initialExecution2[index] = '';
                 initialSelectedOption[index] = null;
+                initialConfirmedOption[index] = null; // 初始化确认后的选项
                 initialMeaning[index] = '';
+                initialConfirmedMeaning[index] = ''; // 初始化确认后的含义
             });
 
             setVisible(initialVisible);
@@ -56,7 +62,9 @@ const ActionSpace = ({ entities }) => {
             setExecution1(initialExecution1);
             setExecution2(initialExecution2);
             setSelectedOption(initialSelectedOption);
+            setConfirmedOption(initialConfirmedOption); // 设置确认后的选项
             setMeaning(initialMeaning);
+            setConfirmedMeaning(initialConfirmedMeaning); // 设置确认后的含义
         } else {
             setVisible({});
             setRuleVisible({});
@@ -66,11 +74,20 @@ const ActionSpace = ({ entities }) => {
             setExecution1({});
             setExecution2({});
             setSelectedOption({});
+            setConfirmedOption({}); // 清空确认后的选项
             setMeaning({});
+            setConfirmedMeaning({}); // 清空确认后的含义
         }
     }, [entityAssignmentStore.isAgentSelected, entityAssignmentStore.selectedAgent, entityAssignmentStore.assignedEntities]);
 
     const handleSelectChange = (index) => {
+        if (visible[index]) {
+            // 如果下拉框正在收起，且用户没有确认，则恢复到确认的状态
+            if (selectedOption[index] !== confirmedOption[index] || meaning[index] !== confirmedMeaning[index]) {
+                setSelectedOption(prev => ({ ...prev, [index]: confirmedOption[index] }));
+                setMeaning(prev => ({ ...prev, [index]: confirmedMeaning[index] }));
+            }
+        }
         setVisible(prev => ({ ...prev, [index]: !prev[index] }));
         setSelectedActionIndex(index);
     };
@@ -96,6 +113,10 @@ const ActionSpace = ({ entities }) => {
             return;
         }
 
+        // 保存确认后的选项和含义
+        setConfirmedOption(prev => ({ ...prev, [index]: selectedOption[index] }));
+        setConfirmedMeaning(prev => ({ ...prev, [index]: meaning[index] }));
+
         // 收起下拉框
         setVisible(prev => ({ ...prev, [index]: false }));
     };
@@ -104,7 +125,9 @@ const ActionSpace = ({ entities }) => {
         const confirmCancel = window.confirm('是否取消该动作？');
         if (confirmCancel) {
             setSelectedOption(prev => ({ ...prev, [index]: null }));
+            setConfirmedOption(prev => ({ ...prev, [index]: null })); // 取消时清空确认后的选项
             setMeaning(prev => ({ ...prev, [index]: '' }));
+            setConfirmedMeaning(prev => ({ ...prev, [index]: '' })); // 取消时清空确认后的含义
             setVisible(prev => ({ ...prev, [index]: false }));
         }
     };
@@ -198,7 +221,7 @@ const ActionSpace = ({ entities }) => {
                                             <Select
                                                 style={{ width: 200 }}
                                                 onChange={(value) => handleOptionChange(uniqueKey, value)}
-                                                value={selectedOption[uniqueKey]}
+                                                value={selectedOption[uniqueKey] || confirmedOption[uniqueKey]} // 显示未确认的选项或确认后的选项
                                             >
                                                 {actionSpace[2].map((option, optionIndex) => (
                                                     <Option key={optionIndex} value={option}>
@@ -211,7 +234,7 @@ const ActionSpace = ({ entities }) => {
                                             <span className="meaning-label">含义：</span>
                                             <Input
                                                 placeholder={meaning[uniqueKey] ? meaning[uniqueKey] : "单行输入"}
-                                                value={meaning[uniqueKey]}
+                                                value={meaning[uniqueKey] || confirmedMeaning[uniqueKey]} // 显示未确认的含义或确认后的含义
                                                 onChange={(e) => setMeaning(prev => ({ ...prev, [uniqueKey]: e.target.value }))}
                                                 className="meaning-input"
                                             />
