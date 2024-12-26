@@ -1,10 +1,10 @@
-// ActionSpace.jsx
 import { useState, useEffect } from 'react';
 import { Button, Select, Input } from 'antd';
 import actionLogo from '../../assets/actionSpace.svg';
 import uploadLogo from '../../assets/upload.svg';
 import entityAssignmentStore from './EntityAssignmentStore';
-import actionSpaceStore from './ActionSpaceStore'; // 引入 ActionSpaceStore
+import actionSpaceStore from './ActionSpaceStore';
+import sidebarStore from './SidebarStore';
 
 const { Option } = Select;
 
@@ -28,93 +28,89 @@ const ActionSpace = ({ entities }) => {
     const [confirmedExecution1, setConfirmedExecution1] = useState({});
     const [confirmedExecution2, setConfirmedExecution2] = useState({});
 
-    useEffect(() => {
-        if (entityAssignmentStore.isAgentSelected) {
-            const selectedAgent = entityAssignmentStore.selectedAgent;
-            const assignedEntities = entityAssignmentStore.assignedEntities[selectedAgent] || [];
+    // 初始化动作空间
+    const initializeActionSpaces = () => {
+        if (!entityAssignmentStore.isAgentSelected || !sidebarStore.isSingleAgent) return;
 
-            const actionSpaces = assignedEntities.flatMap(entity => entity.actionSpace);
-            const initialVisible = {};
-            const initialRuleVisible = {};
-            const initialRuleType = {};
-            const initialCondition1 = {};
-            const initialCondition2 = {};
-            const initialExecution1 = {};
-            const initialExecution2 = {};
-            const initialSelectedOption = {};
-            const initialConfirmedOption = {};
-            const initialMeaning = {};
-            const initialConfirmedMeaning = {};
-            const initialIsCancelled = {};
-            const initialConfirmedRuleType = {};
-            const initialConfirmedCondition1 = {};
-            const initialConfirmedCondition2 = {};
-            const initialConfirmedExecution1 = {};
-            const initialConfirmedExecution2 = {};
+        const selectedAgent = entityAssignmentStore.selectedAgent;
+        const assignedEntities = entityAssignmentStore.assignedEntities[selectedAgent] || [];
 
-            actionSpaces.forEach((actionSpace, index) => {
+        const actionSpaces = assignedEntities.flatMap(entity => entity.actionSpace);
+        const initialVisible = {};
+        const initialRuleVisible = {};
+        const initialRuleType = {};
+        const initialCondition1 = {};
+        const initialCondition2 = {};
+        const initialExecution1 = {};
+        const initialExecution2 = {};
+        const initialSelectedOption = {};
+        const initialConfirmedOption = {};
+        const initialMeaning = {};
+        const initialConfirmedMeaning = {};
+        const initialIsCancelled = {};
+        const initialConfirmedRuleType = {};
+        const initialConfirmedCondition1 = {};
+        const initialConfirmedCondition2 = {};
+        const initialConfirmedExecution1 = {};
+        const initialConfirmedExecution2 = {};
+
+        actionSpaces.forEach((actionSpace, index) => {
+            const entityName = entities.find(entity =>
+                entity.actionSpace.some((_, i) => `${entity.name}-${i}` === index)
+            )?.name;
+
+            if (entityName) {
+                const storedActionSpace = actionSpaceStore.getActionSpace(entityName, index);
+
                 initialVisible[index] = false;
                 initialRuleVisible[index] = false;
-                initialRuleType[index] = null;
-                initialCondition1[index] = '';
-                initialCondition2[index] = '';
-                initialExecution1[index] = '';
-                initialExecution2[index] = '';
-                initialSelectedOption[index] = null;
-                initialConfirmedOption[index] = null;
+                initialRuleType[index] = storedActionSpace?.ruleType || null;
+                initialCondition1[index] = storedActionSpace?.condition1 || '';
+                initialCondition2[index] = storedActionSpace?.condition2 || '';
+                initialExecution1[index] = storedActionSpace?.execution1 || '';
+                initialExecution2[index] = storedActionSpace?.execution2 || '';
+                initialSelectedOption[index] = storedActionSpace?.options || null;
+                initialConfirmedOption[index] = storedActionSpace?.options || null;
                 initialIsCancelled[index] = false;
-                initialConfirmedRuleType[index] = null;
-                initialConfirmedCondition1[index] = '';
-                initialConfirmedCondition2[index] = '';
-                initialConfirmedExecution1[index] = '';
-                initialConfirmedExecution2[index] = '';
+                initialConfirmedRuleType[index] = storedActionSpace?.ruleType || null;
+                initialConfirmedCondition1[index] = storedActionSpace?.condition1 || '';
+                initialConfirmedCondition2[index] = storedActionSpace?.condition2 || '';
+                initialConfirmedExecution1[index] = storedActionSpace?.execution1 || '';
+                initialConfirmedExecution2[index] = storedActionSpace?.execution2 || '';
 
                 if (actionSpace && actionSpace[3] && !initialIsCancelled[index]) {
-                    initialMeaning[index] = actionSpace[3];
-                    initialConfirmedMeaning[index] = actionSpace[3];
+                    initialMeaning[index] = storedActionSpace?.meaning || actionSpace[3];
+                    initialConfirmedMeaning[index] = storedActionSpace?.meaning || actionSpace[3];
                 } else {
-                    initialMeaning[index] = '';
-                    initialConfirmedMeaning[index] = '';
+                    initialMeaning[index] = storedActionSpace?.meaning || '';
+                    initialConfirmedMeaning[index] = storedActionSpace?.meaning || '';
                 }
-            });
+            }
+        });
 
-            setVisible(initialVisible);
-            setRuleVisible(initialRuleVisible);
-            setRuleType(initialRuleType);
-            setCondition1(initialCondition1);
-            setCondition2(initialCondition2);
-            setExecution1(initialExecution1);
-            setExecution2(initialExecution2);
-            setSelectedOption(initialSelectedOption);
-            setConfirmedOption(initialConfirmedOption);
-            setMeaning(initialMeaning);
-            setConfirmedMeaning(initialConfirmedMeaning);
-            setIsCancelled(initialIsCancelled);
-            setConfirmedRuleType(initialConfirmedRuleType);
-            setConfirmedCondition1(initialConfirmedCondition1);
-            setConfirmedCondition2(initialConfirmedCondition2);
-            setConfirmedExecution1(initialConfirmedExecution1);
-            setConfirmedExecution2(initialConfirmedExecution2);
-        } else {
-            setVisible({});
-            setRuleVisible({});
-            setRuleType({});
-            setCondition1({});
-            setCondition2({});
-            setExecution1({});
-            setExecution2({});
-            setSelectedOption({});
-            setConfirmedOption({});
-            setMeaning({});
-            setConfirmedMeaning({});
-            setIsCancelled({});
-            setConfirmedRuleType({});
-            setConfirmedCondition1({});
-            setConfirmedCondition2({});
-            setConfirmedExecution1({});
-            setConfirmedExecution2({});
-        }
-    }, [entityAssignmentStore.isAgentSelected, entityAssignmentStore.selectedAgent, entityAssignmentStore.assignedEntities]);
+        setVisible(initialVisible);
+        setRuleVisible(initialRuleVisible);
+        setRuleType(initialRuleType);
+        setCondition1(initialCondition1);
+        setCondition2(initialCondition2);
+        setExecution1(initialExecution1);
+        setExecution2(initialExecution2);
+        setSelectedOption(initialSelectedOption);
+        setConfirmedOption(initialConfirmedOption);
+        setMeaning(initialMeaning);
+        setConfirmedMeaning(initialConfirmedMeaning);
+        setIsCancelled(initialIsCancelled);
+        setConfirmedRuleType(initialConfirmedRuleType);
+        setConfirmedCondition1(initialConfirmedCondition1);
+        setConfirmedCondition2(initialConfirmedCondition2);
+        setConfirmedExecution1(initialConfirmedExecution1);
+        setConfirmedExecution2(initialConfirmedExecution2);
+    };
+
+    // 监听实体分配和智能体类型变化
+    useEffect(() => {
+        initializeActionSpaces();
+    }, [entityAssignmentStore.isAgentSelected, entityAssignmentStore.selectedAgent, entityAssignmentStore.assignedEntities, sidebarStore.type]);
 
     // 实时更新 ActionSpaceStore 中的记录
     const updateActionSpaceRecord = (entityName, actionIndex) => {
@@ -128,7 +124,7 @@ const ActionSpace = ({ entities }) => {
                 actionIndex,
                 actionSpace[0], // 动作名称
                 actionSpace[1], // 动作种类
-                actionSpace[2], // 可选动作
+                selectedOption[actionIndex] || '', // 可选动作
                 meaning[actionIndex] || '', // 含义
                 ruleType[actionIndex] || '', // 规则类型
                 condition1[actionIndex] || '', // 条件1
@@ -139,6 +135,7 @@ const ActionSpace = ({ entities }) => {
         }
     };
 
+    // 处理下拉框选择
     const handleSelectChange = (index) => {
         if (visible[index]) {
             if (selectedOption[index] !== confirmedOption[index] || meaning[index] !== confirmedMeaning[index]) {
@@ -158,6 +155,7 @@ const ActionSpace = ({ entities }) => {
         setSelectedActionIndex(index);
     };
 
+    // 处理选项更改
     const handleOptionChange = (index, value) => {
         setSelectedOption(prev => ({ ...prev, [index]: value }));
 
@@ -171,6 +169,7 @@ const ActionSpace = ({ entities }) => {
         }
     };
 
+    // 处理含义更改
     const handleMeaningChange = (index, value) => {
         setMeaning(prev => ({ ...prev, [index]: value }));
 
@@ -184,6 +183,7 @@ const ActionSpace = ({ entities }) => {
         }
     };
 
+    // 处理规则类型更改
     const handleRuleTypeChange = (index, value) => {
         setRuleType(prev => ({ ...prev, [index]: value }));
 
@@ -197,6 +197,7 @@ const ActionSpace = ({ entities }) => {
         }
     };
 
+    // 处理条件1更改
     const handleCondition1Change = (index, value) => {
         setCondition1(prev => ({ ...prev, [index]: value }));
 
@@ -210,6 +211,7 @@ const ActionSpace = ({ entities }) => {
         }
     };
 
+    // 处理条件2更改
     const handleCondition2Change = (index, value) => {
         setCondition2(prev => ({ ...prev, [index]: value }));
 
@@ -223,6 +225,7 @@ const ActionSpace = ({ entities }) => {
         }
     };
 
+    // 处理执行1更改
     const handleExecution1Change = (index, value) => {
         setExecution1(prev => ({ ...prev, [index]: value }));
 
@@ -236,6 +239,7 @@ const ActionSpace = ({ entities }) => {
         }
     };
 
+    // 处理执行2更改
     const handleExecution2Change = (index, value) => {
         setExecution2(prev => ({ ...prev, [index]: value }));
 
@@ -249,6 +253,7 @@ const ActionSpace = ({ entities }) => {
         }
     };
 
+    // 处理确认
     const handleConfirm = (index) => {
         if (!selectedOption[index]) {
             alert('请选择完毕后再确认，否则取消！');
@@ -260,6 +265,7 @@ const ActionSpace = ({ entities }) => {
         setVisible(prev => ({ ...prev, [index]: false }));
     };
 
+    // 处理取消
     const handleCancel = (index) => {
         const confirmCancel = window.confirm('是否取消该动作？');
         if (confirmCancel) {
@@ -272,6 +278,7 @@ const ActionSpace = ({ entities }) => {
         }
     };
 
+    // 处理规则点击
     const handleRuleClick = (index) => {
         if (!selectedOption[index]) {
             alert('请先选择动作后再设置行为规则！');
@@ -288,6 +295,7 @@ const ActionSpace = ({ entities }) => {
         setRuleVisible(prev => ({ ...prev, [index]: !prev[index] }));
     };
 
+    // 处理规则确认
     const handleRuleConfirm = (index) => {
         setConfirmedRuleType(prev => ({ ...prev, [index]: ruleType[index] }));
         setConfirmedCondition1(prev => ({ ...prev, [index]: condition1[index] }));
@@ -297,6 +305,7 @@ const ActionSpace = ({ entities }) => {
         setRuleVisible(prev => ({ ...prev, [index]: false }));
     };
 
+    // 处理规则取消
     const handleRuleCancel = (index) => {
         const confirmCancel = window.confirm('是否取消该行为规则的设置？');
         if (confirmCancel) {
