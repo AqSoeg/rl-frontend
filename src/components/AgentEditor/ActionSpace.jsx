@@ -20,6 +20,7 @@ const ActionSpace = ({ entities }) => {
     const [condition2, setCondition2] = useState({});
     const [execution1, setExecution1] = useState({});
     const [execution2, setExecution2] = useState({});
+    const [isCancelled, setIsCancelled] = useState({}); // 用于标记是否取消了某个动作
 
     useEffect(() => {
         if (entityAssignmentStore.isAgentSelected) {
@@ -39,8 +40,9 @@ const ActionSpace = ({ entities }) => {
             const initialConfirmedOption = {}; // 初始化确认后的选项
             const initialMeaning = {};
             const initialConfirmedMeaning = {}; // 初始化确认后的含义
+            const initialIsCancelled = {}; // 初始化取消状态
 
-            actionSpaces.forEach((_, index) => {
+            actionSpaces.forEach((actionSpace, index) => {
                 initialVisible[index] = false;
                 initialRuleVisible[index] = false;
                 initialRuleType[index] = null;
@@ -50,8 +52,16 @@ const ActionSpace = ({ entities }) => {
                 initialExecution2[index] = '';
                 initialSelectedOption[index] = null;
                 initialConfirmedOption[index] = null; // 初始化确认后的选项
-                initialMeaning[index] = '';
-                initialConfirmedMeaning[index] = ''; // 初始化确认后的含义
+                initialIsCancelled[index] = false; // 初始化取消状态为 false
+
+                // 如果 actionSpace[3] 有初始值，且未被取消，则将其加载到 meaning 和 confirmedMeaning 中
+                if (actionSpace && actionSpace[3] && !initialIsCancelled[index]) {
+                    initialMeaning[index] = actionSpace[3];
+                    initialConfirmedMeaning[index] = actionSpace[3];
+                } else {
+                    initialMeaning[index] = '';
+                    initialConfirmedMeaning[index] = '';
+                }
             });
 
             setVisible(initialVisible);
@@ -65,6 +75,7 @@ const ActionSpace = ({ entities }) => {
             setConfirmedOption(initialConfirmedOption); // 设置确认后的选项
             setMeaning(initialMeaning);
             setConfirmedMeaning(initialConfirmedMeaning); // 设置确认后的含义
+            setIsCancelled(initialIsCancelled); // 设置取消状态
         } else {
             setVisible({});
             setRuleVisible({});
@@ -77,6 +88,7 @@ const ActionSpace = ({ entities }) => {
             setConfirmedOption({}); // 清空确认后的选项
             setMeaning({});
             setConfirmedMeaning({}); // 清空确认后的含义
+            setIsCancelled({}); // 清空取消状态
         }
     }, [entityAssignmentStore.isAgentSelected, entityAssignmentStore.selectedAgent, entityAssignmentStore.assignedEntities]);
 
@@ -128,6 +140,7 @@ const ActionSpace = ({ entities }) => {
             setConfirmedOption(prev => ({ ...prev, [index]: null })); // 取消时清空确认后的选项
             setMeaning(prev => ({ ...prev, [index]: '' }));
             setConfirmedMeaning(prev => ({ ...prev, [index]: '' })); // 取消时清空确认后的含义
+            setIsCancelled(prev => ({ ...prev, [index]: true })); // 标记为已取消
             setVisible(prev => ({ ...prev, [index]: false }));
         }
     };
@@ -190,6 +203,8 @@ const ActionSpace = ({ entities }) => {
                 {entityAssignmentStore.isAgentSelected && entities.flatMap((entity, entityIndex) =>
                     entity.actionSpace.map((actionSpace, actionIndex) => {
                         const uniqueKey = `${entityIndex}-${actionIndex}`;
+                        const initialMeaningValue = actionSpace[3] || ''; // 获取初始含义值
+
                         return (
                             <div key={uniqueKey} className="dropdown-container">
                                 <div className="dropdown-header" onClick={() => handleSelectChange(uniqueKey)}>
@@ -233,8 +248,8 @@ const ActionSpace = ({ entities }) => {
                                         <div className="action-row">
                                             <span className="meaning-label">含义：</span>
                                             <Input
-                                                placeholder={meaning[uniqueKey] ? meaning[uniqueKey] : "单行输入"}
-                                                value={meaning[uniqueKey] || confirmedMeaning[uniqueKey]} // 显示未确认的含义或确认后的含义
+                                                placeholder={!isCancelled[uniqueKey] && initialMeaningValue ? "" : "单行输入"} // 如果未取消且有初始值，不显示 placeholder
+                                                value={meaning[uniqueKey] || confirmedMeaning[uniqueKey] || (!isCancelled[uniqueKey] ? initialMeaningValue : '')} // 如果未取消，显示初始值；否则显示空
                                                 onChange={(e) => setMeaning(prev => ({ ...prev, [uniqueKey]: e.target.value }))}
                                                 className="meaning-input"
                                             />
