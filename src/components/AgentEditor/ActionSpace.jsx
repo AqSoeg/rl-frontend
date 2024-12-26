@@ -22,6 +22,11 @@ const ActionSpace = ({ entities }) => {
     const [execution1, setExecution1] = useState({});
     const [execution2, setExecution2] = useState({});
     const [isCancelled, setIsCancelled] = useState({});
+    const [confirmedRuleType, setConfirmedRuleType] = useState({});
+    const [confirmedCondition1, setConfirmedCondition1] = useState({});
+    const [confirmedCondition2, setConfirmedCondition2] = useState({});
+    const [confirmedExecution1, setConfirmedExecution1] = useState({});
+    const [confirmedExecution2, setConfirmedExecution2] = useState({});
 
     useEffect(() => {
         if (entityAssignmentStore.isAgentSelected) {
@@ -41,6 +46,11 @@ const ActionSpace = ({ entities }) => {
             const initialMeaning = {};
             const initialConfirmedMeaning = {};
             const initialIsCancelled = {};
+            const initialConfirmedRuleType = {};
+            const initialConfirmedCondition1 = {};
+            const initialConfirmedCondition2 = {};
+            const initialConfirmedExecution1 = {};
+            const initialConfirmedExecution2 = {};
 
             actionSpaces.forEach((actionSpace, index) => {
                 initialVisible[index] = false;
@@ -53,6 +63,11 @@ const ActionSpace = ({ entities }) => {
                 initialSelectedOption[index] = null;
                 initialConfirmedOption[index] = null;
                 initialIsCancelled[index] = false;
+                initialConfirmedRuleType[index] = null;
+                initialConfirmedCondition1[index] = '';
+                initialConfirmedCondition2[index] = '';
+                initialConfirmedExecution1[index] = '';
+                initialConfirmedExecution2[index] = '';
 
                 if (actionSpace && actionSpace[3] && !initialIsCancelled[index]) {
                     initialMeaning[index] = actionSpace[3];
@@ -75,6 +90,11 @@ const ActionSpace = ({ entities }) => {
             setMeaning(initialMeaning);
             setConfirmedMeaning(initialConfirmedMeaning);
             setIsCancelled(initialIsCancelled);
+            setConfirmedRuleType(initialConfirmedRuleType);
+            setConfirmedCondition1(initialConfirmedCondition1);
+            setConfirmedCondition2(initialConfirmedCondition2);
+            setConfirmedExecution1(initialConfirmedExecution1);
+            setConfirmedExecution2(initialConfirmedExecution2);
         } else {
             setVisible({});
             setRuleVisible({});
@@ -88,6 +108,11 @@ const ActionSpace = ({ entities }) => {
             setMeaning({});
             setConfirmedMeaning({});
             setIsCancelled({});
+            setConfirmedRuleType({});
+            setConfirmedCondition1({});
+            setConfirmedCondition2({});
+            setConfirmedExecution1({});
+            setConfirmedExecution2({});
         }
     }, [entityAssignmentStore.isAgentSelected, entityAssignmentStore.selectedAgent, entityAssignmentStore.assignedEntities]);
 
@@ -120,7 +145,15 @@ const ActionSpace = ({ entities }) => {
                 setSelectedOption(prev => ({ ...prev, [index]: confirmedOption[index] }));
                 setMeaning(prev => ({ ...prev, [index]: confirmedMeaning[index] }));
             }
+
+            // 重置未确认的行为规则更改
+            setRuleType(prev => ({ ...prev, [index]: confirmedRuleType[index] || null }));
+            setCondition1(prev => ({ ...prev, [index]: confirmedCondition1[index] || '' }));
+            setCondition2(prev => ({ ...prev, [index]: confirmedCondition2[index] || '' }));
+            setExecution1(prev => ({ ...prev, [index]: confirmedExecution1[index] || '' }));
+            setExecution2(prev => ({ ...prev, [index]: confirmedExecution2[index] || '' }));
         }
+
         setVisible(prev => ({ ...prev, [index]: !prev[index] }));
         setSelectedActionIndex(index);
     };
@@ -244,10 +277,23 @@ const ActionSpace = ({ entities }) => {
             alert('请先选择动作后再设置行为规则！');
             return;
         }
+
+        // 重置未确认的更改
+        setRuleType(prev => ({ ...prev, [index]: confirmedRuleType[index] || null }));
+        setCondition1(prev => ({ ...prev, [index]: confirmedCondition1[index] || '' }));
+        setCondition2(prev => ({ ...prev, [index]: confirmedCondition2[index] || '' }));
+        setExecution1(prev => ({ ...prev, [index]: confirmedExecution1[index] || '' }));
+        setExecution2(prev => ({ ...prev, [index]: confirmedExecution2[index] || '' }));
+
         setRuleVisible(prev => ({ ...prev, [index]: !prev[index] }));
     };
 
     const handleRuleConfirm = (index) => {
+        setConfirmedRuleType(prev => ({ ...prev, [index]: ruleType[index] }));
+        setConfirmedCondition1(prev => ({ ...prev, [index]: condition1[index] }));
+        setConfirmedCondition2(prev => ({ ...prev, [index]: condition2[index] }));
+        setConfirmedExecution1(prev => ({ ...prev, [index]: execution1[index] }));
+        setConfirmedExecution2(prev => ({ ...prev, [index]: execution2[index] }));
         setRuleVisible(prev => ({ ...prev, [index]: false }));
     };
 
