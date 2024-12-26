@@ -4,6 +4,7 @@ import { Button, Select, Input } from 'antd';
 import actionLogo from '../../assets/actionSpace.svg';
 import uploadLogo from '../../assets/upload.svg';
 import entityAssignmentStore from './EntityAssignmentStore';
+import actionSpaceStore from './ActionSpaceStore'; // 引入 ActionSpaceStore
 
 const { Option } = Select;
 
@@ -11,23 +12,22 @@ const ActionSpace = ({ entities }) => {
     const [visible, setVisible] = useState({});
     const [selectedActionIndex, setSelectedActionIndex] = useState(null);
     const [selectedOption, setSelectedOption] = useState({});
-    const [confirmedOption, setConfirmedOption] = useState({}); // 用于保存确认后的选项
+    const [confirmedOption, setConfirmedOption] = useState({});
     const [meaning, setMeaning] = useState({});
-    const [confirmedMeaning, setConfirmedMeaning] = useState({}); // 用于保存确认后的含义
+    const [confirmedMeaning, setConfirmedMeaning] = useState({});
     const [ruleVisible, setRuleVisible] = useState({});
     const [ruleType, setRuleType] = useState({});
     const [condition1, setCondition1] = useState({});
     const [condition2, setCondition2] = useState({});
     const [execution1, setExecution1] = useState({});
     const [execution2, setExecution2] = useState({});
-    const [isCancelled, setIsCancelled] = useState({}); // 用于标记是否取消了某个动作
+    const [isCancelled, setIsCancelled] = useState({});
 
     useEffect(() => {
         if (entityAssignmentStore.isAgentSelected) {
             const selectedAgent = entityAssignmentStore.selectedAgent;
             const assignedEntities = entityAssignmentStore.assignedEntities[selectedAgent] || [];
 
-            // 初始化状态
             const actionSpaces = assignedEntities.flatMap(entity => entity.actionSpace);
             const initialVisible = {};
             const initialRuleVisible = {};
@@ -37,10 +37,10 @@ const ActionSpace = ({ entities }) => {
             const initialExecution1 = {};
             const initialExecution2 = {};
             const initialSelectedOption = {};
-            const initialConfirmedOption = {}; // 初始化确认后的选项
+            const initialConfirmedOption = {};
             const initialMeaning = {};
-            const initialConfirmedMeaning = {}; // 初始化确认后的含义
-            const initialIsCancelled = {}; // 初始化取消状态
+            const initialConfirmedMeaning = {};
+            const initialIsCancelled = {};
 
             actionSpaces.forEach((actionSpace, index) => {
                 initialVisible[index] = false;
@@ -51,10 +51,9 @@ const ActionSpace = ({ entities }) => {
                 initialExecution1[index] = '';
                 initialExecution2[index] = '';
                 initialSelectedOption[index] = null;
-                initialConfirmedOption[index] = null; // 初始化确认后的选项
-                initialIsCancelled[index] = false; // 初始化取消状态为 false
+                initialConfirmedOption[index] = null;
+                initialIsCancelled[index] = false;
 
-                // 如果 actionSpace[3] 有初始值，且未被取消，则将其加载到 meaning 和 confirmedMeaning 中
                 if (actionSpace && actionSpace[3] && !initialIsCancelled[index]) {
                     initialMeaning[index] = actionSpace[3];
                     initialConfirmedMeaning[index] = actionSpace[3];
@@ -72,10 +71,10 @@ const ActionSpace = ({ entities }) => {
             setExecution1(initialExecution1);
             setExecution2(initialExecution2);
             setSelectedOption(initialSelectedOption);
-            setConfirmedOption(initialConfirmedOption); // 设置确认后的选项
+            setConfirmedOption(initialConfirmedOption);
             setMeaning(initialMeaning);
-            setConfirmedMeaning(initialConfirmedMeaning); // 设置确认后的含义
-            setIsCancelled(initialIsCancelled); // 设置取消状态
+            setConfirmedMeaning(initialConfirmedMeaning);
+            setIsCancelled(initialIsCancelled);
         } else {
             setVisible({});
             setRuleVisible({});
@@ -85,16 +84,38 @@ const ActionSpace = ({ entities }) => {
             setExecution1({});
             setExecution2({});
             setSelectedOption({});
-            setConfirmedOption({}); // 清空确认后的选项
+            setConfirmedOption({});
             setMeaning({});
-            setConfirmedMeaning({}); // 清空确认后的含义
-            setIsCancelled({}); // 清空取消状态
+            setConfirmedMeaning({});
+            setIsCancelled({});
         }
     }, [entityAssignmentStore.isAgentSelected, entityAssignmentStore.selectedAgent, entityAssignmentStore.assignedEntities]);
 
+    // 实时更新 ActionSpaceStore 中的记录
+    const updateActionSpaceRecord = (entityName, actionIndex) => {
+        const actionSpace = entities
+            .flatMap(entity => entity.actionSpace)
+            [actionIndex];
+
+        if (actionSpace) {
+            actionSpaceStore.updateActionSpace(
+                entityName,
+                actionIndex,
+                actionSpace[0], // 动作名称
+                actionSpace[1], // 动作种类
+                actionSpace[2], // 可选动作
+                meaning[actionIndex] || '', // 含义
+                ruleType[actionIndex] || '', // 规则类型
+                condition1[actionIndex] || '', // 条件1
+                condition2[actionIndex] || '', // 条件2
+                execution1[actionIndex] || '', // 执行1
+                execution2[actionIndex] || '' // 执行2
+            );
+        }
+    };
+
     const handleSelectChange = (index) => {
         if (visible[index]) {
-            // 如果下拉框正在收起，且用户没有确认，则恢复到确认的状态
             if (selectedOption[index] !== confirmedOption[index] || meaning[index] !== confirmedMeaning[index]) {
                 setSelectedOption(prev => ({ ...prev, [index]: confirmedOption[index] }));
                 setMeaning(prev => ({ ...prev, [index]: confirmedMeaning[index] }));
@@ -107,15 +128,91 @@ const ActionSpace = ({ entities }) => {
     const handleOptionChange = (index, value) => {
         setSelectedOption(prev => ({ ...prev, [index]: value }));
 
-        // 获取当前动作空间
-        const actionSpace = entities.flatMap(entity => entity.actionSpace)[index];
+        // 获取实体名称
+        const entityName = entities.find(entity =>
+            entity.actionSpace.some((_, i) => `${entity.name}-${i}` === index)
+        )?.name;
 
-        // 防御性检查：确保 actionSpace 存在且有足够的元素
-        if (actionSpace && actionSpace.length > 3) {
-            const optionMeaning = actionSpace[3] || '';
-            setMeaning(prev => ({ ...prev, [index]: optionMeaning }));
-        } else {
-            setMeaning(prev => ({ ...prev, [index]: '' })); // 如果 actionSpace 不存在或元素不足，清空含义
+        if (entityName) {
+            updateActionSpaceRecord(entityName, index);
+        }
+    };
+
+    const handleMeaningChange = (index, value) => {
+        setMeaning(prev => ({ ...prev, [index]: value }));
+
+        // 获取实体名称
+        const entityName = entities.find(entity =>
+            entity.actionSpace.some((_, i) => `${entity.name}-${i}` === index)
+        )?.name;
+
+        if (entityName) {
+            updateActionSpaceRecord(entityName, index);
+        }
+    };
+
+    const handleRuleTypeChange = (index, value) => {
+        setRuleType(prev => ({ ...prev, [index]: value }));
+
+        // 获取实体名称
+        const entityName = entities.find(entity =>
+            entity.actionSpace.some((_, i) => `${entity.name}-${i}` === index)
+        )?.name;
+
+        if (entityName) {
+            updateActionSpaceRecord(entityName, index);
+        }
+    };
+
+    const handleCondition1Change = (index, value) => {
+        setCondition1(prev => ({ ...prev, [index]: value }));
+
+        // 获取实体名称
+        const entityName = entities.find(entity =>
+            entity.actionSpace.some((_, i) => `${entity.name}-${i}` === index)
+        )?.name;
+
+        if (entityName) {
+            updateActionSpaceRecord(entityName, index);
+        }
+    };
+
+    const handleCondition2Change = (index, value) => {
+        setCondition2(prev => ({ ...prev, [index]: value }));
+
+        // 获取实体名称
+        const entityName = entities.find(entity =>
+            entity.actionSpace.some((_, i) => `${entity.name}-${i}` === index)
+        )?.name;
+
+        if (entityName) {
+            updateActionSpaceRecord(entityName, index);
+        }
+    };
+
+    const handleExecution1Change = (index, value) => {
+        setExecution1(prev => ({ ...prev, [index]: value }));
+
+        // 获取实体名称
+        const entityName = entities.find(entity =>
+            entity.actionSpace.some((_, i) => `${entity.name}-${i}` === index)
+        )?.name;
+
+        if (entityName) {
+            updateActionSpaceRecord(entityName, index);
+        }
+    };
+
+    const handleExecution2Change = (index, value) => {
+        setExecution2(prev => ({ ...prev, [index]: value }));
+
+        // 获取实体名称
+        const entityName = entities.find(entity =>
+            entity.actionSpace.some((_, i) => `${entity.name}-${i}` === index)
+        )?.name;
+
+        if (entityName) {
+            updateActionSpaceRecord(entityName, index);
         }
     };
 
@@ -125,11 +222,8 @@ const ActionSpace = ({ entities }) => {
             return;
         }
 
-        // 保存确认后的选项和含义
         setConfirmedOption(prev => ({ ...prev, [index]: selectedOption[index] }));
         setConfirmedMeaning(prev => ({ ...prev, [index]: meaning[index] }));
-
-        // 收起下拉框
         setVisible(prev => ({ ...prev, [index]: false }));
     };
 
@@ -137,10 +231,10 @@ const ActionSpace = ({ entities }) => {
         const confirmCancel = window.confirm('是否取消该动作？');
         if (confirmCancel) {
             setSelectedOption(prev => ({ ...prev, [index]: null }));
-            setConfirmedOption(prev => ({ ...prev, [index]: null })); // 取消时清空确认后的选项
+            setConfirmedOption(prev => ({ ...prev, [index]: null }));
             setMeaning(prev => ({ ...prev, [index]: '' }));
-            setConfirmedMeaning(prev => ({ ...prev, [index]: '' })); // 取消时清空确认后的含义
-            setIsCancelled(prev => ({ ...prev, [index]: true })); // 标记为已取消
+            setConfirmedMeaning(prev => ({ ...prev, [index]: '' }));
+            setIsCancelled(prev => ({ ...prev, [index]: true }));
             setVisible(prev => ({ ...prev, [index]: false }));
         }
     };
@@ -153,28 +247,7 @@ const ActionSpace = ({ entities }) => {
         setRuleVisible(prev => ({ ...prev, [index]: !prev[index] }));
     };
 
-    const handleRuleTypeChange = (index, value) => {
-        setRuleType(prev => ({ ...prev, [index]: value }));
-    };
-
-    const handleCondition1Change = (index, value) => {
-        setCondition1(prev => ({ ...prev, [index]: value }));
-    };
-
-    const handleCondition2Change = (index, value) => {
-        setCondition2(prev => ({ ...prev, [index]: value }));
-    };
-
-    const handleExecution1Change = (index, value) => {
-        setExecution1(prev => ({ ...prev, [index]: value }));
-    };
-
-    const handleExecution2Change = (index, value) => {
-        setExecution2(prev => ({ ...prev, [index]: value }));
-    };
-
     const handleRuleConfirm = (index) => {
-        // 处理规则确认逻辑
         setRuleVisible(prev => ({ ...prev, [index]: false }));
     };
 
@@ -203,7 +276,7 @@ const ActionSpace = ({ entities }) => {
                 {entityAssignmentStore.isAgentSelected && entities.flatMap((entity, entityIndex) =>
                     entity.actionSpace.map((actionSpace, actionIndex) => {
                         const uniqueKey = `${entityIndex}-${actionIndex}`;
-                        const initialMeaningValue = actionSpace[3] || ''; // 获取初始含义值
+                        const initialMeaningValue = actionSpace[3] || '';
 
                         return (
                             <div key={uniqueKey} className="dropdown-container">
@@ -236,7 +309,7 @@ const ActionSpace = ({ entities }) => {
                                             <Select
                                                 style={{ width: 200 }}
                                                 onChange={(value) => handleOptionChange(uniqueKey, value)}
-                                                value={selectedOption[uniqueKey] || confirmedOption[uniqueKey]} // 显示未确认的选项或确认后的选项
+                                                value={selectedOption[uniqueKey] || confirmedOption[uniqueKey]}
                                             >
                                                 {actionSpace[2].map((option, optionIndex) => (
                                                     <Option key={optionIndex} value={option}>
@@ -248,9 +321,9 @@ const ActionSpace = ({ entities }) => {
                                         <div className="action-row">
                                             <span className="meaning-label">含义：</span>
                                             <Input
-                                                placeholder={!isCancelled[uniqueKey] && initialMeaningValue ? "" : "单行输入"} // 如果未取消且有初始值，不显示 placeholder
-                                                value={meaning[uniqueKey] || confirmedMeaning[uniqueKey] || (!isCancelled[uniqueKey] ? initialMeaningValue : '')} // 如果未取消，显示初始值；否则显示空
-                                                onChange={(e) => setMeaning(prev => ({ ...prev, [uniqueKey]: e.target.value }))}
+                                                placeholder={!isCancelled[uniqueKey] && initialMeaningValue ? "" : "单行输入"}
+                                                value={meaning[uniqueKey] || confirmedMeaning[uniqueKey] || (!isCancelled[uniqueKey] ? initialMeaningValue : '')}
+                                                onChange={(e) => handleMeaningChange(uniqueKey, e.target.value)}
                                                 className="meaning-input"
                                             />
                                         </div>

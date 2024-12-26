@@ -16,8 +16,8 @@
                 ["Number of Pedestrians", "等待通过的行人数量", "人"]
               ],
               "actionSpace": [
-                ["Traffic Control", "信号控制", ["红灯", "绿灯", "黄灯"], "红灯停"],
-                ["Switch Frequency", "切换频率", ["快速切换", "正常切换", "慢速切换"], "一闪一闪"]
+                ["Traffic Control", "信号控制", ["红灯", "绿灯", "黄灯"], ""],
+                ["Switch Frequency", "切换频率", ["快速切换", "正常切换", "慢速切换"], ""]
               ]
             },
             {
@@ -28,8 +28,8 @@
                 ["Number of Pedestrians", "等待通过的行人数量", "人"]
               ],
               "actionSpace": [
-                ["Traffic Control", "信号控制", ["红灯", "绿灯", "黄灯"], "绿灯行"],
-                ["Switch Frequency", "切换频率", ["快速切换", "正常切换", "慢速切换"], "两闪两闪"]
+                ["Traffic Control", "信号控制", ["红灯", "绿灯", "黄灯"], ""],
+                ["Switch Frequency", "切换频率", ["快速切换", "正常切换", "慢速切换"], ""]
               ]
             },
             {

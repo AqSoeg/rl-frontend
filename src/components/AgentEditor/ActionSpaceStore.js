@@ -1,92 +1,55 @@
 // ActionSpaceStore.js
-import { observable, action, makeObservable } from 'mobx';
+import { makeAutoObservable, reaction } from 'mobx';
+import sidebarStore from './SidebarStore';
 
 class ActionSpaceStore {
-    actionSpaces = observable.array([]); // 动态存储每个下拉框的状态
+    actionSpaces = {}; // 存储每个实体的动作空间信息
+    isSingleAgent = false; // 是否选择了单智能体
 
     constructor() {
-        makeObservable(this, {
-            actionSpaces: observable,
-            initializeActionSpaces: action,
-            toggleVisibility: action,
-            toggleRuleVisibility: action,
-            setSelectedOption: action,
-            setMeaning: action,
-            setRuleType: action,
-            setCondition1: action,
-            setCondition2: action,
-            setExecution1: action,
-            setExecution2: action,
-            resetSelection: action,
-        });
-    }
+        makeAutoObservable(this);
 
-    initializeActionSpaces(count) {
-        // 根据下拉框的数量初始化状态
-        this.actionSpaces.replace(
-            Array.from({ length: count }, () => ({
-                visible: false,
-                ruleVisible: false,
-                selectedOption: null,
-                meaning: '',
-                ruleType: null,
-                condition1: '',
-                condition2: '',
-                execution1: '',
-                execution2: '',
-            }))
+        // 监听 SidebarStore 中的智能体类型变化
+        reaction(
+            () => sidebarStore.type,
+            (type) => {
+                this.isSingleAgent = type === '单智能体';
+                if (!this.isSingleAgent) {
+                    this.clearActionSpaces(); // 如果不是单智能体，清空记录
+                }
+            }
         );
     }
 
-    toggleVisibility(index) {
-        // 切换指定下拉框的可见性
-        this.actionSpaces[index].visible = !this.actionSpaces[index].visible;
+    // 更新动作空间信息
+    updateActionSpace(entityName, actionIndex, actionName, actionType, options, meaning, ruleType, condition1, condition2, execution1, execution2) {
+        if (!this.isSingleAgent) return; // 如果不是单智能体，不记录
+
+        if (!this.actionSpaces[entityName]) {
+            this.actionSpaces[entityName] = [];
+        }
+
+        this.actionSpaces[entityName][actionIndex] = {
+            actionName,
+            actionType,
+            options,
+            meaning,
+            ruleType,
+            condition1,
+            condition2,
+            execution1,
+            execution2,
+        };
     }
 
-    toggleRuleVisibility(index) {
-        // 切换指定下拉框的规则可见性
-        this.actionSpaces[index].ruleVisible = !this.actionSpaces[index].ruleVisible;
+    // 清空动作空间信息
+    clearActionSpaces() {
+        this.actionSpaces = {};
     }
 
-    setSelectedOption(index, option) {
-        // 设置指定下拉框的选中选项
-        this.actionSpaces[index].selectedOption = option;
-    }
-
-    setMeaning(index, meaning) {
-        // 设置指定下拉框的含义
-        this.actionSpaces[index].meaning = meaning;
-    }
-
-    setRuleType(index, ruleType) {
-        // 设置指定下拉框的规则类型
-        this.actionSpaces[index].ruleType = ruleType;
-    }
-
-    setCondition1(index, value) {
-        // 设置指定下拉框的条件1
-        this.actionSpaces[index].condition1 = value;
-    }
-
-    setCondition2(index, value) {
-        // 设置指定下拉框的条件2
-        this.actionSpaces[index].condition2 = value;
-    }
-
-    setExecution1(index, value) {
-        // 设置指定下拉框的执行内容1
-        this.actionSpaces[index].execution1 = value;
-    }
-
-    setExecution2(index, value) {
-        // 设置指定下拉框的执行内容2
-        this.actionSpaces[index].execution2 = value;
-    }
-
-    resetSelection(index) {
-        // 重置指定下拉框的选中状态
-        this.actionSpaces[index].selectedOption = null;
-        this.actionSpaces[index].meaning = '';
+    // 获取所有动作空间信息
+    getActionSpaces() {
+        return this.actionSpaces;
     }
 }
 
