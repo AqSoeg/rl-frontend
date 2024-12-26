@@ -1,4 +1,4 @@
-import { makeAutoObservable, reaction } from 'mobx';
+import { makeAutoObservable } from 'mobx';
 import sidebarStore from './SidebarStore';
 import entityAssignmentStore from './EntityAssignmentStore';
 
@@ -11,51 +11,46 @@ class ActionSpaceStore {
     constructor() {
         makeAutoObservable(this);
 
-        // 监听 SidebarStore 中的智能体类型变化
-        reaction(
-            () => sidebarStore.type,
-            (type) => {
-                this.isSingleAgent = type === '单智能体';
-                this.isHomogeneousMultiAgent = type === '同构多智能体';
-                this.isHeterogeneousMultiAgent = type === '异构多智能体';
-            }
-        );
+        // 订阅 SidebarStore 中的智能体类型变化
+        sidebarStore.subscribe(() => {
+            this.isSingleAgent = sidebarStore.type === '单智能体';
+            this.isHomogeneousMultiAgent = sidebarStore.type === '同构多智能体';
+            this.isHeterogeneousMultiAgent = sidebarStore.type === '异构多智能体';
+        });
 
-        // 监听实体分配变化
-        reaction(
-            () => entityAssignmentStore.assignedEntities,
-            (assignedEntities) => {
-                if (this.isSingleAgent) return; // 如果是单智能体，不处理
+        // 订阅 EntityAssignmentStore 中的实体分配变化
+        entityAssignmentStore.subscribe(() => {
+            const assignedEntities = entityAssignmentStore.assignedEntities;
+            if (this.isSingleAgent) return; // 如果是单智能体，不处理
 
-                // 同构多智能体：同步所有实体的动作空间
-                if (this.isHomogeneousMultiAgent) {
-                    const selectedAgent = entityAssignmentStore.selectedAgent;
-                    if (selectedAgent) {
-                        const entities = assignedEntities[selectedAgent] || [];
-                        entities.forEach(entity => {
-                            if (!this.actionSpaces[entity.name]) {
-                                this.actionSpaces[entity.name] = [];
-                            }
-                        });
-                    }
-                }
-
-                // 异构多智能体：为每个智能体单独记录动作空间
-                if (this.isHeterogeneousMultiAgent) {
-                    Object.keys(assignedEntities).forEach(agentName => {
-                        if (!this.actionSpaces[agentName]) {
-                            this.actionSpaces[agentName] = {};
+            // 同构多智能体：同步所有实体的动作空间
+            if (this.isHomogeneousMultiAgent) {
+                const selectedAgent = entityAssignmentStore.selectedAgent;
+                if (selectedAgent) {
+                    const entities = assignedEntities[selectedAgent] || [];
+                    entities.forEach(entity => {
+                        if (!this.actionSpaces[entity.name]) {
+                            this.actionSpaces[entity.name] = [];
                         }
-                        const entities = assignedEntities[agentName] || [];
-                        entities.forEach(entity => {
-                            if (!this.actionSpaces[agentName][entity.name]) {
-                                this.actionSpaces[agentName][entity.name] = [];
-                            }
-                        });
                     });
                 }
             }
-        );
+
+            // 异构多智能体：为每个智能体单独记录动作空间
+            if (this.isHeterogeneousMultiAgent) {
+                Object.keys(assignedEntities).forEach(agentName => {
+                    if (!this.actionSpaces[agentName]) {
+                        this.actionSpaces[agentName] = {};
+                    }
+                    const entities = assignedEntities[agentName] || [];
+                    entities.forEach(entity => {
+                        if (!this.actionSpaces[agentName][entity.name]) {
+                            this.actionSpaces[agentName][entity.name] = [];
+                        }
+                    });
+                });
+            }
+        });
     }
 
     // 更新动作空间信息

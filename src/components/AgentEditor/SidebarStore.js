@@ -11,6 +11,7 @@ class SidebarStore {
     agentCount = ''; // 智能体数量
     selectedAgent = ''; // 智能体模型
     modelID = ''; // 模型ID
+    listeners = []; // 订阅者列表
 
     constructor() {
         makeAutoObservable(this);
@@ -21,6 +22,7 @@ class SidebarStore {
         this.scenario = scenario;
         this.clearExceptScenario();
         rewardFunctionStore.clearRewards(); // 清空奖励函数状态
+        this.notifyListeners(); // 通知订阅者
     }
 
     // 设置智能体角色
@@ -28,6 +30,7 @@ class SidebarStore {
         this.role = role;
         this.clearExceptScenarioAndRole();
         rewardFunctionStore.clearRewards(); // 清空奖励函数状态
+        this.notifyListeners(); // 通知订阅者
     }
 
     // 设置智能体类型
@@ -35,16 +38,19 @@ class SidebarStore {
         this.type = type;
         this.clearExceptScenarioRoleAndType();
         rewardFunctionStore.clearRewards(); // 清空奖励函数状态
+        this.notifyListeners(); // 通知订阅者
     }
 
     // 设置智能体名称
     setName(name) {
         this.name = name;
+        this.notifyListeners(); // 通知订阅者
     }
 
     // 设置智能体版本
     setVersion(version) {
         this.version = version;
+        this.notifyListeners(); // 通知订阅者
     }
 
     // 设置智能体数量
@@ -52,16 +58,19 @@ class SidebarStore {
         this.agentCount = agentCount;
         this.clearExceptScenarioRoleTypeAndAgentCount();
         rewardFunctionStore.clearRewards(); // 清空奖励函数状态
+        this.notifyListeners(); // 通知订阅者
     }
 
     // 设置智能体模型
     setSelectedAgent(selectedAgent) {
         this.selectedAgent = selectedAgent;
+        this.notifyListeners(); // 通知订阅者
     }
 
     // 设置模型ID
     setModelID(modelID) {
         this.modelID = modelID;
+        this.notifyListeners(); // 通知订阅者
     }
 
     // 清空除想定场景外的所有状态
@@ -105,6 +114,19 @@ class SidebarStore {
     // 检查是否可以保存模型
     canSaveModel() {
         return this.selectedAgent !== '' && this.modelID !== '' && this.modelID !== 'xxx';
+    }
+
+    // 订阅状态变化
+    subscribe(listener) {
+        this.listeners.push(listener);
+        return () => {
+            this.listeners = this.listeners.filter(l => l !== listener);
+        };
+    }
+
+    // 通知订阅者
+    notifyListeners() {
+        this.listeners.forEach(listener => listener());
     }
 }
 
