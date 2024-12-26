@@ -3,138 +3,155 @@ import { useState, useEffect } from 'react';
 import { Button, Select, Input } from 'antd';
 import actionLogo from '../../assets/actionSpace.svg';
 import uploadLogo from '../../assets/upload.svg';
-import entityAssignmentStore from './EntityAssignmentStore'; // 引入实体分配状态管理
+import entityAssignmentStore from './EntityAssignmentStore';
 
 const { Option } = Select;
 
 const ActionSpace = ({ entities }) => {
-    const [visible, setVisible] = useState([]);
+    const [visible, setVisible] = useState({});
     const [selectedActionIndex, setSelectedActionIndex] = useState(null);
-    const [selectedOption, setSelectedOption] = useState(null);
-    const [meaning, setMeaning] = useState('');
-    const [ruleVisible, setRuleVisible] = useState([]);
-    const [ruleType, setRuleType] = useState([]);
-    const [condition1, setCondition1] = useState([]);
-    const [condition2, setCondition2] = useState([]);
-    const [execution1, setExecution1] = useState([]);
-    const [execution2, setExecution2] = useState([]);
+    const [selectedOption, setSelectedOption] = useState({});
+    const [meaning, setMeaning] = useState({});
+    const [ruleVisible, setRuleVisible] = useState({});
+    const [ruleType, setRuleType] = useState({});
+    const [condition1, setCondition1] = useState({});
+    const [condition2, setCondition2] = useState({});
+    const [execution1, setExecution1] = useState({});
+    const [execution2, setExecution2] = useState({});
 
     useEffect(() => {
         if (entityAssignmentStore.isAgentSelected) {
             const selectedAgent = entityAssignmentStore.selectedAgent;
             const assignedEntities = entityAssignmentStore.assignedEntities[selectedAgent] || [];
 
-            // 初始化 visible 和 ruleVisible 数组
+            // 初始化状态
             const actionSpaces = assignedEntities.flatMap(entity => entity.actionSpace);
-            setVisible(Array(actionSpaces.length).fill(false));
-            setRuleVisible(Array(actionSpaces.length).fill(false));
-            setRuleType(Array(actionSpaces.length).fill(null));
-            setCondition1(Array(actionSpaces.length).fill(''));
-            setCondition2(Array(actionSpaces.length).fill(''));
-            setExecution1(Array(actionSpaces.length).fill(''));
-            setExecution2(Array(actionSpaces.length).fill(''));
+            const initialVisible = {};
+            const initialRuleVisible = {};
+            const initialRuleType = {};
+            const initialCondition1 = {};
+            const initialCondition2 = {};
+            const initialExecution1 = {};
+            const initialExecution2 = {};
+            const initialSelectedOption = {};
+            const initialMeaning = {};
+
+            actionSpaces.forEach((_, index) => {
+                initialVisible[index] = false;
+                initialRuleVisible[index] = false;
+                initialRuleType[index] = null;
+                initialCondition1[index] = '';
+                initialCondition2[index] = '';
+                initialExecution1[index] = '';
+                initialExecution2[index] = '';
+                initialSelectedOption[index] = null;
+                initialMeaning[index] = '';
+            });
+
+            setVisible(initialVisible);
+            setRuleVisible(initialRuleVisible);
+            setRuleType(initialRuleType);
+            setCondition1(initialCondition1);
+            setCondition2(initialCondition2);
+            setExecution1(initialExecution1);
+            setExecution2(initialExecution2);
+            setSelectedOption(initialSelectedOption);
+            setMeaning(initialMeaning);
         } else {
-            setVisible([]);
-            setRuleVisible([]);
-            setRuleType([]);
-            setCondition1([]);
-            setCondition2([]);
-            setExecution1([]);
-            setExecution2([]);
+            setVisible({});
+            setRuleVisible({});
+            setRuleType({});
+            setCondition1({});
+            setCondition2({});
+            setExecution1({});
+            setExecution2({});
+            setSelectedOption({});
+            setMeaning({});
         }
     }, [entityAssignmentStore.isAgentSelected, entityAssignmentStore.selectedAgent, entityAssignmentStore.assignedEntities]);
 
     const handleSelectChange = (index) => {
-        const newVisible = [...visible];
-        newVisible[index] = !newVisible[index];
-        setVisible(newVisible);
+        setVisible(prev => ({ ...prev, [index]: !prev[index] }));
         setSelectedActionIndex(index);
-        setSelectedOption(null);
-        setMeaning('');
     };
 
-    const handleOptionChange = (value) => {
-        setSelectedOption(value);
-        const actionSpace = entities.flatMap(entity => entity.actionSpace)[selectedActionIndex];
-        const optionMeaning = actionSpace[3] || ''; // 含义从 actionSpace 的第四个元素获取
-        setMeaning(optionMeaning);
+    const handleOptionChange = (index, value) => {
+        setSelectedOption(prev => ({ ...prev, [index]: value }));
+
+        // 获取当前动作空间
+        const actionSpace = entities.flatMap(entity => entity.actionSpace)[index];
+
+        // 防御性检查：确保 actionSpace 存在且有足够的元素
+        if (actionSpace && actionSpace.length > 3) {
+            const optionMeaning = actionSpace[3] || '';
+            setMeaning(prev => ({ ...prev, [index]: optionMeaning }));
+        } else {
+            setMeaning(prev => ({ ...prev, [index]: '' })); // 如果 actionSpace 不存在或元素不足，清空含义
+        }
     };
 
-    const handleConfirm = () => {
-        if (!selectedOption) {
+    const handleConfirm = (index) => {
+        if (!selectedOption[index]) {
             alert('请选择完毕后再确认，否则取消！');
             return;
         }
 
-        // 处理确认逻辑
-        console.log('确认选择:', {
-            selectedOption,
-            meaning,
-        });
-
         // 收起下拉框
-        handleSelectChange(selectedActionIndex);
+        setVisible(prev => ({ ...prev, [index]: false }));
     };
 
-    const handleCancel = () => {
+    const handleCancel = (index) => {
         const confirmCancel = window.confirm('是否取消该动作？');
         if (confirmCancel) {
-            // 重置选择
-            setSelectedOption(null);
-            setMeaning('');
-
-            // 收起下拉框
-            handleSelectChange(selectedActionIndex);
+            setSelectedOption(prev => ({ ...prev, [index]: null }));
+            setMeaning(prev => ({ ...prev, [index]: '' }));
+            setVisible(prev => ({ ...prev, [index]: false }));
         }
     };
 
     const handleRuleClick = (index) => {
-        const newRuleVisible = [...ruleVisible];
-        newRuleVisible[index] = !newRuleVisible[index];
-        setRuleVisible(newRuleVisible);
+        if (!selectedOption[index]) {
+            alert('请先选择动作后再设置行为规则！');
+            return;
+        }
+        setRuleVisible(prev => ({ ...prev, [index]: !prev[index] }));
     };
 
     const handleRuleTypeChange = (index, value) => {
-        const newRuleType = [...ruleType];
-        newRuleType[index] = value;
-        setRuleType(newRuleType);
+        setRuleType(prev => ({ ...prev, [index]: value }));
     };
 
     const handleCondition1Change = (index, value) => {
-        const newCondition1 = [...condition1];
-        newCondition1[index] = value;
-        setCondition1(newCondition1);
+        setCondition1(prev => ({ ...prev, [index]: value }));
     };
 
     const handleCondition2Change = (index, value) => {
-        const newCondition2 = [...condition2];
-        newCondition2[index] = value;
-        setCondition2(newCondition2);
+        setCondition2(prev => ({ ...prev, [index]: value }));
     };
 
     const handleExecution1Change = (index, value) => {
-        const newExecution1 = [...execution1];
-        newExecution1[index] = value;
-        setExecution1(newExecution1);
+        setExecution1(prev => ({ ...prev, [index]: value }));
     };
 
     const handleExecution2Change = (index, value) => {
-        const newExecution2 = [...execution2];
-        newExecution2[index] = value;
-        setExecution2(newExecution2);
+        setExecution2(prev => ({ ...prev, [index]: value }));
     };
 
     const handleRuleConfirm = (index) => {
         // 处理规则确认逻辑
-        const newRuleVisible = [...ruleVisible];
-        newRuleVisible[index] = false;
-        setRuleVisible(newRuleVisible);
+        setRuleVisible(prev => ({ ...prev, [index]: false }));
     };
 
     const handleRuleCancel = (index) => {
-        const newRuleVisible = [...ruleVisible];
-        newRuleVisible[index] = false;
-        setRuleVisible(newRuleVisible);
+        const confirmCancel = window.confirm('是否取消该行为规则的设置？');
+        if (confirmCancel) {
+            setRuleType(prev => ({ ...prev, [index]: null }));
+            setCondition1(prev => ({ ...prev, [index]: '' }));
+            setCondition2(prev => ({ ...prev, [index]: '' }));
+            setExecution1(prev => ({ ...prev, [index]: '' }));
+            setExecution2(prev => ({ ...prev, [index]: '' }));
+            setRuleVisible(prev => ({ ...prev, [index]: false }));
+        }
     };
 
     return (
@@ -149,11 +166,11 @@ const ActionSpace = ({ entities }) => {
             <div className="dropdown-container-wrapper">
                 {entityAssignmentStore.isAgentSelected && entities.flatMap((entity, entityIndex) =>
                     entity.actionSpace.map((actionSpace, actionIndex) => {
-                        const uniqueKey = `${entityIndex}-${actionIndex}`; // 生成唯一的 key
+                        const uniqueKey = `${entityIndex}-${actionIndex}`;
                         return (
                             <div key={uniqueKey} className="dropdown-container">
                                 <div className="dropdown-header" onClick={() => handleSelectChange(uniqueKey)}>
-                                    <span>{entity.name}：{actionSpace[0]}</span> {/* 显示实体名和动作种类 */}
+                                    <span>{entity.name}：{actionSpace[0]}</span>
                                     <div className="button-group">
                                         <Button type="link" className="dropdown-button">
                                             {visible[uniqueKey] ? '▲' : '▼'}
@@ -174,14 +191,14 @@ const ActionSpace = ({ entities }) => {
                                     <div className="action-container">
                                         <div className="action-row">
                                             <span>动作种类：</span>
-                                            <span className="action-type-text">{actionSpace[1]}</span> {/* 显示动作种类文本 */}
+                                            <span className="action-type-text">{actionSpace[1]}</span>
                                         </div>
                                         <div className="action-row">
                                             <span>可选动作：</span>
                                             <Select
                                                 style={{ width: 200 }}
-                                                onChange={handleOptionChange}
-                                                value={selectedOption}
+                                                onChange={(value) => handleOptionChange(uniqueKey, value)}
+                                                value={selectedOption[uniqueKey]}
                                             >
                                                 {actionSpace[2].map((option, optionIndex) => (
                                                     <Option key={optionIndex} value={option}>
@@ -193,17 +210,17 @@ const ActionSpace = ({ entities }) => {
                                         <div className="action-row">
                                             <span className="meaning-label">含义：</span>
                                             <Input
-                                                placeholder={meaning ? meaning : "单行输入"}
-                                                value={meaning}
-                                                onChange={(e) => setMeaning(e.target.value)}
+                                                placeholder={meaning[uniqueKey] ? meaning[uniqueKey] : "单行输入"}
+                                                value={meaning[uniqueKey]}
+                                                onChange={(e) => setMeaning(prev => ({ ...prev, [uniqueKey]: e.target.value }))}
                                                 className="meaning-input"
                                             />
                                         </div>
                                         <div className="action-buttons">
-                                            <Button type="primary" onClick={handleConfirm}>
+                                            <Button type="primary" onClick={() => handleConfirm(uniqueKey)}>
                                                 确定
                                             </Button>
-                                            <Button onClick={handleCancel}>
+                                            <Button onClick={() => handleCancel(uniqueKey)}>
                                                 取消
                                             </Button>
                                         </div>
