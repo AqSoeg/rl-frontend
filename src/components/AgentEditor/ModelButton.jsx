@@ -1,9 +1,11 @@
+// ModelButton.jsx
 import { Button, Modal, Table } from 'antd';
 import { useState, useEffect } from 'react';
 import sidebarStore from './SidebarStore';
 import entityAssignmentStore from './EntityAssignmentStore';
 import actionSpaceStore from './ActionSpaceStore';
 import rewardFunctionStore from './RewardFunctionStore';
+import stateVectorStore from './StateVectorStore'; // 引入 StateVectorStore
 
 const ModelFunction = ({ scenarios }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -100,9 +102,13 @@ const ModelFunction = ({ scenarios }) => {
                     })
                     .map(reward => [reward.equation, reward.type]); // 映射为 [公式, 类型]
 
+                // 获取用户选择的状态向量
+                const selectedStateVectors = stateVectorStore.getSelectedStateVectors()[entityName] || [];
+                const stateVector = entity.stateVector.filter((_, idx) => selectedStateVectors.includes(idx));
+
                 return {
                     name: entityName,
-                    stateVector: entity.stateVector,
+                    stateVector: stateVector, // 使用用户选择的状态向量
                     actionSpace: actionSpace.map(action => ({
                         name: action.actionName,
                         action: [action.actionType, action.options, action.meaning],
