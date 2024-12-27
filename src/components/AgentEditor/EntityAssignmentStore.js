@@ -1,4 +1,3 @@
-// EntityAssignmentStore.js
 import { makeAutoObservable } from 'mobx';
 
 class EntityAssignmentStore {
