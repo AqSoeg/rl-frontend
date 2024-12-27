@@ -60,14 +60,8 @@ const ActionSpace = ({ entities }) => {
             )?.name;
 
             if (entityName) {
-                let storedActionSpace, key;
-                if (agentType === 1){
-                    storedActionSpace = actionSpaceStore.getActionSpace(null, entityName, index);
-                    key = index;
-                } else {
-                    storedActionSpace = actionSpaceStore.getActionSpace(selectedAgent, entityName, index);
-                    key = `${selectedAgent}-${entityName}-${index}`;
-                }
+                const key = agentType === 1 ? index : `${selectedAgent}-${entityName}-${index}`;
+                const storedActionSpace = actionSpaceStore.getActionSpace(agentType === 1 ? null : selectedAgent, entityName, index);
 
                 initialVisible[key] = false;
                 initialRuleVisible[key] = false;
@@ -124,40 +118,22 @@ const ActionSpace = ({ entities }) => {
             [actionIndex];
 
         if (actionSpace) {
-            let key;
-            if (agentType === 1) {
-                key = actionIndex;
-                actionSpaceStore.updateActionSpace(
-                    null,
-                    entityName,
-                    actionIndex,
-                    actionSpace[0],
-                    actionSpace[1],
-                    selectedOption[key] || '',
-                    meaning[key] || '',
-                    ruleType[key] || '',
-                    condition1[key] || '',
-                    condition2[key] || '',
-                    execution1[key] || '',
-                    execution2[key] || ''
-                );
-            } else {
-                key = `${entityAssignmentStore.selectedAgent}-${entityName}-${actionIndex}`;
-                actionSpaceStore.updateActionSpace(
-                    entityAssignmentStore.selectedAgent,
-                    entityName,
-                    actionIndex,
-                    actionSpace[0],
-                    actionSpace[1],
-                    selectedOption[key] || '',
-                    meaning[key] || '',
-                    ruleType[key] || '',
-                    condition1[key] || '',
-                    condition2[key] || '',
-                    execution1[key] || '',
-                    execution2[key] || ''
-                );
-            }
+            const key = agentType === 1 ? actionIndex : `${entityAssignmentStore.selectedAgent}-${entityName}-${actionIndex}`;
+            const agent = agentType === 1 ? null : entityAssignmentStore.selectedAgent;
+            actionSpaceStore.updateActionSpace(
+                agent,
+                entityName,
+                actionIndex,
+                actionSpace[0],
+                actionSpace[1],
+                selectedOption[key] || '',
+                meaning[key] || '',
+                ruleType[key] || '',
+                condition1[key] || '',
+                condition2[key] || '',
+                execution1[key] || '',
+                execution2[key] || ''
+            );
         }
     };
 
@@ -179,8 +155,7 @@ const ActionSpace = ({ entities }) => {
         setSelectedActionIndex(key);
     };
 
-    const handleOptionChange = (key, value) => {
-        setSelectedOption(prev => ({ ...prev, [key]: value }));
+    const updateActionSpaceStroe = (key) => {
         if (agentType === 1) {
             const entityName = entities.find(entity =>
                 entity.actionSpace.some((_, i) => `${entity.name}-${i}` === key)
@@ -190,84 +165,41 @@ const ActionSpace = ({ entities }) => {
             const [_, entityName, actionIndex] = key.split('-');
             updateActionSpaceRecord(entityName, parseInt(actionIndex, 10));
         }
+    };
+
+    const handleOptionChange = (key, value) => {
+        setSelectedOption(prev => ({ ...prev, [key]: value }));
+        updateActionSpaceStroe(key);
     };
 
     const handleMeaningChange = (key, value) => {
         setMeaning(prev => ({ ...prev, [key]: value }));
-        if (agentType === 1) {
-            const entityName = entities.find(entity =>
-                entity.actionSpace.some((_, i) => `${entity.name}-${i}` === key)
-            )?.name;
-            updateActionSpaceRecord(entityName, key);
-        } else {
-            const [_, entityName, actionIndex] = key.split('-');
-            updateActionSpaceRecord(entityName, parseInt(actionIndex, 10));
-        }
+        updateActionSpaceStroe(key);
     };
 
     const handleRuleTypeChange = (key, value) => {
         setRuleType(prev => ({ ...prev, [key]: value }));
-        if (agentType === 1) {
-            const entityName = entities.find(entity =>
-                entity.actionSpace.some((_, i) => `${entity.name}-${i}` === key)
-            )?.name;
-            updateActionSpaceRecord(entityName, key);
-        } else {
-            const [_, entityName, actionIndex] = key.split('-');
-            updateActionSpaceRecord(entityName, parseInt(actionIndex, 10));
-        }
+        updateActionSpaceStroe(key);
     };
 
     const handleCondition1Change = (key, value) => {
         setCondition1(prev => ({ ...prev, [key]: value }));
-        if (agentType === 1) {
-            const entityName = entities.find(entity =>
-                entity.actionSpace.some((_, i) => `${entity.name}-${i}` === key)
-            )?.name;
-            updateActionSpaceRecord(entityName, key);
-        } else {
-            const [_, entityName, actionIndex] = key.split('-');
-            updateActionSpaceRecord(entityName, parseInt(actionIndex, 10));
-        }
+        updateActionSpaceStroe(key);
     };
 
     const handleCondition2Change = (key, value) => {
         setCondition2(prev => ({ ...prev, [key]: value }));
-        if (agentType === 1) {
-            const entityName = entities.find(entity =>
-                entity.actionSpace.some((_, i) => `${entity.name}-${i}` === key)
-            )?.name;
-            updateActionSpaceRecord(entityName, key);
-        } else {
-            const [_, entityName, actionIndex] = key.split('-');
-            updateActionSpaceRecord(entityName, parseInt(actionIndex, 10));
-        }
+        updateActionSpaceStroe(key);
     };
 
     const handleExecution1Change = (key, value) => {
         setExecution1(prev => ({ ...prev, [key]: value }));
-        if (agentType === 1) {
-            const entityName = entities.find(entity =>
-                entity.actionSpace.some((_, i) => `${entity.name}-${i}` === key)
-            )?.name;
-            updateActionSpaceRecord(entityName, key);
-        } else {
-            const [_, entityName, actionIndex] = key.split('-');
-            updateActionSpaceRecord(entityName, parseInt(actionIndex, 10));
-        }
+        updateActionSpaceStroe(key);
     };
 
     const handleExecution2Change = (key, value) => {
         setExecution2(prev => ({ ...prev, [key]: value }));
-        if (agentType === 1) {
-            const entityName = entities.find(entity =>
-                entity.actionSpace.some((_, i) => `${entity.name}-${i}` === key)
-            )?.name;
-            updateActionSpaceRecord(entityName, key);
-        } else {
-            const [_, entityName, actionIndex] = key.split('-');
-            updateActionSpaceRecord(entityName, parseInt(actionIndex, 10));
-        }
+        updateActionSpaceStroe(key);
     };
 
     const handleConfirm = (key) => {
