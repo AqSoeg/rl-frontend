@@ -27,6 +27,7 @@ const ActionSpace = ({ entities }) => {
     const [confirmedCondition2, setConfirmedCondition2] = useState({});
     const [confirmedExecution1, setConfirmedExecution1] = useState({});
     const [confirmedExecution2, setConfirmedExecution2] = useState({});
+    const agentType = actionSpaceStore.agentType;
 
     const initializeActionSpaces = () => {
         if (!entityAssignmentStore.isAgentSelected || !sidebarStore.isSingleAgent) return;
@@ -59,30 +60,37 @@ const ActionSpace = ({ entities }) => {
             )?.name;
 
             if (entityName) {
-                const storedActionSpace = actionSpaceStore.getActionSpace(selectedAgent, entityName, index);
-
-                initialVisible[`${selectedAgent}-${entityName}-${index}`] = false;
-                initialRuleVisible[`${selectedAgent}-${entityName}-${index}`] = false;
-                initialRuleType[`${selectedAgent}-${entityName}-${index}`] = storedActionSpace?.ruleType || null;
-                initialCondition1[`${selectedAgent}-${entityName}-${index}`] = storedActionSpace?.condition1 || '';
-                initialCondition2[`${selectedAgent}-${entityName}-${index}`] = storedActionSpace?.condition2 || '';
-                initialExecution1[`${selectedAgent}-${entityName}-${index}`] = storedActionSpace?.execution1 || '';
-                initialExecution2[`${selectedAgent}-${entityName}-${index}`] = storedActionSpace?.execution2 || '';
-                initialSelectedOption[`${selectedAgent}-${entityName}-${index}`] = storedActionSpace?.options || null;
-                initialConfirmedOption[`${selectedAgent}-${entityName}-${index}`] = storedActionSpace?.options || null;
-                initialIsCancelled[`${selectedAgent}-${entityName}-${index}`] = false;
-                initialConfirmedRuleType[`${selectedAgent}-${entityName}-${index}`] = storedActionSpace?.ruleType || null;
-                initialConfirmedCondition1[`${selectedAgent}-${entityName}-${index}`] = storedActionSpace?.condition1 || '';
-                initialConfirmedCondition2[`${selectedAgent}-${entityName}-${index}`] = storedActionSpace?.condition2 || '';
-                initialConfirmedExecution1[`${selectedAgent}-${entityName}-${index}`] = storedActionSpace?.execution1 || '';
-                initialConfirmedExecution2[`${selectedAgent}-${entityName}-${index}`] = storedActionSpace?.execution2 || '';
-
-                if (actionSpace && actionSpace[3] && !initialIsCancelled[`${selectedAgent}-${entityName}-${index}`]) {
-                    initialMeaning[`${selectedAgent}-${entityName}-${index}`] = storedActionSpace?.meaning || actionSpace[3];
-                    initialConfirmedMeaning[`${selectedAgent}-${entityName}-${index}`] = storedActionSpace?.meaning || actionSpace[3];
+                let storedActionSpace, key;
+                if (agentType === 1){
+                    storedActionSpace = actionSpaceStore.getActionSpace(null, entityName, index);
+                    key = index;
                 } else {
-                    initialMeaning[`${selectedAgent}-${entityName}-${index}`] = storedActionSpace?.meaning || '';
-                    initialConfirmedMeaning[`${selectedAgent}-${entityName}-${index}`] = storedActionSpace?.meaning || '';
+                    storedActionSpace = actionSpaceStore.getActionSpace(selectedAgent, entityName, index);
+                    key = `${selectedAgent}-${entityName}-${index}`;
+                }
+
+                initialVisible[key] = false;
+                initialRuleVisible[key] = false;
+                initialRuleType[key] = storedActionSpace?.ruleType || null;
+                initialCondition1[key] = storedActionSpace?.condition1 || '';
+                initialCondition2[key] = storedActionSpace?.condition2 || '';
+                initialExecution1[key] = storedActionSpace?.execution1 || '';
+                initialExecution2[key] = storedActionSpace?.execution2 || '';
+                initialSelectedOption[key] = storedActionSpace?.options || null;
+                initialConfirmedOption[key] = storedActionSpace?.options || null;
+                initialIsCancelled[key] = false;
+                initialConfirmedRuleType[key] = storedActionSpace?.ruleType || null;
+                initialConfirmedCondition1[key] = storedActionSpace?.condition1 || '';
+                initialConfirmedCondition2[key] = storedActionSpace?.condition2 || '';
+                initialConfirmedExecution1[key] = storedActionSpace?.execution1 || '';
+                initialConfirmedExecution2[key] = storedActionSpace?.execution2 || '';
+
+                if (actionSpace && actionSpace[3] && !initialIsCancelled[key]) {
+                    initialMeaning[key] = storedActionSpace?.meaning || actionSpace[3];
+                    initialConfirmedMeaning[key] = storedActionSpace?.meaning || actionSpace[3];
+                } else {
+                    initialMeaning[key] = storedActionSpace?.meaning || '';
+                    initialConfirmedMeaning[key] = storedActionSpace?.meaning || '';
                 }
             }
         });
@@ -116,20 +124,40 @@ const ActionSpace = ({ entities }) => {
             [actionIndex];
 
         if (actionSpace) {
-            actionSpaceStore.updateActionSpace(
-                entityAssignmentStore.selectedAgent,
-                entityName,
-                actionIndex,
-                actionSpace[0],
-                actionSpace[1],
-                selectedOption[`${entityAssignmentStore.selectedAgent}-${entityName}-${actionIndex}`] || '',
-                meaning[`${entityAssignmentStore.selectedAgent}-${entityName}-${actionIndex}`] || '',
-                ruleType[`${entityAssignmentStore.selectedAgent}-${entityName}-${actionIndex}`] || '',
-                condition1[`${entityAssignmentStore.selectedAgent}-${entityName}-${actionIndex}`] || '',
-                condition2[`${entityAssignmentStore.selectedAgent}-${entityName}-${actionIndex}`] || '',
-                execution1[`${entityAssignmentStore.selectedAgent}-${entityName}-${actionIndex}`] || '',
-                execution2[`${entityAssignmentStore.selectedAgent}-${entityName}-${actionIndex}`] || ''
-            );
+            let key;
+            if (agentType === 1) {
+                key = actionIndex;
+                actionSpaceStore.updateActionSpace(
+                    null,
+                    entityName,
+                    actionIndex,
+                    actionSpace[0],
+                    actionSpace[1],
+                    selectedOption[key] || '',
+                    meaning[key] || '',
+                    ruleType[key] || '',
+                    condition1[key] || '',
+                    condition2[key] || '',
+                    execution1[key] || '',
+                    execution2[key] || ''
+                );
+            } else {
+                key = `${entityAssignmentStore.selectedAgent}-${entityName}-${actionIndex}`;
+                actionSpaceStore.updateActionSpace(
+                    entityAssignmentStore.selectedAgent,
+                    entityName,
+                    actionIndex,
+                    actionSpace[0],
+                    actionSpace[1],
+                    selectedOption[key] || '',
+                    meaning[key] || '',
+                    ruleType[key] || '',
+                    condition1[key] || '',
+                    condition2[key] || '',
+                    execution1[key] || '',
+                    execution2[key] || ''
+                );
+            }
         }
     };
 
@@ -153,51 +181,93 @@ const ActionSpace = ({ entities }) => {
 
     const handleOptionChange = (key, value) => {
         setSelectedOption(prev => ({ ...prev, [key]: value }));
-
-        const [agentName, entityName, actionIndex] = key.split('-');
-        updateActionSpaceRecord(entityName, parseInt(actionIndex, 10));
+        if (agentType === 1) {
+            const entityName = entities.find(entity =>
+                entity.actionSpace.some((_, i) => `${entity.name}-${i}` === key)
+            )?.name;
+            updateActionSpaceRecord(entityName, key);
+        } else {
+            const [_, entityName, actionIndex] = key.split('-');
+            updateActionSpaceRecord(entityName, parseInt(actionIndex, 10));
+        }
     };
 
     const handleMeaningChange = (key, value) => {
         setMeaning(prev => ({ ...prev, [key]: value }));
-
-        const [agentName, entityName, actionIndex] = key.split('-');
-        updateActionSpaceRecord(entityName, parseInt(actionIndex, 10));
+        if (agentType === 1) {
+            const entityName = entities.find(entity =>
+                entity.actionSpace.some((_, i) => `${entity.name}-${i}` === key)
+            )?.name;
+            updateActionSpaceRecord(entityName, key);
+        } else {
+            const [_, entityName, actionIndex] = key.split('-');
+            updateActionSpaceRecord(entityName, parseInt(actionIndex, 10));
+        }
     };
 
     const handleRuleTypeChange = (key, value) => {
         setRuleType(prev => ({ ...prev, [key]: value }));
-
-        const [agentName, entityName, actionIndex] = key.split('-');
-        updateActionSpaceRecord(entityName, parseInt(actionIndex, 10));
+        if (agentType === 1) {
+            const entityName = entities.find(entity =>
+                entity.actionSpace.some((_, i) => `${entity.name}-${i}` === key)
+            )?.name;
+            updateActionSpaceRecord(entityName, key);
+        } else {
+            const [_, entityName, actionIndex] = key.split('-');
+            updateActionSpaceRecord(entityName, parseInt(actionIndex, 10));
+        }
     };
 
     const handleCondition1Change = (key, value) => {
         setCondition1(prev => ({ ...prev, [key]: value }));
-
-        const [agentName, entityName, actionIndex] = key.split('-');
-        updateActionSpaceRecord(entityName, parseInt(actionIndex, 10));
+        if (agentType === 1) {
+            const entityName = entities.find(entity =>
+                entity.actionSpace.some((_, i) => `${entity.name}-${i}` === key)
+            )?.name;
+            updateActionSpaceRecord(entityName, key);
+        } else {
+            const [_, entityName, actionIndex] = key.split('-');
+            updateActionSpaceRecord(entityName, parseInt(actionIndex, 10));
+        }
     };
 
     const handleCondition2Change = (key, value) => {
         setCondition2(prev => ({ ...prev, [key]: value }));
-
-        const [agentName, entityName, actionIndex] = key.split('-');
-        updateActionSpaceRecord(entityName, parseInt(actionIndex, 10));
+        if (agentType === 1) {
+            const entityName = entities.find(entity =>
+                entity.actionSpace.some((_, i) => `${entity.name}-${i}` === key)
+            )?.name;
+            updateActionSpaceRecord(entityName, key);
+        } else {
+            const [_, entityName, actionIndex] = key.split('-');
+            updateActionSpaceRecord(entityName, parseInt(actionIndex, 10));
+        }
     };
 
     const handleExecution1Change = (key, value) => {
         setExecution1(prev => ({ ...prev, [key]: value }));
-
-        const [agentName, entityName, actionIndex] = key.split('-');
-        updateActionSpaceRecord(entityName, parseInt(actionIndex, 10));
+        if (agentType === 1) {
+            const entityName = entities.find(entity =>
+                entity.actionSpace.some((_, i) => `${entity.name}-${i}` === key)
+            )?.name;
+            updateActionSpaceRecord(entityName, key);
+        } else {
+            const [_, entityName, actionIndex] = key.split('-');
+            updateActionSpaceRecord(entityName, parseInt(actionIndex, 10));
+        }
     };
 
     const handleExecution2Change = (key, value) => {
         setExecution2(prev => ({ ...prev, [key]: value }));
-
-        const [agentName, entityName, actionIndex] = key.split('-');
-        updateActionSpaceRecord(entityName, parseInt(actionIndex, 10));
+        if (agentType === 1) {
+            const entityName = entities.find(entity =>
+                entity.actionSpace.some((_, i) => `${entity.name}-${i}` === key)
+            )?.name;
+            updateActionSpaceRecord(entityName, key);
+        } else {
+            const [_, entityName, actionIndex] = key.split('-');
+            updateActionSpaceRecord(entityName, parseInt(actionIndex, 10));
+        }
     };
 
     const handleConfirm = (key) => {
@@ -271,7 +341,12 @@ const ActionSpace = ({ entities }) => {
             <div className="dropdown-container-wrapper">
                 {entityAssignmentStore.isAgentSelected && entities.flatMap((entity, entityIndex) =>
                     entity.actionSpace.map((actionSpace, actionIndex) => {
-                        const uniqueKey = `${entityAssignmentStore.selectedAgent}-${entity.name}-${actionIndex}`;
+                        let uniqueKey;
+                        if (agentType === 1) {
+                            uniqueKey = `${entityIndex}-${actionIndex}`;
+                        } else {
+                            uniqueKey = `${entityAssignmentStore.selectedAgent}-${entity.name}-${actionIndex}`;
+                        }
                         const initialMeaningValue = actionSpace[3] || '';
 
                         return (
