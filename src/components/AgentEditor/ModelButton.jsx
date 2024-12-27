@@ -105,7 +105,7 @@ const ModelFunction = ({ scenarios }) => {
                     stateVector: entity.stateVector,
                     actionSpace: actionSpace.map(action => ({
                         name: action.actionName,
-                        action: [action.actionType, ...action.options],
+                        action: [action.actionType, action.options, action.meaning],
                         rule: [action.ruleType, action.condition1, action.condition2, action.execution1, action.execution2]
                     })),
                     rewardFunction: rewardFunction
