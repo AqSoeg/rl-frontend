@@ -326,6 +326,13 @@ const ActionSpace = ({ entities }) => {
             setExecution1(prev => ({ ...prev, [key]: '' }));
             setExecution2(prev => ({ ...prev, [key]: '' }));
             setRuleVisible(prev => ({ ...prev, [key]: false }));
+
+            // 清空已确认的规则内容
+            setConfirmedRuleType(prev => ({ ...prev, [key]: null }));
+            setConfirmedCondition1(prev => ({ ...prev, [key]: '' }));
+            setConfirmedCondition2(prev => ({ ...prev, [key]: '' }));
+            setConfirmedExecution1(prev => ({ ...prev, [key]: '' }));
+            setConfirmedExecution2(prev => ({ ...prev, [key]: '' }));
         }
     };
 
