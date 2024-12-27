@@ -211,6 +211,7 @@ const ActionSpace = ({ entities }) => {
         setConfirmedOption(prev => ({ ...prev, [key]: selectedOption[key] }));
         setConfirmedMeaning(prev => ({ ...prev, [key]: meaning[key] }));
         setVisible(prev => ({ ...prev, [key]: false }));
+        updateActionSpaceStroe(key);
     };
 
     const handleCancel = (key) => {
@@ -247,6 +248,7 @@ const ActionSpace = ({ entities }) => {
         setConfirmedExecution1(prev => ({ ...prev, [key]: execution1[key] }));
         setConfirmedExecution2(prev => ({ ...prev, [key]: execution2[key] }));
         setRuleVisible(prev => ({ ...prev, [key]: false }));
+        updateActionSpaceStroe(key);
     };
 
     const handleRuleCancel = (key) => {
