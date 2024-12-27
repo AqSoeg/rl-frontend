@@ -1,20 +1,20 @@
 import { Button, Modal, Table } from 'antd';
 import { useState, useEffect } from 'react';
-import sidebarStore from './SidebarStore'; // 引入 SidebarStore
-import entityAssignmentStore from './EntityAssignmentStore'; // 引入 entityAssignmentStore
+import sidebarStore from './SidebarStore';
+import entityAssignmentStore from './EntityAssignmentStore';
+import actionSpaceStore from './ActionSpaceStore';
+import rewardFunctionStore from './RewardFunctionStore';
 
 const ModelFunction = ({ scenarios }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [models, setModels] = useState([]);
     const [selectedModel, setSelectedModel] = useState(null);
 
-    // 获取 model.json 中的数据
     useEffect(() => {
         const ws = new WebSocket('ws://localhost:8080');
 
         ws.onopen = () => {
             console.log('WebSocket connected');
-            // 请求模型数据
             ws.send(JSON.stringify({ type: 'getModels' }));
         };
 
@@ -29,61 +29,50 @@ const ModelFunction = ({ scenarios }) => {
             console.log('WebSocket disconnected');
         };
 
-        // 组件卸载时关闭 WebSocket 连接
         return () => ws.close();
     }, []);
 
-    // 处理模型选择
     const handleModelSelect = (model) => {
         setSelectedModel(model);
     };
 
-    // 处理模型确认
     const handleModelConfirm = () => {
         if (!selectedModel) {
             alert('请选择一个智能体模型！');
             return;
         }
 
-        // 确保 entityAssignments 存在且是一个非空数组
         if (!Array.isArray(selectedModel.entityAssignments) || selectedModel.entityAssignments.length === 0) {
             alert('选择的模型中没有实体分配信息！');
             return;
         }
 
-        // 将 entityAssignments 从数组转换为对象格式
         const assignedEntities = selectedModel.entityAssignments.reduce((acc, assignment) => {
-            const agent = Object.keys(assignment)[0]; // 获取智能体名称
-            acc[agent] = assignment[agent]; // 将实体分配信息存入对象
+            const agent = Object.keys(assignment)[0];
+            acc[agent] = assignment[agent];
             return acc;
         }, {});
 
-        // 清空所有状态
         sidebarStore.clearExceptScenario();
         entityAssignmentStore.clearAssignment();
 
-        // 更新侧边栏状态
-        sidebarStore.setScenario(selectedModel.scenarioID); // 设置 scenarioID
+        sidebarStore.setScenario(selectedModel.scenarioID);
         sidebarStore.setRole(selectedModel.agentRoleID);
         sidebarStore.setType(selectedModel.agentType);
         sidebarStore.setName(selectedModel.agentName);
         sidebarStore.setVersion(selectedModel.agentVersion);
-        sidebarStore.setAgentCount(Object.keys(assignedEntities).length.toString()); // 设置智能体数量
+        sidebarStore.setAgentCount(Object.keys(assignedEntities).length.toString());
         sidebarStore.setModelID(selectedModel.agentID);
 
-        // 更新实体分配状态
         entityAssignmentStore.setAssignedEntities(assignedEntities);
 
-        // 关闭模态窗口
         setIsModalVisible(false);
     };
 
-    // 处理模型取消
     const handleModelCancel = () => {
         setIsModalVisible(false);
     };
 
-    // 处理保存模型
     const handleSaveModel = () => {
         if (!sidebarStore.canSaveModel()) {
             alert('请填写完整信息后再保存模型！');
@@ -92,7 +81,38 @@ const ModelFunction = ({ scenarios }) => {
 
         const confirmSave = window.confirm('是否确认保存模型？');
         if (confirmSave) {
-            // 保存模型的逻辑
+            const scenario = scenarios.find(s => s.id === sidebarStore.scenario);
+            const role = scenario.roles.find(r => r.id === sidebarStore.role);
+
+            // 获取所有奖励函数
+            const allRewards = rewardFunctionStore.getAllRewards();
+
+            // 获取实体的状态向量、动作空间和奖励函数
+            const entities = entityAssignmentStore.assignedEntities[sidebarStore.selectedAgent].map(entityName => {
+                const entity = role.entities.find(e => e.name === entityName);
+                const actionSpace = actionSpaceStore.actionSpaces[sidebarStore.selectedAgent]?.[entityName] || [];
+
+                // 过滤出与当前实体相关的奖励函数
+                const rewardFunction = allRewards
+                    .filter(reward => {
+                        // 如果是团队奖励，或者奖励的智能体与当前智能体匹配
+                        return reward.type === '团队奖励' || reward.agent === sidebarStore.selectedAgent;
+                    })
+                    .map(reward => [reward.equation, reward.type]); // 映射为 [公式, 类型]
+
+                return {
+                    name: entityName,
+                    stateVector: entity.stateVector,
+                    actionSpace: actionSpace.map(action => ({
+                        name: action.actionName,
+                        action: [action.actionType, ...action.options],
+                        rule: [action.ruleType, action.condition1, action.condition2, action.execution1, action.execution2]
+                    })),
+                    rewardFunction: rewardFunction
+                };
+            });
+
+            // 构建模型数据
             const modelData = {
                 scenarioID: sidebarStore.scenario,
                 agentRoleID: sidebarStore.role,
@@ -104,10 +124,11 @@ const ModelFunction = ({ scenarios }) => {
                 entityAssignments: Object.entries(entityAssignmentStore.assignedEntities).map(([agent, entities]) => ({
                     [agent]: entities
                 })),
+                entities: entities, // 包含实体的状态向量、动作空间和奖励函数
                 updateTime: new Date().toISOString()
             };
 
-            // 发送数据到 WebSocket 服务器
+            // 通过 WebSocket 发送数据
             const ws = new WebSocket('ws://localhost:8080');
             ws.onopen = () => {
                 ws.send(JSON.stringify(modelData));
@@ -125,30 +146,25 @@ const ModelFunction = ({ scenarios }) => {
         }
     };
 
-    // 处理载入模型
     const handleLoadModel = () => {
         setIsModalVisible(true);
     };
 
-    // 获取场景和角色的名称
     const getScenarioName = (scenarioID) => {
         const scenario = scenarios.find(s => s.id === scenarioID);
         return scenario ? scenario.name : '未知场景';
     };
 
     const getRoleName = (scenarioID, roleID) => {
-        // 根据 scenarioID 找到对应的场景
         const scenario = scenarios.find(s => s.id === scenarioID);
         if (!scenario) {
             return '未知角色';
         }
 
-        // 根据 roleID 找到对应的角色
         const role = scenario.roles.find(r => r.id === roleID);
         return role ? role.name : '未知角色';
     };
 
-    // 表格列配置
     const columns = [
         { title: '序号', dataIndex: 'index', key: 'index' },
         { title: '智能体ID', dataIndex: 'agentID', key: 'agentID' },
@@ -158,12 +174,10 @@ const ModelFunction = ({ scenarios }) => {
         { title: '分配的实体名称', dataIndex: 'assignedEntities', key: 'assignedEntities' },
     ];
 
-    // 表格数据
     const tableData = models.map((model, index) => {
-        // 将 entityAssignments 从数组转换为对象格式
         const assignedEntities = model.entityAssignments.reduce((acc, assignment) => {
-            const agent = Object.keys(assignment)[0]; // 获取智能体名称
-            acc[agent] = assignment[agent]; // 将实体分配信息存入对象
+            const agent = Object.keys(assignment)[0];
+            acc[agent] = assignment[agent];
             return acc;
         }, {});
 
@@ -173,8 +187,8 @@ const ModelFunction = ({ scenarios }) => {
             agentID: model.agentID,
             agentName: `${model.agentName} v${model.agentVersion} ${model.agentModelName}`,
             scenarioName: getScenarioName(model.scenarioID),
-            roleName: getRoleName(model.scenarioID, model.agentRoleID), // 传入 scenarioID 和 agentRoleID
-            assignedEntities: Object.values(assignedEntities).flat().join(', '), // 将所有实体名称拼接成字符串
+            roleName: getRoleName(model.scenarioID, model.agentRoleID),
+            assignedEntities: Object.values(assignedEntities).flat().join(', '),
         };
     });
 
@@ -185,7 +199,7 @@ const ModelFunction = ({ scenarios }) => {
 
             <Modal
                 title="请选择载入的智能体模型"
-                open={isModalVisible} // 使用 open 替代 visible
+                open={isModalVisible}
                 onOk={handleModelConfirm}
                 onCancel={handleModelCancel}
                 okText="确认"

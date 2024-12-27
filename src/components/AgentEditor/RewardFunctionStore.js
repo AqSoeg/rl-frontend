@@ -35,6 +35,11 @@ class RewardFunctionStore {
         this.selectedReward = [];
         this.visible = [];
     }
+
+    // 新增方法：获取所有奖励函数的内容
+    getAllRewards() {
+        return this.selectedReward;
+    }
 }
 
 const rewardFunctionStore = new RewardFunctionStore();
