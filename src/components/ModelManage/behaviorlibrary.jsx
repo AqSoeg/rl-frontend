@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Table, Button, Modal, Form, Input, Card, Select } from 'antd';
 import { PlusOutlined, SettingOutlined } from '@ant-design/icons';
 import moment from 'moment';
-import axios from 'axios';
 
-const BehaviorLibrary = () => {
-  const [rules, setRules] = useState([]);
+
+const BehaviorLibrary = ({data}) => {
+  const [rules, setRules] = useState(data);
   const [filteredRules, setFilteredRules] = useState([]); // 新增状态用于存储过滤后的数据
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentRule, setCurrentRule] = useState(null);
@@ -15,23 +15,6 @@ const BehaviorLibrary = () => {
   const [isAdding, setIsAdding] = useState(false);
   const [form] = Form.useForm();
 
-  useEffect(() => {
-    const fetchRules = async () => {
-      try {
-        const response = await axios.get('http://localhost:3000/agents');
-        const rulesWithKey = response.data.map((rule, index) => ({
-          ...rule,
-          key: `${index + 1}`, // 确保 key 是字符串类型
-        }));
-        setRules(rulesWithKey);
-        setFilteredRules(rulesWithKey); // 初始化过滤后的数据
-      } catch (error) {
-        console.error('Error fetching rules:', error);
-      }
-    };
-    fetchRules();
-  }, []);
-
   const showModal = (rule) => {
     setCurrentRule(rule);
     form.setFieldsValue(rule);
@@ -39,7 +22,23 @@ const BehaviorLibrary = () => {
     setIsEditing(false);
     setIsAdding(false);
   };
-
+  useEffect(() => {
+    console.log('Data in BehaviorLibrary:', data); // 添加日志
+    if (Array.isArray(data)) {
+      // 如果数据是数组，确保每个对象都有唯一的key
+      const rulesWithKeys = data.map((item, index) => ({ ...item, key: index }));
+      setRules(rulesWithKeys);
+    } else if (data !== null && typeof data === 'object') {
+      // 如果数据是对象，将其包装在数组中并添加key
+      setRules([data]);
+    } else if (data === null) {
+      // 特别处理 null 值
+      console.log('Data is null');
+      setRules([]);
+    } else {
+      console.error('Data is not an array:', data);
+    }
+  }, [data]);
   const handleOk = () => {
     if (isEditing || isAdding) {
       form.submit();
@@ -137,25 +136,75 @@ const BehaviorLibrary = () => {
       title: '序号',
       dataIndex: 'key',
       key: 'key',
-      render: (text, record, index) => index + 1, // 动态计算序号
+      render: (text, record, index) => index + 1,
     },
-    { title: '行为规则ID', dataIndex: 'id', key: 'id' },
-    { title: '想定场景', dataIndex: 'sceneId', key: 'sceneId' },
-    { title: '智能体角色', dataIndex: 'agentRoleId', key: 'agentRoleId' },
-    { title: '动作', dataIndex: 'action', key: 'action' },
-    { title: '行为规则类型', dataIndex: 'type', key: 'type' },
-    { title: '条件1', dataIndex: 'condition1', key: 'condition1' },
-    { title: '条件2', dataIndex: 'condition2', key: 'condition2', render: () => <span>/</span> },
-    { title: '内容1', dataIndex: 'content1', key: 'content1' },
-    { title: '内容2', dataIndex: 'content2', key: 'content2' },
-    { title: '更新时间', dataIndex: 'date', key: 'date' },
-    { title: '操作', key: 'action', render: (text, record) => (
-      <>
-        <Button type="link" onClick={() => showModal(record)}>查看</Button>
-        <Button type="link" onClick={() => update(record)}>更新</Button>
-        <Button type="link" onClick={() => handleDelete(record)}>删除</Button>
-      </>
-    ) },
+    {
+      title: '行为规则ID',
+      dataIndex: 'id',
+      key: 'id',
+    },
+    {
+      title: '想定场景',
+      dataIndex: 'scenarioID',
+      key: 'scenarioID',
+    },
+    {
+      title: '智能体角色',
+      dataIndex: 'agentRoleID',
+      key: 'agentRoleID',
+    },
+    {
+      title: '动作',
+      dataIndex: 'action',
+      key: 'action',
+    },
+    {
+      title: '行为规则类型',
+      dataIndex: 'rule',
+      key: 'ruleStyle',
+      render: (text, record) => record.rule[0], // 假设 ruleFunction 数组中第5个元素是行为规则类型
+    },
+    {
+      title: '条件1',
+      dataIndex: 'rule',
+      key: 'condition1',
+      render: (text, record) => record.rule[1], // 假设 rule 数组中第1个元素是条件1
+    },
+    {
+      title: '条件2',
+      dataIndex: 'rule',
+      key: 'condition2',
+      render: (text, record) => record.rule[2], // 假设 rule 数组中第2个元素是条件2
+    },
+    {
+      title: '内容1',
+      dataIndex: 'rule',
+      key: 'content1',
+      render: (text, record) => record.rule[3], // 假设 rule 数组中第3个元素是内容1
+    },
+    {
+      title: '内容2',
+      dataIndex: 'rule',
+      key: 'content2',
+      render: (text, record) => record.rule[4], // 假设 rule 数组中第4个元素是内容2
+    },
+    {
+      title: '更新时间',
+      dataIndex: 'updateTime',
+      key: 'updateTime',
+      render: time => new Date(time).toLocaleString(),
+    },
+    {
+      title: '操作',
+      key: 'action',
+      render: (text, record) => (
+        <>
+          <Button type="link" onClick={() => showModal(record)}>查看</Button>
+          <Button type="link" onClick={() => update(record)}>更新</Button>
+          <Button type="link" onClick={() => handleDelete(record)}>删除</Button>
+        </>
+      ),
+    },
   ];
 
   return (

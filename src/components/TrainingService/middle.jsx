@@ -76,30 +76,7 @@ const Middle = ({ selectedScenario }) => {
     console.log(`更新场景: 实体=${entity}, 属性=${attribute}, 值=${value}`);
     setEntityInfo(`更新后的实体信息: ${entity}的新详细信息...`);
   };
-  // const handleUpdate = async () => {
-  //   try {
-  //     // 构建请求体
-  //     const requestBody = {
-  //       entity,
-  //       attribute,
-  //       value
-  //     };
 
-  //     // 发起POST请求到后端API
-  //     const response = await axios.post('/api/update', requestBody);
-
-  //     // 根据响应结果更新UI或给出反馈
-  //     if (response.status === 200) {
-  //       message.success('更新成功！');
-  //       setEntityInfo(`更新后的实体信息: ${entity}的新详细信息...`);
-  //     } else {
-  //       message.error('更新失败，请稍后再试。');
-  //     }
-  //   } catch (error) {
-  //     console.error("There was an error sending the update request!", error);
-  //     message.error('发生错误，请检查网络连接或稍后再试。');
-  //   }
-  // };
 
   return (
     <div>

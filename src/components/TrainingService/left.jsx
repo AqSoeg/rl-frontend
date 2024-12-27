@@ -134,34 +134,56 @@ const Left =  observer(({ scenarios, algorithms, onAlgorithmSelect, onScenarioSe
 
       <div className='form-item'>
         {intelligentStore.selectedAgent ? (
-          <>
-          <h3>已载入智能体信息</h3>
-          <p><strong>智能体名称：</strong>{intelligentStore.selectedAgent.agentName}</p>
-          <p><strong>智能体ID：</strong>{intelligentStore.selectedAgent.agentID}</p>
-          <p><strong>版本：</strong>{intelligentStore.selectedAgent.agentVersion}</p>
-          <p><strong>智能体类型：</strong>{intelligentStore.selectedAgent.agentType}</p>
-          <p><strong>更新时间：</strong>{new Date(intelligentStore.selectedAgent.updateTime).toLocaleString()}</p>
-          <p><strong>想定场景：</strong>{intelligentStore.selectedAgent.scenarioID}</p>
+          <><div style={{ maxHeight: '500px', overflowY: 'auto' }}>
+              <h3>已载入智能体信息</h3>
+              <p><strong>智能体名称：</strong>{intelligentStore.selectedAgent.agentName}</p>
+              <p><strong>智能体ID：</strong>{intelligentStore.selectedAgent.agentID}</p>
+              <p><strong>版本：</strong>{intelligentStore.selectedAgent.agentVersion}</p>
+              <p><strong>智能体类型：</strong>{intelligentStore.selectedAgent.agentType}</p>
+              <p><strong>更新时间：</strong>{new Date(intelligentStore.selectedAgent.updateTime).toLocaleString()}</p>
+              <p><strong>想定场景：</strong>{intelligentStore.selectedAgent.scenarioID}</p>
+              <h5>实体状态信息：</h5>
+              <ul>
+                {intelligentStore.selectedAgent.entities.map((entity, index) => (
+                  <li key={index}>
+                    <h6>{entity.name} : 当前信号灯状态：{entity.stateVector[0][2]}，等待通过的车辆数量：{entity.stateVector[1][2]}，等待通过的行人数量：{entity.stateVector[2][2]}</h6>
+                  </li>
+                ))}
+              </ul>
+              <h5>模型动作信息包括：</h5>
+              <ul>
+                {intelligentStore.selectedAgent.entities.map((entity, index) => (
+                  <li key={index}>
+                    <h6>动作：</h6>
+                    {entity.actionSpace.map((actionSpace, actionIndex) => (
+                      <span key={actionIndex}>
+                        {actionSpace.action.join(',')}
+                      </span>
+                    ))}
+                    <h6>规则：</h6>
+                    {entity.actionSpace.map((actionSpace, actionIndex) => (
+                      <span key={actionIndex}>
+                        {actionSpace.rule.join(',')}
+                      </span>
+                    ))}
+                  </li>
+                ))}
+              </ul>
+              <h5>奖励信息：</h5>
+              <ul>
+                {intelligentStore.selectedAgent.entities.map((entity, index) => (
+                  <li key={index}>
+                    {entity.rewardFunction.map(rf => (
+                      <h6>{rf[1]}:{rf[0]}</h6>
+                    ))}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </>
         ) : (
           <div>请选择一个智能体</div>
         )}
-        <label>智能体数量</label>
-        <Select placeholder="请选择">
-          <Option value="1">1</Option>
-          <Option value="2">2</Option>
-          <Option value="3">3</Option>
-          <Option value="4">4</Option>
-          <Option value="5">5</Option>
-        </Select>
-        <label>智能体模型</label>
-        <Select placeholder="请选择">
-          <Option value="model1">模型1</Option>
-          <Option value="model2">模型2</Option>
-        </Select>
-        <h5>模型输入（观测）信息包括：...</h5>
-        <h5>模型输入（动作）信息包括：...</h5>
-        <h5>奖励绑定信息：...</h5>
       </div>
       <Modal
         title="载入离线数据"
