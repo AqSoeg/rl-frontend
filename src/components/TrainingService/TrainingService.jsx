@@ -27,7 +27,7 @@ const TrainingService = () => {
   useEffect(() => {
     const fetchAlgorithms = async () => {
       try {
-        const response = await axios.get('http://localhost:3002/algorithms'); // 假设您的后端API端点
+        const response = await axios.get('http://localhost:3001/algorithms'); // 假设您的后端API端点
         setAlgorithms(response.data);
       } catch (error) {
         console.error('Error fetching algorithms:', error);
@@ -51,6 +51,7 @@ const TrainingService = () => {
       </div>
       <div className='right'>
         <Right 
+          algorithms={algorithms}
           selectedAlgorithm={selectedAlgorithm} 
           selectedScenario={selectedScenario} // 传递选中场景
         />

@@ -21,7 +21,7 @@ const ModelManagement = () => {
           const models = modelResponse.data; // 假设 data 是一个数组
   
           // Dynamically build URLs based on the number of items in model.json
-          const urls = models.map(model => `http://localhost:3001/${model.id || models.indexOf(model)}`);
+          const urls = models.map(model => `http://localhost:3002/${model.id || models.indexOf(model)}`);
   
           // Use Promise.all to fetch data from all URLs in parallel
           const responses = await Promise.all(urls.map(url => axios.get(url)));
@@ -54,7 +54,7 @@ const ModelManagement = () => {
       </div>
       <div className='modelright'>
       {activeComponent === 'ModelLibrary' && <ModelLibrary  data={data}/>}
-        {activeComponent === 'BehaviorLibrary' && <BehaviorLibrary />}
+        {activeComponent === 'BehaviorLibrary' && <BehaviorLibrary data={data} />}
         {activeComponent === 'AlgorithmLibrary' && <AlgorithmLibrary />}
         {activeComponent === 'OfflineDatabase' && <OfflineDatabase />}
       </div>

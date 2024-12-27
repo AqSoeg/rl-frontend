@@ -1,12 +1,12 @@
 // right.jsx
 import React, { useState,useEffect } from 'react';
-import { Card, Select, Row, Col, Space ,Button, Modal ,Table} from 'antd';
+import { Card, Select, Row, Col, Space ,Button, Modal ,Table, message} from 'antd';
 import {  SettingOutlined } from '@ant-design/icons';
 import { intelligentStore } from './IntelligentStore';
 import axios from 'axios';
 const { Option } = Select;
 
-const Right = ({ selectedAlgorithm,selectedScenario }) => { // 接收 scenarios 作为 props
+const Right = ({ selectedAlgorithm,selectedScenario,algorithms }) => { // 接收 scenarios 作为 props
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [agents, setAgents] = useState([]);
@@ -15,6 +15,15 @@ const Right = ({ selectedAlgorithm,selectedScenario }) => { // 接收 scenarios 
     intelligentStore.loadAgent(agent);
   };
 
+  useEffect(() => {
+    if (selectedAlgorithm && selectedAlgorithm['hyper-parameters']) {
+      const initialParams = selectedAlgorithm['hyper-parameters'].reduce((acc, param) => {
+        acc[param.id] = param.default;
+        return acc;
+      }, {});
+      setHyperParametersValues(initialParams);
+    }
+  }, [selectedAlgorithm]);
   useEffect(() => {
     // 当 selectedScenario 改变时，重新获取相关智能体信息
     if (selectedScenario) {
@@ -31,7 +40,7 @@ const Right = ({ selectedAlgorithm,selectedScenario }) => { // 接收 scenarios 
         const models = modelResponse.data; // 假设 data 是一个数组
 
         // 动态构建URLs，这里假设 model.json 中的每个对象都有一个 id 属性用来构造URL
-        const urls = models.map(model => `http://localhost:3001/${model.id || models.indexOf(model)}`);
+        const urls = models.map(model => `http://localhost:3002/${model.id || models.indexOf(model)}`);
 
         // 使用Promise.all并发请求所有URL的数据
         const responses = await Promise.all(urls.map(url => axios.get(url)));
@@ -112,8 +121,39 @@ const Right = ({ selectedAlgorithm,selectedScenario }) => { // 接收 scenarios 
       ),
     },
   ];
-
-
+  const [hyperParametersValues, setHyperParametersValues] = useState({});
+  // const algorithmMap = {
+  //   PPO: PPO,
+  //   DDPG: DDPG,
+  //   // 如果有其他算法，继续添加到这个对象中
+  // };
+  const trainAlgorithm = async () => {
+    try {
+      // 从映射中获取选中的算法类
+      // const AlgorithmClass = algorithmMap[selectedAlgorithm.name];
+  
+      // // 创建环境，这里需要替换为您的具体环境
+      // const env = gym.make('YourEnvironmentName');
+  
+      // // 初始化模型
+      // const model = new AlgorithmClass('MlpPolicy', env, hyperParametersValues, { verbose: 1 });
+  
+      // // 训练模型
+      // await model.learn(total_timesteps=hyperParametersValues['total_step']);
+  
+      // // 保存模型为 .pkl 文件
+      const modelPath = `./algorithm/${selectedAlgorithm.name}.pkl`;
+      // await model.save(modelPath);
+  
+      // console.log(`模型已保存到 ${modelPath}`);
+      console.log('参数值',hyperParametersValues)
+      message.success(`训练完成并保存为 .pkl 文件,pkl文件保存到了 ${modelPath}中`);
+    } catch (error) {
+      console.error('训练过程中发生错误:', error);
+      message.error('训练失败，请检查日志');
+    }
+  };
+  
   const handleView = (agent) => {
     setSelectedAgent(agent);
     setIsDetailModalVisible(true);
@@ -180,7 +220,16 @@ const Right = ({ selectedAlgorithm,selectedScenario }) => { // 接收 scenarios 
               <Col key={index} span={8}>
                 <Space align="baseline" style={{ marginBottom: 8 }}>
                   <span>{param.name}:</span>
-                  <Select defaultValue={defaultValue} style={{ width: '100%' }}>
+                  <Select
+                    defaultValue={defaultValue}
+                    onChange={(value) => {
+                      setHyperParametersValues(prevState => ({
+                        ...prevState,
+                        [param.id]: value
+                      }));
+                    }}
+                    style={{ width: '100%' }}
+                  >
                     {uniqueValues.map((value, idx) => (
                       <Option key={`${param.id}-${idx}`} value={value}>
                         {value}
@@ -194,9 +243,9 @@ const Right = ({ selectedAlgorithm,selectedScenario }) => { // 接收 scenarios 
         </Row>
       </Card>
       <div className='button'>
-        <Button>
+        <Button onClick={trainAlgorithm}>
           开始训练
-        </Button>
+        </Button >
         <Button>
           训练终止
         </Button>

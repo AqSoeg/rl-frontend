@@ -100,6 +100,15 @@ const ModelLibrary = ({ data }) => {
     { title: '智能体角色', dataIndex: 'agentRoleID', key: 'agentRoleID' },
     { title: '更新时间', dataIndex: 'updateTime', key: 'updateTime' },
     {
+      title: '代理实体',
+      dataIndex: 'entities',
+      key: 'entities',
+      render: (text, record) => (
+        // 假设每个智能体的实体不多，我们直接将它们列在一个单元格中
+        record.entities.map(entity => entity.name).join(', ') || '无'
+      ),
+    },
+    {
       title: '操作',
       key: 'action',
       render: (text, record) => (
@@ -136,7 +145,7 @@ const ModelLibrary = ({ data }) => {
         style={{ width: 200, marginRight: 8 }}
       />
       <Button type="primary" onClick={handleSearch}>搜索</Button>
-      <Table columns={columns} dataSource={models} pagination={{ pageSize: 5 }} />
+      <Table columns={columns} dataSource={models} pagination={{ pageSize: 3 }} />
       <Modal title={isEditing ? "更新模型" : "模型详情"} visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
         <Form form={form} initialValues={currentModel} onFinish={handleFinish}>
           {currentModel && (
