@@ -92,7 +92,27 @@ const ModelFunction = ({ scenarios }) => {
             // 获取实体的状态向量、动作空间和奖励函数
             const entities = entityAssignmentStore.assignedEntities[sidebarStore.selectedAgent].map(entityName => {
                 const entity = role.entities.find(e => e.name === entityName);
-                const actionSpace = actionSpaceStore.actionSpaces[sidebarStore.selectedAgent]?.[entityName] || [];
+
+                // 获取当前实体的所有动作空间
+                const actionSpaceKeys = Object.keys(actionSpaceStore.actions).filter(key => key.startsWith(`${entityName}：`));
+
+                // 构建动作空间数据
+                const actionSpaceData = actionSpaceKeys.map(key => {
+                    const action = actionSpaceStore.actions[key];
+                    const rule = actionSpaceStore.getRule(key); // 读取行为规则
+                    const actionType = key.split('：')[1];
+
+                    const actionData = {
+                        name: actionType,
+                        type: action.mode,
+                        action: action.mode === '连续型'
+                            ? [action.upperLimit, action.lowerLimit, action.unit]
+                            : action.discreteValues,
+                        rule: rule ? [rule.ruleType, rule.condition1, rule.condition2, rule.execution1, rule.execution2] : [] // 确保规则数据正确
+                    };
+
+                    return actionData;
+                });
 
                 // 过滤出与当前实体相关的奖励函数
                 const rewardFunction = allRewards
@@ -109,11 +129,7 @@ const ModelFunction = ({ scenarios }) => {
                 return {
                     name: entityName,
                     stateVector: stateVector, // 使用用户选择的状态向量
-                    actionSpace: actionSpace.map(action => ({
-                        name: action.actionName,
-                        action: [action.actionType, action.options, action.meaning],
-                        rule: [action.ruleType, action.condition1, action.condition2, action.execution1, action.execution2]
-                    })),
+                    actionSpace: actionSpaceData, // 新的动作空间结构
                     rewardFunction: rewardFunction
                 };
             });
