@@ -9,7 +9,7 @@ import { observer } from 'mobx-react';
 
 const { Option } = Select;
 
-const RewardFunction = observer(() => {
+const RewardFunction = observer(({ selectedParams }) => { // 新增：接收 selectedParams
     const [equation, setEquation] = useState(''); // 公式内容
     const [modalOpen, setModalOpen] = useState(false); // 控制 RewardModal 的打开与关闭
     const [rewardWhoOpen, setRewardWhoOpen] = useState(false); // 控制 RewardWho 弹窗的打开与关闭
@@ -216,7 +216,7 @@ const RewardFunction = observer(() => {
                                 ))}
                             </div>
                             <div className="symbol-group">
-                                {["s'", "a'", 'Q', 'Q̄', 't', 'T', 'ω', 'a_t', 's_t', 'r', 'μ', 'π'].map((symbol, index) => (
+                                {selectedParams.map((symbol, index) => ( // 修改：动态显示 selectedParams
                                     <button key={index}
                                             onClick={() => handleEquationChange({target: {value: equation + symbol}})}>{symbol}</button>
                                 ))}

@@ -270,8 +270,8 @@ const ActionContent = ({ uniqueKey, onEdit, onDelete }) => {
             <div className="action-text">动作空间：</div> {/* 新增的文本 */}
             {action.mode === '连续型' && (
                 <>
-                    <div className="action-text">取值上限：{action.upperLimit} {action.unit}</div>
-                    <div className="action-text">取值下限：{action.lowerLimit} {action.unit}</div>
+                    <div className="action-text">取值上限：{action.upperLimit} ({action.unit})</div>
+                    <div className="action-text">取值下限：{action.lowerLimit} ({action.unit})</div>
                 </>
             )}
             {action.mode === '离散型' && (

@@ -12,6 +12,7 @@ const AgentEditor = () => {
     const [scenarios, setScenarios] = useState([]);
     const [selectedEntities, setSelectedEntities] = useState([]);
     const [selectedActionTypes, setSelectedActionTypes] = useState([]);
+    const [selectedParams, setSelectedParams] = useState([]); // 新增：选中的 params
 
     useEffect(() => {
         entityAssignmentStore.clearAssignment();
@@ -45,9 +46,11 @@ const AgentEditor = () => {
                     .flatMap(scenario => scenario.roles)
                     .find(role => role.entities.some(entity => assignedEntities.includes(entity.name)));
                 setSelectedActionTypes(selectedRole ? selectedRole.actionTypes : []);
+                setSelectedParams(selectedRole ? selectedRole.params : []); // 新增：设置选中的 params
             } else {
                 setSelectedEntities([]);
                 setSelectedActionTypes([]);
+                setSelectedParams([]); // 新增：清空选中的 params
             }
         };
 
@@ -66,7 +69,7 @@ const AgentEditor = () => {
             <div className="gradient-box">
                 <StateVector entities={selectedEntities} />
                 <ActionSpace entities={selectedEntities} actionTypes={selectedActionTypes} />
-                <RewardFunction />
+                <RewardFunction selectedParams={selectedParams} /> {/* 新增：传递 selectedParams */}
                 <ModelFunction scenarios={scenarios} />
             </div>
         </div>
