@@ -239,7 +239,6 @@
     color: white; /* 表头文字颜色 */
     position: sticky;
     top: 0;
-    z-index: 1;
 }
 
 .fixed-table .ant-table-body {

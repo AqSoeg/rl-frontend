@@ -80,7 +80,7 @@ const ActionSpace = ({ entities, actionTypes }) => {
             return; // 阻止弹窗关闭和下拉框的添加
         }
 
-        const uniqueKey = `${selectedEntity}-${selectedActionType}`;
+        const uniqueKey = `${selectedEntity}：${selectedActionType}`;
         const action = {
             entity: selectedEntity,
             actionType: selectedActionType,
@@ -313,7 +313,7 @@ const RuleContent = ({
                     value={ruleType}
                 >
                     <Option key="IF ELSE" value="IF ELSE">IF ELSE</Option>
-                    <Option key="WHILE" value="WHILE">WHILE</Option>
+                    <Option key="FOR" value="FOR">FOR</Option>
                 </Select>
             </div>
             <div className="rule-row">
