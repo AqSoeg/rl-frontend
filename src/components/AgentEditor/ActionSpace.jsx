@@ -21,6 +21,13 @@ const ActionSpace = ({ entities, actionTypes }) => {
     const [isAddButtonEnabled, setIsAddButtonEnabled] = useState(false);
     const [editingUniqueKey, setEditingUniqueKey] = useState(null);
 
+    // 获取当前动作的单位
+    const getActionUnit = () => {
+        if (!selectedActionType) return '';
+        const action = actionTypes.find(type => type[0] === selectedActionType);
+        return action ? action[1] : '';
+    };
+
     useEffect(() => {
         const unsubscribe = entityAssignmentStore.subscribe(() => {
             setIsAddButtonEnabled(!!entityAssignmentStore.selectedAgent);
@@ -69,6 +76,7 @@ const ActionSpace = ({ entities, actionTypes }) => {
             upperLimit,
             lowerLimit,
             discreteValues,
+            unit: getActionUnit(), // 保存单位
         };
 
         // 检查是否已经存在相同的 uniqueKey
@@ -161,6 +169,7 @@ const ActionSpace = ({ entities, actionTypes }) => {
                 setLowerLimit={setLowerLimit}
                 discreteValues={discreteValues}
                 setDiscreteValues={setDiscreteValues}
+                getActionUnit={getActionUnit} // 传递获取单位的函数
             />
         </div>
     );
@@ -242,8 +251,8 @@ const ActionContent = ({ uniqueKey, onEdit, onDelete }) => {
             <div>动作类型: {action.mode}</div>
             {action.mode === '连续型' && (
                 <>
-                    <div>取值上限: {action.upperLimit}</div>
-                    <div>取值下限: {action.lowerLimit}</div>
+                    <div>取值上限: {action.upperLimit} {action.unit}</div>
+                    <div>取值下限: {action.lowerLimit} {action.unit}</div>
                 </>
             )}
             {action.mode === '离散型' && (
@@ -347,7 +356,8 @@ const ActionModal = ({
                          lowerLimit,
                          setLowerLimit,
                          discreteValues,
-                         setDiscreteValues
+                         setDiscreteValues,
+                         getActionUnit // 获取单位的函数
                      }) => {
     const handleAddDiscreteValue = () => {
         setDiscreteValues([...discreteValues, '']);
@@ -371,76 +381,94 @@ const ActionModal = ({
                 <Button key="confirm" type="primary" onClick={onConfirm}>确认</Button>
             ] : null} // 如果没有选择动作类型，则不显示按钮
         >
-            <div>
-                <div>实体：</div>
-                <Select
-                    value={selectedEntity}
-                    onChange={setSelectedEntity}
-                    style={{ width: '100%' }}
-                >
-                    {entities.map(entity => (
-                        <Option key={entity.name} value={entity.name}>{entity.name}</Option>
-                    ))}
-                </Select>
-            </div>
-            <div>
-                <div>动作种类：</div>
-                <Select
-                    value={selectedActionType}
-                    onChange={setSelectedActionType}
-                    style={{ width: '100%' }}
-                    disabled={!selectedEntity}
-                >
-                    {actionTypes.map(type => (
-                        <Option key={type} value={type}>{type}</Option>
-                    ))}
-                </Select>
-            </div>
-            <div>
-                <div>动作类型：</div>
-                <Select
-                    value={actionMode}
-                    onChange={setActionMode}
-                    style={{ width: '100%' }}
-                    disabled={!selectedActionType}
-                >
-                    <Option value="连续型">连续型</Option>
-                    <Option value="离散型">离散型</Option>
-                </Select>
-            </div>
-            {actionMode === '连续型' && (
-                <>
-                    <div>取值上限：</div>
-                    <Input
-                        value={upperLimit}
-                        onChange={(e) => setUpperLimit(e.target.value)}
-                    />
-                    <div>取值下限：</div>
-                    <Input
-                        value={lowerLimit}
-                        onChange={(e) => setLowerLimit(e.target.value)}
-                    />
-                </>
-            )}
-            {actionMode === '离散型' && (
-                <>
-                    {discreteValues.map((value, index) => (
-                        <div key={index}>
-                            <div>取值{index + 1}：</div>
+            <div className="modal-content">
+                <div className="modal-row">
+                    <span className="modal-label">实体：</span>
+                    <Select
+                        value={selectedEntity}
+                        onChange={setSelectedEntity}
+                        style={{ width: '200px' }}
+                    >
+                        {entities.map(entity => (
+                            <Option key={entity.name} value={entity.name}>{entity.name}</Option>
+                        ))}
+                    </Select>
+                </div>
+                <div className="modal-row">
+                    <span className="modal-label">动作种类：</span>
+                    <Select
+                        value={selectedActionType}
+                        onChange={setSelectedActionType}
+                        style={{ width: '200px' }}
+                        disabled={!selectedEntity}
+                    >
+                        {actionTypes.map(type => (
+                            <Option key={type[0]} value={type[0]}>{type[0]}</Option>
+                        ))}
+                    </Select>
+                </div>
+                <div className="modal-row">
+                    <span className="modal-label">动作类型：</span>
+                    <Select
+                        value={actionMode}
+                        onChange={setActionMode}
+                        style={{ width: '200px' }}
+                        disabled={!selectedActionType}
+                    >
+                        <Option value="连续型">连续型</Option>
+                        <Option value="离散型">离散型</Option>
+                    </Select>
+                </div>
+                {actionMode && (
+                    <div className="modal-row">
+                        <span className="modal-label">动作空间：</span>
+                    </div>
+                )}
+                {actionMode === '连续型' && (
+                    <>
+                        <div className="modal-row">
+                            <span className="modal-label">取值上限：</span>
                             <Input
-                                value={value}
-                                onChange={(e) => {
-                                    const newValues = [...discreteValues];
-                                    newValues[index] = e.target.value;
-                                    setDiscreteValues(newValues);
-                                }}
+                                value={upperLimit}
+                                onChange={(e) => setUpperLimit(e.target.value)}
+                                addonAfter={getActionUnit()} // 在输入框后添加单位
+                                style={{ width: '150px' }}
                             />
-                            <Button onClick={() => handleRemoveDiscreteValue(index)}>-</Button>
                         </div>
-                    ))}
-                    <Button onClick={handleAddDiscreteValue}>+</Button>
-                </>
-            )}
+                        <div className="modal-row">
+                            <span className="modal-label">取值下限：</span>
+                            <Input
+                                value={lowerLimit}
+                                onChange={(e) => setLowerLimit(e.target.value)}
+                                addonAfter={getActionUnit()} // 在输入框后添加单位
+                                style={{ width: '150px' }}
+                            />
+                        </div>
+                    </>
+                )}
+                {actionMode === '离散型' && (
+                    <>
+                        {discreteValues.map((value, index) => (
+                            <div className="modal-row" key={index}>
+                                <span className="modal-label">取值{index + 1}：</span>
+                                <Input
+                                    value={value}
+                                    onChange={(e) => {
+                                        const newValues = [...discreteValues];
+                                        newValues[index] = e.target.value;
+                                        setDiscreteValues(newValues);
+                                    }}
+                                    style={{ width: '150px' }}
+                                />
+                                <Button onClick={() => handleRemoveDiscreteValue(index)}>-</Button>
+                            </div>
+                        ))}
+                        <div className="modal-row">
+                            <Button onClick={handleAddDiscreteValue}>+</Button>
+                        </div>
+                    </>
+                )}
+            </div>
         </Modal>
     );
 };

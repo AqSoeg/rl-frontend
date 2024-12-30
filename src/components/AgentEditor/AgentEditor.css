@@ -203,6 +203,23 @@
     color: #1890ff;
 }
 
+.modal-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px; /* 每行之间的间隔 */
+}
+
+.modal-row {
+    display: flex;
+    align-items: center; /* 标题和输入框在同一行 */
+    gap: 8px; /* 标题和输入框之间的间隔 */
+}
+
+.modal-label {
+    width: 80px; /* 标题的固定宽度，确保对齐 */
+    text-align: right; /* 标题右对齐 */
+}
+
 /* 表格容器样式 */
 .table-container {
     margin-top: 10px;
