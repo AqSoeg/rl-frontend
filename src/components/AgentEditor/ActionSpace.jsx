@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Button, Select, Input, Modal, Alert } from 'antd';
+import { Button, Select, Input, Modal } from 'antd';
 import actionLogo from '../../assets/actionSpace.svg';
 import uploadLogo from '../../assets/upload.svg';
 import addLogo from "../../assets/add.svg";
@@ -21,7 +21,6 @@ const ActionSpace = ({ entities, actionTypes }) => {
     const [isAddButtonEnabled, setIsAddButtonEnabled] = useState(false);
     const [editingUniqueKey, setEditingUniqueKey] = useState(null);
 
-    // 获取当前动作的单位
     const getActionUnit = () => {
         if (!selectedActionType) return '';
         const action = actionTypes.find(type => type[0] === selectedActionType);
@@ -56,28 +55,25 @@ const ActionSpace = ({ entities, actionTypes }) => {
     }, []);
 
     const handleAddAction = () => {
-        // 重置弹窗状态
         setSelectedEntity('');
         setSelectedActionType('');
         setActionMode('');
         setUpperLimit('');
         setLowerLimit('');
         setDiscreteValues(['']);
-        setEditingUniqueKey(null); // 设置为新增模式
-        setModalOpen(true); // 打开弹窗
+        setEditingUniqueKey(null);
+        setModalOpen(true);
     };
 
     const handleModalConfirm = () => {
-        // 检查离散型动作的取值是否为空
         if (actionMode === '离散型' && discreteValues.every(value => value.trim() === '')) {
             alert('请确保该动作有数值！');
-            return; // 阻止弹窗关闭和下拉框的添加
+            return;
         }
 
-        // 检查连续型动作的上限和下限是否为空
         if (actionMode === '连续型' && (upperLimit.trim() === '' || lowerLimit.trim() === '')) {
             alert('请确保该动作的上限和下限都有数值！');
-            return; // 阻止弹窗关闭和下拉框的添加
+            return;
         }
 
         const uniqueKey = `${selectedEntity}：${selectedActionType}`;
@@ -88,18 +84,15 @@ const ActionSpace = ({ entities, actionTypes }) => {
             upperLimit,
             lowerLimit,
             discreteValues,
-            unit: getActionUnit(), // 保存单位
+            unit: getActionUnit(),
         };
 
-        // 检查是否已经存在相同的 uniqueKey
         const existingIndex = dropdowns.findIndex(key => key === uniqueKey);
 
         if (existingIndex !== -1) {
-            // 如果存在相同的 uniqueKey，更新该下拉框的内容
             actionSpaceStore.setAction(uniqueKey, action);
-            setDropdowns([...dropdowns]); // 保持 dropdowns 不变，触发重新渲染
+            setDropdowns([...dropdowns]);
         } else {
-            // 如果不存在相同的 uniqueKey，添加新的下拉框
             actionSpaceStore.setAction(uniqueKey, action);
             setDropdowns([...dropdowns, uniqueKey]);
         }
@@ -107,7 +100,6 @@ const ActionSpace = ({ entities, actionTypes }) => {
         setModalOpen(false);
     };
 
-    // 直接关闭弹窗，不触发任何提示
     const handleCloseModal = () => {
         setModalOpen(false);
     };
@@ -120,15 +112,14 @@ const ActionSpace = ({ entities, actionTypes }) => {
 
     const handleEditAction = (uniqueKey) => {
         const action = actionSpaceStore.getAction(uniqueKey);
-        // 填充弹窗内容
         setSelectedEntity(action.entity);
         setSelectedActionType(action.actionType);
         setActionMode(action.mode);
         setUpperLimit(action.upperLimit);
         setLowerLimit(action.lowerLimit);
         setDiscreteValues(action.discreteValues);
-        setEditingUniqueKey(uniqueKey); // 设置为编辑模式
-        setModalOpen(true); // 打开弹窗
+        setEditingUniqueKey(uniqueKey);
+        setModalOpen(true);
     };
 
     const handleDeleteAction = (uniqueKey) => {
@@ -170,7 +161,7 @@ const ActionSpace = ({ entities, actionTypes }) => {
             </div>
             <ActionModal
                 open={modalOpen}
-                onCancel={handleCloseModal} // 点击 X 号时直接关闭弹窗
+                onCancel={handleCloseModal}
                 onConfirm={handleModalConfirm}
                 entities={entities}
                 actionTypes={actionTypes}
@@ -187,7 +178,7 @@ const ActionSpace = ({ entities, actionTypes }) => {
                 discreteValues={discreteValues}
                 setDiscreteValues={setDiscreteValues}
                 getActionUnit={getActionUnit}
-                onModalCancel={handleModalCancel} // 传递给取消按钮的逻辑
+                onModalCancel={handleModalCancel}
             />
         </div>
     );
@@ -202,18 +193,42 @@ const DropdownContainer = ({ uniqueKey, onEdit, onDelete }) => {
     const [execution1, setExecution1] = useState('');
     const [execution2, setExecution2] = useState('');
 
+    // 从 store 中获取当前保存的规则
+    const savedRule = actionSpaceStore.getRule(uniqueKey);
+
+    // 初始化规则内容
+    useEffect(() => {
+        if (savedRule) {
+            setRuleType(savedRule.ruleType);
+            setCondition1(savedRule.condition1);
+            setCondition2(savedRule.condition2);
+            setExecution1(savedRule.execution1);
+            setExecution2(savedRule.execution2);
+        } else {
+            setRuleType('');
+            setCondition1('');
+            setCondition2('');
+            setExecution1('');
+            setExecution2('');
+        }
+    }, [ruleOpen, savedRule]);
+
     const handleRuleConfirm = () => {
+        // 保存规则到 store
         actionSpaceStore.setRule(uniqueKey, { ruleType, condition1, condition2, execution1, execution2 });
         setRuleOpen(false);
     };
 
     const handleRuleCancel = () => {
         if (window.confirm('是否取消编辑？')) {
+            // 清空输入内容
             setRuleType('');
             setCondition1('');
             setCondition2('');
             setExecution1('');
             setExecution2('');
+            // 清空 store 中的规则状态
+            actionSpaceStore.setRule(uniqueKey, null);
             setRuleOpen(false);
         }
     };
@@ -267,7 +282,7 @@ const ActionContent = ({ uniqueKey, onEdit, onDelete }) => {
             <div className="action-text">实体：{action.entity}</div>
             <div className="action-text">动作种类：{action.actionType}</div>
             <div className="action-text">动作类型：{action.mode}</div>
-            <div className="action-text">动作空间：</div> {/* 新增的文本 */}
+            <div className="action-text">动作空间：</div>
             {action.mode === '连续型' && (
                 <>
                     <div className="action-text">取值上限：{action.upperLimit} ({action.unit})</div>
@@ -390,18 +405,17 @@ const ActionModal = ({
         setDiscreteValues(newValues);
     };
 
-    // 是否显示确认和取消按钮
-    const showButtons = actionMode !== ''; // 当动作类型被选择后显示按钮
+    const showButtons = actionMode !== '';
 
     return (
         <Modal
             title="动作编辑"
             open={open}
-            onCancel={onCancel} // 直接调用 onCancel，无需额外提示
-            footer={showButtons ? [ // 动态控制按钮的显示
+            onCancel={onCancel}
+            footer={showButtons ? [
                 <Button key="cancel" onClick={onModalCancel}>取消</Button>,
                 <Button key="confirm" type="primary" onClick={onConfirm}>确认</Button>
-            ] : null} // 如果没有选择动作类型，则不显示按钮
+            ] : null}
         >
             <div className="modal-content">
                 <div className="modal-row">
@@ -453,7 +467,7 @@ const ActionModal = ({
                             <Input
                                 value={upperLimit}
                                 onChange={(e) => setUpperLimit(e.target.value)}
-                                addonAfter={getActionUnit()} // 在输入框后添加单位
+                                addonAfter={getActionUnit()}
                                 style={{ width: '250px' }}
                             />
                         </div>
@@ -462,7 +476,7 @@ const ActionModal = ({
                             <Input
                                 value={lowerLimit}
                                 onChange={(e) => setLowerLimit(e.target.value)}
-                                addonAfter={getActionUnit()} // 在输入框后添加单位
+                                addonAfter={getActionUnit()}
                                 style={{ width: '250px' }}
                             />
                         </div>
