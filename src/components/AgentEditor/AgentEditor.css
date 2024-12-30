@@ -253,19 +253,8 @@
     border-radius: 4px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-}
-
-.action-row {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-    width: 100%;
-    justify-content: center;
-}
-
-.action-row span {
-    margin-right: 10px;
+    align-items: flex-start; /* 修改为 flex-start，使内容左对齐 */
+    text-align: left; /* 确保文本左对齐 */
 }
 
 .action-buttons {
@@ -279,14 +268,8 @@
     margin-left: 10px;
 }
 
-/* 含义标签样式 */
-.meaning-label {
-    margin-right: 10px;
-}
-
-/* 含义输入框样式 */
-.meaning-input {
-    width: 200px;
+.action-text {
+    margin-bottom: 8px; /* 为每行文本添加下边距，避免过于紧凑 */
 }
 
 /* 规则容器样式 */

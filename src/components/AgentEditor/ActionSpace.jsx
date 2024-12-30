@@ -68,6 +68,18 @@ const ActionSpace = ({ entities, actionTypes }) => {
     };
 
     const handleModalConfirm = () => {
+        // 检查离散型动作的取值是否为空
+        if (actionMode === '离散型' && discreteValues.every(value => value.trim() === '')) {
+            alert('请确保该动作有数值！');
+            return; // 阻止弹窗关闭和下拉框的添加
+        }
+
+        // 检查连续型动作的上限和下限是否为空
+        if (actionMode === '连续型' && (upperLimit.trim() === '' || lowerLimit.trim() === '')) {
+            alert('请确保该动作的上限和下限都有数值！');
+            return; // 阻止弹窗关闭和下拉框的添加
+        }
+
         const uniqueKey = `${selectedEntity}-${selectedActionType}`;
         const action = {
             entity: selectedEntity,
@@ -92,6 +104,11 @@ const ActionSpace = ({ entities, actionTypes }) => {
             setDropdowns([...dropdowns, uniqueKey]);
         }
 
+        setModalOpen(false);
+    };
+
+    // 直接关闭弹窗，不触发任何提示
+    const handleCloseModal = () => {
         setModalOpen(false);
     };
 
@@ -153,7 +170,7 @@ const ActionSpace = ({ entities, actionTypes }) => {
             </div>
             <ActionModal
                 open={modalOpen}
-                onCancel={handleModalCancel}
+                onCancel={handleCloseModal} // 点击 X 号时直接关闭弹窗
                 onConfirm={handleModalConfirm}
                 entities={entities}
                 actionTypes={actionTypes}
@@ -169,7 +186,8 @@ const ActionSpace = ({ entities, actionTypes }) => {
                 setLowerLimit={setLowerLimit}
                 discreteValues={discreteValues}
                 setDiscreteValues={setDiscreteValues}
-                getActionUnit={getActionUnit} // 传递获取单位的函数
+                getActionUnit={getActionUnit}
+                onModalCancel={handleModalCancel} // 传递给取消按钮的逻辑
             />
         </div>
     );
@@ -246,24 +264,27 @@ const ActionContent = ({ uniqueKey, onEdit, onDelete }) => {
 
     return (
         <div className="action-container">
-            <div>实体: {action.entity}</div>
-            <div>动作种类: {action.actionType}</div>
-            <div>动作类型: {action.mode}</div>
+            <div className="action-text">实体：{action.entity}</div>
+            <div className="action-text">动作种类：{action.actionType}</div>
+            <div className="action-text">动作类型：{action.mode}</div>
+            <div className="action-text">动作空间：</div> {/* 新增的文本 */}
             {action.mode === '连续型' && (
                 <>
-                    <div>取值上限: {action.upperLimit} {action.unit}</div>
-                    <div>取值下限: {action.lowerLimit} {action.unit}</div>
+                    <div className="action-text">取值上限：{action.upperLimit} {action.unit}</div>
+                    <div className="action-text">取值下限：{action.lowerLimit} {action.unit}</div>
                 </>
             )}
             {action.mode === '离散型' && (
                 <div>
                     {action.discreteValues.map((value, index) => (
-                        <div key={index}>取值{index + 1}: {value}</div>
+                        <div className="action-text" key={index}>取值{index + 1}：{value}</div>
                     ))}
                 </div>
             )}
-            <Button onClick={() => onEdit(uniqueKey)}>编辑</Button>
-            <Button onClick={() => onDelete(uniqueKey)}>删除</Button>
+            <div className="action-buttons">
+                <Button type="primary" onClick={() => onEdit(uniqueKey)}>编辑</Button>
+                <Button onClick={() => onDelete(uniqueKey)}>删除</Button>
+            </div>
         </div>
     );
 };
@@ -357,7 +378,8 @@ const ActionModal = ({
                          setLowerLimit,
                          discreteValues,
                          setDiscreteValues,
-                         getActionUnit // 获取单位的函数
+                         getActionUnit,
+                         onModalCancel
                      }) => {
     const handleAddDiscreteValue = () => {
         setDiscreteValues([...discreteValues, '']);
@@ -375,9 +397,9 @@ const ActionModal = ({
         <Modal
             title="动作编辑"
             open={open}
-            onCancel={onCancel}
+            onCancel={onCancel} // 直接调用 onCancel，无需额外提示
             footer={showButtons ? [ // 动态控制按钮的显示
-                <Button key="cancel" onClick={onCancel}>取消</Button>,
+                <Button key="cancel" onClick={onModalCancel}>取消</Button>,
                 <Button key="confirm" type="primary" onClick={onConfirm}>确认</Button>
             ] : null} // 如果没有选择动作类型，则不显示按钮
         >
