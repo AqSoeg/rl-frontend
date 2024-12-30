@@ -387,7 +387,7 @@ const ActionModal = ({
                     <Select
                         value={selectedEntity}
                         onChange={setSelectedEntity}
-                        style={{ width: '200px' }}
+                        style={{ width: '300px' }}
                     >
                         {entities.map(entity => (
                             <Option key={entity.name} value={entity.name}>{entity.name}</Option>
@@ -399,7 +399,7 @@ const ActionModal = ({
                     <Select
                         value={selectedActionType}
                         onChange={setSelectedActionType}
-                        style={{ width: '200px' }}
+                        style={{ width: '300px' }}
                         disabled={!selectedEntity}
                     >
                         {actionTypes.map(type => (
@@ -412,7 +412,7 @@ const ActionModal = ({
                     <Select
                         value={actionMode}
                         onChange={setActionMode}
-                        style={{ width: '200px' }}
+                        style={{ width: '300px' }}
                         disabled={!selectedActionType}
                     >
                         <Option value="连续型">连续型</Option>
@@ -432,7 +432,7 @@ const ActionModal = ({
                                 value={upperLimit}
                                 onChange={(e) => setUpperLimit(e.target.value)}
                                 addonAfter={getActionUnit()} // 在输入框后添加单位
-                                style={{ width: '150px' }}
+                                style={{ width: '250px' }}
                             />
                         </div>
                         <div className="modal-row">
@@ -441,7 +441,7 @@ const ActionModal = ({
                                 value={lowerLimit}
                                 onChange={(e) => setLowerLimit(e.target.value)}
                                 addonAfter={getActionUnit()} // 在输入框后添加单位
-                                style={{ width: '150px' }}
+                                style={{ width: '250px' }}
                             />
                         </div>
                     </>
@@ -458,7 +458,7 @@ const ActionModal = ({
                                         newValues[index] = e.target.value;
                                         setDiscreteValues(newValues);
                                     }}
-                                    style={{ width: '150px' }}
+                                    style={{ width: '250px' }}
                                 />
                                 <Button onClick={() => handleRemoveDiscreteValue(index)}>-</Button>
                             </div>
