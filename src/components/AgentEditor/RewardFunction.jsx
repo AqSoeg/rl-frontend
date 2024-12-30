@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button, Select, Modal, Form } from 'antd';
 import rewardLogo from '../../assets/rewardFunction.svg';
 import uploadLogo from '../../assets/upload.svg';
-import addFunctionLogo from '../../assets/addFunction.svg';
+import addLogo from '../../assets/add.svg';
 import sidebarStore from './SidebarStore';
 import rewardFunctionStore from './RewardFunctionStore'; // 引入 RewardFunctionStore
 import { observer } from 'mobx-react';
@@ -135,7 +135,7 @@ const RewardFunction = observer(() => {
             </div>
             <div className="upload-button">
                 <img
-                    src={addFunctionLogo}
+                    src={addLogo}
                     alt="Add Function"
                     className="upload-button-logo"
                     onClick={isAddButtonEnabled ? handleAddReward : null}
