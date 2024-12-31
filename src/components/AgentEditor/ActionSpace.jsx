@@ -19,12 +19,25 @@ const ActionSpace = ({ entities, actionTypes }) => {
     const [discreteValues, setDiscreteValues] = useState(['']);
     const [isAddButtonEnabled, setIsAddButtonEnabled] = useState(false);
     const [editingUniqueKey, setEditingUniqueKey] = useState(null);
+    const [actions, setActions] = useState([]); // 新增状态来跟踪动作列表
 
     // 获取当前智能体模型ID
     const currentModelID = entityAssignmentStore.selectedAgent;
 
     // 获取当前模型的动作配置
-    const actions = actionSpaceStore.getActionsForModel(currentModelID);
+    useEffect(() => {
+        const updateActions = () => {
+            setActions(actionSpaceStore.getActionsForModel(currentModelID));
+        };
+
+        // 初始化动作列表
+        updateActions();
+
+        // 订阅动作列表的变化
+        const unsubscribe = actionSpaceStore.subscribe(updateActions);
+
+        return () => unsubscribe();
+    }, [currentModelID]);
 
     // 获取动作单位
     const getActionUnit = () => {
@@ -117,6 +130,8 @@ const ActionSpace = ({ entities, actionTypes }) => {
     const handleDeleteAction = (uniqueKey) => {
         if (window.confirm('是否删除该动作？')) {
             actionSpaceStore.deleteActionForModel(currentModelID, uniqueKey);
+            // 更新动作列表状态
+            setActions(actionSpaceStore.getActionsForModel(currentModelID));
         }
     };
 
@@ -217,7 +232,7 @@ const DropdownContainer = ({ uniqueKey, action, onEdit, onDelete, modelID }) => 
 
     // 处理规则取消
     const handleRuleCancel = () => {
-        if (window.confirm('是否取消编辑？')) {
+        if (window.confirm('是否取消该行为规则？')) {
             setRuleType('');
             setCondition1('');
             setCondition2('');
