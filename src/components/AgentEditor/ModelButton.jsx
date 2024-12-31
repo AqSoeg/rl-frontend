@@ -94,25 +94,19 @@ const ModelFunction = ({ scenarios }) => {
                 const entity = role.entities.find(e => e.name === entityName);
 
                 // 获取当前实体的所有动作空间
-                const actionSpaceKeys = Object.keys(actionSpaceStore.actions).filter(key => key.startsWith(`${entityName}：`));
-
-                // 构建动作空间数据
-                const actionSpaceData = actionSpaceKeys.map(key => {
-                    const action = actionSpaceStore.actions[key];
-                    const rule = actionSpaceStore.getRule(key); // 读取行为规则
-                    const actionType = key.split('：')[1];
-
-                    const actionData = {
-                        name: actionType,
-                        type: action.mode,
-                        action: action.mode === '连续型'
-                            ? [action.upperLimit, action.lowerLimit, action.unit]
-                            : action.discreteValues,
-                        rule: rule ? [rule.ruleType, rule.condition1, rule.condition2, rule.execution1, rule.execution2] : [] // 确保规则数据正确
-                    };
-
-                    return actionData;
-                });
+                const actionSpaceData = actionSpaceStore.getActionsForModel(entityAssignmentStore.selectedAgent)
+                    .filter(action => action.entity === entityName)
+                    .map(action => {
+                        const rule = actionSpaceStore.getRuleForModel(entityAssignmentStore.selectedAgent, `${action.entity}：${action.actionType}`);
+                        return {
+                            name: action.actionType,
+                            type: action.mode,
+                            action: action.mode === '连续型'
+                                ? [[action.lowerLimit, action.upperLimit], action.unit, action.range]
+                                : [action.discreteValues, action.discreteOptions],
+                            rule: rule ? [rule.ruleType, rule.condition1, rule.condition2, rule.execution1, rule.execution2] : null
+                        };
+                    });
 
                 // 过滤出与当前实体相关的奖励函数
                 const rewardFunction = allRewards
