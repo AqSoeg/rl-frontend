@@ -1,4 +1,3 @@
-// StateVector.jsx
 import { useState, useEffect } from 'react';
 import { Button, Table, Checkbox } from 'antd';
 import stateLogo from '../../assets/stateVector.svg';
@@ -7,10 +6,48 @@ import entityAssignmentStore from './EntityAssignmentStore';
 import stateVectorStore from './StateVectorStore'; // 引入 StateVectorStore
 
 const StateVector = ({ entities }) => {
-    const [visible, setVisible] = useState(Array(entities.length).fill(false));
+    const [visible, setVisible] = useState(Array(entities?.length || 0).fill(false));
     const [selectedVector, setSelectedVector] = useState(null);
     const [selectedVectorIndex, setSelectedVectorIndex] = useState(null);
     const [selectedRows, setSelectedRows] = useState({}); // 记录每张表格中选中的行
+    const [agentSelectionState, setAgentSelectionState] = useState({}); // 存储每个智能体的选择状态
+
+    // 初始化 selectedRows，根据当前智能体的选择状态恢复
+    useEffect(() => {
+        if (!entities || !Array.isArray(entities)) {
+            console.error("entities is not defined or not an array");
+            return;
+        }
+
+        const selectedAgent = entityAssignmentStore.selectedAgent;
+        if (selectedAgent && agentSelectionState[selectedAgent]) {
+            // 如果当前智能体有存储的选择状态，则恢复
+            setSelectedRows(agentSelectionState[selectedAgent]);
+        } else {
+            // 否则初始化为全选
+            const initialSelectedRows = {};
+            entities.forEach(entity => {
+                if (!entity || typeof entity !== 'object' || !entity.name || !Array.isArray(entity.stateVector)) {
+                    console.error(`Invalid entity or stateVector for entity: ${entity?.name || 'unknown'}`);
+                    return;
+                }
+                initialSelectedRows[entity.name] = entity.stateVector.map((_, idx) => idx);
+            });
+            setSelectedRows(initialSelectedRows);
+        }
+    }, [entities, entityAssignmentStore.selectedAgent]);
+
+    // 当 selectedRows 变化时，更新当前智能体的选择状态
+    useEffect(() => {
+        const selectedAgent = entityAssignmentStore.selectedAgent;
+        if (selectedAgent) {
+            setAgentSelectionState(prevState => ({
+                ...prevState,
+                [selectedAgent]: selectedRows,
+            }));
+            stateVectorStore.setSelectedStateVectors(selectedRows); // 更新 StateVectorStore
+        }
+    }, [selectedRows]);
 
     useEffect(() => {
         if (entityAssignmentStore.isAgentSelected) {
@@ -33,13 +70,15 @@ const StateVector = ({ entities }) => {
     // 处理全选
     const handleSelectAll = (entityName, selected) => {
         const newSelectedRows = { ...selectedRows };
-        if (selected) {
-            newSelectedRows[entityName] = entities.find(e => e.name === entityName).stateVector.map((_, idx) => idx);
-        } else {
-            newSelectedRows[entityName] = [];
+        const entity = entities.find(e => e.name === entityName);
+        if (entity && Array.isArray(entity.stateVector)) {
+            if (selected) {
+                newSelectedRows[entityName] = entity.stateVector.map((_, idx) => idx);
+            } else {
+                newSelectedRows[entityName] = [];
+            }
+            setSelectedRows(newSelectedRows);
         }
-        setSelectedRows(newSelectedRows);
-        stateVectorStore.setSelectedStateVectors(newSelectedRows); // 更新 StateVectorStore
     };
 
     // 处理单行选择
@@ -54,7 +93,6 @@ const StateVector = ({ entities }) => {
             newSelectedRows[entityName].push(rowIndex);
         }
         setSelectedRows(newSelectedRows);
-        stateVectorStore.setSelectedStateVectors(newSelectedRows); // 更新 StateVectorStore
     };
 
     const columns = [
@@ -75,7 +113,7 @@ const StateVector = ({ entities }) => {
     ];
 
     const getTableData = (vector) => {
-        if (vector.stateVector.length === 0) {
+        if (!vector || !Array.isArray(vector.stateVector) || vector.stateVector.length === 0) {
             return [{ name: '', info: '', unit: '' }];
         }
         return vector.stateVector.map(([name, info, unit], idx) => ({
@@ -97,7 +135,7 @@ const StateVector = ({ entities }) => {
                 <img src={uploadLogo} alt="Upload" className="upload-button-logo" />
             </div>
             <div className="dropdown-container-wrapper">
-                {entityAssignmentStore.isAgentSelected && entities.map((entity, i) => (
+                {entityAssignmentStore.isAgentSelected && entities?.map((entity, i) => (
                     <div key={i} className="dropdown-container">
                         <div className="dropdown-header" onClick={() => handleSelectChange(i)}>
                             <span>{entity.name}</span>
@@ -112,7 +150,7 @@ const StateVector = ({ entities }) => {
                                         {
                                             title: (
                                                 <Checkbox
-                                                    checked={selectedRows[entity.name]?.length === entity.stateVector.length}
+                                                    checked={selectedRows[entity.name]?.length === entity.stateVector?.length}
                                                     onChange={(e) => handleSelectAll(entity.name, e.target.checked)}
                                                 />
                                             ),
