@@ -6,16 +6,10 @@
       "name": "MAPPO",
       "hyper-parameters": [
         {
-          "id": "actor_learning_rate",
-          "name": "Actor学习效率",
-          "value": [1000, 100, 1000, 10000],
-          "default": 1000
-        },
-        {
-          "id": "critic_learning_rate",
-          "name": "Critic学习率",
-          "value": [10000, 100, 1000, 10000, 100000],
-          "default": 10000
+          "id": "learning_rate",
+          "name": "学习率",
+          "value": [0.0003, 0.0001, 0.0003, 0.001],
+          "default": 0.0003
         },
         {
           "id": "gamma",
@@ -24,45 +18,45 @@
           "default": 0.9
         },
         {
-          "id": "epsilon",
-          "name": "截断比率",
-          "value": [0.1, 0.1, 0.2],
-          "default": 0.1
+          "id": "n_steps",
+          "name": "采样步数",
+          "value": [128, 64, 128, 256],
+          "default": 128
         },
         {
           "id": "batch_size",
           "name": "批量大小",
-          "value": [64, 32, 64, 128, 256],
-          "default": 64
+          "value": [32, 64, 128],
+          "default": 32
         },
         {
-          "id": "ppo_epochs",
+          "id": "n_epochs",
           "name": "更新步数",
-          "value": [15, 5, 15, 25],
-          "default": 15
+          "value": [4, 3, 4, 8],
+          "default": 4
         },
         {
-          "id": "lambda",
+          "id": "lambda_",
           "name": "GAE参数",
           "value": [0.95, 0.9, 0.95, 0.99],
           "default": 0.95
         },
         {
-          "id": "train_interval",
-          "name": "训练间隔",
-          "value": [100, 100, 200],
-          "default": 100
+          "id": "clip_range",
+          "name": "裁剪范围",
+          "value": [0.1, 0.2, 0.3],
+          "default": 0.2
         },
         {
-          "id": "save_interval",
-          "name": "保存间隔",
-          "value": [1000, 1000, 5000],
-          "default": 1000
+          "id": "ent_coef",
+          "name": "策略熵系数",
+          "value": [0.01, 0.001, 0.01],
+          "default": 0.01
         },
         {
-          "id": "total_step",
-          "name": "总步数",
-          "value": [1000000, 1000000, 5000000, 10000000],
+          "id": "total_timesteps",
+          "name": "MAPPO总步数",
+          "value": [1000000, 5000000, 10000000],
           "default": 1000000
         }
       ]
@@ -73,16 +67,10 @@
       "name": "MADDPG",
       "hyper-parameters": [
         {
-          "id": "actor_learning_rate",
-          "name": "Actor学习率",
-          "value": [1000, 100, 1000, 10000],
-          "default": 1000
-        },
-        {
-          "id": "critic_learning_rate",
-          "name": "Critic学习率",
-          "value": [10000, 100, 1000, 10000, 100000],
-          "default": 10000
+          "id": "learning_rate",
+          "name": "学习率",
+          "value": [0.0003, 0.0001, 0.0003, 0.001],
+          "default": 0.0003
         },
         {
           "id": "gamma",
@@ -91,45 +79,45 @@
           "default": 0.9
         },
         {
-          "id": "epsilon",
-          "name": "截断比率",
-          "value": [0.1, 0.1, 0.2],
-          "default": 0.1
+          "id": "n_steps",
+          "name": "采样步数",
+          "value": [128, 64, 128, 256],
+          "default": 128
         },
         {
           "id": "batch_size",
           "name": "批量大小",
-          "value": [64, 32, 64, 128, 256],
-          "default": 64
+          "value": [32, 64, 128],
+          "default": 32
         },
         {
-          "id": "ppo_epochs",
+          "id": "n_epochs",
           "name": "更新步数",
-          "value": [15, 5, 15, 25],
-          "default": 15
+          "value": [4, 3, 4, 8],
+          "default": 4
         },
         {
-          "id": "lambda",
+          "id": "lambda_",
           "name": "GAE参数",
           "value": [0.95, 0.9, 0.95, 0.99],
           "default": 0.95
         },
         {
-          "id": "train_interval",
-          "name": "训练间隔",
-          "value": [100, 100, 200],
-          "default": 100
+          "id": "clip_range",
+          "name": "裁剪范围",
+          "value": [0.1, 0.2, 0.3],
+          "default": 0.2
         },
         {
-          "id": "save_interval",
-          "name": "保存间隔",
-          "value": [1000, 1000, 5000],
-          "default": 1000
+          "id": "ent_coef",
+          "name": "策略熵系数",
+          "value": [0.01, 0.001, 0.01],
+          "default": 0.01
         },
         {
-          "id": "total_step",
-          "name": "总步数",
-          "value": [1000000, 1000000, 5000000, 10000000],
+          "id": "total_timesteps",
+          "name": "MADDPG总步数",
+          "value": [1000000, 5000000, 10000000],
           "default": 1000000
         }
       ]
@@ -140,16 +128,10 @@
       "name": "PPO",
       "hyper-parameters": [
         {
-          "id": "actor_learning_rate",
-          "name": "Actor学习率",
-          "value": [1000, 100, 1000, 10000],
-          "default": 1000
-        },
-        {
-          "id": "critic_learning_rate",
-          "name": "Critic学习率",
-          "value": [10000, 100, 1000, 10000, 100000],
-          "default": 10000
+          "id": "learning_rate",
+          "name": "学习率",
+          "value": [0.0003, 0.0001, 0.0003, 0.001],
+          "default": 0.0003
         },
         {
           "id": "gamma",
@@ -158,45 +140,45 @@
           "default": 0.9
         },
         {
-          "id": "epsilon",
-          "name": "截断比率",
-          "value": [0.1, 0.1, 0.2],
-          "default": 0.1
+          "id": "n_steps",
+          "name": "采样步数",
+          "value": [128, 64, 128, 256],
+          "default": 128
         },
         {
           "id": "batch_size",
           "name": "批量大小",
-          "value": [64, 32, 64, 128, 256],
-          "default": 64
+          "value": [32, 64, 128],
+          "default": 32
         },
         {
-          "id": "ppo_epochs",
+          "id": "n_epochs",
           "name": "更新步数",
-          "value": [15, 5, 15, 25],
-          "default": 15
+          "value": [4, 3, 4, 8],
+          "default": 4
         },
         {
-          "id": "lambda",
+          "id": "gae_lambda",
           "name": "GAE参数",
           "value": [0.95, 0.9, 0.95, 0.99],
           "default": 0.95
         },
         {
-          "id": "train_interval",
-          "name": "训练间隔",
-          "value": [100, 100, 200],
-          "default": 100
+          "id": "clip_range",
+          "name": "裁剪范围",
+          "value": [0.1, 0.2, 0.3],
+          "default": 0.2
         },
         {
-          "id": "save_interval",
-          "name": "保存间隔",
-          "value": [1000, 1000, 5000],
-          "default": 1000
+          "id": "ent_coef",
+          "name": "策略熵系数",
+          "value": [0.01, 0.001, 0.01],
+          "default": 0.01
         },
         {
-          "id": "total_step",
-          "name": "总步数",
-          "value": [1000000, 1000000, 5000000, 10000000],
+          "id": "total_timesteps",
+          "name": "PPO总步数",
+          "value": [1000000, 5000, 10000000],
           "default": 1000000
         }
       ]
@@ -209,61 +191,49 @@
         {
           "id": "actor_learning_rate",
           "name": "Actor学习率",
-          "value": [1000, 100, 1000, 10000],
-          "default": 1000
+          "value": [0.0001, 0.0003],
+          "default": 0.0001
         },
         {
           "id": "critic_learning_rate",
           "name": "Critic学习率",
-          "value": [10000, 100, 1000, 10000, 100000],
-          "default": 10000
+          "value": [0.001, 0.0001],
+          "default": 0.001
         },
         {
           "id": "gamma",
           "name": "折扣因子",
-          "value": [0.9, 0.8, 0.9, 0.95, 0.99],
+          "value": [0.9, 0.99],
           "default": 0.9
         },
         {
-          "id": "epsilon",
-          "name": "截断比率",
-          "value": [0.1, 0.1, 0.2],
-          "default": 0.1
+          "id": "tau",
+          "name": "软更新率",
+          "value": [0.005, 0.01, 0.05],
+          "default": 0.005
         },
         {
           "id": "batch_size",
           "name": "批量大小",
-          "value": [64, 32, 64, 128, 256],
+          "value": [64, 32, 128],
           "default": 64
         },
         {
-          "id": "ppo_epochs",
-          "name": "更新步数",
-          "value": [15, 5, 15, 25],
-          "default": 15
+          "id": "buffer_size",
+          "name": "经验回放缓冲区大小",
+          "value": [10000, 50000, 100000],
+          "default": 10000
         },
         {
-          "id": "lambda",
-          "name": "GAE参数",
-          "value": [0.95, 0.9, 0.95, 0.99],
-          "default": 0.95
+          "id": "exploration_noise",
+          "name": "探索噪声",
+          "value": [0.1, 0.2],
+          "default": 0.1
         },
         {
-          "id": "train_interval",
-          "name": "训练间隔",
-          "value": [100, 100, 200],
-          "default": 100
-        },
-        {
-          "id": "save_interval",
-          "name": "保存间隔",
-          "value": [1000, 1000, 5000],
-          "default": 1000
-        },
-        {
-          "id": "total_step",
+          "id": "total_timesteps",
           "name": "总步数",
-          "value": [1000000, 1000000, 5000000, 10000000],
+          "value": [1000000, 5000000, 10000000],
           "default": 1000000
         }
       ]

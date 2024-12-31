@@ -1,6 +1,6 @@
 import React from 'react';
 
-const RighT = ({ selectedAlgorithm, selectedScenario }) => {
+const RighT = ({ selectedAlgorithm, selectedScenario ,selectedAgentRole}) => {
   return (
     <div className='right'>
       <h3>已选算法详情</h3>
@@ -31,7 +31,23 @@ const RighT = ({ selectedAlgorithm, selectedScenario }) => {
       ) : (
         <p>请选择一个想定场景</p>
       )}
+
+      <hr />
+
+
+      
+      <h3>已选智能体角色详情</h3>
+      {selectedAgentRole ? (
+        <div>
+          <p><strong>ID:</strong> {selectedAgentRole.id || '未知ID'}</p>
+          <p><strong>名称:</strong> {selectedAgentRole.name || '未知ID'}</p>
+        </div>
+      ) : (
+        <p>请选择一个想定场景</p>
+      )}
+    
     </div>
+    
   );
 };
 

@@ -1,6 +1,7 @@
 .trainingservice {
     display: flex;
     flex-direction: row; /* 指定水平排列 */
+    height: 100vh;
   }
   
   .left, .middle, .right {
@@ -16,6 +17,7 @@
     background-color: #7ed0e9; /* 左列背景色 */
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0, 0.1);
+    height: 100vh;
   }
   
   .form-item {
@@ -52,6 +54,7 @@
     flex: 1;
     background-color: #6483e7;
     padding: 20px; /* 内边距 */
+    height: 100vh;
   }
 
   .image-container {
@@ -86,7 +89,8 @@
 
   .right {
     flex: 2;
-    background-color: #7a2222; /* 右列背景色，根据需要调整 */
+    background-color: #ffffff; /* 右列背景色，根据需要调整 */
+    height: 100vh;
   }
   .ant-card{
     margin-top: 20px;
