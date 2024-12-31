@@ -17,16 +17,23 @@ const ActionSpace = ({ entities, actionTypes }) => {
     const [upperLimit, setUpperLimit] = useState('');
     const [lowerLimit, setLowerLimit] = useState('');
     const [discreteValues, setDiscreteValues] = useState(['']);
-    const [dropdowns, setDropdowns] = useState([]);
     const [isAddButtonEnabled, setIsAddButtonEnabled] = useState(false);
     const [editingUniqueKey, setEditingUniqueKey] = useState(null);
 
+    // 获取当前智能体模型ID
+    const currentModelID = entityAssignmentStore.selectedAgent;
+
+    // 获取当前模型的动作配置
+    const actions = actionSpaceStore.getActionsForModel(currentModelID);
+
+    // 获取动作单位
     const getActionUnit = () => {
         if (!selectedActionType) return '';
         const action = actionTypes.find(type => type[0] === selectedActionType);
         return action ? action[1] : '';
     };
 
+    // 订阅实体分配状态变化
     useEffect(() => {
         const unsubscribe = entityAssignmentStore.subscribe(() => {
             setIsAddButtonEnabled(!!entityAssignmentStore.selectedAgent);
@@ -37,23 +44,7 @@ const ActionSpace = ({ entities, actionTypes }) => {
         return () => unsubscribe();
     }, []);
 
-    useEffect(() => {
-        const unsubscribeSidebar = sidebarStore.subscribe(() => {
-            actionSpaceStore.clearActions();
-            setDropdowns([]);
-        });
-
-        const unsubscribeEntity = entityAssignmentStore.subscribe(() => {
-            actionSpaceStore.clearActions();
-            setDropdowns([]);
-        });
-
-        return () => {
-            unsubscribeSidebar();
-            unsubscribeEntity();
-        };
-    }, []);
-
+    // 处理添加动作
     const handleAddAction = () => {
         setSelectedEntity('');
         setSelectedActionType('');
@@ -61,10 +52,11 @@ const ActionSpace = ({ entities, actionTypes }) => {
         setUpperLimit('');
         setLowerLimit('');
         setDiscreteValues(['']);
-        setEditingUniqueKey(null);
+        setEditingUniqueKey(null); // 重置编辑状态
         setModalOpen(true);
     };
 
+    // 处理模态框确认
     const handleModalConfirm = () => {
         if (actionMode === '离散型' && discreteValues.every(value => value.trim() === '')) {
             alert('请确保该动作有数值！');
@@ -87,45 +79,44 @@ const ActionSpace = ({ entities, actionTypes }) => {
             unit: getActionUnit(),
         };
 
-        const existingIndex = dropdowns.findIndex(key => key === uniqueKey);
-
-        if (existingIndex !== -1) {
-            actionSpaceStore.setAction(uniqueKey, action);
-            setDropdowns([...dropdowns]);
+        // 判断是否是编辑模式
+        if (editingUniqueKey) {
+            // 更新动作配置
+            actionSpaceStore.updateActionForModel(currentModelID, editingUniqueKey, action);
         } else {
-            actionSpaceStore.setAction(uniqueKey, action);
-            setDropdowns([...dropdowns, uniqueKey]);
+            // 检查是否已经存在相同的实体-动作种类
+            const existingAction = actions.find(a => `${a.entity}：${a.actionType}` === uniqueKey);
+            if (existingAction) {
+                // 更新动作配置
+                actionSpaceStore.updateActionForModel(currentModelID, uniqueKey, action);
+            } else {
+                // 新增动作配置
+                actionSpaceStore.addActionForModel(currentModelID, action);
+            }
         }
 
         setModalOpen(false);
     };
 
-    const handleCloseModal = () => {
-        setModalOpen(false);
-    };
-
-    const handleModalCancel = () => {
-        if (window.confirm('是否取消编辑？')) {
-            setModalOpen(false);
-        }
-    };
-
+    // 处理编辑动作
     const handleEditAction = (uniqueKey) => {
-        const action = actionSpaceStore.getAction(uniqueKey);
-        setSelectedEntity(action.entity);
-        setSelectedActionType(action.actionType);
-        setActionMode(action.mode);
-        setUpperLimit(action.upperLimit);
-        setLowerLimit(action.lowerLimit);
-        setDiscreteValues(action.discreteValues);
-        setEditingUniqueKey(uniqueKey);
-        setModalOpen(true);
+        const action = actions.find(action => `${action.entity}：${action.actionType}` === uniqueKey);
+        if (action) {
+            setSelectedEntity(action.entity);
+            setSelectedActionType(action.actionType);
+            setActionMode(action.mode);
+            setUpperLimit(action.upperLimit);
+            setLowerLimit(action.lowerLimit);
+            setDiscreteValues(action.discreteValues);
+            setEditingUniqueKey(uniqueKey); // 设置编辑状态
+            setModalOpen(true);
+        }
     };
 
+    // 处理删除动作
     const handleDeleteAction = (uniqueKey) => {
         if (window.confirm('是否删除该动作？')) {
-            actionSpaceStore.deleteAction(uniqueKey);
-            setDropdowns(dropdowns.filter(key => key !== uniqueKey));
+            actionSpaceStore.deleteActionForModel(currentModelID, uniqueKey);
         }
     };
 
@@ -150,18 +141,23 @@ const ActionSpace = ({ entities, actionTypes }) => {
                 <img src={uploadLogo} alt="Upload" className="upload-button-logo"/>
             </div>
             <div className="dropdown-container-wrapper">
-                {dropdowns.map(uniqueKey => (
-                    <DropdownContainer
-                        key={uniqueKey}
-                        uniqueKey={uniqueKey}
-                        onEdit={handleEditAction}
-                        onDelete={handleDeleteAction}
-                    />
-                ))}
+                {actions.map(action => {
+                    const uniqueKey = `${action.entity}：${action.actionType}`;
+                    return (
+                        <DropdownContainer
+                            key={uniqueKey}
+                            uniqueKey={uniqueKey}
+                            action={action}
+                            onEdit={handleEditAction}
+                            onDelete={handleDeleteAction}
+                            modelID={currentModelID}
+                        />
+                    );
+                })}
             </div>
             <ActionModal
                 open={modalOpen}
-                onCancel={handleCloseModal}
+                onCancel={() => setModalOpen(false)}
                 onConfirm={handleModalConfirm}
                 entities={entities}
                 actionTypes={actionTypes}
@@ -178,13 +174,13 @@ const ActionSpace = ({ entities, actionTypes }) => {
                 discreteValues={discreteValues}
                 setDiscreteValues={setDiscreteValues}
                 getActionUnit={getActionUnit}
-                onModalCancel={handleModalCancel}
+                onModalCancel={() => setModalOpen(false)}
             />
         </div>
     );
 };
 
-const DropdownContainer = ({ uniqueKey, onEdit, onDelete }) => {
+const DropdownContainer = ({ uniqueKey, action, onEdit, onDelete, modelID }) => {
     const [actionOpen, setActionOpen] = useState(false);
     const [ruleOpen, setRuleOpen] = useState(false);
     const [ruleType, setRuleType] = useState('');
@@ -194,7 +190,7 @@ const DropdownContainer = ({ uniqueKey, onEdit, onDelete }) => {
     const [execution2, setExecution2] = useState('');
 
     // 从 store 中获取当前保存的规则
-    const savedRule = actionSpaceStore.getRule(uniqueKey);
+    const savedRule = actionSpaceStore.getRuleForModel(modelID, uniqueKey);
 
     // 初始化规则内容
     useEffect(() => {
@@ -213,22 +209,21 @@ const DropdownContainer = ({ uniqueKey, onEdit, onDelete }) => {
         }
     }, [ruleOpen, savedRule]);
 
+    // 处理规则确认
     const handleRuleConfirm = () => {
-        // 保存规则到 store
-        actionSpaceStore.setRule(uniqueKey, { ruleType, condition1, condition2, execution1, execution2 });
+        actionSpaceStore.setRuleForModel(modelID, uniqueKey, { ruleType, condition1, condition2, execution1, execution2 });
         setRuleOpen(false);
     };
 
+    // 处理规则取消
     const handleRuleCancel = () => {
         if (window.confirm('是否取消编辑？')) {
-            // 清空输入内容
             setRuleType('');
             setCondition1('');
             setCondition2('');
             setExecution1('');
             setExecution2('');
-            // 清空 store 中的规则状态
-            actionSpaceStore.setRule(uniqueKey, null);
+            actionSpaceStore.setRuleForModel(modelID, uniqueKey, null);
             setRuleOpen(false);
         }
     };
@@ -248,11 +243,7 @@ const DropdownContainer = ({ uniqueKey, onEdit, onDelete }) => {
                 </div>
             </div>
             {actionOpen && (
-                <ActionContent
-                    uniqueKey={uniqueKey}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                />
+                <ActionContent action={action} onEdit={onEdit} onDelete={onDelete} />
             )}
             {ruleOpen && (
                 <RuleContent
@@ -274,9 +265,7 @@ const DropdownContainer = ({ uniqueKey, onEdit, onDelete }) => {
     );
 };
 
-const ActionContent = ({ uniqueKey, onEdit, onDelete }) => {
-    const action = actionSpaceStore.getAction(uniqueKey);
-
+const ActionContent = ({ action, onEdit, onDelete }) => {
     return (
         <div className="action-container">
             <div className="action-text">实体：{action.entity}</div>
@@ -297,8 +286,8 @@ const ActionContent = ({ uniqueKey, onEdit, onDelete }) => {
                 </div>
             )}
             <div className="action-buttons">
-                <Button type="primary" onClick={() => onEdit(uniqueKey)}>编辑</Button>
-                <Button onClick={() => onDelete(uniqueKey)}>删除</Button>
+                <Button type="primary" onClick={() => onEdit(`${action.entity}：${action.actionType}`)}>编辑</Button>
+                <Button onClick={() => onDelete(`${action.entity}：${action.actionType}`)}>删除</Button>
             </div>
         </div>
     );

@@ -1,36 +1,68 @@
 import { makeAutoObservable } from 'mobx';
 
 class ActionSpaceStore {
-    actions = {};
-    rules = {};
+    // 使用模型ID作为键，存储每个模型的动作和行为规则
+    actionsByModel = {};
+    rulesByModel = {};
 
     constructor() {
         makeAutoObservable(this);
     }
 
-    setAction(uniqueKey, action) {
-        this.actions[uniqueKey] = action;
+    // 设置动作配置
+    setActionsForModel(modelID, actions) {
+        this.actionsByModel[modelID] = actions;
     }
 
-    getAction(uniqueKey) {
-        return this.actions[uniqueKey];
+    // 获取动作配置
+    getActionsForModel(modelID) {
+        return this.actionsByModel[modelID] || [];
     }
 
-    deleteAction(uniqueKey) {
-        delete this.actions[uniqueKey];
+    // 添加动作
+    addActionForModel(modelID, action) {
+        if (!this.actionsByModel[modelID]) {
+            this.actionsByModel[modelID] = [];
+        }
+        this.actionsByModel[modelID].push(action);
     }
 
-    setRule(uniqueKey, rule) {
-        this.rules[uniqueKey] = rule;
+    // 更新动作
+    updateActionForModel(modelID, uniqueKey, updatedAction) {
+        const actions = this.actionsByModel[modelID];
+        if (actions) {
+            const index = actions.findIndex(action => `${action.entity}：${action.actionType}` === uniqueKey);
+            if (index !== -1) {
+                actions[index] = updatedAction;
+            }
+        }
     }
 
-    getRule(uniqueKey) {
-        return this.rules[uniqueKey];
+    // 删除动作
+    deleteActionForModel(modelID, uniqueKey) {
+        const actions = this.actionsByModel[modelID];
+        if (actions) {
+            this.actionsByModel[modelID] = actions.filter(action => `${action.entity}：${action.actionType}` !== uniqueKey);
+        }
     }
 
-    clearActions() {
-        this.actions = {};
-        this.rules = {};
+    // 设置行为规则
+    setRuleForModel(modelID, uniqueKey, rule) {
+        if (!this.rulesByModel[modelID]) {
+            this.rulesByModel[modelID] = {};
+        }
+        this.rulesByModel[modelID][uniqueKey] = rule;
+    }
+
+    // 获取行为规则
+    getRuleForModel(modelID, uniqueKey) {
+        return this.rulesByModel[modelID]?.[uniqueKey] || null;
+    }
+
+    // 清空某个模型的动作和行为规则
+    clearActionsAndRulesForModel(modelID) {
+        delete this.actionsByModel[modelID];
+        delete this.rulesByModel[modelID];
     }
 }
 
