@@ -16,37 +16,41 @@ const ActionSpace = ({ entities, actionTypes }) => {
     const [actionMode, setActionMode] = useState('');
     const [upperLimit, setUpperLimit] = useState('');
     const [lowerLimit, setLowerLimit] = useState('');
-    const [discreteValues, setDiscreteValues] = useState(['']);
+    const [discreteValues, setDiscreteValues] = useState([]);
     const [isAddButtonEnabled, setIsAddButtonEnabled] = useState(false);
     const [editingUniqueKey, setEditingUniqueKey] = useState(null);
-    const [actions, setActions] = useState([]); // 新增状态来跟踪动作列表
+    const [actions, setActions] = useState([]);
 
-    // 获取当前智能体模型ID
     const currentModelID = entityAssignmentStore.selectedAgent;
 
-    // 获取当前模型的动作配置
     useEffect(() => {
         const updateActions = () => {
             setActions(actionSpaceStore.getActionsForModel(currentModelID));
         };
 
-        // 初始化动作列表
         updateActions();
-
-        // 订阅动作列表的变化
         const unsubscribe = actionSpaceStore.subscribe(updateActions);
-
         return () => unsubscribe();
     }, [currentModelID]);
 
-    // 获取动作单位
     const getActionUnit = () => {
         if (!selectedActionType) return '';
         const action = actionTypes.find(type => type[0] === selectedActionType);
         return action ? action[1] : '';
     };
 
-    // 订阅实体分配状态变化
+    const getActionRange = () => {
+        if (!selectedActionType) return [];
+        const action = actionTypes.find(type => type[0] === selectedActionType);
+        return action ? action[2] : [];
+    };
+
+    const getActionDiscreteValues = () => {
+        if (!selectedActionType) return [];
+        const action = actionTypes.find(type => type[0] === selectedActionType);
+        return action ? action[3] : [];
+    };
+
     useEffect(() => {
         const unsubscribe = entityAssignmentStore.subscribe(() => {
             setIsAddButtonEnabled(!!entityAssignmentStore.selectedAgent);
@@ -57,21 +61,19 @@ const ActionSpace = ({ entities, actionTypes }) => {
         return () => unsubscribe();
     }, []);
 
-    // 处理添加动作
     const handleAddAction = () => {
         setSelectedEntity('');
         setSelectedActionType('');
         setActionMode('');
         setUpperLimit('');
         setLowerLimit('');
-        setDiscreteValues(['']);
-        setEditingUniqueKey(null); // 重置编辑状态
+        setDiscreteValues([]);
+        setEditingUniqueKey(null);
         setModalOpen(true);
     };
 
-    // 处理模态框确认
     const handleModalConfirm = () => {
-        if (actionMode === '离散型' && discreteValues.every(value => value.trim() === '')) {
+        if (actionMode === '离散型' && discreteValues.length === 0) {
             alert('请确保该动作有数值！');
             return;
         }
@@ -90,20 +92,17 @@ const ActionSpace = ({ entities, actionTypes }) => {
             lowerLimit,
             discreteValues,
             unit: getActionUnit(),
+            range: getActionRange(),
+            discreteOptions: getActionDiscreteValues(),
         };
 
-        // 判断是否是编辑模式
         if (editingUniqueKey) {
-            // 更新动作配置
             actionSpaceStore.updateActionForModel(currentModelID, editingUniqueKey, action);
         } else {
-            // 检查是否已经存在相同的实体-动作种类
             const existingAction = actions.find(a => `${a.entity}：${a.actionType}` === uniqueKey);
             if (existingAction) {
-                // 更新动作配置
                 actionSpaceStore.updateActionForModel(currentModelID, uniqueKey, action);
             } else {
-                // 新增动作配置
                 actionSpaceStore.addActionForModel(currentModelID, action);
             }
         }
@@ -111,7 +110,6 @@ const ActionSpace = ({ entities, actionTypes }) => {
         setModalOpen(false);
     };
 
-    // 处理编辑动作
     const handleEditAction = (uniqueKey) => {
         const action = actions.find(action => `${action.entity}：${action.actionType}` === uniqueKey);
         if (action) {
@@ -121,16 +119,14 @@ const ActionSpace = ({ entities, actionTypes }) => {
             setUpperLimit(action.upperLimit);
             setLowerLimit(action.lowerLimit);
             setDiscreteValues(action.discreteValues);
-            setEditingUniqueKey(uniqueKey); // 设置编辑状态
+            setEditingUniqueKey(uniqueKey);
             setModalOpen(true);
         }
     };
 
-    // 处理删除动作
     const handleDeleteAction = (uniqueKey) => {
         if (window.confirm('是否删除该动作？')) {
             actionSpaceStore.deleteActionForModel(currentModelID, uniqueKey);
-            // 更新动作列表状态
             setActions(actionSpaceStore.getActionsForModel(currentModelID));
         }
     };
@@ -189,6 +185,8 @@ const ActionSpace = ({ entities, actionTypes }) => {
                 discreteValues={discreteValues}
                 setDiscreteValues={setDiscreteValues}
                 getActionUnit={getActionUnit}
+                getActionRange={getActionRange}
+                getActionDiscreteValues={getActionDiscreteValues}
                 onModalCancel={() => setModalOpen(false)}
             />
         </div>
@@ -204,10 +202,8 @@ const DropdownContainer = ({ uniqueKey, action, onEdit, onDelete, modelID }) => 
     const [execution1, setExecution1] = useState('');
     const [execution2, setExecution2] = useState('');
 
-    // 从 store 中获取当前保存的规则
     const savedRule = actionSpaceStore.getRuleForModel(modelID, uniqueKey);
 
-    // 初始化规则内容
     useEffect(() => {
         if (savedRule) {
             setRuleType(savedRule.ruleType);
@@ -224,13 +220,11 @@ const DropdownContainer = ({ uniqueKey, action, onEdit, onDelete, modelID }) => 
         }
     }, [ruleOpen, savedRule]);
 
-    // 处理规则确认
     const handleRuleConfirm = () => {
         actionSpaceStore.setRuleForModel(modelID, uniqueKey, { ruleType, condition1, condition2, execution1, execution2 });
         setRuleOpen(false);
     };
 
-    // 处理规则取消
     const handleRuleCancel = () => {
         if (window.confirm('是否取消该行为规则？')) {
             setRuleType('');
@@ -291,14 +285,16 @@ const ActionContent = ({ action, onEdit, onDelete }) => {
                 <>
                     <div className="action-text">取值上限：{action.upperLimit} ({action.unit})</div>
                     <div className="action-text">取值下限：{action.lowerLimit} ({action.unit})</div>
+                    <div className="action-text">最大取值范围：[{action.range.join(', ')}]</div>
                 </>
             )}
             {action.mode === '离散型' && (
-                <div>
+                <>
                     {action.discreteValues.map((value, index) => (
                         <div className="action-text" key={index}>取值{index + 1}：{value}</div>
                     ))}
-                </div>
+                    <div className="action-text">可选取值：[{action.discreteOptions.join(', ')}]</div>
+                </>
             )}
             <div className="action-buttons">
                 <Button type="primary" onClick={() => onEdit(`${action.entity}：${action.actionType}`)}>编辑</Button>
@@ -398,10 +394,17 @@ const ActionModal = ({
                          discreteValues,
                          setDiscreteValues,
                          getActionUnit,
+                         getActionRange,
+                         getActionDiscreteValues,
                          onModalCancel
                      }) => {
     const handleAddDiscreteValue = () => {
-        setDiscreteValues([...discreteValues, '']);
+        const availableOptions = getActionDiscreteValues().filter(value => !discreteValues.includes(value));
+        if (availableOptions.length === 0) {
+            alert('没有可选的取值了！');
+            return;
+        }
+        setDiscreteValues([...discreteValues, availableOptions[0]]);
     };
 
     const handleRemoveDiscreteValue = (index) => {
@@ -409,7 +412,48 @@ const ActionModal = ({
         setDiscreteValues(newValues);
     };
 
+    const handleDiscreteValueChange = (index, value) => {
+        const newValues = [...discreteValues];
+        newValues[index] = value;
+        setDiscreteValues(newValues);
+    };
+
     const showButtons = actionMode !== '';
+
+    const handleUpperLimitChange = (e) => {
+        const value = e.target.value;
+        const range = getActionRange();
+        if (range.length === 2 && (value < range[0] || value > range[1])) {
+            alert(`取值上限必须在${range[0]}到${range[1]}之间！`);
+            setUpperLimit('');
+            return;
+        }
+        setUpperLimit(value);
+    };
+
+    const handleLowerLimitChange = (e) => {
+        const value = e.target.value;
+        const range = getActionRange();
+        if (range.length === 2 && (value < range[0] || value > range[1])) {
+            alert(`取值下限必须在${range[0]}到${range[1]}之间！`);
+            setLowerLimit('');
+            return;
+        }
+        setLowerLimit(value);
+    };
+
+    const handleConfirm = () => {
+        if (actionMode === '连续型') {
+            // 检查取值下限是否小于取值上限
+            if (parseFloat(lowerLimit) >= parseFloat(upperLimit)) {
+                alert('取值下限必须小于取值上限！');
+                setUpperLimit('');
+                setLowerLimit('');
+                return;
+            }
+        }
+        onConfirm();
+    };
 
     return (
         <Modal
@@ -418,7 +462,7 @@ const ActionModal = ({
             onCancel={onCancel}
             footer={showButtons ? [
                 <Button key="cancel" onClick={onModalCancel}>取消</Button>,
-                <Button key="confirm" type="primary" onClick={onConfirm}>确认</Button>
+                <Button key="confirm" type="primary" onClick={handleConfirm}>确认</Button>
             ] : null}
         >
             <div className="modal-content">
@@ -470,7 +514,7 @@ const ActionModal = ({
                             <span className="modal-label">取值上限：</span>
                             <Input
                                 value={upperLimit}
-                                onChange={(e) => setUpperLimit(e.target.value)}
+                                onChange={handleUpperLimitChange}
                                 addonAfter={getActionUnit()}
                                 style={{ width: '250px' }}
                             />
@@ -479,10 +523,14 @@ const ActionModal = ({
                             <span className="modal-label">取值下限：</span>
                             <Input
                                 value={lowerLimit}
-                                onChange={(e) => setLowerLimit(e.target.value)}
+                                onChange={handleLowerLimitChange}
                                 addonAfter={getActionUnit()}
                                 style={{ width: '250px' }}
                             />
+                        </div>
+                        <div className="modal-row">
+                            <span className="modal-label">最大取值范围：</span>
+                            <span>[{getActionRange().join(', ')}]</span>
                         </div>
                     </>
                 )}
@@ -491,20 +539,26 @@ const ActionModal = ({
                         {discreteValues.map((value, index) => (
                             <div className="modal-row" key={index}>
                                 <span className="modal-label">取值{index + 1}：</span>
-                                <Input
+                                <Select
                                     value={value}
-                                    onChange={(e) => {
-                                        const newValues = [...discreteValues];
-                                        newValues[index] = e.target.value;
-                                        setDiscreteValues(newValues);
-                                    }}
-                                    style={{ width: '250px' }}
-                                />
+                                    onChange={(value) => handleDiscreteValueChange(index, value)}
+                                    style={{ width: '200px' }}
+                                >
+                                    {getActionDiscreteValues()
+                                        .filter(option => !discreteValues.includes(option) || option === value)
+                                        .map(option => (
+                                            <Option key={option} value={option}>{option}</Option>
+                                        ))}
+                                </Select>
                                 <Button onClick={() => handleRemoveDiscreteValue(index)}>-</Button>
                             </div>
                         ))}
                         <div className="modal-row">
                             <Button onClick={handleAddDiscreteValue}>+</Button>
+                        </div>
+                        <div className="modal-row">
+                            <span className="modal-label">可选取值：</span>
+                            <span>[{getActionDiscreteValues().join(', ')}]</span>
                         </div>
                     </>
                 )}

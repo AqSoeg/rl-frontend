@@ -216,7 +216,7 @@
 }
 
 .modal-label {
-    width: 80px; /* 标题的固定宽度，确保对齐 */
+    width: 100px; /* 标题的固定宽度，确保对齐 */
     text-align: right; /* 标题右对齐 */
 }
 
