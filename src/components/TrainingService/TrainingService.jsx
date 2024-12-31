@@ -11,6 +11,7 @@ const TrainingService = () => {
   const [algorithms, setAlgorithms] = useState([]); // 新增状态用于存储算法数据
   const [selectedAlgorithm, setSelectedAlgorithm] = useState(null);
   const [selectedScenario, setSelectedScenario] = useState(null); // 新增状态用于存储选中的场景
+  const [selectedAgentRole, setSelectedAgentRole] = useState(null);
 
   useEffect(() => {
     const fetchScenarios = async () => {
@@ -44,22 +45,28 @@ const TrainingService = () => {
           algorithms={algorithms} 
           onAlgorithmSelect={setSelectedAlgorithm} 
           onScenarioSelect={setSelectedScenario} // 提供场景选择回调
+          onAgentRoleSelect={setSelectedAgentRole} 
         />
       </div>
       <div className='middle'>
-        <Middle selectedScenario={selectedScenario}/> {/* 传递选中场景 */}
+        <Middle 
+          selectedScenario={selectedScenario}
+          selectedAgentRole={selectedAgentRole}
+        /> {/* 传递选中场景 */}
       </div>
       <div className='right'>
         <Right 
           algorithms={algorithms}
           selectedAlgorithm={selectedAlgorithm} 
           selectedScenario={selectedScenario} // 传递选中场景
+          selectedAgentRole={selectedAgentRole}
         />
       </div>
       <div className='righT'>
         <RighT 
           selectedAlgorithm={selectedAlgorithm} 
           selectedScenario={selectedScenario} // 传递选中场景
+          selectedAgentRole={selectedAgentRole}
         />
       </div>
     </div>

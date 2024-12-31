@@ -4,7 +4,7 @@ import { intelligentStore } from './IntelligentStore';
 const { Option } = Select;
 import { observer } from 'mobx-react';
 
-const Left =  observer(({ scenarios, algorithms, onAlgorithmSelect, onScenarioSelect }) => {
+const Left =  observer(({ scenarios, algorithms, onAlgorithmSelect, onScenarioSelect ,onAgentRoleSelect}) => {
   const [trainingMode, setTrainingMode] = useState('offline');
   const [algorithmType, setAlgorithmType] = useState(''); // 设置默认算法类型
   const [algorithmsByType, setAlgorithmsByType] = useState([]); // 存储根据算法类型筛选的算法列表
@@ -12,7 +12,8 @@ const Left =  observer(({ scenarios, algorithms, onAlgorithmSelect, onScenarioSe
   const [visible, setVisible] = useState(false);
   const [selectedScenario, setSelectedScenario] = useState(null); // 新增：存储当前选中的场景
   const [selectedDataset, setSelectedDataset] = useState('');
-
+  const [selectedAgentRole, setSelectedAgentRole] = useState(null);
+  const [agentRoles, setAgentRoles] = useState([]);
   // 假设这是你的离线数据集列表
   const offlineDatasets = [
     { id: 1, name: 'Dataset 1' },
@@ -51,6 +52,17 @@ const Left =  observer(({ scenarios, algorithms, onAlgorithmSelect, onScenarioSe
     const selectedScene = scenarios.find(scenario => scenario.name === value);
     setSelectedScenario(selectedScene);
     onScenarioSelect(selectedScene); // 将选中的场景传递给父组件
+    
+    // 假设场景对象中有一个roles数组，包含所有智能体角色
+    const agentRoles = selectedScene.roles || [];
+    setSelectedAgentRole(null); // 重置选中的智能体角色
+    setAgentRoles(agentRoles); // 更新智能体角色列表
+  };
+  const handleAgentRoleSelectChange = (value) => {
+    const selectedRole = agentRoles.find(role => role.name === value);
+    setSelectedAgentRole(selectedRole);
+    // 调用父组件的回调函数，传递选定的智能体角色
+    onAgentRoleSelect(selectedRole); // 假设父组件提供了这个回调函数
   };
   const handleOk = async () => {
     try {
@@ -95,6 +107,20 @@ const Left =  observer(({ scenarios, algorithms, onAlgorithmSelect, onScenarioSe
         </Select>
       </div>
       <div className="form-item">
+        <label>智能体角色</label>
+        <Select
+          value={selectedAgentRole ? selectedAgentRole.name : ''}
+          onChange={handleAgentRoleSelectChange}
+          placeholder="请选择"
+        >
+          {agentRoles.map((role, index) => (
+            <Option key={role.name} value={role.name}>
+              {role.name}
+            </Option>
+          ))}
+        </Select>
+      </div>
+      <div className="form-item">
         <label>训练方式</label>
         <Select value={trainingMode} onChange={handleTrainingModeChange}>
           <Option value="offline">离线数据</Option>
@@ -134,7 +160,7 @@ const Left =  observer(({ scenarios, algorithms, onAlgorithmSelect, onScenarioSe
 
       <div className='form-item'>
         {intelligentStore.selectedAgent ? (
-          <><div style={{ maxHeight: '500px', overflowY: 'auto' }}>
+          <><div style={{ maxHeight: '400px', overflowY: 'auto' }}>
               <h3>已载入智能体信息</h3>
               <p><strong>智能体名称：</strong>{intelligentStore.selectedAgent.agentName}</p>
               <p><strong>智能体ID：</strong>{intelligentStore.selectedAgent.agentID}</p>
