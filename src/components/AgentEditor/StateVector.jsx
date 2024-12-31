@@ -12,17 +12,17 @@ const StateVector = ({ entities }) => {
     const [selectedRows, setSelectedRows] = useState({}); // 记录每张表格中选中的行
     const [agentSelectionState, setAgentSelectionState] = useState({}); // 存储每个智能体的选择状态
 
-    // 初始化 selectedRows，根据当前智能体的选择状态恢复
+    // 初始化 selectedRows，根据 StateVectorStore 或默认全选
     useEffect(() => {
         if (!entities || !Array.isArray(entities)) {
             console.error("entities is not defined or not an array");
             return;
         }
 
-        const selectedAgent = entityAssignmentStore.selectedAgent;
-        if (selectedAgent && agentSelectionState[selectedAgent]) {
-            // 如果当前智能体有存储的选择状态，则恢复
-            setSelectedRows(agentSelectionState[selectedAgent]);
+        const selectedStateVectors = stateVectorStore.getSelectedStateVectors();
+        if (Object.keys(selectedStateVectors).length > 0) {
+            // 如果 StateVectorStore 中有数据，则使用它
+            setSelectedRows(selectedStateVectors);
         } else {
             // 否则初始化为全选
             const initialSelectedRows = {};
@@ -35,18 +35,11 @@ const StateVector = ({ entities }) => {
             });
             setSelectedRows(initialSelectedRows);
         }
-    }, [entities, entityAssignmentStore.selectedAgent]);
+    }, [entities]);
 
-    // 当 selectedRows 变化时，更新当前智能体的选择状态
+    // 当 selectedRows 变化时，更新 StateVectorStore
     useEffect(() => {
-        const selectedAgent = entityAssignmentStore.selectedAgent;
-        if (selectedAgent) {
-            setAgentSelectionState(prevState => ({
-                ...prevState,
-                [selectedAgent]: selectedRows,
-            }));
-            stateVectorStore.setSelectedStateVectors(selectedRows); // 更新 StateVectorStore
-        }
+        stateVectorStore.setSelectedStateVectors(selectedRows);
     }, [selectedRows]);
 
     useEffect(() => {

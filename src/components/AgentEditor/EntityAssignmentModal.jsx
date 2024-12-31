@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Modal, Alert, List, Checkbox } from 'antd';
+import stateVectorStore from './StateVectorStore'; // 引入 StateVectorStore
 
 const EntityAssignmentModal = ({ open, onCancel, onConfirm, entityCount, agentCount, agentType, entities }) => {
     const [selectedEntities, setSelectedEntities] = useState({});
@@ -83,6 +84,12 @@ const EntityAssignmentModal = ({ open, onCancel, onConfirm, entityCount, agentCo
     const handleConfirm = () => {
         if (validateSelection()) {
             onConfirm(selectedEntities);
+            // 初始化 StateVectorStore，设置为默认全选状态
+            const defaultSelectedStateVectors = {};
+            entities.forEach(entity => {
+                defaultSelectedStateVectors[entity.name] = entity.stateVector.map((_, idx) => idx);
+            });
+            stateVectorStore.setSelectedStateVectors(defaultSelectedStateVectors);
         }
     };
 
