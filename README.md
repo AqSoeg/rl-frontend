@@ -16,7 +16,7 @@ npm install
 5. 安装 mobx 和 mobx-react：`npm install mobx mobx-react`。
 6. 安装 axios：`npm install axios`。
 7. 安装 [ws](https://github.com/websockets/ws)：`npm install ws`。
-8. 安装 MathJax：`npm install better-react-mathjax`。
+8. 安装 recharts：`npm install recharts`。
 
 ## 项目运行
 
