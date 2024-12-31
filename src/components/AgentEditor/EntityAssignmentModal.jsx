@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Modal, Alert, List, Checkbox } from 'antd';
 import stateVectorStore from './StateVectorStore'; // 引入 StateVectorStore
+import actionSpaceStore from './ActionSpaceStore'; // 引入 ActionSpaceStore
 
 const EntityAssignmentModal = ({ open, onCancel, onConfirm, entityCount, agentCount, agentType, entities }) => {
     const [selectedEntities, setSelectedEntities] = useState({});
@@ -83,6 +84,11 @@ const EntityAssignmentModal = ({ open, onCancel, onConfirm, entityCount, agentCo
 
     const handleConfirm = () => {
         if (validateSelection()) {
+            // 清空所有智能体模型的动作空间
+            for (let i = 1; i <= agentCount; i++) {
+                actionSpaceStore.clearActionsAndRulesForModel(`智能体${i}`);
+            }
+
             onConfirm(selectedEntities);
             // 初始化 StateVectorStore，设置为默认全选状态
             const defaultSelectedStateVectors = {};

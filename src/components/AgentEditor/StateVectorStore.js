@@ -1,4 +1,3 @@
-// StateVectorStore.js
 import { makeAutoObservable } from 'mobx';
 
 class StateVectorStore {
