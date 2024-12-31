@@ -31,40 +31,7 @@ npm install
 
 注意 tmp 文件夹被 gitignore 了，所以需要自己创建 tmp/model.json 文件
 ```json
-[
-  {
-    "scenarioID": "traffic",
-    "agentRoleID": "traffic_light",
-    "agentType": "同构多智能体",
-    "agentName": "1",
-    "agentVersion": "1",
-    "agentID": "ri0trtfia944iic1",
-    "agentModelName": "智能体1",
-    "entityAssignments": [
-      {
-        "智能体1": [
-          "红绿灯1"
-        ]
-      },
-      {
-        "智能体2": [
-          "红绿灯2"
-        ]
-      },
-      {
-        "智能体3": [
-          "红绿灯3"
-        ]
-      },
-      {
-        "智能体4": [
-          "红绿灯4"
-        ]
-      }
-    ],
-    "updateTime": "2024-12-19T11:01:26.319Z"
-  }
-]
+[]
 ```
 
 ## 如果有新增的内容，先写在后面，便于合并
