@@ -1,4 +1,3 @@
-// ModelButton.jsx
 import { Button, Modal, Table } from 'antd';
 import { useState, useEffect } from 'react';
 import sidebarStore from './SidebarStore';
@@ -89,43 +88,54 @@ const ModelFunction = ({ scenarios }) => {
             // 获取所有奖励函数
             const allRewards = rewardFunctionStore.getAllRewards();
 
-            // 获取实体的状态向量、动作空间和奖励函数
-            const entities = entityAssignmentStore.assignedEntities[sidebarStore.selectedAgent].map(entityName => {
-                const entity = role.entities.find(e => e.name === entityName);
+            // 解析当前的 modelID，获取基础部分和智能体代号
+            const baseModelID = sidebarStore.modelID.slice(0, sidebarStore.modelID.lastIndexOf('-')); // 获取基础部分
+            const agentCount = parseInt(sidebarStore.agentCount, 10); // 获取智能体数量
 
-                // 获取当前实体的所有动作空间
-                const actionSpaceData = actionSpaceStore.getActionsForModel(entityAssignmentStore.selectedAgent)
-                    .filter(action => action.entity === entityName)
-                    .map(action => {
-                        const rule = actionSpaceStore.getRuleForModel(entityAssignmentStore.selectedAgent, `${action.entity}：${action.actionType}`);
-                        return {
-                            name: action.actionType,
-                            type: action.mode,
-                            action: action.mode === '连续型'
-                                ? [[action.lowerLimit, action.upperLimit], action.unit, action.range]
-                                : [action.discreteValues, action.discreteOptions],
-                            rule: rule ? [rule.ruleType, rule.condition1, rule.condition2, rule.execution1, rule.execution2] : null
-                        };
-                    });
+            // 构建每个智能体模型的实体信息
+            const agentModels = Object.entries(entityAssignmentStore.assignedEntities).map(([agent, entities], index) => {
+                const agentID = `${baseModelID}-${index + 1}`; // 生成唯一的 agentID
 
-                // 过滤出与当前实体相关的奖励函数
-                const rewardFunction = allRewards
-                    .filter(reward => {
-                        // 如果是团队奖励，或者奖励的智能体与当前智能体匹配
-                        return reward.type === '团队奖励' || reward.agent === sidebarStore.selectedAgent;
-                    })
-                    .map(reward => [reward.equation, reward.type]); // 映射为 [公式, 类型]
+                const agentEntities = entities.map(entityName => {
+                    const entity = role.entities.find(e => e.name === entityName);
 
-                // 获取用户选择的状态向量
-                const selectedStateVectors = stateVectorStore.getSelectedStateVectors()[entityName] || [];
-                const stateVector = entity.stateVector.filter((_, idx) => selectedStateVectors.includes(idx));
+                    // 获取当前实体的所有动作空间
+                    const actionSpaceData = actionSpaceStore.getActionsForModel(agent)
+                        .filter(action => action.entity === entityName)
+                        .map(action => {
+                            const rule = actionSpaceStore.getRuleForModel(agent, `${action.entity}：${action.actionType}`);
+                            return {
+                                name: action.actionType,
+                                type: action.mode,
+                                action: action.mode === '连续型'
+                                    ? [[action.lowerLimit, action.upperLimit], action.unit, action.range]
+                                    : [action.discreteValues, action.discreteOptions],
+                                rule: rule ? [rule.ruleType, rule.condition1, rule.condition2, rule.execution1, rule.execution2] : null
+                            };
+                        });
+
+                    // 获取用户选择的状态向量
+                    const selectedStateVectors = stateVectorStore.getSelectedStateVectors()[entityName] || [];
+                    const stateVector = entity.stateVector.filter((_, idx) => selectedStateVectors.includes(idx));
+
+                    return {
+                        name: entityName,
+                        stateVector: stateVector, // 使用用户选择的状态向量
+                        actionSpace: actionSpaceData // 新的动作空间结构
+                    };
+                });
 
                 return {
-                    name: entityName,
-                    stateVector: stateVector, // 使用用户选择的状态向量
-                    actionSpace: actionSpaceData, // 新的动作空间结构
-                    rewardFunction: rewardFunction
+                    agentID: agentID, // 使用生成的唯一 agentID
+                    agentModelName: sidebarStore.selectedAgent, // 智能体模型名称
+                    entities: agentEntities // 实体信息
                 };
+            });
+
+            // 构建奖励函数信息
+            const rewardFunctions = allRewards.map(reward => {
+                const rewardType = reward.type === '团队奖励' ? '团队奖励' : `个人奖励-${reward.agent}`;
+                return [reward.equation, rewardType];
             });
 
             // 构建模型数据
@@ -135,12 +145,12 @@ const ModelFunction = ({ scenarios }) => {
                 agentType: sidebarStore.type,
                 agentName: sidebarStore.name,
                 agentVersion: sidebarStore.version,
-                agentID: sidebarStore.modelID,
-                agentModelName: sidebarStore.selectedAgent,
+                agentCount: sidebarStore.agentCount,
                 entityAssignments: Object.entries(entityAssignmentStore.assignedEntities).map(([agent, entities]) => ({
                     [agent]: entities
                 })),
-                entities: entities, // 包含实体的状态向量、动作空间和奖励函数
+                agentModel: agentModels, // 智能体模型列表
+                rewardFunction: rewardFunctions, // 奖励函数列表
                 updateTime: new Date().toISOString()
             };
 
