@@ -1,6 +1,5 @@
 import { makeAutoObservable } from 'mobx';
 import entityAssignmentStore from './EntityAssignmentStore';
-import rewardFunctionStore from './RewardFunctionStore'; // 引入 RewardFunctionStore
 
 class SidebarStore {
     scenario = ''; // 想定场景
@@ -24,7 +23,6 @@ class SidebarStore {
         this.scenario = scenario;
         this.scenarioName = scenarioName;
         this.clearExceptScenario();
-        rewardFunctionStore.clearRewards(); // 清空奖励函数状态
         this.notifyListeners(); // 通知订阅者
     }
 
@@ -33,7 +31,6 @@ class SidebarStore {
         this.role = role;
         this.roleName = roleName;
         this.clearExceptScenarioAndRole();
-        rewardFunctionStore.clearRewards(); // 清空奖励函数状态
         this.notifyListeners(); // 通知订阅者
     }
 
@@ -41,7 +38,6 @@ class SidebarStore {
     setType(type) {
         this.type = type;
         this.clearExceptScenarioRoleAndType();
-        rewardFunctionStore.clearRewards(); // 清空奖励函数状态
         this.notifyListeners(); // 通知订阅者
     }
 
@@ -61,7 +57,6 @@ class SidebarStore {
     setAgentCount(agentCount) {
         this.agentCount = agentCount;
         this.clearExceptScenarioRoleTypeAndAgentCount();
-        rewardFunctionStore.clearRewards(); // 清空奖励函数状态
         this.notifyListeners(); // 通知订阅者
     }
 

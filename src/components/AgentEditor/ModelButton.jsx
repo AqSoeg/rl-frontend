@@ -51,6 +51,17 @@ const ModelFunction = ({ scenarios }) => {
         sidebarStore.setVersion(selectedModel.agentVersion);
         sidebarStore.setAgentCount(selectedModel.agentCount);
 
+        rewardFunctionStore.clearRewards(); // 清空现有的奖励函数
+        selectedModel.rewardFunction.forEach(reward => {
+            const [equation, rewardType] = reward;
+            const agent = rewardType === '团队奖励' ? '' : rewardType.split('-')[1]; // 提取智能体名称
+            rewardFunctionStore.addReward({
+                equation: equation,
+                type: rewardType === '团队奖励' ? '团队奖励' : '个人奖励',
+                agent: agent,
+            });
+        });
+
         // 关闭弹窗
         setIsModalVisible(false);
     };
