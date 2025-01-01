@@ -15,7 +15,15 @@ const Right = ({ selectedAlgorithm,selectedScenario, selectedAgentRole}) => { //
   const [currentModel, setCurrentModel] = useState(null);
   const [training, setTraining] = useState(false);
   const [isSuccessModalVisible, setIsSuccessModalVisible] = useState(false);
-
+  useEffect(() => {
+    // 当 selectedScenario 改变时，重置 selectedAgentRole
+    setSelectedAgent(null); // 或者设置为初始值
+  
+    // 当 selectedScenario 改变时，重新获取相关智能体信息
+    if (selectedScenario) {
+      fetchAgents();
+    }
+  }, [selectedScenario]);
   useEffect(() => {
     if (selectedAlgorithm && selectedAlgorithm['hyper-parameters']) {
       const initialParams = selectedAlgorithm['hyper-parameters'].reduce((acc, param) => {
@@ -32,7 +40,7 @@ const Right = ({ selectedAlgorithm,selectedScenario, selectedAgentRole}) => { //
     }
   }, [selectedScenario]);
   useEffect(() => {
-    // 当 selectedScenario 改变时，重新获取相关智能体信息
+    // 当 selectedAgentRole 改变时，重新获取相关智能体信息
     if (selectedAgentRole) {
       fetchAgents();
     }
@@ -266,91 +274,70 @@ const modelList = [
     // 调试输出，确保 selectedAlgorithm 和 hyperParameters 是按预期接收的
   console.log('Selected Algorithm:', selectedAlgorithm);
 
-  if (!selectedAlgorithm || !selectedAlgorithm['hyper-parameters']) {
-    return <div>请选择一个算法</div>;
-  }
-  
-    const hyperParameters = selectedAlgorithm['hyper-parameters'];
+
   
   return (
-    <div>
-       {/* 展示选中的想定场景详情 */}
-       {selectedScenario && agents.length > 0 && (
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+      {/* 如果选择了智能体角色，显示智能体设计的列表 */}
+      {selectedAgentRole && agents.length > 0 && (
         <Card title="已选想定场景、智能体角色的智能体设计列表" bordered={true} style={{ marginBottom: 16 }}>
           <Table
             columns={scenarioColumns}
-            dataSource={agents.map((agent, index) => ({ ...agent, key: index }))}
-            pagination={{
-              pageSize: 2,
-              showQuickJumper: true,
-            }}
+            dataSource={agents}
+            pagination={{ pageSize: 2, showQuickJumper: true }}
             bordered
           />
         </Card>
       )}
-      <Card
-        title={
-          <div style={{ backgroundColor: '#f0f0f0', fontSize: '24px', textAlign: 'center' }}>
-            训练超参数
-            <SettingOutlined style={{ marginLeft: 8 }} />
-          </div>
-        }
-        bordered={true}
-        style={{ marginBottom: 16 }}
-      >
-        <Row gutter={[16, 16]}>
-          {hyperParameters.map((param, index) => {
-            // 确保 value 数组中的值是唯一的并排序
-            const uniqueValues = [...new Set(param.value)].sort((a, b) => a - b);
+  
+      {/* 如果选择了算法，显示训练超参数 */}
+      {selectedAlgorithm && selectedAlgorithm['hyper-parameters'] && (
+        <Card
+          title="训练超参数"
+          bordered={true}
+          style={{ marginBottom: 16 }}
+        >
+          <Row gutter={[16, 16]}>
+            {selectedAlgorithm['hyper-parameters'].map((param, index) => {
+              const uniqueValues = [...new Set(param.value)].sort((a, b) => a - b);
+              const defaultValueExists = uniqueValues.includes(param.default);
+              const defaultValue = defaultValueExists ? param.default : uniqueValues[0];
 
-            // 确保默认值存在于 value 数组中
-            const defaultValueExists = uniqueValues.includes(param.default);
-            const defaultValue = defaultValueExists ? param.default : uniqueValues[0]; // 如果默认值不存在，则选择第一个值
-
-            return (
-              <Col key={index} span={8}>
-                <Space align="baseline" style={{ marginBottom: 8 }}>
-                  <span>{param.name}:</span>
-                  <Select
-                    defaultValue={defaultValue}
-                    onChange={(value) => {
-                      setHyperParametersValues(prevState => ({
-                        ...prevState,
-                        [param.id]: value
-                      }));
-                    }}
-                    style={{ width: '100%' }}
-                  >
-                    {uniqueValues.map((value, idx) => (
-                      <Option key={`${param.id}-${idx}`} value={value}>
-                        {value}
-                      </Option>
-                    ))}
-                  </Select>
-                </Space>
-              </Col>
-            );
-          })}
-        </Row>
-      </Card>
-      <div className='button'>
-      <Button onClick={trainAlgorithm} disabled={training}>
-        {training ? '训练中...' : '开始训练'}
-      </Button>
-        <Button onClick={handleViewModelListClick}>
-          查看模型列表
+              return (
+                <Col key={index} span={8}>
+                  <Space align="baseline" style={{ marginBottom: 8 }}>
+                    <span>{param.name}:</span>
+                    <Select
+                      defaultValue={defaultValue}
+                      onChange={(value) => {
+                        setHyperParametersValues(prevState => ({
+                          ...prevState,
+                          [param.id]: value
+                        }));
+                      }}
+                      style={{ width: '100%' }}
+                    >
+                      {uniqueValues.map((value, idx) => (
+                        <Option key={`${param.id}-${idx}`} value={value}>
+                          {value}
+                        </Option>
+                      ))}
+                    </Select>
+                  </Space>
+                </Col>
+              );
+            })}
+          </Row>
+        </Card>
+      )}
+      <div className="button-container" style={{ position: 'fixed', bottom: '0', width: '100%', textAlign: 'center', padding: '20px' }}>
+        <Button onClick={trainAlgorithm} disabled={training}>
+          {training ? '训练中...' : '开始训练'}
         </Button>
-        <Button>
-          训练终止
-        </Button>
-        <div>
-          {training ? (
-            <div style={{ color: 'blue', fontWeight: 'bold' }}>训练中，请稍候...</div>
-          ) : (
-            <div style={{ color: 'green', fontWeight: 'bold' }}>开始训练</div>
-          )}
-        </div>
+        <Button onClick={handleViewModelListClick}>查看模型列表</Button>
+        <Button>训练终止</Button>
       </div>
+
       <Modal
         title="智能体详情"
         visible={isDetailModalVisible}

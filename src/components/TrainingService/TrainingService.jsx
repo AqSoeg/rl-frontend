@@ -51,7 +51,6 @@ const TrainingService = () => {
       <div className='middle'>
         <Middle 
           selectedScenario={selectedScenario}
-          selectedAgentRole={selectedAgentRole}
         /> {/* 传递选中场景 */}
       </div>
       <div className='right'>
