@@ -43,31 +43,6 @@ const ModelFunction = ({ scenarios }) => {
             return;
         }
 
-        if (!Array.isArray(selectedModel.entityAssignments) || selectedModel.entityAssignments.length === 0) {
-            alert('选择的模型中没有实体分配信息！');
-            return;
-        }
-
-        const assignedEntities = selectedModel.entityAssignments.reduce((acc, assignment) => {
-            const agent = Object.keys(assignment)[0];
-            acc[agent] = assignment[agent];
-            return acc;
-        }, {});
-
-        sidebarStore.clearExceptScenario();
-        entityAssignmentStore.clearAssignment();
-
-        sidebarStore.setScenario(selectedModel.scenarioID);
-        sidebarStore.setRole(selectedModel.agentRoleID);
-        sidebarStore.setType(selectedModel.agentType);
-        sidebarStore.setName(selectedModel.agentName);
-        sidebarStore.setVersion(selectedModel.agentVersion);
-        sidebarStore.setAgentCount(Object.keys(assignedEntities).length.toString());
-        sidebarStore.setModelID(selectedModel.agentID);
-
-        entityAssignmentStore.setAssignedEntities(assignedEntities);
-
-        setIsModalVisible(false);
     };
 
     const handleModelCancel = () => {
@@ -192,30 +167,11 @@ const ModelFunction = ({ scenarios }) => {
     };
 
     const columns = [
-        { title: '序号', dataIndex: 'index', key: 'index' },
-        { title: '智能体ID', dataIndex: 'agentID', key: 'agentID' },
-        { title: '智能体名称', dataIndex: 'agentName', key: 'agentName' },
-        { title: '场景', dataIndex: 'scenarioName', key: 'scenarioName' },
-        { title: '智能体角色', dataIndex: 'roleName', key: 'roleName' },
-        { title: '分配的实体名称', dataIndex: 'assignedEntities', key: 'assignedEntities' },
+
     ];
 
     const tableData = models.map((model, index) => {
-        const assignedEntities = model.entityAssignments.reduce((acc, assignment) => {
-            const agent = Object.keys(assignment)[0];
-            acc[agent] = assignment[agent];
-            return acc;
-        }, {});
 
-        return {
-            key: model.agentID,
-            index: index + 1,
-            agentID: model.agentID,
-            agentName: `${model.agentName} v${model.agentVersion} ${model.agentModelName}`,
-            scenarioName: getScenarioName(model.scenarioID),
-            roleName: getRoleName(model.scenarioID, model.agentRoleID),
-            assignedEntities: Object.values(assignedEntities).flat().join(', '),
-        };
     });
 
     return (

@@ -4,7 +4,6 @@ import actionLogo from '../../assets/actionSpace.svg';
 import uploadLogo from '../../assets/upload.svg';
 import addLogo from "../../assets/add.svg";
 import actionSpaceStore from './ActionSpaceStore';
-import sidebarStore from './SidebarStore';
 import entityAssignmentStore from './EntityAssignmentStore';
 
 const { Option } = Select;
