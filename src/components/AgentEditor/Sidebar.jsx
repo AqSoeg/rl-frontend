@@ -22,6 +22,22 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
     const [modalOpen, setModalOpen] = useState(false);
 
     useEffect(() => {
+        // 订阅 SidebarStore 的状态变化
+        const unsubscribe = sidebarStore.subscribe(() => {
+            // 当 SidebarStore 的状态变化时，更新组件的状态
+            setScenario(sidebarStore.scenario);
+            setRole(sidebarStore.role);
+            setType(sidebarStore.type);
+            setName(sidebarStore.name);
+            setVersion(sidebarStore.version);
+            setAgentCount(sidebarStore.agentCount);
+        });
+
+        // 组件卸载时取消订阅
+        return () => unsubscribe();
+    }, []);
+
+    useEffect(() => {
         const selectedScenario = scenarios.find(s => s.id === scenario);
         setAgentRoles(selectedScenario ? selectedScenario.roles : []);
     }, [scenario, scenarios]);

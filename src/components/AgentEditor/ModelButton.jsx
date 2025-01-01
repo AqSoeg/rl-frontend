@@ -4,7 +4,7 @@ import sidebarStore from './SidebarStore';
 import entityAssignmentStore from './EntityAssignmentStore';
 import actionSpaceStore from './ActionSpaceStore';
 import rewardFunctionStore from './RewardFunctionStore';
-import stateVectorStore from './StateVectorStore'; // 引入 StateVectorStore
+import stateVectorStore from './StateVectorStore';
 
 const ModelFunction = ({ scenarios }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -43,6 +43,16 @@ const ModelFunction = ({ scenarios }) => {
             return;
         }
 
+        // 更新 SidebarStore 的状态
+        sidebarStore.setScenario(selectedModel.scenarioID, getScenarioName(selectedModel.scenarioID));
+        sidebarStore.setRole(selectedModel.agentRoleID, getRoleName(selectedModel.scenarioID, selectedModel.agentRoleID));
+        sidebarStore.setType(selectedModel.agentType);
+        sidebarStore.setName(selectedModel.agentName);
+        sidebarStore.setVersion(selectedModel.agentVersion);
+        sidebarStore.setAgentCount(selectedModel.agentCount);
+
+        // 关闭弹窗
+        setIsModalVisible(false);
     };
 
     const handleModelCancel = () => {
@@ -167,12 +177,50 @@ const ModelFunction = ({ scenarios }) => {
     };
 
     const columns = [
-
+        {
+            title: '序号',
+            dataIndex: 'index',
+            key: 'index',
+            render: (text, record, index) => index + 1,
+        },
+        {
+            title: '智能体名称',
+            dataIndex: 'agentName',
+            key: 'agentName',
+        },
+        {
+            title: '智能体版本',
+            dataIndex: 'agentVersion',
+            key: 'agentVersion',
+        },
+        {
+            title: '场景',
+            dataIndex: 'scenarioID',
+            key: 'scenarioID',
+            render: (scenarioID) => getScenarioName(scenarioID),
+        },
+        {
+            title: '智能体角色',
+            dataIndex: 'agentRoleID',
+            key: 'agentRoleID',
+            render: (agentRoleID, record) => getRoleName(record.scenarioID, agentRoleID),
+        },
+        {
+            title: '智能体类型',
+            dataIndex: 'agentType',
+            key: 'agentType',
+        },
+        {
+            title: '智能体数量',
+            dataIndex: 'agentCount',
+            key: 'agentCount',
+        },
     ];
 
-    const tableData = models.map((model, index) => {
-
-    });
+    const tableData = models.map((model, index) => ({
+        ...model,
+        key: index,
+    }));
 
     return (
         <div className="model-button-container">
