@@ -27,24 +27,25 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
     }, [scenario, scenarios]);
 
     const handleScenarioChange = (value) => {
+        const selectedScenario = scenarios.find(s => s.id === value);
         setScenario(value);
         setRole('');
         setType('');
         setAgentCount('');
         setSelectedAgent('');
         entityAssignmentStore.clearAssignment(); // 清空实体分配状态
-        sidebarStore.setScenario(value); // 更新 SidebarStore 的状态
+        sidebarStore.setScenario(value, selectedScenario.name); // 更新 SidebarStore 的状态
     };
 
     const handleRoleChange = (value) => {
+        const selectedRole = agentRoles.find(r => r.id === value);
         setRole(value);
         setType('');
         setAgentCount('');
         setSelectedAgent('');
         entityAssignmentStore.clearAssignment(); // 清空实体分配状态
-        sidebarStore.setRole(value); // 更新 SidebarStore 的状态
+        sidebarStore.setRole(value, selectedRole.name); // 更新 SidebarStore 的状态
 
-        const selectedRole = agentRoles.find(r => r.id === value);
         if (selectedRole) {
             setEntityCount(selectedRole.entities.length);
         }

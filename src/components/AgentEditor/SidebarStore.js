@@ -4,7 +4,9 @@ import rewardFunctionStore from './RewardFunctionStore'; // 引入 RewardFunctio
 
 class SidebarStore {
     scenario = ''; // 想定场景
+    scenarioName = ''; // 想定场景名称
     role = ''; // 智能体角色
+    roleName = ''; // 智能体角色名称
     type = ''; // 智能体类型
     name = ''; // 智能体名称
     version = ''; // 智能体版本
@@ -18,16 +20,18 @@ class SidebarStore {
     }
 
     // 设置想定场景
-    setScenario(scenario) {
+    setScenario(scenario, scenarioName) {
         this.scenario = scenario;
+        this.scenarioName = scenarioName;
         this.clearExceptScenario();
         rewardFunctionStore.clearRewards(); // 清空奖励函数状态
         this.notifyListeners(); // 通知订阅者
     }
 
     // 设置智能体角色
-    setRole(role) {
+    setRole(role, roleName) {
         this.role = role;
+        this.roleName = roleName;
         this.clearExceptScenarioAndRole();
         rewardFunctionStore.clearRewards(); // 清空奖励函数状态
         this.notifyListeners(); // 通知订阅者
@@ -76,6 +80,7 @@ class SidebarStore {
     // 清空除想定场景外的所有状态
     clearExceptScenario() {
         this.role = '';
+        this.roleName = '';
         this.type = '';
         this.name = '';
         this.version = '';
