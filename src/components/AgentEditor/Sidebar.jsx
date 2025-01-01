@@ -17,7 +17,6 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
     const [agentRoles, setAgentRoles] = useState([]);
     const [modelName, setModelName] = useState('待定');
     const [modelID, setModelID] = useState('xxx');
-    const [inputIncomplete, setInputIncomplete] = useState(false);
     const [entityCount, setEntityCount] = useState(0);
     const [modalOpen, setModalOpen] = useState(false);
 
@@ -36,6 +35,11 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
         // 组件卸载时取消订阅
         return () => unsubscribe();
     }, []);
+
+    useEffect(() => {
+        checkInputCompleteness(name, version);
+        updateModelName(name, version, selectedAgent);
+    }, [name, version, selectedAgent]);
 
     useEffect(() => {
         const selectedScenario = scenarios.find(s => s.id === scenario);
@@ -191,10 +195,8 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
         }
         if (name && version) {
             setModelName(`${name} v${formattedVersion}`);
-            setInputIncomplete(false);
         } else {
             setModelName('待定');
-            setInputIncomplete(true);
             setModelID('xxx'); // 重置模型ID为默认值
             sidebarStore.setModelID('xxx'); // 更新 SidebarStore 的状态
         }
@@ -291,7 +293,6 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
                     placeholder="请输出实数"
                     className="w-full"
                 />
-                {inputIncomplete && <Alert message="请输入完整的智能体名称和版本号!" type="error" className="mt-2" />}
             </div>
             <div className="sidebar-section">
                 <div className="text">智能体数量</div>
