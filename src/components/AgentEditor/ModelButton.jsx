@@ -55,6 +55,8 @@ const ModelFunction = ({ scenarios }) => {
         sidebarStore.setName(selectedModel.agentName);
         sidebarStore.setVersion(selectedModel.agentVersion);
         sidebarStore.setAgentCount(selectedModel.agentCount);
+        sidebarStore.modelID = selectedModel.agentID;
+        sidebarStore.setLoadingModel(true);
 
         const assignedEntities = selectedModel.entityAssignments.reduce((acc, assignment) => {
             const [agent, entities] = Object.entries(assignment)[0];
@@ -73,6 +75,7 @@ const ModelFunction = ({ scenarios }) => {
                 agent: agent,
             });
         });
+        rewardFunctionStore.setLoadingModel(true);
 
         selectedModel.agentModel.forEach(agentModel => {
             const agent = agentModel.agentModelName; // 智能体名称，如 "智能体1"
@@ -110,7 +113,6 @@ const ModelFunction = ({ scenarios }) => {
             });
         });
 
-        rewardFunctionStore.setLoadingModel(true);
         setIsModalVisible(false);
     };
 

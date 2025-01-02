@@ -34,6 +34,7 @@ npm install
 ```json
 [
    {
+      "agentID": "03e4b7a1d5d0fa8",
       "scenarioID": "traffic",
       "agentRoleID": "traffic_light",
       "agentType": "异构多智能体",
@@ -56,7 +57,6 @@ npm install
       ],
       "agentModel": [
          {
-            "agentID": "traffic-traffic_light-2-2-1",
             "agentModelName": "智能体1",
             "entities": [
                {
@@ -118,7 +118,6 @@ npm install
             ]
          },
          {
-            "agentID": "traffic-traffic_light-2-2-2",
             "agentModelName": "智能体2",
             "entities": [
                {
@@ -185,9 +184,10 @@ npm install
             "个人奖励-智能体2"
          ]
       ],
-      "updateTime": "2025-01-02T06:27:08.616Z"
+      "updateTime": "2025-01-02T09:39:11.939Z"
    },
    {
+      "agentID": "0140bb71e693470",
       "scenarioID": "traffic",
       "agentRoleID": "traffic_light",
       "agentType": "同构多智能体",
@@ -210,7 +210,6 @@ npm install
       ],
       "agentModel": [
          {
-            "agentID": "traffic-traffic_light-1-2-1",
             "agentModelName": "智能体1",
             "entities": [
                {
@@ -261,12 +260,21 @@ npm install
             ]
          },
          {
-            "agentID": "traffic-traffic_light-1-2-2",
             "agentModelName": "智能体2",
             "entities": [
                {
                   "name": "红绿灯3",
                   "stateVector": [
+                     [
+                        "Traffic Light Status",
+                        "当前信号灯状态",
+                        "状态"
+                     ],
+                     [
+                        "Number of Waiting Vehicles",
+                        "等待通过的车辆数量",
+                        "辆"
+                     ],
                      [
                         "Number of Pedestrians",
                         "等待通过的行人数量",
@@ -291,13 +299,35 @@ npm install
                               30
                            ]
                         ],
-                        "rule": null
+                        "rule": [
+                           "FOR",
+                           "44",
+                           "33",
+                           "22",
+                           "11"
+                        ]
                      }
                   ]
                },
                {
                   "name": "红绿灯4",
-                  "stateVector": [],
+                  "stateVector": [
+                     [
+                        "Traffic Light Status",
+                        "当前信号灯状态",
+                        "状态"
+                     ],
+                     [
+                        "Number of Waiting Vehicles",
+                        "等待通过的车辆数量",
+                        "辆"
+                     ],
+                     [
+                        "Number of Pedestrians",
+                        "等待通过的行人数量",
+                        "人"
+                     ]
+                  ],
                   "actionSpace": []
                }
             ]
@@ -309,11 +339,11 @@ npm install
             "团队奖励"
          ],
          [
-            "R÷R̄",
+            "R-R̄×u",
             "团队奖励"
          ]
       ],
-      "updateTime": "2025-01-02T06:49:38.671Z"
+      "updateTime": "2025-01-02T09:41:08.670Z"
    }
 ]
 ```

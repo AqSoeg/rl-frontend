@@ -47,6 +47,10 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
 
     // 当场景、角色、类型、版本或智能体数量变化时，生成模型ID
     useEffect(() => {
+        if (sidebarStore.isLoadingModel) {
+            sidebarStore.setLoadingModel(false);
+            return;
+        }
         if (scenario && role && type && version && agentCount) {
             sidebarStore.setModelID(scenario, role, type, version, agentCount);
         } else {

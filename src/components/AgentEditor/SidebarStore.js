@@ -14,6 +14,7 @@ class SidebarStore {
     selectedAgent = ''; // 智能体模型
     modelID = ''; // 模型ID
     listeners = []; // 订阅者列表
+    isLoadingModel = false; // 是否正在载入模型
 
     constructor() {
         makeAutoObservable(this);
@@ -142,6 +143,11 @@ class SidebarStore {
     notifyListeners() {
         this.listeners.forEach(listener => listener());
     }
+
+    setLoadingModel(value) {
+        this.isLoadingModel = value;
+    }
+
 }
 
 const sidebarStore = new SidebarStore();
