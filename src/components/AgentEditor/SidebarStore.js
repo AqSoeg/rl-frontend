@@ -77,8 +77,6 @@ class SidebarStore {
         this.role = '';
         this.roleName = '';
         this.type = '';
-        this.name = '';
-        this.version = '';
         this.agentCount = '';
         this.selectedAgent = '';
         this.modelID = '';
@@ -88,8 +86,6 @@ class SidebarStore {
     // 清空除想定场景和智能体角色外的所有状态
     clearExceptScenarioAndRole() {
         this.type = '';
-        this.name = '';
-        this.version = '';
         this.agentCount = '';
         this.selectedAgent = '';
         this.modelID = '';

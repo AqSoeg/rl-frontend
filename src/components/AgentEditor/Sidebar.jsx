@@ -247,8 +247,10 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
         if (scenario && role && type && agentCount && selectedAgent) {
             const newModelID = generateModelID(scenario, role, type, agentCount, selectedAgent);
             setModelID(newModelID);
-            sidebarStore.setModelID(newModelID); // 更新 SidebarStore 的状态
+        } else {
+            setModelID('xxx'); // 重置模型ID为默认值
         }
+        sidebarStore.setModelID('xxx'); // 更新 SidebarStore 的状态
     }, [scenario, role, type, version, agentCount, selectedAgent]);
 
     return (
