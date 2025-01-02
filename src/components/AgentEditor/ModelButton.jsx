@@ -124,7 +124,7 @@ const ModelFunction = ({ scenarios }) => {
 
                 return {
                     agentID: agentID, // 使用生成的唯一 agentID
-                    agentModelName: sidebarStore.selectedAgent, // 智能体模型名称
+                    agentModelName: agent, // 智能体名称
                     entities: agentEntities // 实体信息
                 };
             });

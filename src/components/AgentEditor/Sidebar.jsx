@@ -244,9 +244,8 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
     };
 
     useEffect(() => {
-        if (scenario && role && type && version && agentCount && selectedAgent) {
-            const timestamp = Date.now();
-            const newModelID = generateModelID(scenario, role, type, version, agentCount, timestamp, selectedAgent);
+        if (scenario && role && type && agentCount && selectedAgent) {
+            const newModelID = generateModelID(scenario, role, type, agentCount, selectedAgent);
             setModelID(newModelID);
             sidebarStore.setModelID(newModelID); // 更新 SidebarStore 的状态
         }
