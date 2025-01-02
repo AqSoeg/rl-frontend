@@ -43,7 +43,12 @@ const ModelFunction = ({ scenarios }) => {
             return;
         }
 
-        // 更新 SidebarStore 的状态
+        for (let i = 1; i <= sidebarStore.agentCount; i++) {
+            actionSpaceStore.clearActionsAndRulesForModel(`智能体${i}`);
+        }
+        sidebarStore.clearExceptScenario();
+        rewardFunctionStore.clearRewards();
+
         sidebarStore.setScenario(selectedModel.scenarioID, getScenarioName(selectedModel.scenarioID));
         sidebarStore.setRole(selectedModel.agentRoleID, getRoleName(selectedModel.scenarioID, selectedModel.agentRoleID));
         sidebarStore.setType(selectedModel.agentType);
@@ -59,7 +64,6 @@ const ModelFunction = ({ scenarios }) => {
 
         entityAssignmentStore.setAssignedEntities(assignedEntities);
 
-        rewardFunctionStore.clearRewards(); // 清空现有的奖励函数
         selectedModel.rewardFunction.forEach(reward => {
             const [equation, rewardType] = reward;
             const agent = rewardType === '团队奖励' ? '' : rewardType.split('-')[1]; // 提取智能体名称
@@ -70,7 +74,6 @@ const ModelFunction = ({ scenarios }) => {
             });
         });
 
-        // 载入动作空间
         selectedModel.agentModel.forEach(agentModel => {
             const agent = agentModel.agentModelName; // 智能体名称，如 "智能体1"
             agentModel.entities.forEach(entity => {
@@ -107,7 +110,6 @@ const ModelFunction = ({ scenarios }) => {
             });
         });
 
-        // 关闭弹窗
         rewardFunctionStore.setLoadingModel(true);
         setIsModalVisible(false);
     };
