@@ -51,6 +51,14 @@ const ModelFunction = ({ scenarios }) => {
         sidebarStore.setVersion(selectedModel.agentVersion);
         sidebarStore.setAgentCount(selectedModel.agentCount);
 
+        const assignedEntities = selectedModel.entityAssignments.reduce((acc, assignment) => {
+            const [agent, entities] = Object.entries(assignment)[0];
+            acc[agent] = entities;
+            return acc;
+        }, {});
+
+        entityAssignmentStore.setAssignedEntities(assignedEntities);
+
         rewardFunctionStore.clearRewards(); // 清空现有的奖励函数
         selectedModel.rewardFunction.forEach(reward => {
             const [equation, rewardType] = reward;
@@ -59,6 +67,43 @@ const ModelFunction = ({ scenarios }) => {
                 equation: equation,
                 type: rewardType === '团队奖励' ? '团队奖励' : '个人奖励',
                 agent: agent,
+            });
+        });
+
+        // 载入动作空间
+        selectedModel.agentModel.forEach(agentModel => {
+            const agent = agentModel.agentModelName; // 智能体名称，如 "智能体1"
+            agentModel.entities.forEach(entity => {
+                const entityName = entity.name; // 实体名称，如 "红绿灯1"
+                entity.actionSpace.forEach(action => {
+                    // 构建动作空间数据
+                    const actionData = {
+                        entity: entityName,
+                        actionType: action.name,
+                        mode: action.type,
+                        unit: action.action[1], // 单位
+                        range: action.action[2], // 取值范围
+                        discreteOptions: action.type === '离散型' ? action.action[1] : [], // 离散型动作的可选取值
+                        discreteValues: action.type === '离散型' ? action.action[0] : [], // 离散型动作的取值
+                        upperLimit: action.type === '连续型' ? action.action[0][1] : '', // 连续型动作的上限
+                        lowerLimit: action.type === '连续型' ? action.action[0][0] : '', // 连续型动作的下限
+                    };
+
+                    // 更新 ActionSpaceStore 中的动作空间
+                    actionSpaceStore.addActionForModel(agent, actionData);
+
+                    // 如果有行为规则，更新 ActionSpaceStore 中的规则
+                    if (action.rule) {
+                        const uniqueKey = `${entityName}：${action.name}`;
+                        actionSpaceStore.setRuleForModel(agent, uniqueKey, {
+                            ruleType: action.rule[0],
+                            condition1: action.rule[1],
+                            condition2: action.rule[2],
+                            execution1: action.rule[3],
+                            execution2: action.rule[4],
+                        });
+                    }
+                });
             });
         });
 
