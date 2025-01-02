@@ -63,6 +63,7 @@ const ModelFunction = ({ scenarios }) => {
         });
 
         // 关闭弹窗
+        rewardFunctionStore.setLoadingModel(true);
         setIsModalVisible(false);
     };
 

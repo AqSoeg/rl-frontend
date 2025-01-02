@@ -22,6 +22,10 @@ const RewardFunction = observer(({ selectedParams }) => { // 新增：接收 sel
 
     // 监听 SidebarStore 的状态变化
     useEffect(() => {
+        if (rewardFunctionStore.isLoadingModel) {
+            rewardFunctionStore.setLoadingModel(false);
+            return;
+        }
         if (sidebarStore.agentCount || sidebarStore.type || sidebarStore.role || sidebarStore.scenario) {
             rewardFunctionStore.clearRewards(); // 清空奖励函数状态
         }

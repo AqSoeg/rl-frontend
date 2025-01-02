@@ -3,6 +3,7 @@ import { makeAutoObservable } from 'mobx';
 class RewardFunctionStore {
     selectedReward = []; // 选中的奖励函数
     visible = []; // 下拉框的可见状态
+    isLoadingModel = false; // 是否正在载入模型
 
     constructor() {
         makeAutoObservable(this);
@@ -34,6 +35,11 @@ class RewardFunctionStore {
     clearRewards() {
         this.selectedReward = [];
         this.visible = [];
+    }
+
+    // 设置是否正在载入模型
+    setLoadingModel(value) {
+        this.isLoadingModel = value;
     }
 
     // 新增方法：获取所有奖励函数的内容
