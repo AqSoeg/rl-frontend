@@ -1,4 +1,5 @@
 import { makeAutoObservable } from 'mobx';
+import md5 from 'md5';
 import entityAssignmentStore from './EntityAssignmentStore';
 
 class SidebarStore {
@@ -67,8 +68,25 @@ class SidebarStore {
     }
 
     // 设置模型ID
-    setModelID(modelID) {
-        this.modelID = modelID;
+    setModelID(scenario, role, type, version, agentCount) {
+        // 获取智能体类型对应的数字
+        let typeNumber;
+        switch (type) {
+            case '单智能体':
+                typeNumber = '0';
+                break;
+            case '同构多智能体':
+                typeNumber = '1';
+                break;
+            case '异构多智能体':
+                typeNumber = '2';
+                break;
+            default:
+                typeNumber = '0'; // 默认值为 0
+        }
+
+        const data = `${scenario}|${role}|${typeNumber}|${version}|${agentCount}|${Date.now()}`;
+        this.modelID = md5(data).slice(0, 15);
         this.notifyListeners(); // 通知订阅者
     }
 

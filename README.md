@@ -17,6 +17,7 @@ npm install
 6. 安装 axios：`npm install axios`。
 7. 安装 [ws](https://github.com/websockets/ws)：`npm install ws`。
 8. 安装 recharts：`npm install recharts`。
+9. 安装 md5：`npm install md5`。
 
 ## 项目运行
 

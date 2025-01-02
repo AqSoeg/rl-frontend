@@ -16,7 +16,6 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
     const [selectedAgent, setSelectedAgent] = useState('');
     const [agentRoles, setAgentRoles] = useState([]);
     const [modelName, setModelName] = useState('待定');
-    const [modelID, setModelID] = useState('xxx');
     const [entityCount, setEntityCount] = useState(0);
     const [modalOpen, setModalOpen] = useState(false);
 
@@ -45,6 +44,15 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
         const selectedScenario = scenarios.find(s => s.id === scenario);
         setAgentRoles(selectedScenario ? selectedScenario.roles : []);
     }, [scenario, scenarios]);
+
+    // 当场景、角色、类型、版本或智能体数量变化时，生成模型ID
+    useEffect(() => {
+        if (scenario && role && type && version && agentCount) {
+            sidebarStore.setModelID(scenario, role, type, version, agentCount);
+        } else {
+            sidebarStore.setModelID('', '', '', '', ''); // 重置模型ID
+        }
+    }, [scenario, role, type, version, agentCount]);
 
     const handleScenarioChange = (value) => {
         const selectedScenario = scenarios.find(s => s.id === value);
@@ -197,8 +205,6 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
             setModelName(`${name} v${formattedVersion}`);
         } else {
             setModelName('待定');
-            setModelID('xxx'); // 重置模型ID为默认值
-            sidebarStore.setModelID('xxx'); // 更新 SidebarStore 的状态
         }
     };
 
@@ -217,41 +223,17 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
             }
         } else {
             setModelName('待定');
-            setModelID('xxx'); // 重置模型ID为默认值
-            sidebarStore.setModelID('xxx'); // 更新 SidebarStore 的状态
         }
     };
 
-    const generateModelID = (scenarioID, roleID, type, agentCount, selectedAgent) => {
-        let typeNumber;
-        switch (type) {
-            case '单智能体':
-                typeNumber = '0';
-                break;
-            case '同构多智能体':
-                typeNumber = '1';
-                break;
-            case '异构多智能体':
-                typeNumber = '2';
-                break;
-            default:
-                typeNumber = '0'; // 默认值为 0
+    // 生成渲染用的模型ID（添加 agentNumber）
+    const getRenderedModelID = () => {
+        if (sidebarStore.version && sidebarStore.modelID && selectedAgent) {
+            const agentNumber = selectedAgent.replace('智能体', ''); // 提取智能体编号
+            return `${sidebarStore.modelID}-${agentNumber}`;
         }
-
-        const agentNumber = selectedAgent.replace('智能体', ''); // 提取智能体模型的编号
-        const modelID = `${scenarioID}-${roleID}-${typeNumber}-${agentCount}-${agentNumber}`;
-        return modelID;
+        return 'xxx';
     };
-
-    useEffect(() => {
-        if (scenario && role && type && agentCount && selectedAgent) {
-            const newModelID = generateModelID(scenario, role, type, agentCount, selectedAgent);
-            setModelID(newModelID);
-        } else {
-            setModelID('xxx'); // 重置模型ID为默认值
-        }
-        sidebarStore.setModelID('xxx'); // 更新 SidebarStore 的状态
-    }, [scenario, role, type, version, agentCount, selectedAgent]);
 
     return (
         <div className="sidebar">
@@ -319,7 +301,7 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
             </div>
             <div className="sidebar-section">
                 <div className="text">模型名称：{modelName}</div>
-                <div className="text">模型ID：{modelID}</div>
+                <div className="text">模型ID：{getRenderedModelID()}</div>
             </div>
 
             <EntityAssignmentModal
