@@ -95,18 +95,5 @@
   .ant-card{
     margin-top: 20px;
   }
-  .button {
-    margin-top: 20px; /* 与上方内容的间距 */
-  }
-  .hyper-params {
-    display: flex;
-    flex-wrap: wrap; /* 允许换行 */
-  }
-  
-  .hyper-params > * {
-    flex: 1 1 30%; /* 默认每个组件占据%的宽度 */
-    margin-bottom: 10px; /* 组件之间的间距 */
-  }
-  .value{
-    width: 150px;
-  }
+
+
