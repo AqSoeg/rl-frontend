@@ -46,7 +46,7 @@ const AgentEditor = () => {
                     .flatMap(scenario => scenario.roles)
                     .find(role => role.entities.some(entity => assignedEntities.includes(entity.name)));
                 setSelectedActionTypes(selectedRole ? selectedRole.actionTypes : []);
-                setSelectedParams(selectedRole ? selectedRole.params : []); // 新增：设置选中的 params
+                setSelectedParams(selectedRole ? selectedRole.RewardParams : []); // 新增：设置选中的 params
             } else {
                 setSelectedEntities([]);
                 setSelectedActionTypes([]);
