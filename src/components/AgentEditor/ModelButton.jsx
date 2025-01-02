@@ -132,14 +132,8 @@ const ModelFunction = ({ scenarios }) => {
             // 获取所有奖励函数
             const allRewards = rewardFunctionStore.getAllRewards();
 
-            // 解析当前的 modelID，获取基础部分和智能体代号
-            const baseModelID = sidebarStore.modelID.slice(0, sidebarStore.modelID.lastIndexOf('-')); // 获取基础部分
-            const agentCount = parseInt(sidebarStore.agentCount, 10); // 获取智能体数量
-
             // 构建每个智能体模型的实体信息
             const agentModels = Object.entries(entityAssignmentStore.assignedEntities).map(([agent, entities], index) => {
-                const agentID = `${baseModelID}-${index + 1}`; // 生成唯一的 agentID
-
                 const agentEntities = entities.map(entityName => {
                     const entity = role.entities.find(e => e.name === entityName);
 
@@ -170,7 +164,6 @@ const ModelFunction = ({ scenarios }) => {
                 });
 
                 return {
-                    agentID: agentID, // 使用生成的唯一 agentID
                     agentModelName: agent, // 智能体名称
                     entities: agentEntities // 实体信息
                 };
@@ -184,6 +177,7 @@ const ModelFunction = ({ scenarios }) => {
 
             // 构建模型数据
             const modelData = {
+                agentID: sidebarStore.modelID,
                 scenarioID: sidebarStore.scenario,
                 agentRoleID: sidebarStore.role,
                 agentType: sidebarStore.type,
