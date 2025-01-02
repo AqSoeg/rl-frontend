@@ -80,10 +80,10 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
     };
 
     const handleNameChange = (e) => {
-        const newName = e.target.value.slice(0, 10);
+        const newName = e.target.value.slice(0, 50);
         setName(newName);
         sidebarStore.setName(newName); // 更新 SidebarStore 的状态
-        if (newName.length >= 10) {
+        if (newName.length >= 50) {
             alert('名称不能超过10个字符!');
         }
         checkInputCompleteness(newName, version);
