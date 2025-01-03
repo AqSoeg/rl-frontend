@@ -95,5 +95,20 @@
   .ant-card{
     margin-top: 20px;
   }
-
+  .right {
+    position: relative;
+    height: 100vh; /* 确保父容器有高度 */
+  }
+  
+  .button-container {
+    position: absolute;
+    bottom: 20vh;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    padding: 10px;
+    text-align: center;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+    
+  }
 

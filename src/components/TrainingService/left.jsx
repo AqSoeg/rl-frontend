@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Select, Button, Modal, message } from 'antd';
 import { intelligentStore } from './IntelligentStore';
-const { Option } = Select;
 import { observer } from 'mobx-react';
 
-const Left =  observer(({ scenarios, algorithms, onAlgorithmSelect, onScenarioSelect ,onAgentRoleSelect}) => {
+const { Option } = Select;
+
+const Left = observer(({ scenarios, algorithms }) => {
   const [trainingMode, setTrainingMode] = useState('offline');
-  const [algorithmType, setAlgorithmType] = useState(''); // 设置默认算法类型
-  const [algorithmsByType, setAlgorithmsByType] = useState([]); // 存储根据算法类型筛选的算法列表
-  const [selectedAlgorithm, setSelectedAlgorithm] = useState(null); // 存储当前选中的算法
+  const [algorithmType, setAlgorithmType] = useState('');
+  const [algorithmsByType, setAlgorithmsByType] = useState([]);
   const [visible, setVisible] = useState(false);
-  const [selectedScenario, setSelectedScenario] = useState(null); // 新增：存储当前选中的场景
   const [selectedDataset, setSelectedDataset] = useState('');
-  const [selectedAgentRole, setSelectedAgentRole] = useState(null);
   const [agentRoles, setAgentRoles] = useState([]);
-  // 假设这是你的离线数据集列表
+
   const offlineDatasets = [
     { id: 1, name: 'Dataset 1' },
     { id: 2, name: 'Dataset 2' },
@@ -24,56 +22,52 @@ const Left =  observer(({ scenarios, algorithms, onAlgorithmSelect, onScenarioSe
   const showDataLoadModal = () => {
     setVisible(true);
   };
+
   const handleDatasetChange = (value) => {
     setSelectedDataset(value);
   };
-  useEffect(() => {
-    // 这里可以添加任何副作用代码，比如日志输出或API请求
-    console.log('Selected Agent Changed:', intelligentStore.selectedAgent);
-  }, [intelligentStore.selectedAgent]);
+
   const handleTrainingModeChange = (value) => {
     setTrainingMode(value);
-    setVisible(false); // 隐藏弹窗
+    setVisible(false);
   };
 
   const handleAlgorithmTypeChange = (value) => {
-    setAlgorithmType(value);
-    setSelectedAlgorithm(null); // 重置选中的算法
+    setAlgorithmType(value); // 更新算法类型
+    setAlgorithmsByType([]); // 重置根据算法类型筛选的算法列表
+    intelligentStore.selectedAlgorithm = null; // 重置选定的算法
+  
+    // 根据算法类型筛选算法
     const filteredAlgorithms = algorithms.filter(algo => algo.type_name === value);
     setAlgorithmsByType(filteredAlgorithms);
   };
 
   const handleAlgorithmSelectChange = (value) => {
     const selectedAlgo = algorithms.find(algo => algo.name === value);
-    setSelectedAlgorithm(selectedAlgo);
-    onAlgorithmSelect(selectedAlgo); // 将选中的算法传递给父组件
+    intelligentStore.selectedAlgorithm = selectedAlgo;
   };
+
   const handleScenarioSelectChange = (value) => {
     const selectedScene = scenarios.find(scenario => scenario.name === value);
-    setSelectedScenario(selectedScene);
-    onScenarioSelect(selectedScene); // 将选中的场景传递给父组件
-    
-    // 假设场景对象中有一个roles数组，包含所有智能体角色
+    intelligentStore.selectedScenario = selectedScene; // 更新选定的场景
+    intelligentStore.selectedAgentRole = null; // 重置选定的智能体角色
+  
+    // 更新智能体角色列表
     const agentRoles = selectedScene.roles || [];
-    setSelectedAgentRole(null); // 重置选中的智能体角色
     setAgentRoles(agentRoles); // 更新智能体角色列表
   };
+
   const handleAgentRoleSelectChange = (value) => {
     const selectedRole = agentRoles.find(role => role.name === value);
-    setSelectedAgentRole(selectedRole);
-    // 调用父组件的回调函数，传递选定的智能体角色
-    onAgentRoleSelect(selectedRole); // 假设父组件提供了这个回调函数
+    intelligentStore.selectedAgentRole = selectedRole;
   };
+
   const handleOk = async () => {
     try {
       if (!selectedDataset) {
         message.error('请选择一个数据集！');
         return;
       }
-
-      // 这里可以发送请求到后端处理加载数据
-      // await axios.post('/api/loadOfflineData', { datasetId: selectedDataset });
-
       message.success('数据集加载成功！');
       setVisible(false);
     } catch (error) {
@@ -88,14 +82,12 @@ const Left =  observer(({ scenarios, algorithms, onAlgorithmSelect, onScenarioSe
 
   const uniqueAlgorithmTypeNames = Array.from(new Set(algorithms.map(algo => algo.type_name)));
 
-
-
   return (
     <div className='left'>
       <div className="form-item">
         <label>想定场景</label>
         <Select 
-          value={selectedScenario ? selectedScenario.name : ''} 
+          value={intelligentStore.selectedScenario ? intelligentStore.selectedScenario.name : ''} 
           onChange={handleScenarioSelectChange}
           placeholder="请选择"
         >
@@ -109,7 +101,7 @@ const Left =  observer(({ scenarios, algorithms, onAlgorithmSelect, onScenarioSe
       <div className="form-item">
         <label>智能体角色</label>
         <Select
-          value={selectedAgentRole ? selectedAgentRole.name : ''}
+          value={intelligentStore.selectedAgentRole ? intelligentStore.selectedAgentRole.name : ''}
           onChange={handleAgentRoleSelectChange}
           placeholder="请选择"
         >
@@ -145,9 +137,9 @@ const Left =  observer(({ scenarios, algorithms, onAlgorithmSelect, onScenarioSe
       <div className="form-item">
         <label>算法选择</label>
         <Select
-          value={selectedAlgorithm ? selectedAlgorithm.name : ''}
+          value={intelligentStore.selectedAlgorithm ? intelligentStore.selectedAlgorithm.name : ''}
           onChange={handleAlgorithmSelectChange}
-          placeholder="请选择" // 设置默认提示为“请选择”
+          placeholder="请选择"
         >
           {algorithmsByType.map((algo) => (
             <Option key={algo.name} value={algo.name}>

@@ -1,17 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect,useState } from 'react';
 import Left from './left';
 import Middle from './middle';
 import axios from 'axios';
 import Right from './right';
 import RighT from './1';
-import './TrainingService.css'; // 引入CSS文件
+import './TrainingService.css';
+import { intelligentStore } from './IntelligentStore';
+import { observer } from 'mobx-react';
 
-const TrainingService = () => {
+const TrainingService = observer(() => {
   const [scenarios, setScenarios] = useState([]);
-  const [algorithms, setAlgorithms] = useState([]); // 新增状态用于存储算法数据
-  const [selectedAlgorithm, setSelectedAlgorithm] = useState(null);
-  const [selectedScenario, setSelectedScenario] = useState(null); // 新增状态用于存储选中的场景
-  const [selectedAgentRole, setSelectedAgentRole] = useState(null);
+  const [algorithms, setAlgorithms] = useState([]);
 
   useEffect(() => {
     const fetchScenarios = async () => {
@@ -28,7 +27,7 @@ const TrainingService = () => {
   useEffect(() => {
     const fetchAlgorithms = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/algorithms'); // 假设您的后端API端点
+        const response = await axios.get('http://localhost:3001/algorithms');
         setAlgorithms(response.data);
       } catch (error) {
         console.error('Error fetching algorithms:', error);
@@ -43,33 +42,21 @@ const TrainingService = () => {
         <Left 
           scenarios={scenarios} 
           algorithms={algorithms} 
-          onAlgorithmSelect={setSelectedAlgorithm} 
-          onScenarioSelect={setSelectedScenario} // 提供场景选择回调
-          onAgentRoleSelect={setSelectedAgentRole} 
         />
       </div>
       <div className='middle'>
-        <Middle 
-          selectedScenario={selectedScenario}
-        /> {/* 传递选中场景 */}
+        <Middle />
       </div>
       <div className='right'>
         <Right 
           algorithms={algorithms}
-          selectedAlgorithm={selectedAlgorithm} 
-          selectedScenario={selectedScenario} // 传递选中场景
-          selectedAgentRole={selectedAgentRole}
         />
       </div>
       <div className='righT'>
-        <RighT 
-          selectedAlgorithm={selectedAlgorithm} 
-          selectedScenario={selectedScenario} // 传递选中场景
-          selectedAgentRole={selectedAgentRole}
-        />
+        <RighT />
       </div>
     </div>
   );
-};
+});
 
 export default TrainingService;
