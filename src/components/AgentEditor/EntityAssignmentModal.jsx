@@ -21,11 +21,11 @@ const EntityAssignmentModal = ({ open, onCancel, onConfirm }) => {
 
             if (sidebarStore.type === '单智能体') {
                 setSelectedEntities({
-                    [`智能体1`]: entityAssignmentStore.entities.map(entity => entity.name),
+                    [`智能体1`]: entityAssignmentStore.entityNames,
                 });
             }
         }
-    }, [open, sidebarStore.agentCount, sidebarStore.type, entityAssignmentStore.entities]);
+    }, [open, sidebarStore.agentCount, sidebarStore.type, entityAssignmentStore.entityNames]);
 
     const handleEntitySelect = (agent, entity) => {
         const currentSelected = selectedEntities[agent] || [];
@@ -84,15 +84,17 @@ const EntityAssignmentModal = ({ open, onCancel, onConfirm }) => {
             }
 
             onConfirm(selectedEntities);
+
             const defaultSelectedStateVectors = {};
             entityAssignmentStore.entities.forEach(entity => {
-                defaultSelectedStateVectors[entity.name] = entity.stateVector.map((_, idx) => idx);
+                if (entity && Array.isArray(entity.stateVector)) {
+                    defaultSelectedStateVectors[entity.name] = entity.stateVector.map((_, idx) => idx);
+                }
             });
+
             stateVectorStore.setSelectedStateVectors(defaultSelectedStateVectors);
         }
     };
-
-    const entityNames = entityAssignmentStore.entities.map(entity => entity.name);
 
     const isEntityAssigned = (entity) => {
         return Object.values(selectedEntities).some(entities => entities.includes(entity));
@@ -139,7 +141,7 @@ const EntityAssignmentModal = ({ open, onCancel, onConfirm }) => {
                     <h3 className="entity-assignment-modal__title">所有实体</h3>
                     <List
                         bordered
-                        dataSource={entityNames}
+                        dataSource={entityAssignmentStore.entityNames}
                         renderItem={entity => {
                             const isAssigned = isEntityAssigned(entity);
                             const isCurrentAgentAssigned = selectedEntities[currentAgent]?.includes(entity);

@@ -74,8 +74,7 @@ const Sidebar = ({ scenarios }) => {
         sidebarStore.setRole(value, selectedRole.name);
 
         if (selectedRole) {
-            entityAssignmentStore.setEntityCount(selectedRole.entities.length); // 更新实体数量
-            entityAssignmentStore.setEntities(selectedRole.entities); // 更新实体列表
+            entityAssignmentStore.setEntities(selectedRole.entities);
         }
     };
 
