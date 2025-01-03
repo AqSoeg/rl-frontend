@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Select, Row, Col, Space, Button, Modal, Table, message } from 'antd';
 import { intelligentStore } from './IntelligentStore';
-import axios from 'axios';
 import { observer } from 'mobx-react';
+import axios from 'axios';
 
 const { Option } = Select;
 
@@ -16,13 +16,36 @@ const Right = observer(({ algorithms }) => {
   const [training, setTraining] = useState(false);
   const [isSuccessModalVisible, setIsSuccessModalVisible] = useState(false);
   const [hyperParametersValues, setHyperParametersValues] = useState({});
-  const [effectImageUrl, setEffectImageUrl] = useState(null); // 存储图片 URL
-const [isEffectImageModalVisible, setIsEffectImageModalVisible] = useState(false); // 控制弹窗显示
+  const [effectImageUrl, setEffectImageUrl] = useState(null);
+  const [isEffectImageModalVisible, setIsEffectImageModalVisible] = useState(false);
+  const [modelList, setModelList] = useState([]); // 用于保存训练好的模型列表
+
+  // 获取智能体列表
+  const fetchAgents = async () => {
+    try {
+      const response = await axios.get('tmp/model.json');
+      const models = response.data;
+
+      // 根据 scenarioID 和 agentRoleID 过滤智能体
+      const filteredAgents = models.filter(agent =>
+        agent.scenarioID === intelligentStore.selectedScenario.id &&
+        agent.agentRoleID === intelligentStore.selectedAgentRole.id
+      );
+
+      setAgents(filteredAgents);
+    } catch (error) {
+      console.error("Error fetching agents:", error);
+    }
+  };
+
+  // 当场景或智能体角色发生变化时，重新获取智能体列表
   useEffect(() => {
     if (intelligentStore.selectedScenario && intelligentStore.selectedAgentRole) {
       fetchAgents();
     }
   }, [intelligentStore.selectedScenario, intelligentStore.selectedAgentRole]);
+
+  // 初始化超参数值
   useEffect(() => {
     if (intelligentStore.selectedAlgorithm && intelligentStore.selectedAlgorithm['hyper-parameters']) {
       const initialParams = intelligentStore.selectedAlgorithm['hyper-parameters'].reduce((acc, param) => {
@@ -33,42 +56,133 @@ const [isEffectImageModalVisible, setIsEffectImageModalVisible] = useState(false
     }
   }, [intelligentStore.selectedAlgorithm]);
 
-  useEffect(() => {
-    if (intelligentStore.selectedScenario) {
-      fetchAgents();
-    }
-  }, [intelligentStore.selectedScenario]);
-
-  useEffect(() => {
-    if (intelligentStore.selectedAgentRole) {
-      fetchAgents();
-    }
-  }, [intelligentStore.selectedAgentRole]);
-
-  const fetchAgents = async () => {
+  // 训练算法
+  const trainAlgorithm = async () => {
+    setTraining(true);
     try {
-      const modelResponse = await axios.get('tmp/model.json');
-      const models = modelResponse.data;
-      const urls = models.map(model => `http://localhost:3002/${model.id || models.indexOf(model)}`);
-      const responses = await Promise.all(urls.map(url => axios.get(url)));
-      let allData = [];
-      for (let response of responses) {
-        allData = allData.concat(response.data);
-      }    const filteredAgents = allData.filter(agent => 
-        agent.scenarioID === intelligentStore.selectedScenario.id &&
-        agent.agentRoleID === intelligentStore.selectedAgentRole.id
-      );
-  
-      setAgents(filteredAgents);
+      const response = await fetch('http://localhost:5000/train', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ hyperParametersValues }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log(data);
+
+      if (data.status === 'success') {
+        setIsSuccessModalVisible(true);
+
+        // 训练完成后，将训练好的智能体信息保存到 modelList 中
+        const trainedModel = {
+          scenarioID: intelligentStore.selectedAgent.scenarioID,
+          agentRoleID: intelligentStore.selectedAgent.agentRoleID,
+          agentName: intelligentStore.selectedAgent.agentName, // 从 loadedAgent 中获取
+          decisionModelID: Date.now(), // 使用时间戳作为决策模型 ID
+          agentType: intelligentStore.selectedAgent.agentType, // 从 loadedAgent 中获取
+        };
+
+        setModelList((prevModelList) => [...prevModelList, trainedModel]); // 更新 modelList
+        message.success('训练完成，模型已保存！');
+      } else {
+        message.error('训练失败，请检查日志');
+      }
     } catch (error) {
-      console.error("Error fetching agents:", error);
+      console.error('训练过程中发生错误:', error);
+      message.error('训练失败，请检查日志');
+    } finally {
+      setTraining(false);
     }
   };
 
-  const modelList = [
-    { scenarioID: '1', agentRoleID: '2', agentName: '3', decisionModelID: '4', agentType: '5' }
-  ];
+  // 查看智能体详情
+  const handleView = (agent) => {
+    setSelectedAgent(agent);
+    setIsDetailModalVisible(true);
+  };
 
+  // 载入智能体
+  const handleLoad = (agent) => {
+    intelligentStore.loadAgent(agent); // 将选中的智能体信息存储到 IntelligentStore
+    message.success('智能体载入成功！'); // 提示用户
+  };
+
+  // 查看模型列表
+  const handleViewModelListClick = () => {
+    setIsModelListModalVisible(true);
+  };
+
+  // 查看模型详情
+  const handleViewModel = (model) => {
+    setCurrentModel(model);
+    setIsModelInfoModalVisible(true);
+  };
+
+  // 查看模型效果
+  const handleEffectModel = async (record) => {
+    try {
+      const response = await fetch('http://localhost:5000/get-effect-image', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.statusText}`);
+      }
+
+      const blob = await response.blob(); // 获取 Blob 数据
+      const imageUrl = URL.createObjectURL(blob); // 生成图片 URL
+      setEffectImageUrl(imageUrl);
+      setIsEffectImageModalVisible(true);
+    } catch (error) {
+      console.error('获取效果图片失败:', error);
+      message.error('获取效果图片失败，请检查网络或联系管理员');
+    }
+  };
+
+  // 发布模型
+  const handlePublishModel = async (record) => {
+    try {
+      const response = await fetch('http://localhost:5000/publish-model', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          decisionModelID: record.decisionModelID,
+          modelInfo: {
+            scenarioID: record.scenarioID,
+            agentRoleID: record.agentRoleID,
+            agentName: record.agentName,
+            agentType: record.agentType,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.statusText}`);
+      }
+
+      const data = await response.json(); // 解析响应数据
+      if (data.status === 'success') {
+        message.success('模型发布成功！');
+      } else {
+        message.error('模型发布失败，请检查日志');
+      }
+    } catch (error) {
+      console.error('模型发布失败:', error);
+      message.error('模型发布失败，请检查网络或联系管理员');
+    }
+  };
+
+  // 表格列定义
   const scenarioColumns = [
     { title: '想定场景', dataIndex: 'scenarioID', key: 'scenarioID' },
     { title: '智能体角色', dataIndex: 'agentRoleID', key: 'agentRoleID' },
@@ -77,9 +191,32 @@ const [isEffectImageModalVisible, setIsEffectImageModalVisible] = useState(false
     { title: '版本', dataIndex: 'agentVersion', key: 'agentVersion' },
     { title: '智能体类型', dataIndex: 'agentType', key: 'agentType' },
     { title: '更新时间', dataIndex: 'updateTime', key: 'updateTime', render: time => new Date(time).toLocaleString() },
-    { title: '代理实体', dataIndex: 'entities', key: 'entities', render: (text, record) => record.entities.map(entity => entity.name).join(', ') || '无' },
     {
-      title: '操作', key: 'action', render: (text, record) => (
+      title: '实体分配',
+      dataIndex: 'entityAssignments',
+      key: 'entityAssignments',
+      render: (text, record) => {
+        // 提取 entityAssignments 中的智能体和实体名称
+        const assignments = record.entityAssignments.map((assignment, index) => {
+          const agentName = Object.keys(assignment)[0]; // 获取智能体名称
+          const entities = assignment[agentName].join(', '); // 获取实体名称并拼接成字符串
+          return `${agentName}: ${entities}`; // 返回智能体和实体名称的组合
+        });
+
+        // 使用 <br /> 标签实现换行
+        return (
+          <div>
+            {assignments.map((assignment, index) => (
+              <div key={index}>{assignment}</div>
+            ))}
+          </div>
+        );
+      },
+    },
+    {
+      title: '操作',
+      key: 'action',
+      render: (text, record) => (
         <div style={{ display: 'flex', gap: 8 }}>
           <Button type="primary" onClick={() => handleView(record)}>查看</Button>
           <Button type="primary" onClick={() => handleLoad(record)}>载入</Button>
@@ -95,7 +232,9 @@ const [isEffectImageModalVisible, setIsEffectImageModalVisible] = useState(false
     { title: '决策模型ID', dataIndex: 'decisionModelID', key: 'decisionModelID' },
     { title: '智能体类型', dataIndex: 'agentType', key: 'agentType' },
     {
-      title: '操作', key: 'action', render: (text, record) => (
+      title: '操作',
+      key: 'action',
+      render: (text, record) => (
         <div style={{ display: 'flex', gap: 8 }}>
           <Button type="primary" onClick={() => handleViewModel(record)}>查看</Button>
           <Button type="primary" onClick={() => handleEffectModel(record)}>效果</Button>
@@ -109,107 +248,6 @@ const [isEffectImageModalVisible, setIsEffectImageModalVisible] = useState(false
     { title: '输入情况', dataIndex: 'inputInfo', key: 'inputInfo' },
     { title: '输出情况', dataIndex: 'outputInfo', key: 'outputInfo' },
   ];
-
-  const trainAlgorithm = async () => {
-    setTraining(true);
-    try {
-      const response = await fetch('http://localhost:5000/train', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ hyperParametersValues })
-      });
-  
-      if (!response.ok) {
-        throw new Error(`Network response was not ok: ${response.statusText}`);
-      }
-  
-      const data = await response.json();
-      console.log(data);
-  
-      if (data.status === 'success') {
-        setIsSuccessModalVisible(true);
-      } else {
-        message.error('训练失败，请检查日志');
-      }
-    } catch (error) {
-      console.error('训练过程中发生错误:', error);
-      message.error('训练失败，请检查日志');
-    } finally {
-      setTraining(false);
-    }
-  };
-
-  const handleViewModelListClick = () => {
-    setIsModelListModalVisible(true);
-  };
-
-  const handleViewModel = (model) => {
-    setCurrentModel(model);
-    setIsModelInfoModalVisible(true);
-  };
-
-  const handleEffectModel = async (record) => {
-    try {
-      // 发送请求到后端获取图片
-      const response = await axios.get(`http://localhost:5000/get-effect-image`, {
-        responseType: 'blob', // 指定响应类型为二进制数据
-      });
-  
-      // 将二进制数据转换为图片 URL
-      const imageUrl = URL.createObjectURL(new Blob([response.data]));
-  
-      // 显示图片
-      setEffectImageUrl(imageUrl);
-      setIsEffectImageModalVisible(true); // 显示图片弹窗
-    } catch (error) {
-      console.error('获取效果图片失败:', error);
-      message.error('获取效果图片失败，请检查网络或联系管理员');
-    }
-  };
-
-  const handlePublishModel = async (record) => {
-    try {
-      // 发送请求到后端，发布模型
-      const response = await axios.post('http://localhost:5000/publish-model', {
-        decisionModelID: record.decisionModelID,
-        modelInfo: {
-          scenarioID: record.scenarioID,
-          agentRoleID: record.agentRoleID,
-          agentName: record.agentName,
-          agentType: record.agentType,
-        },
-      });
-  
-      // 处理后端响应
-      if (response.data && response.data.status === 'success') {
-        message.success('模型发布成功！');
-      } else {
-        message.error('模型发布失败，请检查日志');
-      }
-    } catch (error) {
-      console.error('模型发布失败:', error);
-      message.error('模型发布失败，请检查网络或联系管理员');
-    }
-  };
-
-  const handleView = (agent) => {
-    setSelectedAgent(agent);
-    setIsDetailModalVisible(true);
-  };
-
-  const handleOk = () => {
-    setIsDetailModalVisible(false);
-  };
-
-  const handleCancel = () => {
-    setIsDetailModalVisible(false);
-  };
-
-  const handleLoad = (agent) => {
-    intelligentStore.loadAgent(agent);
-  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
@@ -259,6 +297,7 @@ const [isEffectImageModalVisible, setIsEffectImageModalVisible] = useState(false
           </Row>
         </Card>
       )}
+
       <div className="button-container">
         <Button onClick={trainAlgorithm} disabled={training}>
           {training ? '训练中...' : '开始训练'}
@@ -267,92 +306,178 @@ const [isEffectImageModalVisible, setIsEffectImageModalVisible] = useState(false
         <Button>训练终止</Button>
       </div>
 
+      {/* 智能体详情弹窗 */}
       <Modal
         title="智能体详情"
         visible={isDetailModalVisible}
-        onOk={handleOk}
-        onCancel={handleCancel}
+        onOk={() => setIsDetailModalVisible(false)}
+        onCancel={() => setIsDetailModalVisible(false)}
         footer={null}
+        width={800} // 可以根据需要调整弹窗宽度
       >
-        <div>
-          {selectedAgent && (
-            <div>
-              <p><strong>智能体名称：</strong>{selectedAgent.agentName}</p>
-              <p><strong>智能体ID：</strong>{selectedAgent.agentID}</p>
-              <p><strong>版本：</strong>{selectedAgent.agentVersion}</p>
-              <p><strong>智能体类型：</strong>{selectedAgent.agentType}</p>
-              <p><strong>更新时间：</strong>{new Date(selectedAgent.updateTime).toLocaleString()}</p>
-              <p><strong>想定场景：</strong>{selectedAgent.scenarioID}</p>
-              <h3>状态信息</h3>
-              {selectedAgent.entities.map((entity, index) => (
-                <div key={index}>
-                  <p><strong>实体名称：</strong>{entity.name}</p>
-                  <table style={{ borderCollapse: 'collapse', width: '100%' }}>
-                    <thead>
-                      <tr>
-                        <th style={{ border: '1px solid black', padding: '5px' }}>属性</th>
-                        <th style={{ border: '1px solid black', padding: '5px' }}>描述</th>
-                        <th style={{ border: '1px solid black', padding: '5px' }}>单位</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {entity.stateVector.map((state, stateIndex) => (
-                        <tr key={stateIndex}>
-                          <td style={{ border: '1px solid black', padding: '5px' }}>{state[0]}</td>
-                          <td style={{ border: '1px solid black', padding: '5px' }}>{state[1]}</td>
-                          <td style={{ border: '1px solid black', padding: '5px' }}>{state[2]}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ))}
-              <h3>动作信息</h3>
-              {selectedAgent.entities.map((entity, index) => (
-                <div key={index}>
-                  <p><strong>实体名称：</strong>{entity.name}</p>
-                  <p><strong>动作：</strong>{entity.actionSpace ? entity.actionSpace.map(action => action.action.join(' ')).join(', ') : '无'}</p>
-                  <p><strong>规则：</strong>{entity.actionSpace ? entity.actionSpace.map(action => action.rule.join(' ')).join(', ') : '无'}</p>
-                </div>
-              ))}
-              <h3>奖励信息</h3>
-              {selectedAgent.entities.map((entity, index) => (
-                <div key={index}>
-                  <p><strong>实体名称：</strong>{entity.name}</p>
-                  <table style={{ borderCollapse: 'collapse', width: '100%', marginTop: '10px' }}>
-                    <thead>
-                      <tr>
-                        <th style={{ border: '1px solid black', padding: '5px', fontWeight: 'bold' }}>奖励类型</th>
-                        <th style={{ border: '1px solid black', padding: '5px', fontWeight: 'bold' }}>奖励函数</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {entity.rewardFunction.map((reward, rewardIndex) => (
-                        <tr key={rewardIndex}>
-                          <td style={{ border: '1px solid black', padding: '5px' }}>{reward[1]}</td>
-                          <td style={{ border: '1px solid black', padding: '5px' }}>{reward[0]}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        {selectedAgent && (
+          <div>
+            {/* 智能体基本信息 */}
+            <p><strong>智能体名称：</strong>{selectedAgent.agentName}</p>
+            <p><strong>智能体ID：</strong>{selectedAgent.agentID}</p>
+            <p><strong>版本：</strong>{selectedAgent.agentVersion}</p>
+            <p><strong>智能体类型：</strong>{selectedAgent.agentType}</p>
+            <p><strong>更新时间：</strong>{new Date(selectedAgent.updateTime).toLocaleString()}</p>
+            <p><strong>想定场景：</strong>{selectedAgent.scenarioID}</p>
+
+            {/* 智能体分配信息表格 */}
+            <h3>智能体分配信息</h3>
+            <Table
+              columns={[
+                { title: '智能体名称', dataIndex: 'agentName', key: 'agentName' },
+                { title: '分配实体', dataIndex: 'assignedEntities', key: 'assignedEntities' },
+              ]}
+              dataSource={selectedAgent.entityAssignments.flatMap((assignment) =>
+                Object.entries(assignment).map(([agentName, entities]) => ({
+                  key: agentName,
+                  agentName: agentName,
+                  assignedEntities: entities.join(', '),
+                }))
+              )}
+              pagination={false}
+              bordered
+            />
+<h3>实体状态信息</h3>
+<Table
+  columns={[
+    { title: '实体名称', dataIndex: 'name', key: 'name' },
+    { title: '当前信号灯状态', dataIndex: 'trafficLightStatus', key: 'trafficLightStatus' },
+    { title: '等待通过的车辆数量', dataIndex: 'waitingVehicles', key: 'waitingVehicles' },
+    { title: '等待通过的行人数量', dataIndex: 'waitingPedestrians', key: 'waitingPedestrians' },
+  ]}
+  dataSource={selectedAgent.agentModel.flatMap((model) => {
+    // 创建一个对象，用于存储每个实体的状态信息
+    const entityStateMap = {};
+
+    model.stateVector.forEach((state) => {
+      const entityName = state[0]; // 实体名称
+      const fieldName = state[1];  // 字段名称
+      const fieldValue = state[3]; // 字段值
+
+      // 初始化实体状态对象
+      if (!entityStateMap[entityName]) {
+        entityStateMap[entityName] = {
+          key: entityName,
+          name: entityName,
+          trafficLightStatus: '无', // 默认值
+          waitingVehicles: '无',    // 默认值
+          waitingPedestrians: '无', // 默认值
+        };
+      }
+
+      // 根据字段名称填充数据
+      if (fieldName === 'Traffic Light Status') {
+        entityStateMap[entityName].trafficLightStatus = fieldValue;
+      } else if (fieldName === 'Number of Waiting Vehicles') {
+        entityStateMap[entityName].waitingVehicles = fieldValue;
+      } else if (fieldName === 'Number of Pedestrians') {
+        entityStateMap[entityName].waitingPedestrians = fieldValue;
+      }
+    });
+
+    // 将对象转换为数组
+    return Object.values(entityStateMap);
+  })}
+  pagination={false}
+  bordered
+/>
+            <h3>模型动作信息</h3>
+            <Table
+              columns={[
+                { title: '实体名称', dataIndex: 'name', key: 'name' },
+                { title: '动作名称', dataIndex: 'actionName', key: 'actionName' },
+                { title: '动作类型', dataIndex: 'actionType', key: 'actionType' },
+                { title: '动作值', dataIndex: 'actionValue', key: 'actionValue' },
+                { title: '最大动作取值', dataIndex: 'maxActionValue', key: 'maxActionValue' },
+                { title: '规则', dataIndex: 'rule', key: 'rule' },
+              ]}
+              dataSource={selectedAgent.agentModel.flatMap((model) => {
+                // 获取所有实体的动作信息，并去重
+                const entities = [...new Set(model.stateVector.map((state) => state[0]))]; // 去重后的实体名称
+                return entities.map((entity) => {
+                  const action = model.actionSpace.find((action) => action.entity === entity);
+                  return {
+                    key: entity,
+                    name: entity,
+                    actionName: action ? action.name : '无',
+                    actionType: action ? action.type : '无',
+                    actionValue: action ? (Array.isArray(action.action) ? action.action.join(', ') : '无') : '无',
+                    maxActionValue: action ? (Array.isArray(action.action[1]) ? action.action[1].join(', ') : '无') : '无',
+                    rule: action ? (Array.isArray(action.rule) ? action.rule.join(', ') : '无') : '无',
+                  };
+                });
+              })}
+              pagination={false}
+              bordered
+            />
+            <h3>奖励信息</h3>
+            <Table
+              columns={[
+                { title: '奖励名称', dataIndex: 'rewardName', key: 'rewardName' },
+                { title: '奖励值', dataIndex: 'rewardValue', key: 'rewardValue' },
+              ]}
+              dataSource={
+                (() => {
+                  // 提取奖励信息
+                  const { rewards, teamReward } = selectedAgent.agentModel
+                    .flatMap((model) => model.rewardFunction) // 将所有智能体的奖励信息合并
+                    .reduce(
+                      (acc, reward) => {
+                        // 如果是团队奖励，记录下来
+                        if (reward[1] === '团队奖励') {
+                          acc.teamReward = reward; // 记录团队奖励信息
+                        } else {
+                          // 其他奖励直接添加到表格数据中
+                          acc.rewards.push({
+                            key: acc.rewards.length, // 生成唯一的 key
+                            rewardName: reward[1], // 奖励名称
+                            rewardValue: reward[0], // 奖励值
+                          });
+                        }
+                        return acc;
+                      },
+                      { rewards: [], teamReward: null } // 初始化 acc
+                    );
+
+                  // 将团队奖励信息添加到表格的最后一行
+                  return teamReward
+                    ? rewards.concat({
+                        key: 'team-reward', // 唯一的 key
+                        rewardName: teamReward[1], // 奖励名称
+                        rewardValue: teamReward[0], // 奖励值
+                      })
+                    : rewards;
+                })()
+              }
+              pagination={false}
+              bordered
+            />
+          </div>
+        )}
       </Modal>
+
+      {/* 模型列表弹窗 */}
       <Modal
         title="模型列表"
         visible={isModelListModalVisible}
         onOk={() => setIsModelListModalVisible(false)}
         onCancel={() => setIsModelListModalVisible(false)}
+        width={800} 
       >
         <Table
           columns={modelListColumns}
-          dataSource={modelList}
+          dataSource={modelList} // 使用 modelList 数据作为模型列表
           pagination={false}
+          style={{ width: '100%' }} 
         />
       </Modal>
+
+      {/* 模型详情弹窗 */}
       <Modal
         title="模型详细信息"
         visible={isModelInfoModalVisible}
@@ -374,6 +499,8 @@ const [isEffectImageModalVisible, setIsEffectImageModalVisible] = useState(false
           </div>
         )}
       </Modal>
+
+      {/* 训练状态弹窗 */}
       <Modal
         title="训练状态"
         visible={isSuccessModalVisible}
@@ -387,6 +514,8 @@ const [isEffectImageModalVisible, setIsEffectImageModalVisible] = useState(false
       >
         <p>训练完成！</p>
       </Modal>
+
+      {/* 训练效果图片弹窗 */}
       <Modal
         title="训练效果图片"
         visible={isEffectImageModalVisible}

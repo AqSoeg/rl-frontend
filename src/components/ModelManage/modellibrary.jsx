@@ -4,7 +4,6 @@ import { PlusOutlined, SettingOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import moment from 'moment';
 
-
 const ModelLibrary = ({ data }) => {
   const [models, setModels] = useState(data || []);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -13,8 +12,6 @@ const ModelLibrary = ({ data }) => {
   const [searchText, setSearchText] = useState('');
   const [searchField, setSearchField] = useState('');
   const [form] = Form.useForm();
- 
-
 
   useEffect(() => {
     if (Array.isArray(data)) {
@@ -57,6 +54,7 @@ const ModelLibrary = ({ data }) => {
     setIsModalVisible(false);
     setModels(newModels); // 更新父组件的状态
   };
+
   const handleCancel = () => {
     setIsModalVisible(false);
   };
@@ -76,8 +74,6 @@ const ModelLibrary = ({ data }) => {
     setModels(updatedModels); // 使用setModels更新状态
   };
 
-
-
   const handleSearch = () => {
     const filteredModels = models.filter(model =>
       String(model[searchField]).includes(searchText)
@@ -95,18 +91,31 @@ const ModelLibrary = ({ data }) => {
     { title: '想定场景', dataIndex: 'scenarioID', key: 'scenarioID' },
     { title: '智能体ID', dataIndex: 'agentID', key: 'agentID' },
     { title: '智能体名称', dataIndex: 'agentName', key: 'agentName' },
-    { title: '版本', dataIndex: 'agentVersion', key: 'agetVersion' },
+    { title: '版本', dataIndex: 'agentVersion', key: 'agentVersion' },
     { title: '智能体类型', dataIndex: 'agentType', key: 'agentType' },
     { title: '智能体角色', dataIndex: 'agentRoleID', key: 'agentRoleID' },
     { title: '更新时间', dataIndex: 'updateTime', key: 'updateTime' },
     {
-      title: '代理实体',
-      dataIndex: 'entities',
-      key: 'entities',
-      render: (text, record) => (
-        // 假设每个智能体的实体不多，我们直接将它们列在一个单元格中
-        record.entities.map(entity => entity.name).join(', ') || '无'
-      ),
+      title: '实体分配',
+      dataIndex: 'entityAssignments',
+      key: 'entityAssignments',
+      render: (text, record) => {
+        // 提取 entityAssignments 中的智能体和实体名称
+        const assignments = record.entityAssignments.map((assignment, index) => {
+          const agentName = Object.keys(assignment)[0]; // 获取智能体名称
+          const entities = assignment[agentName].join(', '); // 获取实体名称并拼接成字符串
+          return `${agentName}: ${entities}`; // 返回智能体和实体名称的组合
+        });
+
+        // 使用 <div> 包裹每个智能体和实体分配的组合
+        return (
+          <div>
+            {assignments.map((assignment, index) => (
+              <div key={index}>{assignment}</div>
+            ))}
+          </div>
+        );
+      },
     },
     {
       title: '操作',

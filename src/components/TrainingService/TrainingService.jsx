@@ -3,9 +3,8 @@ import Left from './left';
 import Middle from './middle';
 import axios from 'axios';
 import Right from './right';
-import RighT from './1';
+// import RighT from './1';
 import './TrainingService.css';
-import { intelligentStore } from './IntelligentStore';
 import { observer } from 'mobx-react';
 
 const TrainingService = observer(() => {
@@ -52,9 +51,9 @@ const TrainingService = observer(() => {
           algorithms={algorithms}
         />
       </div>
-      <div className='righT'>
+      {/* <div className='righT'>
         <RighT />
-      </div>
+      </div> */}
     </div>
   );
 });
