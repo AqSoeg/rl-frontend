@@ -55,6 +55,7 @@ const ModelFunction = ({ scenarios }) => {
         sidebarStore.setName(selectedModel.agentName);
         sidebarStore.setVersion(selectedModel.agentVersion);
         sidebarStore.setAgentCount(selectedModel.agentCount);
+        sidebarStore.selectedAgent = '';
         sidebarStore.modelID = selectedModel.agentID;
         sidebarStore.setLoadingModel(true);
 

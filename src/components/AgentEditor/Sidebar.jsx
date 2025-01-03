@@ -26,6 +26,7 @@ const Sidebar = ({ scenarios }) => {
             setName(sidebarStore.name);
             setVersion(sidebarStore.version);
             setAgentCount(sidebarStore.agentCount);
+            setSelectedAgent(sidebarStore.selectedAgent);
         });
 
         return () => unsubscribe();
