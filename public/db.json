@@ -274,14 +274,6 @@
                 ["Status", "交警当前状态", "状态"],
                 ["Direction of Command", "交警指挥方向", "方向"]
               ]
-            },
-            {
-              "name": "交警2",
-              "stateVector": [
-                ["Position", "交警当前位置", "坐标"],
-                ["Status", "交警当前状态", "状态"],
-                ["Direction of Command", "交警指挥方向", "方向"]
-              ]
             }
           ]
         }
