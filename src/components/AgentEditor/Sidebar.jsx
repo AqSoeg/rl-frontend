@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Select, Input, Button } from 'antd';
+import sidebarStore from './SidebarStore';
 import entityAssignmentStore from './EntityAssignmentStore';
 import EntityAssignmentModal from './EntityAssignmentModal';
-import sidebarStore from './SidebarStore'; // 引入 SidebarStore
 
 const { Option } = Select;
 
-const Sidebar = ({ scenarios, onEntitiesChange }) => {
+const Sidebar = ({ scenarios }) => {
     const [scenario, setScenario] = useState('');
     const [role, setRole] = useState('');
     const [type, setType] = useState('');
@@ -16,13 +16,10 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
     const [selectedAgent, setSelectedAgent] = useState('');
     const [agentRoles, setAgentRoles] = useState([]);
     const [modelName, setModelName] = useState('待定');
-    const [entityCount, setEntityCount] = useState(0);
     const [modalOpen, setModalOpen] = useState(false);
 
     useEffect(() => {
-        // 订阅 SidebarStore 的状态变化
         const unsubscribe = sidebarStore.subscribe(() => {
-            // 当 SidebarStore 的状态变化时，更新组件的状态
             setScenario(sidebarStore.scenario);
             setRole(sidebarStore.role);
             setType(sidebarStore.type);
@@ -31,7 +28,6 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
             setAgentCount(sidebarStore.agentCount);
         });
 
-        // 组件卸载时取消订阅
         return () => unsubscribe();
     }, []);
 
@@ -45,7 +41,6 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
         setAgentRoles(selectedScenario ? selectedScenario.roles : []);
     }, [scenario, scenarios]);
 
-    // 当场景、角色、类型、版本或智能体数量变化时，生成模型ID
     useEffect(() => {
         if (sidebarStore.isLoadingModel) {
             sidebarStore.setLoadingModel(false);
@@ -54,7 +49,7 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
         if (scenario && role && type && version && agentCount) {
             sidebarStore.setModelID(scenario, role, type, version, agentCount);
         } else {
-            sidebarStore.setModelID('', '', '', '', ''); // 重置模型ID
+            sidebarStore.setModelID('', '', '', '', '');
         }
     }, [scenario, role, type, version, agentCount]);
 
@@ -65,8 +60,8 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
         setType('');
         setAgentCount('');
         setSelectedAgent('');
-        entityAssignmentStore.clearAssignment(); // 清空实体分配状态
-        sidebarStore.setScenario(value, selectedScenario.name); // 更新 SidebarStore 的状态
+        entityAssignmentStore.clearAssignment();
+        sidebarStore.setScenario(value, selectedScenario.name);
     };
 
     const handleRoleChange = (value) => {
@@ -75,11 +70,12 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
         setType('');
         setAgentCount('');
         setSelectedAgent('');
-        entityAssignmentStore.clearAssignment(); // 清空实体分配状态
-        sidebarStore.setRole(value, selectedRole.name); // 更新 SidebarStore 的状态
+        entityAssignmentStore.clearAssignment();
+        sidebarStore.setRole(value, selectedRole.name);
 
         if (selectedRole) {
-            setEntityCount(selectedRole.entities.length);
+            entityAssignmentStore.setEntityCount(selectedRole.entities.length); // 更新实体数量
+            entityAssignmentStore.setEntities(selectedRole.entities); // 更新实体列表
         }
     };
 
@@ -87,14 +83,14 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
         setType(value);
         setAgentCount('');
         setSelectedAgent('');
-        entityAssignmentStore.clearAssignment(); // 清空实体分配状态
-        sidebarStore.setType(value); // 更新 SidebarStore 的状态
+        entityAssignmentStore.clearAssignment();
+        sidebarStore.setType(value);
     };
 
     const handleNameChange = (e) => {
         const newName = e.target.value.slice(0, 50);
         setName(newName);
-        sidebarStore.setName(newName); // 更新 SidebarStore 的状态
+        sidebarStore.setName(newName);
         if (newName.length >= 50) {
             alert('名称不能超过10个字符!');
         }
@@ -108,7 +104,7 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
             newVersion = parts[0] + '.' + parts[1].split('.')[0].slice(0, 2);
         }
         setVersion(newVersion);
-        sidebarStore.setVersion(newVersion); // 更新 SidebarStore 的状态
+        sidebarStore.setVersion(newVersion);
         if (newVersion !== e.target.value) {
             alert('版本号只能包含数字和小数点，小数位数不超过两位!');
         }
@@ -118,15 +114,15 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
     const handleAgentCountChange = (value) => {
         setAgentCount(value);
         setSelectedAgent('');
-        entityAssignmentStore.clearAssignment(); // 清空实体分配状态
-        sidebarStore.setAgentCount(value); // 更新 SidebarStore 的状态
+        entityAssignmentStore.clearAssignment();
+        sidebarStore.setAgentCount(value);
     };
 
     const handleAgentChange = (value) => {
         if (Object.keys(entityAssignmentStore.assignedEntities).length > 0) {
             setSelectedAgent(value);
-            entityAssignmentStore.setSelectedAgent(value); // 更新选中的智能体模型
-            sidebarStore.setSelectedAgent(value); // 更新 SidebarStore 的状态
+            entityAssignmentStore.setSelectedAgent(value);
+            sidebarStore.setSelectedAgent(value);
             updateModelName(name, version, value);
         } else {
             alert('请先分配实体后再选择智能体模型！');
@@ -186,14 +182,13 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
 
     const handleModalConfirm = (selectedEntities) => {
         if (Object.keys(entityAssignmentStore.assignedEntities).length > 0) {
-            entityAssignmentStore.updateAssignedEntities(selectedEntities); // 更新分配的实体
+            entityAssignmentStore.updateAssignedEntities(selectedEntities);
         } else {
-            entityAssignmentStore.setAssignedEntities(selectedEntities); // 首次分配实体
+            entityAssignmentStore.setAssignedEntities(selectedEntities);
         }
-        entityAssignmentStore.resetSelectedAgent(); // 重置选中的智能体模型
-        setSelectedAgent(''); // 重置本地状态
+        entityAssignmentStore.resetSelectedAgent();
+        setSelectedAgent('');
         setModalOpen(false);
-        onEntitiesChange(Object.values(selectedEntities).flat());
     };
 
     const handleModalCancel = () => {
@@ -230,10 +225,9 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
         }
     };
 
-    // 生成渲染用的模型ID（添加 agentNumber）
     const getRenderedModelID = () => {
         if (sidebarStore.version && sidebarStore.modelID && selectedAgent) {
-            const agentNumber = selectedAgent.replace('智能体', ''); // 提取智能体编号
+            const agentNumber = selectedAgent.replace('智能体', '');
             return `${sidebarStore.modelID}-${agentNumber}`;
         }
         return 'xxx';
@@ -312,10 +306,6 @@ const Sidebar = ({ scenarios, onEntitiesChange }) => {
                 open={modalOpen}
                 onCancel={handleModalCancel}
                 onConfirm={handleModalConfirm}
-                entityCount={entityCount}
-                agentCount={agentCount}
-                agentType={type}
-                entities={agentRoles.find(r => r.id === role)?.entities || []}
             />
         </div>
     );

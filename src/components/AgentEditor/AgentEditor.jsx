@@ -1,18 +1,19 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import Sidebar from './Sidebar';
-import StateVector from './StateVector.jsx';
-import ActionSpace from './ActionSpace.jsx';
-import ModelFunction from './ModelButton.jsx';
-import './AgentEditor.css';
+import StateVector from './StateVector';
+import ActionSpace from './ActionSpace';
+import RewardFunction from "./RewardFunction";
+import ModelFunction from './ModelButton';
 import entityAssignmentStore from './EntityAssignmentStore';
-import RewardFunction from "./RewardFunction.jsx";
+import './AgentEditor.css';
+
 
 const AgentEditor = () => {
     const [scenarios, setScenarios] = useState([]);
     const [selectedEntities, setSelectedEntities] = useState([]);
     const [selectedActionTypes, setSelectedActionTypes] = useState([]);
-    const [selectedParams, setSelectedParams] = useState([]); // 新增：选中的 params
+    const [selectedParams, setSelectedParams] = useState([]);
 
     useEffect(() => {
         entityAssignmentStore.clearAssignment();
@@ -46,11 +47,11 @@ const AgentEditor = () => {
                     .flatMap(scenario => scenario.roles)
                     .find(role => role.entities.some(entity => assignedEntities.includes(entity.name)));
                 setSelectedActionTypes(selectedRole ? selectedRole.actionTypes : []);
-                setSelectedParams(selectedRole ? selectedRole.RewardParams : []); // 新增：设置选中的 params
+                setSelectedParams(selectedRole ? selectedRole.RewardParams : []);
             } else {
                 setSelectedEntities([]);
                 setSelectedActionTypes([]);
-                setSelectedParams([]); // 新增：清空选中的 params
+                setSelectedParams([]);
             }
         };
 
@@ -59,17 +60,13 @@ const AgentEditor = () => {
         return () => unsubscribe();
     }, [scenarios]);
 
-    const handleEntitiesChange = (entities) => {
-        setSelectedEntities(entities);
-    };
-
     return (
         <div className="container">
-            <Sidebar scenarios={scenarios} onEntitiesChange={handleEntitiesChange} />
+            <Sidebar scenarios={scenarios} />
             <div className="gradient-box">
                 <StateVector entities={selectedEntities} />
                 <ActionSpace entities={selectedEntities} actionTypes={selectedActionTypes} />
-                <RewardFunction selectedParams={selectedParams} /> {/* 新增：传递 selectedParams */}
+                <RewardFunction selectedParams={selectedParams} />
                 <ModelFunction scenarios={scenarios} />
             </div>
         </div>

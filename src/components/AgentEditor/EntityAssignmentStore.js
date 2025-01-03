@@ -4,6 +4,8 @@ class EntityAssignmentStore {
     assignedEntities = {}; // 存储分配的实体
     selectedAgent = null; // 当前选中的智能体模型
     isAgentSelected = false; // 是否已经选择了智能体模型
+    entityCount = 0; // 实体数量
+    entities = []; // 实体列表
     listeners = []; // 订阅者列表
 
     constructor() {
@@ -44,15 +46,15 @@ class EntityAssignmentStore {
         this.notifyListeners(); // 通知订阅者
     }
 
-    // 重新分配实体时，重置状态
-    resetAssignment(agentCount) {
-        const initialSelectedEntities = {};
-        for (let i = 1; i <= agentCount; i++) {
-            initialSelectedEntities[`智能体${i}`] = [];
-        }
-        this.assignedEntities = initialSelectedEntities;
-        this.selectedAgent = null;
-        this.isAgentSelected = false;
+    // 设置实体数量
+    setEntityCount(count) {
+        this.entityCount = count;
+        this.notifyListeners(); // 通知订阅者
+    }
+
+    // 设置实体列表
+    setEntities(entities) {
+        this.entities = entities;
         this.notifyListeners(); // 通知订阅者
     }
 

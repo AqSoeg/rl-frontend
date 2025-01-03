@@ -3,8 +3,8 @@ import { Button, Select, Input, Modal } from 'antd';
 import actionLogo from '../../assets/actionSpace.svg';
 import uploadLogo from '../../assets/upload.svg';
 import addLogo from "../../assets/add.svg";
-import actionSpaceStore from './ActionSpaceStore';
 import entityAssignmentStore from './EntityAssignmentStore';
+import actionSpaceStore from './ActionSpaceStore';
 
 const { Option } = Select;
 

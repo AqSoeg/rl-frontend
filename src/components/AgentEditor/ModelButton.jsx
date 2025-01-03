@@ -2,9 +2,9 @@ import { Button, Modal, Table } from 'antd';
 import { useState, useEffect } from 'react';
 import sidebarStore from './SidebarStore';
 import entityAssignmentStore from './EntityAssignmentStore';
+import stateVectorStore from './StateVectorStore';
 import actionSpaceStore from './ActionSpaceStore';
 import rewardFunctionStore from './RewardFunctionStore';
-import stateVectorStore from './StateVectorStore';
 
 const ModelFunction = ({ scenarios }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);

@@ -1,42 +1,40 @@
 import { useState, useEffect } from 'react';
 import { Modal, Alert, List, Checkbox } from 'antd';
-import stateVectorStore from './StateVectorStore'; // 引入 StateVectorStore
-import actionSpaceStore from './ActionSpaceStore'; // 引入 ActionSpaceStore
+import sidebarStore from './SidebarStore';
+import entityAssignmentStore from './EntityAssignmentStore';
+import stateVectorStore from './StateVectorStore';
+import actionSpaceStore from './ActionSpaceStore';
 
-const EntityAssignmentModal = ({ open, onCancel, onConfirm, entityCount, agentCount, agentType, entities }) => {
+const EntityAssignmentModal = ({ open, onCancel, onConfirm }) => {
     const [selectedEntities, setSelectedEntities] = useState({});
     const [errorMessage, setErrorMessage] = useState('');
-    const [currentAgent, setCurrentAgent] = useState(''); // 当前选中的智能体模型
+    const [currentAgent, setCurrentAgent] = useState('');
 
     useEffect(() => {
-        // 初始化选中实体的状态
         if (open) {
             const initialSelectedEntities = {};
-            for (let i = 1; i <= agentCount; i++) {
+            for (let i = 1; i <= sidebarStore.agentCount; i++) {
                 initialSelectedEntities[`智能体${i}`] = [];
             }
             setSelectedEntities(initialSelectedEntities);
-            setCurrentAgent(`智能体1`); // 默认选中第一个智能体
+            setCurrentAgent(`智能体1`);
 
-            // 如果是单智能体，自动分配所有实体
-            if (agentType === '单智能体') {
+            if (sidebarStore.type === '单智能体') {
                 setSelectedEntities({
-                    [`智能体1`]: entities.map(entity => entity.name),
+                    [`智能体1`]: entityAssignmentStore.entities.map(entity => entity.name),
                 });
             }
         }
-    }, [open, agentCount, agentType, entities]);
+    }, [open, sidebarStore.agentCount, sidebarStore.type, entityAssignmentStore.entities]);
 
     const handleEntitySelect = (agent, entity) => {
-        const currentSelected = selectedEntities[agent] || []; // 确保 currentSelected 不为 undefined
+        const currentSelected = selectedEntities[agent] || [];
         if (currentSelected.includes(entity)) {
-            // 如果已经选中，则取消选中
             setSelectedEntities({
                 ...selectedEntities,
                 [agent]: currentSelected.filter(e => e !== entity),
             });
         } else {
-            // 如果没有选中，则添加选中
             setSelectedEntities({
                 ...selectedEntities,
                 [agent]: [...currentSelected, entity],
@@ -47,29 +45,26 @@ const EntityAssignmentModal = ({ open, onCancel, onConfirm, entityCount, agentCo
     const validateSelection = () => {
         const allSelectedEntities = Object.values(selectedEntities).flat();
 
-        // 检查是否有实体未被选中
-        if (allSelectedEntities.length !== entityCount) {
+        if (allSelectedEntities.length !== entityAssignmentStore.entityCount) {
             setErrorMessage('所有实体必须被分配！');
             return false;
         }
 
-        // 检查是否有重复分配的实体
         const uniqueEntities = new Set(allSelectedEntities);
-        if (uniqueEntities.size !== entityCount) {
+        if (uniqueEntities.size !== entityAssignmentStore.entityCount) {
             setErrorMessage('实体不能被重复分配！');
             return false;
         }
 
-        // 根据智能体类型进行额外验证
-        if (agentType === '同构多智能体') {
-            const requiredCount = entityCount / agentCount;
+        if (sidebarStore.type === '同构多智能体') {
+            const requiredCount = entityAssignmentStore.entityCount / sidebarStore.agentCount;
             for (const agent in selectedEntities) {
                 if (selectedEntities[agent].length !== requiredCount) {
                     setErrorMessage(`每个智能体必须选择 ${requiredCount} 个实体！`);
                     return false;
                 }
             }
-        } else if (agentType === '异构多智能体') {
+        } else if (sidebarStore.type === '异构多智能体') {
             for (const agent in selectedEntities) {
                 if (selectedEntities[agent].length === 0) {
                     setErrorMessage('每个智能体至少需要选择一个实体！');
@@ -84,25 +79,21 @@ const EntityAssignmentModal = ({ open, onCancel, onConfirm, entityCount, agentCo
 
     const handleConfirm = () => {
         if (validateSelection()) {
-            // 清空所有智能体模型的动作空间
-            for (let i = 1; i <= agentCount; i++) {
+            for (let i = 1; i <= sidebarStore.agentCount; i++) {
                 actionSpaceStore.clearActionsAndRulesForModel(`智能体${i}`);
             }
 
             onConfirm(selectedEntities);
-            // 初始化 StateVectorStore，设置为默认全选状态
             const defaultSelectedStateVectors = {};
-            entities.forEach(entity => {
+            entityAssignmentStore.entities.forEach(entity => {
                 defaultSelectedStateVectors[entity.name] = entity.stateVector.map((_, idx) => idx);
             });
             stateVectorStore.setSelectedStateVectors(defaultSelectedStateVectors);
         }
     };
 
-    // 提取实体的名称
-    const entityNames = entities.map(entity => entity.name);
+    const entityNames = entityAssignmentStore.entities.map(entity => entity.name);
 
-    // 检查实体是否已经被分配给其他智能体
     const isEntityAssigned = (entity) => {
         return Object.values(selectedEntities).some(entities => entities.includes(entity));
     };
@@ -110,13 +101,13 @@ const EntityAssignmentModal = ({ open, onCancel, onConfirm, entityCount, agentCo
     return (
         <Modal
             title="分配实体"
-            open={open} // 使用 open 属性替代 visible
+            open={open}
             onCancel={onCancel}
             onOk={handleConfirm}
             okText="确认"
             cancelText="取消"
             width={800}
-            className="entity-assignment-modal" // 添加 BEM 类名
+            className="entity-assignment-modal"
         >
             {errorMessage && <Alert message={errorMessage} type="error" showIcon className="entity-assignment-modal__alert" />}
             <div className="entity-assignment-modal__content">
@@ -127,7 +118,7 @@ const EntityAssignmentModal = ({ open, onCancel, onConfirm, entityCount, agentCo
                         dataSource={Object.keys(selectedEntities)}
                         renderItem={agent => (
                             <List.Item
-                                onClick={() => setCurrentAgent(agent)} // 点击切换当前智能体
+                                onClick={() => setCurrentAgent(agent)}
                                 className={`entity-assignment-modal__agent-item ${currentAgent === agent ? 'entity-assignment-modal__agent-item--active' : ''}`}
                             >
                                 <div className="entity-assignment-modal__agent-content">
@@ -148,17 +139,17 @@ const EntityAssignmentModal = ({ open, onCancel, onConfirm, entityCount, agentCo
                     <h3 className="entity-assignment-modal__title">所有实体</h3>
                     <List
                         bordered
-                        dataSource={entityNames} // 使用提取的实体名称
+                        dataSource={entityNames}
                         renderItem={entity => {
-                            const isAssigned = isEntityAssigned(entity); // 检查实体是否已经被分配
-                            const isCurrentAgentAssigned = selectedEntities[currentAgent]?.includes(entity); // 检查当前智能体是否已经分配该实体
+                            const isAssigned = isEntityAssigned(entity);
+                            const isCurrentAgentAssigned = selectedEntities[currentAgent]?.includes(entity);
 
                             return (
                                 <List.Item className="entity-assignment-modal__entity-item">
                                     <Checkbox
-                                        checked={isCurrentAgentAssigned} // 当前智能体是否选中该实体
+                                        checked={isCurrentAgentAssigned}
                                         onChange={() => handleEntitySelect(currentAgent, entity)}
-                                        disabled={agentType === '单智能体' || (isAssigned && !isCurrentAgentAssigned)} // 如果是单智能体或实体已被分配给其他智能体，禁用选择
+                                        disabled={sidebarStore.type === '单智能体' || (isAssigned && !isCurrentAgentAssigned)}
                                         className="entity-assignment-modal__checkbox"
                                     >
                                         {entity}

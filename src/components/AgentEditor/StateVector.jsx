@@ -3,7 +3,7 @@ import { Button, Table, Checkbox } from 'antd';
 import stateLogo from '../../assets/stateVector.svg';
 import uploadLogo from '../../assets/upload.svg';
 import entityAssignmentStore from './EntityAssignmentStore';
-import stateVectorStore from './StateVectorStore'; // 引入 StateVectorStore
+import stateVectorStore from './StateVectorStore';
 
 const StateVector = ({ entities }) => {
     const [visible, setVisible] = useState(Array(entities?.length || 0).fill(false));
