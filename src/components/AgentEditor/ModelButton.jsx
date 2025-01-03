@@ -69,50 +69,62 @@ const ModelFunction = ({ scenarios }) => {
         entityAssignmentStore.entityCount = allEntities.length;
         entityAssignmentStore.setAssignedEntities(assignedEntities);
 
-        selectedModel.rewardFunction.forEach(reward => {
-            const [equation, rewardType] = reward;
-            const agent = rewardType === '团队奖励' ? '' : rewardType.split('-')[1]; // 提取智能体名称
-            rewardFunctionStore.addReward({
-                equation: equation,
-                type: rewardType === '团队奖励' ? '团队奖励' : '个人奖励',
-                agent: agent,
+        const agent1Model = selectedModel.agentModel.find(model => model.name === '智能体1');
+        if (agent1Model) {
+            agent1Model.rewardFunction.forEach(reward => {
+                const [equation, rewardType] = reward;
+                if (rewardType === '团队奖励') {
+                    rewardFunctionStore.addReward({
+                        equation: equation,
+                        type: '团队奖励',
+                        agent: '',
+                    });
+                }
             });
+        }
+        selectedModel.agentModel.forEach(agentModel => {
+            if (agentModel.name !== '智能体1') {
+                agentModel.rewardFunction.forEach(reward => {
+                    const [equation, rewardType] = reward;
+                    if (rewardType.startsWith('个人奖励')) {
+                        const agent = rewardType.split('-')[1];
+                        rewardFunctionStore.addReward({
+                            equation: equation,
+                            type: '个人奖励',
+                            agent: agent,
+                        });
+                    }
+                });
+            }
         });
         rewardFunctionStore.setLoadingModel(true);
 
         selectedModel.agentModel.forEach(agentModel => {
-            const agent = agentModel.agentModelName; // 智能体名称，如 "智能体1"
-            agentModel.entities.forEach(entity => {
-                const entityName = entity.name; // 实体名称，如 "红绿灯1"
-                entity.actionSpace.forEach(action => {
-                    // 构建动作空间数据
-                    const actionData = {
-                        entity: entityName,
-                        actionType: action.name,
-                        mode: action.type,
-                        unit: action.action[1], // 单位
-                        range: action.action[2], // 取值范围
-                        discreteOptions: action.type === '离散型' ? action.action[1] : [], // 离散型动作的可选取值
-                        discreteValues: action.type === '离散型' ? action.action[0] : [], // 离散型动作的取值
-                        upperLimit: action.type === '连续型' ? action.action[0][1] : '', // 连续型动作的上限
-                        lowerLimit: action.type === '连续型' ? action.action[0][0] : '', // 连续型动作的下限
-                    };
+            const agent = agentModel.name;
+            agentModel.actionSpace.forEach(action => {
+                const actionData = {
+                    entity: action.entity,
+                    actionType: action.name,
+                    mode: action.type,
+                    unit: action.action[1],
+                    range: action.action[2],
+                    discreteOptions: action.type === '离散型' ? action.action[1] : [],
+                    discreteValues: action.type === '离散型' ? action.action[0] : [],
+                    upperLimit: action.type === '连续型' ? action.action[0][1].toString() : '',
+                    lowerLimit: action.type === '连续型' ? action.action[0][0].toString() : '',
+                };
+                actionSpaceStore.addActionForModel(agent, actionData);
 
-                    // 更新 ActionSpaceStore 中的动作空间
-                    actionSpaceStore.addActionForModel(agent, actionData);
-
-                    // 如果有行为规则，更新 ActionSpaceStore 中的规则
-                    if (action.rule) {
-                        const uniqueKey = `${entityName}：${action.name}`;
-                        actionSpaceStore.setRuleForModel(agent, uniqueKey, {
-                            ruleType: action.rule[0],
-                            condition1: action.rule[1],
-                            condition2: action.rule[2],
-                            execution1: action.rule[3],
-                            execution2: action.rule[4],
-                        });
-                    }
-                });
+                if (action.rule) {
+                    const uniqueKey = `${action.entity}：${action.name}`;
+                    actionSpaceStore.setRuleForModel(agent, uniqueKey, {
+                        ruleType: action.rule[0],
+                        condition1: action.rule[1],
+                        condition2: action.rule[2],
+                        execution1: action.rule[3],
+                        execution2: action.rule[4],
+                    });
+                }
             });
         });
 
@@ -134,53 +146,58 @@ const ModelFunction = ({ scenarios }) => {
             const scenario = scenarios.find(s => s.id === sidebarStore.scenario);
             const role = scenario.roles.find(r => r.id === sidebarStore.role);
 
-            // 获取所有奖励函数
             const allRewards = rewardFunctionStore.getAllRewards();
 
-            // 构建每个智能体模型的实体信息
             const agentModels = Object.entries(entityAssignmentStore.assignedEntities).map(([agent, entities], index) => {
                 const agentEntities = entities.map(entityName => {
                     const entity = role.entities.find(e => e.name === entityName);
 
-                    // 获取当前实体的所有动作空间
                     const actionSpaceData = actionSpaceStore.getActionsForModel(agent)
                         .filter(action => action.entity === entityName)
                         .map(action => {
                             const rule = actionSpaceStore.getRuleForModel(agent, `${action.entity}：${action.actionType}`);
                             return {
+                                entity: entityName,
                                 name: action.actionType,
                                 type: action.mode,
                                 action: action.mode === '连续型'
-                                    ? [[action.lowerLimit, action.upperLimit], action.unit, action.range]
+                                    ? [[parseFloat(action.lowerLimit), parseFloat(action.upperLimit)], action.unit, action.range]
                                     : [action.discreteValues, action.discreteOptions],
                                 rule: rule ? [rule.ruleType, rule.condition1, rule.condition2, rule.execution1, rule.execution2] : null
                             };
                         });
 
-                    // 获取用户选择的状态向量
                     const selectedStateVectors = stateVectorStore.getSelectedStateVectors()[entityName] || [];
                     const stateVector = entity.stateVector.filter((_, idx) => selectedStateVectors.includes(idx));
 
+                    const stateVectorWithEntityName = stateVector.map(vector => [entityName, ...vector]);
+
                     return {
                         name: entityName,
-                        stateVector: stateVector, // 使用用户选择的状态向量
-                        actionSpace: actionSpaceData // 新的动作空间结构
+                        stateVector: stateVectorWithEntityName,
+                        actionSpace: actionSpaceData
                     };
                 });
 
+                const agentRewards = allRewards.filter(reward => {
+                    if (reward.type === '团队奖励') {
+                        return true;
+                    } else {
+                        return reward.agent === agent;
+                    }
+                }).map(reward => {
+                    const rewardType = reward.type === '团队奖励' ? '团队奖励' : `个人奖励-${reward.agent}`;
+                    return [reward.equation, rewardType];
+                });
+
                 return {
-                    agentModelName: agent, // 智能体名称
-                    entities: agentEntities // 实体信息
+                    name: agent,
+                    stateVector: agentEntities.flatMap(entity => entity.stateVector),
+                    actionSpace: agentEntities.flatMap(entity => entity.actionSpace),
+                    rewardFunction: agentRewards
                 };
             });
 
-            // 构建奖励函数信息
-            const rewardFunctions = allRewards.map(reward => {
-                const rewardType = reward.type === '团队奖励' ? '团队奖励' : `个人奖励-${reward.agent}`;
-                return [reward.equation, rewardType];
-            });
-
-            // 构建模型数据
             const modelData = {
                 agentID: sidebarStore.modelID,
                 scenarioID: sidebarStore.scenario,
@@ -192,12 +209,10 @@ const ModelFunction = ({ scenarios }) => {
                 entityAssignments: Object.entries(entityAssignmentStore.assignedEntities).map(([agent, entities]) => ({
                     [agent]: entities
                 })),
-                agentModel: agentModels, // 智能体模型列表
-                rewardFunction: rewardFunctions, // 奖励函数列表
+                agentModel: agentModels,
                 updateTime: new Date().toISOString()
             };
 
-            // 通过 WebSocket 发送数据
             const ws = new WebSocket('ws://localhost:8080');
             ws.onopen = () => {
                 ws.send(JSON.stringify(modelData));
