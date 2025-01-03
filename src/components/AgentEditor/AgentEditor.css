@@ -1,15 +1,27 @@
-/* 容器样式 */
+/* AgentEditor */
+
 .container {
     display: flex;
     height: 100%;
     padding: 20px;
 }
 
+.gradient-box {
+    display: flex;
+    width: calc(100% - 40px);
+    height: 75vh;
+    padding: 20px;
+    background: linear-gradient(to bottom, #b2dfdb, #b0bec5, #ffffff);
+    border-radius: 8px;
+    margin: 0 20px;
+}
+
+/* Sidebar */
+
 .sidebar{
     padding: 1rem;
 }
 
-/* 侧边栏内部样式 */
 .sidebar-section {
     margin-bottom: 1rem;
     background-color: #ecf4fc;
@@ -18,9 +30,9 @@
 }
 
 .text {
-    font-weight: bold; /* 字体加粗 */
+    font-weight: bold;
     margin-top: 0.5rem;
-    margin-bottom: 0.5rem; /* 下边距为2个单位的间距，假设1个单位的间距为0.25rem */
+    margin-bottom: 0.5rem;
 }
 
 .sidebar-section .ant-select,
@@ -37,124 +49,109 @@
     margin-bottom: 0.5rem;
 }
 
-.gradient-box {
-    display: flex;
-    width: calc(100% - 40px); /* 设置框的宽度为剩余宽度，减去左右边距 */
-    height: 75vh; /* 设置框的高度 */
-    padding: 20px;
-    background: linear-gradient(to bottom, #b2dfdb, #b0bec5, #ffffff); /* 设置从上到下的线性渐变，颜色依次为浅蓝色、灰色、白色 */
-    border-radius: 8px; /* 设置圆角半径为8像素 */
-    margin: 0 20px; /* 设置左右边距为20像素 */
-}
-
-/* 子组件样式 */
-.sub-component {
-    flex: 1; /* 设置子组件的弹性比例为1 */
-    padding: 0.5rem; /* 设置内边距为1个rem单位 */
-    background-color: white; /* 设置背景颜色为白色 */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 设置阴影效果，水平偏移0，垂直偏移4px，模糊半径8px，颜色为黑色透明度10% */
-    height: 70vh; /* 设置高度与侧边栏一致 */
-    margin-right: 1rem; /* 设置右侧外边距为1个rem单位 */
-    border-radius: 8px; /* 设置圆角半径为8像素 */
-    display: flex; /* 使用弹性布局 */
-    flex-direction: column; /* 设置主轴方向为垂直 */
-    position: relative; /* 设置相对定位 */
-}
-
-/* 子组件横幅样式 */
-.sub-component-banner {
-    background-color: #ADD8E6; /* 设置淡蓝色背景 */
-    padding: 0.5rem 0; /* 设置上下内边距为0.5rem，左右内边距为0 */
-    text-align: center; /* 文字居中 */
-    border-radius: 8px; /* 设置四个角的圆角半径为8像素 */
-    margin-bottom: 0; /* 移除底部外边距 */
-}
-
-/* 子组件Logo样式 */
-.sub-component-logo {
-    margin-right: 0.5rem; /* 设置Logo右侧外边距 */
-    height: 1.5rem; /* 设置Logo高度 */
-    vertical-align: middle; /* 垂直居中对齐 */
-    display: inline-block; /* 设置为行内块元素 */
-}
-
-/* 子组件标题样式 */
-.sub-component-title {
-    font-size: 1.5rem; /* 设置字体大小 */
-    font-weight: bold; /* 设置字体加粗 */
-    display: inline-block; /* 设置为行内块元素 */
-    vertical-align: middle; /* 垂直居中对齐 */
-}
-
-/* 上传文件按钮样式 */
-.upload-button {
-    position: absolute; /* 设置绝对定位 */
-    bottom: 1.5rem; /* 设置底部距离 */
-    right: 2rem; /* 设置右侧距离 */
-    padding: 0; /* 移除内边距 */
-    border-radius: 4px; /* 设置圆角半径 */
-    cursor: pointer; /* 设置鼠标指针样式 */
-    display: flex; /* 使用弹性布局 */
-    align-items: center; /* 垂直居中对齐 */
-    justify-content: center; /* 水平居中对齐 */
-    z-index: 1; /* 设置层级，确保按钮显示在其他内容之上 */
-    background-color: transparent; /* 设置背景颜色为透明 */
-}
-
-/* 上传文件按钮Logo样式 */
-.upload-button-logo {
-    height: 3rem; /* 设置Logo高度为2rem */
-    vertical-align: middle; /* 垂直居中对齐 */
-    transition: transform 0.3s ease; /* 添加点击效果过渡 */
-}
-
-/* 鼠标点击时添加缩放效果 */
-.upload-button:active .upload-button-logo {
-    transform: scale(0.9); /* 设置点击时的缩放效果 */
-}
+/* ModelButton */
 
 .model-button-container {
-    position: fixed; /* 固定位置 */
-    bottom: 100px; /* 距离底部40像素 */
-    right: 100px; /* 距离右侧20像素 */
-    display: flex; /* 设置为弹性布局 */
-    gap: 10px; /* 按钮之间的间距 */
+    position: fixed;
+    bottom: 100px;
+    right: 100px;
+    display: flex;
+    gap: 10px;
 }
 
 .model-button {
-    background-color: #4caf50; /* 设置背景颜色为绿色 */
-    color: white; /* 设置文字颜色为白色 */
-    padding: 30px 50px; /* 设置内边距，使按钮变大 */
-    border: none; /* 去除边框 */
-    border-radius: 25px; /* 设置圆角半径，使按钮变圆 */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 设置阴影效果 */
-    cursor: pointer; /* 设置鼠标指针为手型 */
-    transition: background-color 0.3s ease; /* 添加背景颜色过渡效果 */
-    font-size: 18px; /* 设置文字大小 */
+    background-color: #4caf50;
+    color: white;
+    padding: 30px 50px;
+    border: none;
+    border-radius: 25px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 18px;
 }
 
 .model-button:hover {
-    background-color: #43a047; /* 鼠标悬停时的背景颜色 */
+    background-color: #43a047;
 }
 
 .model-button:active {
-    background-color: #388e3c; /* 按钮被点击时的背景颜色 */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* 按钮被点击时的阴影效果 */
-    transform: translateY(2px); /* 按钮被点击时的向下移动效果 */
+    background-color: #388e3c;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transform: translateY(2px);
 }
 
-/* 下拉框容器样式 */
+/* StateVector, ActionSpace, RewardFunction */
+
+.sub-component {
+    flex: 1;
+    padding: 0.5rem;
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    height: 70vh;
+    margin-right: 1rem;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.sub-component-banner {
+    background-color: #ADD8E6;
+    padding: 0.5rem 0;
+    text-align: center;
+    border-radius: 8px;
+    margin-bottom: 0;
+}
+
+.sub-component-logo {
+    margin-right: 0.5rem;
+    height: 1.5rem;
+    vertical-align: middle;
+    display: inline-block;
+}
+
+.sub-component-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.upload-button {
+    position: absolute;
+    bottom: 1.5rem;
+    right: 2rem;
+    padding: 0;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    background-color: transparent;
+}
+
+.upload-button-logo {
+    height: 3rem;
+    vertical-align: middle;
+    transition: transform 0.3s ease;
+}
+
+.upload-button:active .upload-button-logo {
+    transform: scale(0.9);
+}
+
 .dropdown-container-wrapper {
-    max-height: 720px; /* 设置最大高度，容纳10个下拉框 */
-    overflow-y: auto; /* 添加垂直滚动条 */
+    max-height: 720px;
+    overflow-y: auto;
     margin-top: 20px;
 }
 
 .dropdown-container {
-    margin-bottom: 20px; /* 每个下拉框之间的间距 */
+    margin-bottom: 20px;
 }
 
-/* 下拉框头部样式 */
 .dropdown-header {
     display: flex;
     justify-content: space-between;
@@ -165,38 +162,36 @@
     cursor: pointer;
 }
 
-/* 下拉按钮样式 */
 .dropdown-button {
     font-size: 14px;
     color: #1890ff;
 }
 
-/* 按钮组样式 */
 .button-group {
-    display: flex; /* 使用弹性布局 */
-    align-items: center; /* 垂直居中对齐 */
-    justify-content: flex-end; /* 水平靠右对齐 */
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
 }
 
-/* 蓝色分割线样式 */
+/* ActionSpace */
+
 .blue-divider {
-    width: 1px; /* 设置宽度为1像素 */
-    height: 20px; /* 设置高度为20像素 */
-    background-color: #1890ff; /* 设置背景颜色为蓝色 */
-    margin: 0 10px; /* 设置左右外边距为10像素 */
+    width: 1px;
+    height: 20px;
+    background-color: #1890ff;
+    margin: 0 10px;
 }
 
-/* 规则按钮样式 */
 .rule-button {
-    width: 80px; /* 设置矩形宽度为80像素 */
-    height: 30px; /* 设置矩形高度为30像素 */
-    border-radius: 4px; /* 设置圆角半径为4像素 */
-    display: flex; /* 使用弹性布局 */
-    align-items: center; /* 垂直居中对齐 */
-    justify-content: center; /* 水平居中对齐 */
-    cursor: pointer; /* 设置鼠标指针为手型 */
-    color: black; /* 设置文字颜色为黑色 */
-    transition: color 0.3s ease; /* 添加文字颜色过渡效果 */
+    width: 80px;
+    height: 30px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: black;
+    transition: color 0.3s ease;
 }
 
 .rule-button.active {
@@ -206,21 +201,20 @@
 .modal-content {
     display: flex;
     flex-direction: column;
-    gap: 16px; /* 每行之间的间隔 */
+    gap: 16px;
 }
 
 .modal-row {
     display: flex;
-    align-items: center; /* 标题和输入框在同一行 */
-    gap: 8px; /* 标题和输入框之间的间隔 */
+    align-items: center;
+    gap: 8px;
 }
 
 .modal-label {
-    width: 100px; /* 标题的固定宽度，确保对齐 */
-    text-align: right; /* 标题右对齐 */
+    width: 100px;
+    text-align: right;
 }
 
-/* 表格容器样式 */
 .table-container {
     margin-top: 10px;
     max-height: 240px;
@@ -228,15 +222,14 @@
     border-radius: 4px;
 }
 
-/* 表格样式 */
 .fixed-table {
     width: 100%;
     table-layout: fixed;
 }
 
 .fixed-table .ant-table-thead > tr > th {
-    background-color: #A9A9A9; /* 表头颜色为深灰色 */
-    color: white; /* 表头文字颜色 */
+    background-color: #A9A9A9;
+    color: white;
     position: sticky;
     top: 0;
 }
@@ -245,15 +238,14 @@
     overflow-y: auto;
 }
 
-/* 动作容器样式 */
 .action-container {
     padding: 10px;
     border: 1px solid #e8e8e8;
     border-radius: 4px;
     display: flex;
     flex-direction: column;
-    align-items: flex-start; /* 修改为 flex-start，使内容左对齐 */
-    text-align: left; /* 确保文本左对齐 */
+    align-items: flex-start;
+    text-align: left;
 }
 
 .action-buttons {
@@ -268,10 +260,9 @@
 }
 
 .action-text {
-    margin-bottom: 8px; /* 为每行文本添加下边距，避免过于紧凑 */
+    margin-bottom: 8px;
 }
 
-/* 规则容器样式 */
 .rule-container {
     padding: 10px;
     border: 1px solid #e8e8e8;
@@ -304,10 +295,11 @@
     margin-left: 10px;
 }
 
-/* 通用输入框样式 */
 .common-input {
     width: 200px;
 }
+
+/* RewardFunction */
 
 .reward-modal-overlay {
     position: fixed;
@@ -323,42 +315,42 @@
 
 .reward-modal {
     background: white;
-    padding: 30px; /* 整体放大 */
-    border-radius: 12px; /* 圆角放大 */
-    width: 800px; /* 整体放大 */
+    padding: 30px;
+    border-radius: 12px;
+    width: 800px;
     max-width: 90%;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* 添加阴影 */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
 .reward-modal-header {
     text-align: center;
-    margin-bottom: 30px; /* 放大间距 */
-    font-size: 24px; /* 放大标题字体 */
+    margin-bottom: 30px;
+    font-size: 24px;
 }
 
 .symbol-groups {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 30px; /* 放大间距 */
+    margin-bottom: 30px;
 }
 
 .symbol-group {
     display: flex;
     flex-wrap: wrap;
-    max-height: 200px; /* 最多三行，超过则滚动 */
+    max-height: 200px;
     overflow-y: auto;
-    width: 48%; /* 左右两大列 */
-    gap: 10px; /* 按钮之间的间距 */
+    width: 48%;
+    gap: 10px;
 }
 
 .symbol-group button {
     margin: 5px;
-    padding: 15px 20px; /* 放大按钮 */
+    padding: 15px 20px;
     border: 1px solid #ccc;
-    border-radius: 8px; /* 圆角放大 */
+    border-radius: 8px;
     cursor: pointer;
-    flex: 1 1 calc(25% - 20px); /* 每行 4 个元素 */
-    font-size: 18px; /* 放大字体 */
+    flex: 1 1 calc(25% - 20px);
+    font-size: 18px;
     background: #f5f5f5;
     transition: background 0.3s;
 }
@@ -369,37 +361,37 @@
 
 .equation-input {
     width: 100%;
-    height: 150px; /* 放大输入框 */
-    margin-bottom: 30px; /* 放大间距 */
+    height: 150px;
+    margin-bottom: 30px;
     border: 1px solid #ccc;
-    border-radius: 8px; /* 圆角放大 */
-    font-size: 18px; /* 放大字体 */
-    resize: none; /* 禁止调整大小 */
+    border-radius: 8px;
+    font-size: 18px;
+    resize: none;
 }
 
 .equation-preview {
-    margin-bottom: 30px; /* 放大间距 */
-    font-size: 20px; /* 放大字体 */
-    padding: 20px; /* 内边距 */
-    border: 2px solid #000; /* 黑框 */
-    border-radius: 8px; /* 圆角 */
-    background: #f9f9f9; /* 背景色 */
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1); /* 内阴影 */
+    margin-bottom: 30px;
+    font-size: 20px;
+    padding: 20px;
+    border: 2px solid #000;
+    border-radius: 8px;
+    background: #f9f9f9;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .modal-buttons {
     display: flex;
     justify-content: flex-end;
-    gap: 20px; /* 按钮之间的间距 */
+    gap: 20px;
 }
 
 .confirm-button, .cancel-button {
     margin-left: 10px;
-    padding: 20px 30px; /* 放大按钮 */
+    padding: 20px 30px;
     border: none;
-    border-radius: 8px; /* 圆角放大 */
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 18px; /* 放大字体 */
+    font-size: 18px;
     transition: background 0.3s, color 0.3s;
 }
 
@@ -421,12 +413,7 @@
     background: #e0e0e0;
 }
 
-/* EntityAssignmentModal.css */
-
-/* 块（Block） */
-.entity-assignment-modal {
-    /* 模态框的样式 */
-}
+/* EntityAssignmentModal */
 
 .entity-assignment-modal__content {
     display: flex;
@@ -443,7 +430,6 @@
     margin-bottom: 12px;
 }
 
-/* 元素（Element） */
 .entity-assignment-modal__alert {
     margin-bottom: 16px;
 }

@@ -10,7 +10,6 @@ const StateVector = ({ entities }) => {
     const [selectedVector, setSelectedVector] = useState(null);
     const [selectedVectorIndex, setSelectedVectorIndex] = useState(null);
     const [selectedRows, setSelectedRows] = useState({}); // 记录每张表格中选中的行
-    const [agentSelectionState, setAgentSelectionState] = useState({}); // 存储每个智能体的选择状态
 
     // 初始化 selectedRows，根据 StateVectorStore 或默认全选
     useEffect(() => {
