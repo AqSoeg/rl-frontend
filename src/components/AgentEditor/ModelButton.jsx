@@ -1,5 +1,5 @@
-import { Button, Modal, Table } from 'antd';
-import { useState, useEffect } from 'react';
+import {Button, Modal, Table} from 'antd';
+import {useEffect, useState} from 'react';
 import sidebarStore from './SidebarStore';
 import entityAssignmentStore from './EntityAssignmentStore';
 import stateVectorStore from './StateVectorStore';
@@ -63,7 +63,10 @@ const ModelFunction = ({ scenarios }) => {
             acc[agent] = entities;
             return acc;
         }, {});
-
+        const allEntities = Object.values(assignedEntities).flat();
+        allEntities.sort((a, b) => a.localeCompare(b, 'zh-Hans-CN', { numeric: true }));
+        entityAssignmentStore.entityNames = allEntities;
+        entityAssignmentStore.entityCount = allEntities.length;
         entityAssignmentStore.setAssignedEntities(assignedEntities);
 
         selectedModel.rewardFunction.forEach(reward => {
