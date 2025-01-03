@@ -1,23 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,message } from 'react';
 import { Select, Button, Input, Card } from 'antd';
-
+import { intelligentStore } from './IntelligentStore';
+import { observer } from 'mobx-react';
+import axios from 'axios';
 const { Option } = Select;
 
-const Middle = ({ selectedScenario }) => {
+const Middle = observer(() => {
   const [entity, setEntity] = useState('');
   const [attribute, setAttribute] = useState('');
   const [value, setValue] = useState('');
   const [envParamsMap, setEnvParamsMap] = useState({});
+  const [entityParamsInfo, setEntityParamsInfo] = useState('');
+  const [modifiedParams, setModifiedParams] = useState({}); // 存储修改的信息
 
   useEffect(() => {
-    // 当 selectedScenario 变化时，重置所有的选择框
     setEntity('');
     setAttribute('');
     setValue('');
     setEntityParamsInfo('');
 
-    if (selectedScenario && selectedScenario.env_params) {
-      const envParamsMap = selectedScenario.env_params.reduce((acc, param) => {
+    if (intelligentStore.selectedScenario && intelligentStore.selectedScenario.env_params) {
+      const envParamsMap = intelligentStore.selectedScenario.env_params.reduce((acc, param) => {
         acc[param.name] = param.params.map(p => ({
           key: p[0],
           label: p[1],
@@ -29,92 +32,92 @@ const Middle = ({ selectedScenario }) => {
 
       setEnvParamsMap(envParamsMap);
     }
-  }, [selectedScenario]);
-
-  const [entityParamsInfo, setEntityParamsInfo] = useState(''); // 新增状态
+  }, [intelligentStore.selectedScenario]);
 
   const handleEntityChange = (value) => {
     setEntity(value);
-    setAttribute(''); // 重置属性选择框
-    setValue(''); // 重置值选择框
+    setAttribute('');
+    setValue('');
   
-    if (selectedScenario && selectedScenario.env_params) {
-      const selectedEntity = selectedScenario.env_params.find(param => param.name === value);
+    if (intelligentStore.selectedScenario && intelligentStore.selectedScenario.env_params) {
+      const selectedEntity = intelligentStore.selectedScenario.env_params.find(param => param.name === value);
       if (selectedEntity) {
         const paramsInfo = selectedEntity.params.map(param => {
           const [key, label, defaultValue, options] = param;
           return `${label}：${defaultValue}（默认值）`;
-        }).join('，'); // 使用中文逗号连接字符串
+        }).join('，');
         setEntityParamsInfo(paramsInfo);
       }
     }
-  
   };
 
   const handleAttributeChange = (value) => {
     setAttribute(value);
     const attributeInfo = envParamsMap[entity].find(attr => attr.key === value);
-    setValue(attributeInfo ? attributeInfo.value : ''); // 设置默认值
-
+    setValue(attributeInfo ? attributeInfo.value : '');
   };
 
   const handleValueChange = (value) => {
     setValue(value);
-
   };
-  const handleUpdate = async () => {
+
+  const handleUpdate = () => {
     const selectedEntityParams = envParamsMap[entity];
-  if (selectedEntityParams) {
-    // 查找所选属性的完整信息
-    const selectedAttributeInfo = selectedEntityParams.find(attr => attr.key === attribute);
-    if (selectedAttributeInfo) {
-      // 使用属性的 label 而不是 key
-      console.log(`更新场景: 实体=${entity}, 属性=${selectedAttributeInfo.label}, 值=${value}`);
+    if (selectedEntityParams) {
+      const selectedAttributeInfo = selectedEntityParams.find(attr => attr.key === attribute);
+      if (selectedAttributeInfo) {
+        // 将修改的信息存入状态
+        setModifiedParams(prevState => ({
+          ...prevState,
+          [entity]: {
+            ...prevState[entity],
+            [selectedAttributeInfo.label]: value,
+          },
+        }));
+  
+        // 显示更新成功信息
+        setEntityParamsInfo(`更新成功：${entity} 的 ${selectedAttributeInfo.label} 已修改为 ${value}`);
+      } else {
+        setEntityParamsInfo('请选择一个属性');
+      }
+    } else {
+      setEntityParamsInfo('请选择一个实体');
     }
-  }
-    setEntityParamsInfo('更新成功');
-    // try {
-    //   // 查找所选实体的参数信息
-    //   const selectedEntityParams = envParamsMap[entity];
-    //   if (selectedEntityParams) {
-    //     const selectedAttributeInfo = selectedEntityParams.find(attr => attr.key === attribute);
-    //     if (selectedAttributeInfo) {
-    //       // 准备发送到后端的数据
-    //       const requestData = {
-    //         entity: entity,
-    //         attribute: selectedAttributeInfo.label,
-    //         value: value,
-    //       };
-
-    //       // 发送请求到后端
-    //       const response = await fetch('http://localhost:5000/update', {
-    //         method: 'POST', // 或者是 'GET', 取决于你的后端要求
-    //         headers: {
-    //           'Content-Type': 'application/json',
-    //         },
-    //         body: JSON.stringify(requestData),
-    //       });
-
-    //       // 检查响应状态
-    //       if (response.ok) {
-    //         // 解析后端返回的数据
-    //         const responseData = await response.json();
-    //         // 更新状态以显示后端反馈的信息
-    //         setEntityParamsInfo(responseData.message || '更新成功');
-    //       } else {
-    //         // 处理错误情况
-    //         setEntityParamsInfo('更新失败，请重试');
-    //       }
-    //     } else {
-    //       setEntityParamsInfo('请选择一个属性');
-    //     }
-    //   } else {
-    //     setEntityParamsInfo('请选择一个实体');
-    //   }
-    // } catch (error) {
-    //   // 处理网络错误或其他异常
-    //   setEntityParamsInfo('网络错误或服务器异常');
-    // }
+  };
+  const handleSave = async () => {
+    try {
+      console.log('Saving modified params:', modifiedParams); // 打印请求数据
+  
+      const response = await axios.post('http://localhost:5000/save-scenario', {
+        modifiedParams,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      console.log('Response:', response); // 打印响应
+      console.log('Response data:', response.data); // 打印响应数据
+  
+      // 检查 response.data 是否存在
+      if (!response.data) {
+        throw new Error('后端未返回数据');
+      }
+  
+      // 处理后端响应
+      if (response.data.status === 'success') {
+        console.log(response.data.message || '场景保存成功！');
+        setModifiedParams({}); // 清空修改信息
+      } else {
+        if (message && message.error) {
+          console.error(response.data.message || '场景保存失败，请检查日志');
+        } else {
+          console.error('message.error is not available');
+        }
+      }
+    } catch (error) {
+      console.error('场景保存失败:', error);
+    }
   };
 
   const entityOptions = Object.keys(envParamsMap).map(name => (
@@ -132,7 +135,7 @@ const Middle = ({ selectedScenario }) => {
   };
 
   const valueOptions = () => {
-    if (!selectedScenario || !envParamsMap[entity]) return [];
+    if (!intelligentStore.selectedScenario || !envParamsMap[entity]) return [];
 
     const currentParam = envParamsMap[entity].find(param => param.key === attribute);
     if (!currentParam) return [];
@@ -191,10 +194,10 @@ const Middle = ({ selectedScenario }) => {
         </Card>
       </div>
       <div className="form-item1">
-        <Button className='third-button'>保存场景</Button>
+        <Button className='third-button' onClick={handleSave}>保存场景</Button>
       </div>
     </div>
   );
-};
+});
 
 export default Middle;
