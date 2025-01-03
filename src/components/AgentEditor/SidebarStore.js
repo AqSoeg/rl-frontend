@@ -1,10 +1,12 @@
 import { makeAutoObservable } from 'mobx';
+import md5 from 'md5';
 import entityAssignmentStore from './EntityAssignmentStore';
-import rewardFunctionStore from './RewardFunctionStore'; // 引入 RewardFunctionStore
 
 class SidebarStore {
     scenario = ''; // 想定场景
+    scenarioName = ''; // 想定场景名称
     role = ''; // 智能体角色
+    roleName = ''; // 智能体角色名称
     type = ''; // 智能体类型
     name = ''; // 智能体名称
     version = ''; // 智能体版本
@@ -12,24 +14,25 @@ class SidebarStore {
     selectedAgent = ''; // 智能体模型
     modelID = ''; // 模型ID
     listeners = []; // 订阅者列表
+    isLoadingModel = false; // 是否正在载入模型
 
     constructor() {
         makeAutoObservable(this);
     }
 
     // 设置想定场景
-    setScenario(scenario) {
+    setScenario(scenario, scenarioName) {
         this.scenario = scenario;
+        this.scenarioName = scenarioName;
         this.clearExceptScenario();
-        rewardFunctionStore.clearRewards(); // 清空奖励函数状态
         this.notifyListeners(); // 通知订阅者
     }
 
     // 设置智能体角色
-    setRole(role) {
+    setRole(role, roleName) {
         this.role = role;
+        this.roleName = roleName;
         this.clearExceptScenarioAndRole();
-        rewardFunctionStore.clearRewards(); // 清空奖励函数状态
         this.notifyListeners(); // 通知订阅者
     }
 
@@ -37,7 +40,6 @@ class SidebarStore {
     setType(type) {
         this.type = type;
         this.clearExceptScenarioRoleAndType();
-        rewardFunctionStore.clearRewards(); // 清空奖励函数状态
         this.notifyListeners(); // 通知订阅者
     }
 
@@ -57,7 +59,6 @@ class SidebarStore {
     setAgentCount(agentCount) {
         this.agentCount = agentCount;
         this.clearExceptScenarioRoleTypeAndAgentCount();
-        rewardFunctionStore.clearRewards(); // 清空奖励函数状态
         this.notifyListeners(); // 通知订阅者
     }
 
@@ -68,17 +69,33 @@ class SidebarStore {
     }
 
     // 设置模型ID
-    setModelID(modelID) {
-        this.modelID = modelID;
+    setModelID(scenario, role, type, version, agentCount) {
+        // 获取智能体类型对应的数字
+        let typeNumber;
+        switch (type) {
+            case '单智能体':
+                typeNumber = '0';
+                break;
+            case '同构多智能体':
+                typeNumber = '1';
+                break;
+            case '异构多智能体':
+                typeNumber = '2';
+                break;
+            default:
+                typeNumber = '0'; // 默认值为 0
+        }
+
+        const data = `${scenario}|${role}|${typeNumber}|${version}|${agentCount}|${Date.now()}`;
+        this.modelID = md5(data).slice(0, 15);
         this.notifyListeners(); // 通知订阅者
     }
 
     // 清空除想定场景外的所有状态
     clearExceptScenario() {
         this.role = '';
+        this.roleName = '';
         this.type = '';
-        this.name = '';
-        this.version = '';
         this.agentCount = '';
         this.selectedAgent = '';
         this.modelID = '';
@@ -88,8 +105,6 @@ class SidebarStore {
     // 清空除想定场景和智能体角色外的所有状态
     clearExceptScenarioAndRole() {
         this.type = '';
-        this.name = '';
-        this.version = '';
         this.agentCount = '';
         this.selectedAgent = '';
         this.modelID = '';
@@ -128,6 +143,11 @@ class SidebarStore {
     notifyListeners() {
         this.listeners.forEach(listener => listener());
     }
+
+    setLoadingModel(value) {
+        this.isLoadingModel = value;
+    }
+
 }
 
 const sidebarStore = new SidebarStore();

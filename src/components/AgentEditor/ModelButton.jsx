@@ -4,7 +4,7 @@ import sidebarStore from './SidebarStore';
 import entityAssignmentStore from './EntityAssignmentStore';
 import actionSpaceStore from './ActionSpaceStore';
 import rewardFunctionStore from './RewardFunctionStore';
-import stateVectorStore from './StateVectorStore'; // 引入 StateVectorStore
+import stateVectorStore from './StateVectorStore';
 
 const ModelFunction = ({ scenarios }) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -43,29 +43,75 @@ const ModelFunction = ({ scenarios }) => {
             return;
         }
 
-        if (!Array.isArray(selectedModel.entityAssignments) || selectedModel.entityAssignments.length === 0) {
-            alert('选择的模型中没有实体分配信息！');
-            return;
+        for (let i = 1; i <= sidebarStore.agentCount; i++) {
+            actionSpaceStore.clearActionsAndRulesForModel(`智能体${i}`);
         }
-
-        const assignedEntities = selectedModel.entityAssignments.reduce((acc, assignment) => {
-            const agent = Object.keys(assignment)[0];
-            acc[agent] = assignment[agent];
-            return acc;
-        }, {});
-
         sidebarStore.clearExceptScenario();
-        entityAssignmentStore.clearAssignment();
+        rewardFunctionStore.clearRewards();
 
-        sidebarStore.setScenario(selectedModel.scenarioID);
-        sidebarStore.setRole(selectedModel.agentRoleID);
+        sidebarStore.setScenario(selectedModel.scenarioID, getScenarioName(selectedModel.scenarioID));
+        sidebarStore.setRole(selectedModel.agentRoleID, getRoleName(selectedModel.scenarioID, selectedModel.agentRoleID));
         sidebarStore.setType(selectedModel.agentType);
         sidebarStore.setName(selectedModel.agentName);
         sidebarStore.setVersion(selectedModel.agentVersion);
-        sidebarStore.setAgentCount(Object.keys(assignedEntities).length.toString());
-        sidebarStore.setModelID(selectedModel.agentID);
+        sidebarStore.setAgentCount(selectedModel.agentCount);
+        sidebarStore.modelID = selectedModel.agentID;
+        sidebarStore.setLoadingModel(true);
+
+        const assignedEntities = selectedModel.entityAssignments.reduce((acc, assignment) => {
+            const [agent, entities] = Object.entries(assignment)[0];
+            acc[agent] = entities;
+            return acc;
+        }, {});
 
         entityAssignmentStore.setAssignedEntities(assignedEntities);
+
+        selectedModel.rewardFunction.forEach(reward => {
+            const [equation, rewardType] = reward;
+            const agent = rewardType === '团队奖励' ? '' : rewardType.split('-')[1]; // 提取智能体名称
+            rewardFunctionStore.addReward({
+                equation: equation,
+                type: rewardType === '团队奖励' ? '团队奖励' : '个人奖励',
+                agent: agent,
+            });
+        });
+        rewardFunctionStore.setLoadingModel(true);
+
+        selectedModel.agentModel.forEach(agentModel => {
+            const agent = agentModel.agentModelName; // 智能体名称，如 "智能体1"
+            agentModel.entities.forEach(entity => {
+                const entityName = entity.name; // 实体名称，如 "红绿灯1"
+                entity.actionSpace.forEach(action => {
+                    // 构建动作空间数据
+                    const actionData = {
+                        entity: entityName,
+                        actionType: action.name,
+                        mode: action.type,
+                        unit: action.action[1], // 单位
+                        range: action.action[2], // 取值范围
+                        discreteOptions: action.type === '离散型' ? action.action[1] : [], // 离散型动作的可选取值
+                        discreteValues: action.type === '离散型' ? action.action[0] : [], // 离散型动作的取值
+                        upperLimit: action.type === '连续型' ? action.action[0][1] : '', // 连续型动作的上限
+                        lowerLimit: action.type === '连续型' ? action.action[0][0] : '', // 连续型动作的下限
+                    };
+
+                    // 更新 ActionSpaceStore 中的动作空间
+                    actionSpaceStore.addActionForModel(agent, actionData);
+
+                    // 如果有行为规则，更新 ActionSpaceStore 中的规则
+                    if (action.rule) {
+                        const uniqueKey = `${entityName}：${action.name}`;
+                        actionSpaceStore.setRuleForModel(agent, uniqueKey, {
+                            ruleType: action.rule[0],
+                            condition1: action.rule[1],
+                            condition2: action.rule[2],
+                            execution1: action.rule[3],
+                            execution2: action.rule[4],
+                        });
+                    }
+                });
+            });
+        });
 
         setIsModalVisible(false);
     };
@@ -88,14 +134,8 @@ const ModelFunction = ({ scenarios }) => {
             // 获取所有奖励函数
             const allRewards = rewardFunctionStore.getAllRewards();
 
-            // 解析当前的 modelID，获取基础部分和智能体代号
-            const baseModelID = sidebarStore.modelID.slice(0, sidebarStore.modelID.lastIndexOf('-')); // 获取基础部分
-            const agentCount = parseInt(sidebarStore.agentCount, 10); // 获取智能体数量
-
             // 构建每个智能体模型的实体信息
             const agentModels = Object.entries(entityAssignmentStore.assignedEntities).map(([agent, entities], index) => {
-                const agentID = `${baseModelID}-${index + 1}`; // 生成唯一的 agentID
-
                 const agentEntities = entities.map(entityName => {
                     const entity = role.entities.find(e => e.name === entityName);
 
@@ -126,8 +166,7 @@ const ModelFunction = ({ scenarios }) => {
                 });
 
                 return {
-                    agentID: agentID, // 使用生成的唯一 agentID
-                    agentModelName: sidebarStore.selectedAgent, // 智能体模型名称
+                    agentModelName: agent, // 智能体名称
                     entities: agentEntities // 实体信息
                 };
             });
@@ -140,6 +179,7 @@ const ModelFunction = ({ scenarios }) => {
 
             // 构建模型数据
             const modelData = {
+                agentID: sidebarStore.modelID,
                 scenarioID: sidebarStore.scenario,
                 agentRoleID: sidebarStore.role,
                 agentType: sidebarStore.type,
@@ -192,31 +232,50 @@ const ModelFunction = ({ scenarios }) => {
     };
 
     const columns = [
-        { title: '序号', dataIndex: 'index', key: 'index' },
-        { title: '智能体ID', dataIndex: 'agentID', key: 'agentID' },
-        { title: '智能体名称', dataIndex: 'agentName', key: 'agentName' },
-        { title: '场景', dataIndex: 'scenarioName', key: 'scenarioName' },
-        { title: '智能体角色', dataIndex: 'roleName', key: 'roleName' },
-        { title: '分配的实体名称', dataIndex: 'assignedEntities', key: 'assignedEntities' },
+        {
+            title: '序号',
+            dataIndex: 'index',
+            key: 'index',
+            render: (text, record, index) => index + 1,
+        },
+        {
+            title: '智能体名称',
+            dataIndex: 'agentName',
+            key: 'agentName',
+        },
+        {
+            title: '智能体版本',
+            dataIndex: 'agentVersion',
+            key: 'agentVersion',
+        },
+        {
+            title: '场景',
+            dataIndex: 'scenarioID',
+            key: 'scenarioID',
+            render: (scenarioID) => getScenarioName(scenarioID),
+        },
+        {
+            title: '智能体角色',
+            dataIndex: 'agentRoleID',
+            key: 'agentRoleID',
+            render: (agentRoleID, record) => getRoleName(record.scenarioID, agentRoleID),
+        },
+        {
+            title: '智能体类型',
+            dataIndex: 'agentType',
+            key: 'agentType',
+        },
+        {
+            title: '智能体数量',
+            dataIndex: 'agentCount',
+            key: 'agentCount',
+        },
     ];
 
-    const tableData = models.map((model, index) => {
-        const assignedEntities = model.entityAssignments.reduce((acc, assignment) => {
-            const agent = Object.keys(assignment)[0];
-            acc[agent] = assignment[agent];
-            return acc;
-        }, {});
-
-        return {
-            key: model.agentID,
-            index: index + 1,
-            agentID: model.agentID,
-            agentName: `${model.agentName} v${model.agentVersion} ${model.agentModelName}`,
-            scenarioName: getScenarioName(model.scenarioID),
-            roleName: getRoleName(model.scenarioID, model.agentRoleID),
-            assignedEntities: Object.values(assignedEntities).flat().join(', '),
-        };
-    });
+    const tableData = models.map((model, index) => ({
+        ...model,
+        key: index,
+    }));
 
     return (
         <div className="model-button-container">

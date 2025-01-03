@@ -4,7 +4,6 @@ import actionLogo from '../../assets/actionSpace.svg';
 import uploadLogo from '../../assets/upload.svg';
 import addLogo from "../../assets/add.svg";
 import actionSpaceStore from './ActionSpaceStore';
-import sidebarStore from './SidebarStore';
 import entityAssignmentStore from './EntityAssignmentStore';
 
 const { Option } = Select;
@@ -422,33 +421,59 @@ const ActionModal = ({
 
     const handleUpperLimitChange = (e) => {
         const value = e.target.value;
-        const range = getActionRange();
-        if (range.length === 2 && (value < range[0] || value > range[1])) {
-            alert(`取值上限必须在${range[0]}到${range[1]}之间！`);
-            setUpperLimit('');
-            return;
-        }
         setUpperLimit(value);
     };
 
     const handleLowerLimitChange = (e) => {
         const value = e.target.value;
-        const range = getActionRange();
-        if (range.length === 2 && (value < range[0] || value > range[1])) {
-            alert(`取值下限必须在${range[0]}到${range[1]}之间！`);
-            setLowerLimit('');
-            return;
-        }
         setLowerLimit(value);
     };
 
     const handleConfirm = () => {
         if (actionMode === '连续型') {
-            // 检查取值下限是否小于取值上限
-            if (parseFloat(lowerLimit) >= parseFloat(upperLimit)) {
-                alert('取值下限必须小于取值上限！');
+            const range = getActionRange();
+            const errors = [];
+
+            // 检查取值上限是否为合法浮点数
+            if (!/^\d*\.?\d+$/.test(upperLimit)) {
+                errors.push('取值上限必须是一个合法的浮点数！');
                 setUpperLimit('');
+            }
+
+            // 检查取值下限是否为合法浮点数
+            if (!/^\d*\.?\d+$/.test(lowerLimit)) {
+                errors.push('取值下限必须是一个合法的浮点数！');
                 setLowerLimit('');
+            }
+
+            // 如果取值上限和下限是合法浮点数，继续检查范围
+            if (/^\d*\.?\d+$/.test(upperLimit) && /^\d*\.?\d+$/.test(lowerLimit)) {
+                const upper = parseFloat(upperLimit);
+                const lower = parseFloat(lowerLimit);
+
+                // 检查取值上限是否在允许的范围内
+                if (range.length === 2 && (upper < range[0] || upper > range[1])) {
+                    errors.push(`取值上限必须在${range[0]}到${range[1]}之间！`);
+                    setUpperLimit('');
+                }
+
+                // 检查取值下限是否在允许的范围内
+                if (range.length === 2 && (lower < range[0] || lower > range[1])) {
+                    errors.push(`取值下限必须在${range[0]}到${range[1]}之间！`);
+                    setLowerLimit('');
+                }
+
+                // 检查取值下限是否小于取值上限
+                if (lower >= upper) {
+                    errors.push('取值下限必须小于取值上限！');
+                    setUpperLimit('');
+                    setLowerLimit('');
+                }
+            }
+
+            // 如果有错误，弹出提示并返回
+            if (errors.length > 0) {
+                alert(errors.join('\n')); // 将所有错误信息合并为一条提示
                 return;
             }
         }
