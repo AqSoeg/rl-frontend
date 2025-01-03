@@ -68,6 +68,7 @@ const ModelFunction = ({ scenarios }) => {
         allEntities.sort((a, b) => a.localeCompare(b, 'zh-Hans-CN', { numeric: true }));
         entityAssignmentStore.entityNames = allEntities;
         entityAssignmentStore.entityCount = allEntities.length;
+        entityAssignmentStore.entities = scenarios.find(s => s.id === selectedModel.scenarioID).roles.find(r => r.id === selectedModel.agentRoleID).entities;
         entityAssignmentStore.setAssignedEntities(assignedEntities);
 
         const agent1Model = selectedModel.agentModel.find(model => model.name === '智能体1');
@@ -128,6 +129,15 @@ const ModelFunction = ({ scenarios }) => {
                 }
             });
         });
+
+        const defaultSelectedStateVectors = {};
+        entityAssignmentStore.entities.forEach(entity => {
+            if (entity && Array.isArray(entity.stateVector)) {
+                defaultSelectedStateVectors[entity.name] = entity.stateVector.map((_, idx) => idx);
+            }
+        });
+
+        stateVectorStore.setSelectedStateVectors(defaultSelectedStateVectors);
 
         setIsModalVisible(false);
     };

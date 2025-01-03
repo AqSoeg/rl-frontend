@@ -9,34 +9,21 @@ const StateVector = ({ entities }) => {
     const [visible, setVisible] = useState(Array(entities?.length || 0).fill(false));
     const [selectedVector, setSelectedVector] = useState(null);
     const [selectedVectorIndex, setSelectedVectorIndex] = useState(null);
-    const [selectedRows, setSelectedRows] = useState({}); // 记录每张表格中选中的行
+    const [selectedRows, setSelectedRows] = useState({});
 
-    // 初始化 selectedRows，根据 StateVectorStore 或默认全选
     useEffect(() => {
-        if (!entities || !Array.isArray(entities)) {
-            console.error("entities is not defined or not an array");
-            return;
-        }
-
         const selectedStateVectors = stateVectorStore.getSelectedStateVectors();
         if (Object.keys(selectedStateVectors).length > 0) {
-            // 如果 StateVectorStore 中有数据，则使用它
             setSelectedRows(selectedStateVectors);
         } else {
-            // 否则初始化为全选
             const initialSelectedRows = {};
             entities.forEach(entity => {
-                if (!entity || typeof entity !== 'object' || !entity.name || !Array.isArray(entity.stateVector)) {
-                    console.error(`Invalid entity or stateVector for entity: ${entity?.name || 'unknown'}`);
-                    return;
-                }
                 initialSelectedRows[entity.name] = entity.stateVector.map((_, idx) => idx);
             });
             setSelectedRows(initialSelectedRows);
         }
     }, [entities]);
 
-    // 当 selectedRows 变化时，更新 StateVectorStore
     useEffect(() => {
         stateVectorStore.setSelectedStateVectors(selectedRows);
     }, [selectedRows]);
@@ -59,7 +46,6 @@ const StateVector = ({ entities }) => {
         setSelectedVectorIndex(index);
     };
 
-    // 处理全选
     const handleSelectAll = (entityName, selected) => {
         const newSelectedRows = { ...selectedRows };
         const entity = entities.find(e => e.name === entityName);
@@ -73,7 +59,6 @@ const StateVector = ({ entities }) => {
         }
     };
 
-    // 处理单行选择
     const handleRowSelect = (entityName, rowIndex) => {
         const newSelectedRows = { ...selectedRows };
         if (!newSelectedRows[entityName]) {
