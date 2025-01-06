@@ -1,5 +1,5 @@
-import React, { useState, useEffect,message } from 'react';
-import { Select, Button, Input, Card } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Select, Button, Input, Card ,message} from 'antd';
 import { intelligentStore } from './IntelligentStore';
 import { observer } from 'mobx-react';
 import axios from 'axios';
@@ -95,31 +95,18 @@ const Middle = observer(() => {
           'Content-Type': 'application/json',
         },
       });
-  
-      console.log('Response:', response); // 打印响应
-      console.log('Response data:', response.data); // 打印响应数据
-  
-      // 检查 response.data 是否存在
-      if (!response.data) {
-        throw new Error('后端未返回数据');
-      }
-  
       // 处理后端响应
-      if (response.data.status === 'success') {
-        console.log(response.data.message || '场景保存成功！');
-        setModifiedParams({}); // 清空修改信息
+      if (response.data && response.data.status === 'success') {
+        message.success('场景保存成功！');
+        setModifiedParams({});
       } else {
-        if (message && message.error) {
-          console.error(response.data.message || '场景保存失败，请检查日志');
-        } else {
-          console.error('message.error is not available');
-        }
+        message.error('场景保存失败，请检查日志');
       }
     } catch (error) {
       console.error('场景保存失败:', error);
+      message.error('场景保存失败，请检查网络或联系管理员');
     }
   };
-
   const entityOptions = Object.keys(envParamsMap).map(name => (
     <Option key={name} value={name}>
       {name}

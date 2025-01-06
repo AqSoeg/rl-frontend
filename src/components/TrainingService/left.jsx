@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Select, Button, Modal, message } from 'antd';
+import { Select, Button, Modal, message, Table } from 'antd';
 import { intelligentStore } from './IntelligentStore';
 import { observer } from 'mobx-react';
 
@@ -33,11 +33,10 @@ const Left = observer(({ scenarios, algorithms }) => {
   };
 
   const handleAlgorithmTypeChange = (value) => {
-    setAlgorithmType(value); // 更新算法类型
-    setAlgorithmsByType([]); // 重置根据算法类型筛选的算法列表
-    intelligentStore.selectedAlgorithm = null; // 重置选定的算法
-  
-    // 根据算法类型筛选算法
+    setAlgorithmType(value);
+    setAlgorithmsByType([]);
+    intelligentStore.selectedAlgorithm = null;
+
     const filteredAlgorithms = algorithms.filter(algo => algo.type_name === value);
     setAlgorithmsByType(filteredAlgorithms);
   };
@@ -49,12 +48,11 @@ const Left = observer(({ scenarios, algorithms }) => {
 
   const handleScenarioSelectChange = (value) => {
     const selectedScene = scenarios.find(scenario => scenario.name === value);
-    intelligentStore.selectedScenario = selectedScene; // 更新选定的场景
-    intelligentStore.selectedAgentRole = null; // 重置选定的智能体角色
-  
-    // 更新智能体角色列表
+    intelligentStore.selectedScenario = selectedScene;
+    intelligentStore.selectedAgentRole = null;
+
     const agentRoles = selectedScene.roles || [];
-    setAgentRoles(agentRoles); // 更新智能体角色列表
+    setAgentRoles(agentRoles);
   };
 
   const handleAgentRoleSelectChange = (value) => {
@@ -152,57 +150,115 @@ const Left = observer(({ scenarios, algorithms }) => {
 
       <div className='form-item'>
         {intelligentStore.selectedAgent ? (
-          <><div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-              <h3>已载入智能体信息</h3>
-              <p><strong>智能体名称：</strong>{intelligentStore.selectedAgent.agentName}</p>
-              <p><strong>智能体ID：</strong>{intelligentStore.selectedAgent.agentID}</p>
-              <p><strong>版本：</strong>{intelligentStore.selectedAgent.agentVersion}</p>
-              <p><strong>智能体类型：</strong>{intelligentStore.selectedAgent.agentType}</p>
-              <p><strong>更新时间：</strong>{new Date(intelligentStore.selectedAgent.updateTime).toLocaleString()}</p>
-              <p><strong>想定场景：</strong>{intelligentStore.selectedAgent.scenarioID}</p>
-              <h5>实体状态信息：</h5>
-              <ul>
-                {intelligentStore.selectedAgent.entities.map((entity, index) => (
-                  <li key={index}>
-                    <h6>{entity.name} : 当前信号灯状态：{entity.stateVector[0][2]}，等待通过的车辆数量：{entity.stateVector[1][2]}，等待通过的行人数量：{entity.stateVector[2][2]}</h6>
-                  </li>
-                ))}
-              </ul>
-              <h5>模型动作信息包括：</h5>
-              <ul>
-                {intelligentStore.selectedAgent.entities.map((entity, index) => (
-                  <li key={index}>
-                    <h6>动作：</h6>
-                    {entity.actionSpace.map((actionSpace, actionIndex) => (
-                      <span key={actionIndex}>
-                        {actionSpace.action.join(',')}
-                      </span>
-                    ))}
-                    <h6>规则：</h6>
-                    {entity.actionSpace.map((actionSpace, actionIndex) => (
-                      <span key={actionIndex}>
-                        {actionSpace.rule.join(',')}
-                      </span>
-                    ))}
-                  </li>
-                ))}
-              </ul>
-              <h5>奖励信息：</h5>
-              <ul>
-                {intelligentStore.selectedAgent.entities.map((entity, index) => (
-                  <li key={index}>
-                    {entity.rewardFunction.map(rf => (
-                      <h6>{rf[1]}:{rf[0]}</h6>
-                    ))}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </>
+          <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+            <h3>已载入智能体信息</h3>
+            <p><strong>智能体名称：</strong>{intelligentStore.selectedAgent.agentName}</p>
+            <p><strong>智能体ID：</strong>{intelligentStore.selectedAgent.agentID}</p>
+            <p><strong>版本：</strong>{intelligentStore.selectedAgent.agentVersion}</p>
+            <p><strong>智能体类型：</strong>{intelligentStore.selectedAgent.agentType}</p>
+            <p><strong>更新时间：</strong>{new Date(intelligentStore.selectedAgent.updateTime).toLocaleString()}</p>
+            <p><strong>想定场景：</strong>{intelligentStore.selectedAgent.scenarioID}</p>
+
+            {/* 智能体分配信息 */}
+            <h5>智能体分配信息：</h5>
+            <Table
+              columns={[
+                { title: '智能体名称', dataIndex: 'agentName', key: 'agentName' },
+                { title: '分配实体', dataIndex: 'assignedEntities', key: 'assignedEntities' },
+              ]}
+              dataSource={intelligentStore.selectedAgent.entityAssignments.flatMap((assignment) =>
+                Object.entries(assignment).map(([agentName, entities]) => ({
+                  key: agentName,
+                  agentName: agentName,
+                  assignedEntities: entities.join(', '),
+                }))
+              )}
+              pagination={false}
+              bordered
+            />
+
+            {/* 智能体状态信息 */}
+            <h5>智能体状态信息：</h5>
+            <Table
+              columns={[
+                { title: '智能体名称', dataIndex: 'name', key: 'name' },
+                { title: '当前信号灯状态', dataIndex: 'trafficLightStatus', key: 'trafficLightStatus' },
+                { title: '等待通过的车辆数量', dataIndex: 'waitingVehicles', key: 'waitingVehicles' },
+                { title: '等待通过的行人数量', dataIndex: 'waitingPedestrians', key: 'waitingPedestrians' },
+              ]}
+              dataSource={intelligentStore.selectedAgent.agentModel.map((model) => ({
+                key: model.name,
+                name: model.name,
+                trafficLightStatus: model.stateVector.find((state) => state[1] === 'Traffic Light Status')?.[3] || '无',
+                waitingVehicles: model.stateVector.find((state) => state[1] === 'Number of Waiting Vehicles')?.[3] || '无',
+                waitingPedestrians: model.stateVector.find((state) => state[1] === 'Number of Pedestrians')?.[3] || '无',
+              }))}
+              pagination={false}
+              bordered
+            />
+
+            {/* 智能体动作信息 */}
+            <h5>智能体动作信息：</h5>
+            <Table
+              columns={[
+                { title: '智能体名称', dataIndex: 'name', key: 'name' },
+                { title: '动作名称', dataIndex: 'actionName', key: 'actionName' },
+                { title: '动作类型', dataIndex: 'actionType', key: 'actionType' },
+                { title: '动作值', dataIndex: 'actionValue', key: 'actionValue' },
+                { title: '最大动作取值', dataIndex: 'maxActionValue', key: 'maxActionValue' },
+                { title: '规则', dataIndex: 'rule', key: 'rule' },
+              ]}
+              dataSource={intelligentStore.selectedAgent.agentModel.map((model) => {
+                const action = model.actionSpace[0]; // 假设每个智能体只有一个动作
+                return {
+                  key: model.name,
+                  name: model.name,
+                  actionName: action ? action.name : '无',
+                  actionType: action ? action.type : '无',
+                  actionValue: action ? (Array.isArray(action.action) ? action.action.join(', ') : '无') : '无',
+                  maxActionValue: action ? (Array.isArray(action.action[1]) ? action.action[1].join(', ') : '无') : '无',
+                  rule: action ? (Array.isArray(action.rule) ? action.rule.join(', ') : '无') : '无',
+                };
+              })}
+              pagination={false}
+              bordered
+            />
+
+            {/* 智能体奖励信息 */}
+            <h5>智能体奖励信息：</h5>
+            <Table
+              columns={[
+                { title: '智能体名称', dataIndex: 'name', key: 'name' },
+                { title: '奖励名称', dataIndex: 'rewardName', key: 'rewardName' },
+                { title: '奖励值', dataIndex: 'rewardValue', key: 'rewardValue' },
+              ]}
+              dataSource={intelligentStore.selectedAgent.agentModel.map((model) => {
+                const rewards = model.rewardFunction.reduce((acc, reward) => {
+                  if (reward[1] === '团队奖励') {
+                    if (!acc.some((r) => r[1] === '团队奖励')) {
+                      acc.push(reward);
+                    }
+                  } else {
+                    acc.push(reward);
+                  }
+                  return acc;
+                }, []);
+                return rewards.map((reward, index) => ({
+                  key: `${model.name}-${index}`,
+                  name: model.name,
+                  rewardName: reward[1],
+                  rewardValue: reward[0],
+                }));
+              }).flat()}
+              pagination={false}
+              bordered
+            />
+          </div>
         ) : (
           <div>请选择一个智能体</div>
         )}
       </div>
+
       <Modal
         title="载入离线数据"
         visible={visible}
