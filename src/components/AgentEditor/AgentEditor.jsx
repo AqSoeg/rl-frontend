@@ -8,16 +8,11 @@ import ModelFunction from './ModelButton';
 import entityAssignmentStore from './EntityAssignmentStore';
 import './AgentEditor.css';
 
-
 const AgentEditor = () => {
     const [scenarios, setScenarios] = useState([]);
     const [selectedEntities, setSelectedEntities] = useState([]);
     const [selectedActionTypes, setSelectedActionTypes] = useState([]);
     const [selectedParams, setSelectedParams] = useState([]);
-
-    useEffect(() => {
-        entityAssignmentStore.clearAssignment();
-    }, []);
 
     useEffect(() => {
         const fetchScenarios = async () => {
