@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Select, Button, Modal, message, Table } from 'antd';
 import { intelligentStore } from './IntelligentStore';
 import { observer } from 'mobx-react';
+import sidebarStore from '../AgentEditor/SidebarStore';
 
 const { Option } = Select;
 
 const Left = observer(({ scenarios, algorithms }) => {
   const [trainingMode, setTrainingMode] = useState('offline');
-  const [algorithmType, setAlgorithmType] = useState('');
-  const [algorithmsByType, setAlgorithmsByType] = useState([]);
   const [visible, setVisible] = useState(false);
   const [selectedDataset, setSelectedDataset] = useState('');
   const [agentRoles, setAgentRoles] = useState([]);
@@ -18,6 +17,51 @@ const Left = observer(({ scenarios, algorithms }) => {
     { id: 2, name: 'Dataset 2' },
     { id: 3, name: 'Dataset 3' },
   ];
+
+  // 使用 SidebarStore 中的状态初始化选定的想定场景和智能体角色
+  const [selectedScenario, setSelectedScenario] = useState(sidebarStore.scenarioName);
+  const [selectedAgentRole, setSelectedAgentRole] = useState(sidebarStore.roleName);
+
+  // 监听 SidebarStore 中的状态变化
+  useEffect(() => {
+    const unsubscribe = sidebarStore.subscribe(() => {
+      setSelectedScenario(sidebarStore.scenarioName);
+      setSelectedAgentRole(sidebarStore.roleName);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  // 初始化场景和智能体角色
+  useEffect(() => {
+    if (scenarios.length > 0 && selectedScenario) {
+      const selectedScene = scenarios.find(scenario => scenario.name === selectedScenario);
+      if (selectedScene) {
+        intelligentStore.selectScenario(selectedScene);
+        setAgentRoles(selectedScene.roles || []);
+      }
+    }
+  }, [scenarios, selectedScenario]);
+
+  // 初始化智能体角色
+  useEffect(() => {
+    if (agentRoles.length > 0 && selectedAgentRole) {
+      const selectedRole = agentRoles.find(role => role.name === selectedAgentRole);
+      if (selectedRole) {
+        intelligentStore.selectAgentRole(selectedRole);
+      }
+    }
+  }, [agentRoles, selectedAgentRole]);
+
+  // 初始化算法类型和算法列表
+  useEffect(() => {
+    if (intelligentStore.algorithmType) {
+      const filteredAlgorithms = algorithms.filter(algo => algo.type_name === intelligentStore.algorithmType);
+      intelligentStore.setAlgorithmsByType(filteredAlgorithms);
+    }
+  }, [algorithms, intelligentStore.algorithmType]);
 
   const showDataLoadModal = () => {
     setVisible(true);
@@ -33,31 +77,34 @@ const Left = observer(({ scenarios, algorithms }) => {
   };
 
   const handleAlgorithmTypeChange = (value) => {
-    setAlgorithmType(value);
-    setAlgorithmsByType([]);
-    intelligentStore.selectedAlgorithm = null;
-
+    intelligentStore.setAlgorithmType(value); // 更新全局状态
     const filteredAlgorithms = algorithms.filter(algo => algo.type_name === value);
-    setAlgorithmsByType(filteredAlgorithms);
+    intelligentStore.setAlgorithmsByType(filteredAlgorithms); // 更新算法列表
   };
 
   const handleAlgorithmSelectChange = (value) => {
     const selectedAlgo = algorithms.find(algo => algo.name === value);
-    intelligentStore.selectedAlgorithm = selectedAlgo;
+    intelligentStore.selectAlgorithm(selectedAlgo);
   };
 
   const handleScenarioSelectChange = (value) => {
     const selectedScene = scenarios.find(scenario => scenario.name === value);
-    intelligentStore.selectedScenario = selectedScene;
-    intelligentStore.selectedAgentRole = null;
+    if (selectedScene) {
+      intelligentStore.selectScenario(selectedScene);
+      sidebarStore.setScenario(selectedScene.id, selectedScene.name);
 
-    const agentRoles = selectedScene.roles || [];
-    setAgentRoles(agentRoles);
+      const agentRoles = selectedScene.roles || [];
+      setAgentRoles(agentRoles);
+      setSelectedAgentRole(''); // 重置智能体角色
+    }
   };
 
   const handleAgentRoleSelectChange = (value) => {
     const selectedRole = agentRoles.find(role => role.name === value);
-    intelligentStore.selectedAgentRole = selectedRole;
+    if (selectedRole) {
+      intelligentStore.selectAgentRole(selectedRole);
+      sidebarStore.setRole(selectedRole.id, selectedRole.name);
+    }
   };
 
   const handleOk = async () => {
@@ -85,7 +132,7 @@ const Left = observer(({ scenarios, algorithms }) => {
       <div className="form-item">
         <label>想定场景</label>
         <Select 
-          value={intelligentStore.selectedScenario ? intelligentStore.selectedScenario.name : ''} 
+          value={selectedScenario} 
           onChange={handleScenarioSelectChange}
           placeholder="请选择"
         >
@@ -99,7 +146,7 @@ const Left = observer(({ scenarios, algorithms }) => {
       <div className="form-item">
         <label>智能体角色</label>
         <Select
-          value={intelligentStore.selectedAgentRole ? intelligentStore.selectedAgentRole.name : ''}
+          value={selectedAgentRole}
           onChange={handleAgentRoleSelectChange}
           placeholder="请选择"
         >
@@ -124,7 +171,11 @@ const Left = observer(({ scenarios, algorithms }) => {
       </div>
       <div className="form-item">
         <label>算法类型</label>
-        <Select value={algorithmType} onChange={handleAlgorithmTypeChange}>
+        <Select
+          value={intelligentStore.algorithmType} // 使用全局状态
+          onChange={handleAlgorithmTypeChange}
+          placeholder="请选择"
+        >
           {uniqueAlgorithmTypeNames.map((typeName) => (
             <Option key={typeName} value={typeName}>
               {typeName}
@@ -139,12 +190,12 @@ const Left = observer(({ scenarios, algorithms }) => {
           onChange={handleAlgorithmSelectChange}
           placeholder="请选择"
         >
-          {algorithmsByType.map((algo) => (
+          {intelligentStore.algorithmsByType.map((algo) => (
             <Option key={algo.name} value={algo.name}>
               {algo.name}
             </Option>
           ))}
-          {!algorithmsByType.length && <Option value="">请选择</Option>}
+          {!intelligentStore.algorithmsByType.length && <Option value="">请选择</Option>}
         </Select>
       </div>
 
@@ -193,63 +244,6 @@ const Left = observer(({ scenarios, algorithms }) => {
                 waitingVehicles: model.stateVector.find((state) => state[1] === 'Number of Waiting Vehicles')?.[3] || '无',
                 waitingPedestrians: model.stateVector.find((state) => state[1] === 'Number of Pedestrians')?.[3] || '无',
               }))}
-              pagination={false}
-              bordered
-            />
-
-            {/* 智能体动作信息 */}
-            <h5>智能体动作信息：</h5>
-            <Table
-              columns={[
-                { title: '智能体名称', dataIndex: 'name', key: 'name' },
-                { title: '动作名称', dataIndex: 'actionName', key: 'actionName' },
-                { title: '动作类型', dataIndex: 'actionType', key: 'actionType' },
-                { title: '动作值', dataIndex: 'actionValue', key: 'actionValue' },
-                { title: '最大动作取值', dataIndex: 'maxActionValue', key: 'maxActionValue' },
-                { title: '规则', dataIndex: 'rule', key: 'rule' },
-              ]}
-              dataSource={intelligentStore.selectedAgent.agentModel.map((model) => {
-                const action = model.actionSpace[0]; // 假设每个智能体只有一个动作
-                return {
-                  key: model.name,
-                  name: model.name,
-                  actionName: action ? action.name : '无',
-                  actionType: action ? action.type : '无',
-                  actionValue: action ? (Array.isArray(action.action) ? action.action.join(', ') : '无') : '无',
-                  maxActionValue: action ? (Array.isArray(action.action[1]) ? action.action[1].join(', ') : '无') : '无',
-                  rule: action ? (Array.isArray(action.rule) ? action.rule.join(', ') : '无') : '无',
-                };
-              })}
-              pagination={false}
-              bordered
-            />
-
-            {/* 智能体奖励信息 */}
-            <h5>智能体奖励信息：</h5>
-            <Table
-              columns={[
-                { title: '智能体名称', dataIndex: 'name', key: 'name' },
-                { title: '奖励名称', dataIndex: 'rewardName', key: 'rewardName' },
-                { title: '奖励值', dataIndex: 'rewardValue', key: 'rewardValue' },
-              ]}
-              dataSource={intelligentStore.selectedAgent.agentModel.map((model) => {
-                const rewards = model.rewardFunction.reduce((acc, reward) => {
-                  if (reward[1] === '团队奖励') {
-                    if (!acc.some((r) => r[1] === '团队奖励')) {
-                      acc.push(reward);
-                    }
-                  } else {
-                    acc.push(reward);
-                  }
-                  return acc;
-                }, []);
-                return rewards.map((reward, index) => ({
-                  key: `${model.name}-${index}`,
-                  name: model.name,
-                  rewardName: reward[1],
-                  rewardValue: reward[0],
-                }));
-              }).flat()}
               pagination={false}
               bordered
             />
