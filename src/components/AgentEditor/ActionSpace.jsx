@@ -4,6 +4,7 @@ import actionLogo from '../../assets/actionSpace.svg';
 import uploadLogo from '../../assets/upload.svg';
 import addLogo from "../../assets/add.svg";
 import entityAssignmentStore from './EntityAssignmentStore';
+import sidebarStore from "./SidebarStore";
 import actionSpaceStore from './ActionSpaceStore';
 
 const { Option } = Select;
@@ -106,6 +107,41 @@ const ActionSpace = ({ entities, actionTypes }) => {
             }
         }
 
+        if (sidebarStore.type === '同构多智能体') {
+            const agentEntityMapping = entityAssignmentStore.agentEntityMapping;
+            const entityGroup = agentEntityMapping.find(group =>
+                Object.keys(group).some(entityName => entityName === selectedEntity)
+            );
+
+            if (entityGroup) {
+                Object.entries(entityGroup).forEach(([entityName, agentName]) => {
+                    if (entityName !== selectedEntity) {
+                        const syncUniqueKey = `${entityName}：${selectedActionType}`;
+                        const syncAction = {
+                            entity: entityName,
+                            actionType: selectedActionType,
+                            mode: actionMode,
+                            upperLimit,
+                            lowerLimit,
+                            discreteValues,
+                            unit: getActionUnit(),
+                            range: getActionRange(),
+                            discreteOptions: getActionDiscreteValues(),
+                        };
+                        const existingSyncAction = actionSpaceStore
+                            .getActionsForModel(agentName)
+                            .find(a => `${a.entity}：${a.actionType}` === syncUniqueKey);
+
+                        if (existingSyncAction) {
+                            actionSpaceStore.updateActionForModel(agentName, syncUniqueKey, syncAction);
+                        } else {
+                            actionSpaceStore.addActionForModel(agentName, syncAction);
+                        }
+                    }
+                });
+            }
+        }
+
         setModalOpen(false);
     };
 
@@ -126,6 +162,22 @@ const ActionSpace = ({ entities, actionTypes }) => {
     const handleDeleteAction = (uniqueKey) => {
         if (window.confirm('是否删除该动作？')) {
             actionSpaceStore.deleteActionForModel(currentModelID, uniqueKey);
+
+            if (sidebarStore.type === '同构多智能体') {
+                const agentEntityMapping = entityAssignmentStore.agentEntityMapping;
+                const entityGroup = agentEntityMapping.find(group =>
+                    Object.keys(group).some(entityName => uniqueKey.startsWith(entityName))
+                );
+                if (entityGroup) {
+                    Object.entries(entityGroup).forEach(([entityName, agentName]) => {
+                        if (!uniqueKey.startsWith(entityName)) {
+                            const syncUniqueKey = `${entityName}：${uniqueKey.split('：')[1]}`;
+                            actionSpaceStore.deleteActionForModel(agentName, syncUniqueKey);
+                        }
+                    });
+                }
+            }
+
             setActions(actionSpaceStore.getActionsForModel(currentModelID));
         }
     };
@@ -221,6 +273,22 @@ const DropdownContainer = ({ uniqueKey, action, onEdit, onDelete, modelID }) => 
 
     const handleRuleConfirm = () => {
         actionSpaceStore.setRuleForModel(modelID, uniqueKey, { ruleType, condition1, condition2, execution1, execution2 });
+
+        if (sidebarStore.type === '同构多智能体') {
+            const agentEntityMapping = entityAssignmentStore.agentEntityMapping;
+            const entityGroup = agentEntityMapping.find(group =>
+                Object.keys(group).some(entityName => uniqueKey.startsWith(entityName))
+            );
+            if (entityGroup) {
+                Object.entries(entityGroup).forEach(([entityName, agentName]) => {
+                    if (!uniqueKey.startsWith(entityName)) {
+                        const syncUniqueKey = `${entityName}：${uniqueKey.split('：')[1]}`;
+                        actionSpaceStore.setRuleForModel(agentName, syncUniqueKey, { ruleType, condition1, condition2, execution1, execution2 });
+                    }
+                });
+            }
+        }
+
         setRuleOpen(false);
     };
 
@@ -232,6 +300,22 @@ const DropdownContainer = ({ uniqueKey, action, onEdit, onDelete, modelID }) => 
             setExecution1('');
             setExecution2('');
             actionSpaceStore.setRuleForModel(modelID, uniqueKey, null);
+
+            if (sidebarStore.type === '同构多智能体') {
+                const agentEntityMapping = entityAssignmentStore.agentEntityMapping;
+                const entityGroup = agentEntityMapping.find(group =>
+                    Object.keys(group).some(entityName => uniqueKey.startsWith(entityName))
+                );
+                if (entityGroup) {
+                    Object.entries(entityGroup).forEach(([entityName, agentName]) => {
+                        if (!uniqueKey.startsWith(entityName)) {
+                            const syncUniqueKey = `${entityName}：${uniqueKey.split('：')[1]}`;
+                            actionSpaceStore.setRuleForModel(agentName, syncUniqueKey, null);
+                        }
+                    });
+                }
+            }
+
             setRuleOpen(false);
         }
     };

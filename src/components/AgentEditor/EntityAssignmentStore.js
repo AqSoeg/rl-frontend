@@ -1,4 +1,5 @@
 import { makeAutoObservable } from 'mobx';
+import sidebarStore from './SidebarStore';
 
 class EntityAssignmentStore {
     assignedEntities = {};
@@ -8,6 +9,7 @@ class EntityAssignmentStore {
     entities = [];
     entityNames = [];
     listeners = [];
+    agentEntityMapping = [];
 
     constructor() {
         makeAutoObservable(this);
@@ -15,15 +17,39 @@ class EntityAssignmentStore {
 
     setAssignedEntities(entities) {
         this.assignedEntities = entities;
+        this.updateAgentEntityMapping();
         this.notifyListeners();
     }
 
     updateAssignedEntities(entities) {
         this.assignedEntities = { ...this.assignedEntities, ...entities };
+        this.updateAgentEntityMapping();
         this.notifyListeners();
     }
 
-    // 设置选中的智能体模型
+    updateAgentEntityMapping() {
+        if (sidebarStore.type === '同构多智能体') {
+            const agentCount = sidebarStore.agentCount;
+            const entitiesPerAgent = this.entityCount / agentCount;
+
+            this.agentEntityMapping = [];
+
+            for (let i = 0; i < entitiesPerAgent; i++) {
+                const mapping = {};
+                for (let agentIndex = 1; agentIndex <= agentCount; agentIndex++) {
+                    const agent = `智能体${agentIndex}`;
+                    const entity = this.assignedEntities[agent]?.[i];
+                    if (entity) {
+                        mapping[entity] = agent;
+                    }
+                }
+                this.agentEntityMapping.push(mapping);
+            }
+        } else {
+            this.agentEntityMapping = [];
+        }
+    }
+
     setSelectedAgent(agent) {
         this.selectedAgent = agent;
         this.isAgentSelected = true;
@@ -40,6 +66,7 @@ class EntityAssignmentStore {
         this.assignedEntities = {};
         this.selectedAgent = null;
         this.isAgentSelected = false;
+        this.agentEntityMapping = [];
         this.notifyListeners();
     }
 
