@@ -34,7 +34,189 @@ npm install
 ```json
 [
    {
-      "agentID": "ea85712c9d8f1b2",
+      "agentID": "2671fbacd1817a5",
+      "scenarioID": "traffic",
+      "agentRoleID": "traffic_light",
+      "agentType": "同构多智能体",
+      "agentName": "agent",
+      "agentVersion": "1",
+      "agentCount": "2",
+      "entityAssignments": [
+         {
+            "智能体1": [
+               "红绿灯1",
+               "红绿灯3"
+            ]
+         },
+         {
+            "智能体2": [
+               "红绿灯2",
+               "红绿灯4"
+            ]
+         }
+      ],
+      "agentModel": [
+         {
+            "name": "智能体1",
+            "stateVector": [
+               [
+                  "红绿灯1",
+                  "Traffic Light Status",
+                  "当前信号灯状态",
+                  "状态"
+               ],
+               [
+                  "红绿灯3",
+                  "Number of Waiting Vehicles",
+                  "等待通过的车辆数量",
+                  "辆"
+               ]
+            ],
+            "actionSpace": [
+               {
+                  "entity": "红绿灯1",
+                  "name": "信号控制",
+                  "type": "连续型",
+                  "action": [
+                     [
+                        0.1,
+                        0.5
+                     ],
+                     "状态",
+                     [
+                        0,
+                        1
+                     ]
+                  ],
+                  "rule": [
+                     "IF ELSE",
+                     "1",
+                     "2",
+                     "3",
+                     "4"
+                  ]
+               },
+               {
+                  "entity": "红绿灯3",
+                  "name": "切换频率",
+                  "type": "离散型",
+                  "action": [
+                     [
+                        10,
+                        20,
+                        30
+                     ],
+                     [
+                        10,
+                        15,
+                        20,
+                        25,
+                        30
+                     ]
+                  ],
+                  "rule": [
+                     "FOR",
+                     "4",
+                     "3",
+                     "2",
+                     "1"
+                  ]
+               }
+            ],
+            "rewardFunction": [
+               [
+                  "x'+b'",
+                  "团队奖励"
+               ],
+               [
+                  "R-R̄",
+                  "团队奖励"
+               ]
+            ]
+         },
+         {
+            "name": "智能体2",
+            "stateVector": [
+               [
+                  "红绿灯2",
+                  "Traffic Light Status",
+                  "当前信号灯状态",
+                  "状态"
+               ],
+               [
+                  "红绿灯4",
+                  "Number of Waiting Vehicles",
+                  "等待通过的车辆数量",
+                  "辆"
+               ]
+            ],
+            "actionSpace": [
+               {
+                  "entity": "红绿灯2",
+                  "name": "信号控制",
+                  "type": "连续型",
+                  "action": [
+                     [
+                        0.1,
+                        0.5
+                     ],
+                     "状态",
+                     [
+                        0,
+                        1
+                     ]
+                  ],
+                  "rule": [
+                     "IF ELSE",
+                     "1",
+                     "2",
+                     "3",
+                     "4"
+                  ]
+               },
+               {
+                  "entity": "红绿灯4",
+                  "name": "切换频率",
+                  "type": "离散型",
+                  "action": [
+                     [
+                        10,
+                        20,
+                        30
+                     ],
+                     [
+                        10,
+                        15,
+                        20,
+                        25,
+                        30
+                     ]
+                  ],
+                  "rule": [
+                     "FOR",
+                     "4",
+                     "3",
+                     "2",
+                     "1"
+                  ]
+               }
+            ],
+            "rewardFunction": [
+               [
+                  "x'+b'",
+                  "团队奖励"
+               ],
+               [
+                  "R-R̄",
+                  "团队奖励"
+               ]
+            ]
+         }
+      ],
+      "updateTime": "2025-01-09T12:51:28.098Z"
+   },
+   {
+      "agentID": "ab87440f47865d2",
       "scenarioID": "traffic",
       "agentRoleID": "traffic_light",
       "agentType": "异构多智能体",
@@ -81,25 +263,25 @@ npm install
             "actionSpace": [
                {
                   "entity": "红绿灯1",
-                  "name": "信号控制",
+                  "name": "切换频率",
                   "type": "连续型",
                   "action": [
                      [
-                        0.1,
-                        0.5
+                        15,
+                        55
                      ],
-                     "状态",
+                     "秒",
                      [
-                        0,
-                        1
+                        5,
+                        60
                      ]
                   ],
                   "rule": [
                      "IF ELSE",
-                     "1",
-                     "2",
-                     "3",
-                     "4"
+                     "111",
+                     "222",
+                     "333",
+                     "444"
                   ]
                }
             ],
@@ -139,28 +321,26 @@ npm install
             "actionSpace": [
                {
                   "entity": "红绿灯4",
-                  "name": "切换频率",
+                  "name": "信号控制",
                   "type": "离散型",
                   "action": [
                      [
-                        10,
-                        15,
-                        20
+                        1,
+                        2,
+                        3
                      ],
                      [
-                        10,
-                        15,
-                        20,
-                        25,
-                        30
+                        1,
+                        2,
+                        3
                      ]
                   ],
                   "rule": [
                      "FOR",
-                     "4",
-                     "3",
-                     "2",
-                     "1"
+                     "444",
+                     "333",
+                     "222",
+                     "111"
                   ]
                }
             ],
@@ -176,153 +356,7 @@ npm install
             ]
          }
       ],
-      "updateTime": "2025-01-03T08:04:51.401Z"
-   },
-   {
-      "agentID": "6ec0c60e132524e",
-      "scenarioID": "traffic",
-      "agentRoleID": "traffic_light",
-      "agentType": "同构多智能体",
-      "agentName": "agent",
-      "agentVersion": "1",
-      "agentCount": "2",
-      "entityAssignments": [
-         {
-            "智能体1": [
-               "红绿灯1",
-               "红绿灯2"
-            ]
-         },
-         {
-            "智能体2": [
-               "红绿灯3",
-               "红绿灯4"
-            ]
-         }
-      ],
-      "agentModel": [
-         {
-            "name": "智能体1",
-            "stateVector": [
-               [
-                  "红绿灯1",
-                  "Traffic Light Status",
-                  "当前信号灯状态",
-                  "状态"
-               ],
-               [
-                  "红绿灯1",
-                  "Number of Waiting Vehicles",
-                  "等待通过的车辆数量",
-                  "辆"
-               ],
-               [
-                  "红绿灯2",
-                  "Traffic Light Status",
-                  "当前信号灯状态",
-                  "状态"
-               ],
-               [
-                  "红绿灯2",
-                  "Number of Waiting Vehicles",
-                  "等待通过的车辆数量",
-                  "辆"
-               ]
-            ],
-            "actionSpace": [
-               {
-                  "entity": "红绿灯2",
-                  "name": "切换频率",
-                  "type": "连续型",
-                  "action": [
-                     [
-                        15,
-                        55
-                     ],
-                     "秒",
-                     [
-                        5,
-                        60
-                     ]
-                  ],
-                  "rule": [
-                     "IF ELSE",
-                     "11",
-                     "22",
-                     "33",
-                     "44"
-                  ]
-               }
-            ],
-            "rewardFunction": [
-               [
-                  "x'+b'",
-                  "团队奖励"
-               ]
-            ]
-         },
-         {
-            "name": "智能体2",
-            "stateVector": [
-               [
-                  "红绿灯3",
-                  "Number of Waiting Vehicles",
-                  "等待通过的车辆数量",
-                  "辆"
-               ],
-               [
-                  "红绿灯3",
-                  "Number of Pedestrians",
-                  "等待通过的行人数量",
-                  "人"
-               ],
-               [
-                  "红绿灯4",
-                  "Number of Waiting Vehicles",
-                  "等待通过的车辆数量",
-                  "辆"
-               ],
-               [
-                  "红绿灯4",
-                  "Number of Pedestrians",
-                  "等待通过的行人数量",
-                  "人"
-               ]
-            ],
-            "actionSpace": [
-               {
-                  "entity": "红绿灯3",
-                  "name": "信号控制",
-                  "type": "离散型",
-                  "action": [
-                     [
-                        2,
-                        1
-                     ],
-                     [
-                        1,
-                        2,
-                        3
-                     ]
-                  ],
-                  "rule": [
-                     "FOR",
-                     "44",
-                     "33",
-                     "22",
-                     "11"
-                  ]
-               }
-            ],
-            "rewardFunction": [
-               [
-                  "x'+b'",
-                  "团队奖励"
-               ]
-            ]
-         }
-      ],
-      "updateTime": "2025-01-03T08:08:34.706Z"
+      "updateTime": "2025-01-09T12:53:22.683Z"
    }
 ]
 ```
