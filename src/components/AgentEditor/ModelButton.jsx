@@ -6,7 +6,7 @@ import stateVectorStore from './StateVectorStore';
 import actionSpaceStore from './ActionSpaceStore';
 import rewardFunctionStore from './RewardFunctionStore';
 
-const ModelFunction = ({ scenarios }) => {
+const ModelFunction = ({scenarios}) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [models, setModels] = useState([]);
     const [selectedModel, setSelectedModel] = useState(null);
@@ -16,7 +16,7 @@ const ModelFunction = ({ scenarios }) => {
 
         ws.onopen = () => {
             console.log('WebSocket connected');
-            ws.send(JSON.stringify({ type: 'getModels' }));
+            ws.send(JSON.stringify({type: 'getModels'}));
         };
 
         ws.onmessage = (event) => {
@@ -65,7 +65,7 @@ const ModelFunction = ({ scenarios }) => {
             return acc;
         }, {});
         const allEntities = Object.values(assignedEntities).flat();
-        allEntities.sort((a, b) => a.localeCompare(b, 'zh-Hans-CN', { numeric: true }));
+        allEntities.sort((a, b) => a.localeCompare(b, 'zh-Hans-CN', {numeric: true}));
         entityAssignmentStore.entityNames = allEntities;
         entityAssignmentStore.entityCount = allEntities.length;
         entityAssignmentStore.entities = scenarios.find(s => s.id === selectedModel.scenarioID).roles.find(r => r.id === selectedModel.agentRoleID).entities;
@@ -85,19 +85,17 @@ const ModelFunction = ({ scenarios }) => {
             });
         }
         selectedModel.agentModel.forEach(agentModel => {
-            if (agentModel.name !== '智能体1') {
-                agentModel.rewardFunction.forEach(reward => {
-                    const [equation, rewardType] = reward;
-                    if (rewardType.startsWith('个人奖励')) {
-                        const agent = rewardType.split('-')[1];
-                        rewardFunctionStore.addReward({
-                            equation: equation,
-                            type: '个人奖励',
-                            agent: agent,
-                        });
-                    }
-                });
-            }
+            agentModel.rewardFunction.forEach(reward => {
+                const [equation, rewardType] = reward;
+                if (rewardType.startsWith('个人奖励')) {
+                    const agent = rewardType.split('-')[1];
+                    rewardFunctionStore.addReward({
+                        equation: equation,
+                        type: '个人奖励',
+                        agent: agent,
+                    });
+                }
+            });
         });
         rewardFunctionStore.setLoadingModel(true);
 
