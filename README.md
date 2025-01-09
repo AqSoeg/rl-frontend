@@ -220,8 +220,8 @@ npm install
       "scenarioID": "traffic",
       "agentRoleID": "traffic_light",
       "agentType": "异构多智能体",
-      "agentName": "agent",
-      "agentVersion": "1",
+      "agentName": "Agent",
+      "agentVersion": "2",
       "agentCount": "2",
       "entityAssignments": [
          {
