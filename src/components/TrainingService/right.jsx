@@ -56,8 +56,15 @@ const Right = observer(({ algorithms }) => {
     }
   }, [intelligentStore.selectedAlgorithm]);
 
-  // 训练算法
+  const [trainingStatus, setTrainingStatus] = useState("idle"); // 训练状态：idle、running、completed
+
+  // 开始训练
   const trainAlgorithm = async () => {
+    if (!intelligentStore.selectedAgent) {
+      message.error('请先载入智能体！');
+      return;
+    }
+  
     setTraining(true);
     try {
       const response = await fetch('http://localhost:5000/train', {
@@ -67,39 +74,84 @@ const Right = observer(({ algorithms }) => {
         },
         body: JSON.stringify({ hyperParametersValues }),
       });
-
+  
       if (!response.ok) {
         throw new Error(`Network response was not ok: ${response.statusText}`);
       }
-
+  
       const data = await response.json();
-      console.log(data);
-
       if (data.status === 'success') {
-        setIsSuccessModalVisible(true);
-
-        // 训练完成后，将训练好的智能体信息保存到 modelList 中
-        const trainedModel = {
-          scenarioID: intelligentStore.selectedAgent.scenarioID,
-          agentRoleID: intelligentStore.selectedAgent.agentRoleID,
-          agentName: intelligentStore.selectedAgent.agentName, // 从 loadedAgent 中获取
-          decisionModelID: Date.now(), // 使用时间戳作为决策模型 ID
-          agentType: intelligentStore.selectedAgent.agentType, // 从 loadedAgent 中获取
+        message.success('训练已开始！');
+        setTrainingStatus("running");
+  
+        // 轮询训练状态
+        const checkTrainingStatus = async () => {
+          const statusResponse = await fetch('http://localhost:5000/training-status');
+          const statusData = await statusResponse.json();
+          if (statusData.status === "completed") {
+            setTrainingStatus("completed");
+            setTraining(false);
+  
+            // 处理训练结果
+            if (statusData.result.status === "success") {
+              message.success('训练完成，模型已保存！');
+              // 保存模型到 modelList
+              const trainedModel = {
+                scenarioID: intelligentStore.selectedAgent.scenarioID,
+                agentRoleID: intelligentStore.selectedAgent.agentRoleID,
+                agentName: intelligentStore.selectedAgent.agentName,
+                decisionModelID: Date.now(),
+                agentType: intelligentStore.selectedAgent.agentType,
+                algorithmType: intelligentStore.selectedAlgorithm.type,
+                algorithmName: intelligentStore.selectedAlgorithm.name,
+              };
+              setModelList((prevModelList) => [...prevModelList, trainedModel]);
+            } else if (statusData.result.status === "stopped") {
+              message.warning('训练已终止，模型未保存');
+            } else {
+              message.error('训练失败，请检查日志');
+            }
+          } else {
+            // 继续轮询
+            setTimeout(checkTrainingStatus, 1000);
+          }
         };
-
-        setModelList((prevModelList) => [...prevModelList, trainedModel]); // 更新 modelList
-        message.success('训练完成，模型已保存！');
+  
+        checkTrainingStatus(); // 开始轮询
       } else {
         message.error('训练失败，请检查日志');
       }
     } catch (error) {
       console.error('训练过程中发生错误:', error);
       message.error('训练失败，请检查日志');
-    } finally {
-      setTraining(false);
     }
   };
-
+  
+  // 终止训练
+  const stopTraining = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/stop-training', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.statusText}`);
+      }
+  
+      const data = await response.json();
+      if (data.status === 'success') {
+        message.success('训练终止请求已发送');
+      } else {
+        message.error('训练终止失败，请检查日志');
+      }
+    } catch (error) {
+      console.error('训练终止失败:', error);
+      message.error('训练终止失败，请检查网络或联系管理员');
+    }
+  };
   // 查看智能体详情
   const handleView = (agent) => {
     setSelectedAgent(agent);
@@ -231,6 +283,8 @@ const Right = observer(({ algorithms }) => {
     { title: '智能体名称', dataIndex: 'agentName', key: 'agentName' },
     { title: '决策模型ID', dataIndex: 'decisionModelID', key: 'decisionModelID' },
     { title: '智能体类型', dataIndex: 'agentType', key: 'agentType' },
+    { title: '算法类型', dataIndex: 'algorithmType', key: 'algorithmType' }, // 新增列：算法类型
+    { title: '算法名称', dataIndex: 'algorithmName', key: 'algorithmName' }, // 新增列：算法名称
     {
       title: '操作',
       key: 'action',
@@ -303,7 +357,9 @@ const Right = observer(({ algorithms }) => {
           {training ? '训练中...' : '开始训练'}
         </Button>
         <Button onClick={handleViewModelListClick}>查看模型列表</Button>
-        <Button>训练终止</Button>
+        <Button onClick={stopTraining} disabled={!training}>
+          终止训练
+        </Button>
       </div>
 
       {/* 智能体详情弹窗 */}
@@ -342,50 +398,50 @@ const Right = observer(({ algorithms }) => {
               pagination={false}
               bordered
             />
-<h3>实体状态信息</h3>
-<Table
-  columns={[
-    { title: '实体名称', dataIndex: 'name', key: 'name' },
-    { title: '当前信号灯状态', dataIndex: 'trafficLightStatus', key: 'trafficLightStatus' },
-    { title: '等待通过的车辆数量', dataIndex: 'waitingVehicles', key: 'waitingVehicles' },
-    { title: '等待通过的行人数量', dataIndex: 'waitingPedestrians', key: 'waitingPedestrians' },
-  ]}
-  dataSource={selectedAgent.agentModel.flatMap((model) => {
-    // 创建一个对象，用于存储每个实体的状态信息
-    const entityStateMap = {};
+            <h3>实体状态信息</h3>
+            <Table
+              columns={[
+                { title: '实体名称', dataIndex: 'name', key: 'name' },
+                { title: '当前信号灯状态', dataIndex: 'trafficLightStatus', key: 'trafficLightStatus' },
+                { title: '等待通过的车辆数量', dataIndex: 'waitingVehicles', key: 'waitingVehicles' },
+                { title: '等待通过的行人数量', dataIndex: 'waitingPedestrians', key: 'waitingPedestrians' },
+              ]}
+              dataSource={selectedAgent.agentModel.flatMap((model) => {
+                // 创建一个对象，用于存储每个实体的状态信息
+                const entityStateMap = {};
 
-    model.stateVector.forEach((state) => {
-      const entityName = state[0]; // 实体名称
-      const fieldName = state[1];  // 字段名称
-      const fieldValue = state[3]; // 字段值
+                model.stateVector.forEach((state) => {
+                  const entityName = state[0]; // 实体名称
+                  const fieldName = state[1];  // 字段名称
+                  const fieldValue = state[3]; // 字段值
 
-      // 初始化实体状态对象
-      if (!entityStateMap[entityName]) {
-        entityStateMap[entityName] = {
-          key: entityName,
-          name: entityName,
-          trafficLightStatus: '无', // 默认值
-          waitingVehicles: '无',    // 默认值
-          waitingPedestrians: '无', // 默认值
-        };
-      }
+                  // 初始化实体状态对象
+                  if (!entityStateMap[entityName]) {
+                    entityStateMap[entityName] = {
+                      key: entityName,
+                      name: entityName,
+                      trafficLightStatus: '无', // 默认值
+                      waitingVehicles: '无',    // 默认值
+                      waitingPedestrians: '无', // 默认值
+                    };
+                  }
 
-      // 根据字段名称填充数据
-      if (fieldName === 'Traffic Light Status') {
-        entityStateMap[entityName].trafficLightStatus = fieldValue;
-      } else if (fieldName === 'Number of Waiting Vehicles') {
-        entityStateMap[entityName].waitingVehicles = fieldValue;
-      } else if (fieldName === 'Number of Pedestrians') {
-        entityStateMap[entityName].waitingPedestrians = fieldValue;
-      }
-    });
+                  // 根据字段名称填充数据
+                  if (fieldName === 'Traffic Light Status') {
+                    entityStateMap[entityName].trafficLightStatus = fieldValue;
+                  } else if (fieldName === 'Number of Waiting Vehicles') {
+                    entityStateMap[entityName].waitingVehicles = fieldValue;
+                  } else if (fieldName === 'Number of Pedestrians') {
+                    entityStateMap[entityName].waitingPedestrians = fieldValue;
+                  }
+                });
 
-    // 将对象转换为数组
-    return Object.values(entityStateMap);
-  })}
-  pagination={false}
-  bordered
-/>
+                // 将对象转换为数组
+                return Object.values(entityStateMap);
+              })}
+              pagination={false}
+              bordered
+            />
             <h3>模型动作信息</h3>
             <Table
               columns={[
@@ -467,7 +523,7 @@ const Right = observer(({ algorithms }) => {
         visible={isModelListModalVisible}
         onOk={() => setIsModelListModalVisible(false)}
         onCancel={() => setIsModelListModalVisible(false)}
-        width={800} 
+        width={1000} 
       >
         <Table
           columns={modelListColumns}
@@ -491,6 +547,8 @@ const Right = observer(({ algorithms }) => {
             <p><strong>决策模型ID：</strong>{currentModel.decisionModelID}</p>
             <p><strong>智能体名称：</strong>{currentModel.agentName}</p>
             <p><strong>智能体类型：</strong>{currentModel.agentType}</p>
+            <p><strong>算法类型：</strong>{currentModel.algorithmType}</p>
+            <p><strong>算法名称：</strong>{currentModel.algorithmName}</p>
             <Table
               columns={modelInfoColumns}
               dataSource={[currentModel]}
