@@ -4,6 +4,7 @@ import stateLogo from '../../assets/stateVector.svg';
 import uploadLogo from '../../assets/upload.svg';
 import entityAssignmentStore from './EntityAssignmentStore';
 import stateVectorStore from './StateVectorStore';
+import sidebarStore from './SidebarStore';
 
 const StateVector = ({ entities }) => {
     const [visible, setVisible] = useState(Array(entities?.length || 0).fill(false));
@@ -55,6 +56,21 @@ const StateVector = ({ entities }) => {
             } else {
                 newSelectedRows[entityName] = [];
             }
+
+            if (sidebarStore.type === '同构多智能体') {
+                const agentEntityMapping = entityAssignmentStore.agentEntityMapping;
+                const entityGroup = agentEntityMapping.find(group =>
+                    Object.keys(group).some(name => name === entityName)
+                );
+                if (entityGroup) {
+                    Object.entries(entityGroup).forEach(([name]) => {
+                        if (name !== entityName) {
+                            newSelectedRows[name] = [...newSelectedRows[entityName]];
+                        }
+                    });
+                }
+            }
+
             setSelectedRows(newSelectedRows);
         }
     };
@@ -69,6 +85,28 @@ const StateVector = ({ entities }) => {
         } else {
             newSelectedRows[entityName].push(rowIndex);
         }
+
+        if (sidebarStore.type === '同构多智能体') {
+            const agentEntityMapping = entityAssignmentStore.agentEntityMapping;
+            const entityGroup = agentEntityMapping.find(group =>
+                Object.keys(group).some(name => name === entityName)
+            );
+            if (entityGroup) {
+                Object.entries(entityGroup).forEach(([name]) => {
+                    if (name !== entityName) {
+                        if (!newSelectedRows[name]) {
+                            newSelectedRows[name] = [];
+                        }
+                        if (newSelectedRows[entityName].includes(rowIndex)) {
+                            newSelectedRows[name].push(rowIndex);
+                        } else {
+                            newSelectedRows[name] = newSelectedRows[name].filter(idx => idx !== rowIndex);
+                        }
+                    }
+                });
+            }
+        }
+
         setSelectedRows(newSelectedRows);
     };
 
