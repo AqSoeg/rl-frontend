@@ -4,75 +4,67 @@ import rewardLogo from '../../assets/rewardFunction.svg';
 import uploadLogo from '../../assets/upload.svg';
 import addLogo from '../../assets/add.svg';
 import sidebarStore from './SidebarStore';
-import rewardFunctionStore from './RewardFunctionStore'; // 引入 RewardFunctionStore
+import rewardFunctionStore from './RewardFunctionStore';
 import { observer } from 'mobx-react';
 
 const { Option } = Select;
 
-const RewardFunction = observer(({ selectedParams }) => { // 新增：接收 selectedParams
-    const [equation, setEquation] = useState(''); // 公式内容
-    const [modalOpen, setModalOpen] = useState(false); // 控制 RewardModal 的打开与关闭
-    const [rewardWhoOpen, setRewardWhoOpen] = useState(false); // 控制 RewardWho 弹窗的打开与关闭
-    const [rewardType, setRewardType] = useState(''); // 奖励类型
-    const [selectedAgent, setSelectedAgent] = useState(''); // 选中的智能体
-    const [editingIndex, setEditingIndex] = useState(null); // 用于记录当前编辑的下拉框索引
+const RewardFunction = observer(({ selectedParams }) => {
+    const [equation, setEquation] = useState('');
+    const [modalOpen, setModalOpen] = useState(false);
+    const [rewardWhoOpen, setRewardWhoOpen] = useState(false);
+    const [rewardType, setRewardType] = useState('');
+    const [selectedAgent, setSelectedAgent] = useState('');
+    const [editingIndex, setEditingIndex] = useState(null);
+    const [isHovering, setIsHovering] = useState(false);
+    const [hoveredParam, setHoveredParam] = useState(null);
 
-    // 检查智能体数量是否大于 0
     const isAddButtonEnabled = sidebarStore.agentCount > 0;
 
-    // 监听 SidebarStore 的状态变化
     useEffect(() => {
         if (rewardFunctionStore.isLoadingModel) {
             rewardFunctionStore.setLoadingModel(false);
             return;
         }
         if (sidebarStore.agentCount || sidebarStore.type || sidebarStore.role || sidebarStore.scenario) {
-            rewardFunctionStore.clearRewards(); // 清空奖励函数状态
+            rewardFunctionStore.clearRewards();
         }
     }, [sidebarStore.agentCount, sidebarStore.type, sidebarStore.role, sidebarStore.scenario]);
 
-    // 处理新增奖励函数
     const handleAddReward = () => {
         if (sidebarStore.type === '同构多智能体') {
-            // 如果是同构多智能体，直接打开 RewardModal 并设置为团队奖励
             setRewardType('团队奖励');
             setModalOpen(true);
         } else if (sidebarStore.agentCount > 1) {
             setRewardWhoOpen(true);
         } else {
-            // 智能体数量为 1 时，默认是团队奖励
             setRewardType('团队奖励');
             setSelectedAgent('智能体1');
             setModalOpen(true);
         }
-        setEquation(''); // 新增时，公式内容为空
+        setEquation('');
     };
 
-    // 处理 RewardWho 弹窗确认
     const handleRewardWhoConfirm = (type, agent) => {
         setRewardType(type);
         setSelectedAgent(agent);
         setRewardWhoOpen(false);
         setModalOpen(true);
-        setEquation(''); // 新增时，公式内容为空
+        setEquation('');
     };
 
-    // 处理 RewardWho 弹窗取消
     const handleRewardWhoCancel = () => {
         setRewardWhoOpen(false);
     };
 
-    // 处理奖励类型变化
     const handleRewardTypeChange = (value) => {
         setRewardType(value);
     };
 
-    // 处理智能体选择变化
     const handleAgentChange = (value) => {
         setSelectedAgent(value);
     };
 
-    // 处理确认按钮点击
     const handleConfirm = () => {
         if (!equation) {
             alert('请填写公式后再确认，否则取消！');
@@ -86,49 +78,52 @@ const RewardFunction = observer(({ selectedParams }) => { // 新增：接收 sel
         };
 
         if (editingIndex !== null) {
-            // 如果正在编辑，更新原来的奖励函数
             rewardFunctionStore.editReward(editingIndex, newReward);
-            setEditingIndex(null); // 重置编辑状态
+            setEditingIndex(null);
         } else {
-            // 否则添加新的奖励函数
             rewardFunctionStore.addReward(newReward);
         }
 
         setModalOpen(false);
-        setEquation(''); // 清空公式输入框
+        setEquation('');
     };
 
-    // 处理取消按钮点击
     const handleCancel = () => {
-        setModalOpen(false); // 直接关闭弹窗
-        setEditingIndex(null); // 重置编辑状态
-        setEquation(''); // 清空公式输入框
+        setModalOpen(false);
+        setEditingIndex(null);
+        setEquation('');
     };
 
-    // 处理公式输入变化
     const handleEquationChange = (e) => setEquation(e.target.value);
 
-    // 处理下拉框点击
     const handleDropdownClick = (index) => {
         rewardFunctionStore.toggleDropdown(index);
     };
 
-    // 处理编辑按钮点击
     const handleEdit = (index) => {
         const reward = rewardFunctionStore.selectedReward[index];
-        setEquation(reward.equation); // 设置为之前的公式
-        setRewardType(reward.type); // 设置为之前的奖励类型
-        setSelectedAgent(reward.agent); // 设置为之前的智能体
-        setEditingIndex(index); // 设置当前编辑的下拉框索引
+        setEquation(reward.equation);
+        setRewardType(reward.type);
+        setSelectedAgent(reward.agent);
+        setEditingIndex(index);
         setModalOpen(true);
     };
 
-    // 处理删除按钮点击
     const handleDelete = (index) => {
         const confirmDelete = window.confirm('是否确认删除该奖赏函数？');
         if (confirmDelete) {
             rewardFunctionStore.deleteReward(index);
         }
+    };
+
+    const handleParamHover = (param) => {
+        setIsHovering(true);
+        setHoveredParam(param);
+    };
+
+    const handleParamLeave = () => {
+        setIsHovering(false);
+        setHoveredParam(null);
     };
 
     return (
@@ -175,7 +170,6 @@ const RewardFunction = observer(({ selectedParams }) => { // 新增：接收 sel
                 ))}
             </div>
 
-            {/* RewardWho 弹窗 */}
             <Modal
                 title="选择奖励类型"
                 open={rewardWhoOpen}
@@ -204,7 +198,6 @@ const RewardFunction = observer(({ selectedParams }) => { // 新增：接收 sel
                 </Form>
             </Modal>
 
-            {/* RewardModal 弹窗 */}
             {modalOpen && (
                 <div className="reward-modal-overlay">
                     <div className="reward-modal">
@@ -220,9 +213,11 @@ const RewardFunction = observer(({ selectedParams }) => { // 新增：接收 sel
                                 ))}
                             </div>
                             <div className="symbol-group">
-                                {selectedParams.map((symbol, index) => ( // 修改：动态显示 selectedParams
+                                {selectedParams.map((param, index) => (
                                     <button key={index}
-                                            onClick={() => handleEquationChange({target: {value: equation + symbol}})}>{symbol}</button>
+                                            onMouseEnter={() => handleParamHover(param)}
+                                            onMouseLeave={handleParamLeave}
+                                            onClick={() => handleEquationChange({target: {value: equation + param[0]}})}>{param[0]}</button>
                                 ))}
                             </div>
                         </div>
@@ -237,6 +232,16 @@ const RewardFunction = observer(({ selectedParams }) => { // 新增：接收 sel
                             <Button type="primary" onClick={handleConfirm}>确认</Button>
                         </div>
                     </div>
+
+                    {isHovering && hoveredParam && (
+                        <div className="tooltip">
+                            <div className="tooltip-content">
+                                <div className="tooltip-title">{hoveredParam[0]}</div>
+                                <div className="tooltip-description">{hoveredParam[1]}</div>
+                                <div className="tooltip-unit">{hoveredParam[2]}</div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
         </div>
