@@ -4,8 +4,8 @@
 # Node.js 依赖文件
 node_modules/
 
-# 临时文件
-tmp/
+# 临时文件，测试模型的载入和保存
+mock/model.json
 
 # 构建输出目录
 build/

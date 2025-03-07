@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
 import Sidebar from './Sidebar';
 import StateVector from './StateVector';
 import ActionSpace from './ActionSpace';
@@ -17,13 +16,26 @@ const AgentEditor = () => {
     useEffect(() => {
         const fetchScenarios = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/scenarios');
-                setScenarios(response.data);
+                const response = await fetch(__APP_CONFIG__.scenarios, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        scenario_id: '',
+                    }),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                setScenarios(data);
             } catch (error) {
                 console.error('Error fetching scenarios:', error);
             }
         };
-
         fetchScenarios();
     }, []);
 

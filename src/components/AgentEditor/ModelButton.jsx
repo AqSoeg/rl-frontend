@@ -11,26 +11,25 @@ const ModelFunction = ({scenarios}) => {
     const [models, setModels] = useState([]);
     const [selectedModel, setSelectedModel] = useState(null);
 
-    useEffect(() => {
-        const ws = new WebSocket('ws://localhost:8080');
-
-        ws.onopen = () => {
-            console.log('WebSocket connected');
-            ws.send(JSON.stringify({type: 'getModels'}));
-        };
-
-        ws.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if (data.type === 'models') {
+    const fetchModels = async () => {
+        try {
+            const response = await fetch(__APP_CONFIG__.getModels, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            const data = await response.json();
+            if (data.models) {
                 setModels(data.models);
             }
-        };
+        } catch (error) {
+            console.error('模型加载失败:', error);
+        }
+    };
 
-        ws.onclose = () => {
-            console.log('WebSocket disconnected');
-        };
-
-        return () => ws.close();
+    useEffect(() => {
+        fetchModels();
     }, []);
 
     const handleModelSelect = (model) => {
@@ -144,7 +143,7 @@ const ModelFunction = ({scenarios}) => {
         setIsModalVisible(false);
     };
 
-    const handleSaveModel = () => {
+    const handleSaveModel = async () => {
         if (!sidebarStore.canSaveModel()) {
             alert('请填写完整信息后再保存模型！');
             return;
@@ -222,20 +221,26 @@ const ModelFunction = ({scenarios}) => {
                 updateTime: new Date().toISOString()
             };
 
-            const ws = new WebSocket('ws://localhost:8080');
-            ws.onopen = () => {
-                ws.send(JSON.stringify(modelData));
-                ws.close();
-            };
+            try {
+                const response = await fetch(__APP_CONFIG__.saveModel, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(modelData),
+                });
 
-            ws.onmessage = (event) => {
-                const response = JSON.parse(event.data);
-                if (response.status === 'success') {
+                const result = await response.json();
+                if (result.status === 'success') {
                     alert('模型保存成功！');
+                    fetchModels(); // 刷新模型列表
                 } else {
                     alert('模型保存失败，请重试！');
                 }
-            };
+            } catch (error) {
+                console.error('Error saving model:', error);
+                alert('模型保存失败，请检查网络连接！');
+            }
         }
     };
 
