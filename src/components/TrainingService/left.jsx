@@ -201,7 +201,7 @@ const Left = observer(({ scenarios, algorithms }) => {
 
       <div className='form-item'>
         {intelligentStore.selectedAgent ? (
-          <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+          <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
             <h3>已载入智能体信息</h3>
             <p><strong>智能体名称：</strong>{intelligentStore.selectedAgent.agentName}</p>
             <p><strong>智能体ID：</strong>{intelligentStore.selectedAgent.agentID}</p>

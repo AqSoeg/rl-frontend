@@ -180,9 +180,7 @@ const Middle = observer(() => {
           <Input.TextArea className='input' rows={4} value={entityParamsInfo} disabled />
         </Card>
       </div>
-      <div className="form-item1">
-        <Button className='third-button' onClick={handleSave}>保存场景</Button>
-      </div>
+
     </div>
   );
 });

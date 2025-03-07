@@ -6,7 +6,7 @@ import axios from 'axios';
 
 const { Option } = Select;
 
-const Right = observer(({ algorithms }) => {
+const Right = observer(() => {
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [agents, setAgents] = useState([]);
@@ -58,40 +58,61 @@ const Right = observer(({ algorithms }) => {
 
   const [trainingStatus, setTrainingStatus] = useState("idle"); // 训练状态：idle、running、completed
 
-  // 开始训练
+ // 开始训练
   const trainAlgorithm = async () => {
     if (!intelligentStore.selectedAgent) {
       message.error('请先载入智能体！');
       return;
     }
-  
+
     setTraining(true);
     try {
+      // 构建请求体
+      const requestBody = {
+        agentInfo: {
+          agentID: intelligentStore.selectedAgent.agentID,
+          agentName: intelligentStore.selectedAgent.agentName,
+          agentType: intelligentStore.selectedAgent.agentType,
+          scenarioID: intelligentStore.selectedAgent.scenarioID,
+          agentRoleID: intelligentStore.selectedAgent.agentRoleID,
+        },
+        algorithmInfo: {
+          algorithmType: intelligentStore.selectedAlgorithm.type,
+          algorithmName: intelligentStore.selectedAlgorithm.name,
+          hyperParameters: hyperParametersValues,
+        },
+        scenarioEditInfo: {
+          // 从intelligence对象中提取场景编辑信息
+          scenarioName: intelligentStore.selectedScenario.name,
+          entities: intelligentStore.selectedAgentRole.id
+        },
+      };
+
       const response = await fetch('http://localhost:5000/train', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ hyperParametersValues }),
+        body: JSON.stringify(requestBody),
       });
-  
+
       if (!response.ok) {
         throw new Error(`Network response was not ok: ${response.statusText}`);
       }
-  
+
       const data = await response.json();
       if (data.status === 'success') {
         message.success('训练已开始！');
         setTrainingStatus("running");
-  
+
         // 轮询训练状态
         const checkTrainingStatus = async () => {
-          const statusResponse = await fetch('http://localhost:5000/training-status');
+          const statusResponse = await fetch('http://localhost:5000/training_status');
           const statusData = await statusResponse.json();
           if (statusData.status === "completed") {
             setTrainingStatus("completed");
             setTraining(false);
-  
+
             // 处理训练结果
             if (statusData.result.status === "success") {
               message.success('训练完成，模型已保存！');
@@ -116,7 +137,7 @@ const Right = observer(({ algorithms }) => {
             setTimeout(checkTrainingStatus, 1000);
           }
         };
-  
+
         checkTrainingStatus(); // 开始轮询
       } else {
         message.error('训练失败，请检查日志');
@@ -130,7 +151,7 @@ const Right = observer(({ algorithms }) => {
   // 终止训练
   const stopTraining = async () => {
     try {
-      const response = await fetch('http://localhost:5000/stop-training', {
+      const response = await fetch('http://localhost:5000/stop_training', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -178,7 +199,7 @@ const Right = observer(({ algorithms }) => {
   // 查看模型效果
   const handleEffectModel = async (record) => {
     try {
-      const response = await fetch('http://localhost:5000/get-effect-image', {
+      const response = await fetch('http://localhost:5000/get_effect', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -202,7 +223,7 @@ const Right = observer(({ algorithms }) => {
   // 发布模型
   const handlePublishModel = async (record) => {
     try {
-      const response = await fetch('http://localhost:5000/publish-model', {
+      const response = await fetch('http://localhost:5000/publish_model', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -304,20 +325,20 @@ const Right = observer(({ algorithms }) => {
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+    <div className='right1' style={{height : '80vh'}}>
       {intelligentStore.selectedScenario && intelligentStore.selectedAgentRole && (
-        <Card title="已选想定场景、智能体角色的智能体设计列表" bordered={true} style={{ marginBottom: 16 }}>
+        <Card title="已选想定场景、智能体角色的智能体设计列表" bordered={true} >
           <Table
             columns={scenarioColumns}
             dataSource={agents}
-            pagination={{ pageSize: 2, showQuickJumper: true }}
+            pagination={{ pageSize: 4, showQuickJumper: true }}
             bordered
           />
         </Card>
       )}
 
       {intelligentStore.selectedAlgorithm && intelligentStore.selectedAlgorithm['hyper-parameters'] && (
-        <Card title="训练超参数" bordered={true} style={{ marginBottom: 16 }}>
+        <Card title="训练超参数" bordered={true}>
           <Row gutter={[16, 16]}>
             {intelligentStore.selectedAlgorithm['hyper-parameters'].map((param, index) => {
               const uniqueValues = [...new Set(param.value)].sort((a, b) => a - b);
