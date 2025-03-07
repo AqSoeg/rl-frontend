@@ -11,26 +11,20 @@ npm install
 
 1. 安装路由管理：`npm install react-router-dom`。
 2. 安装 [Ant Design](https://ant.design/docs/react/use-with-vite-cn)：`npm install antd --save`。
-3. 安装 [json-server](https://www.npmjs.com/package/json-server)：`npm install json-server`，运行 `json-server db.json`。
-4. 安装 moment：`npm install moment`。
-5. 安装 mobx 和 mobx-react：`npm install mobx mobx-react`。
-6. 安装 axios：`npm install axios`。
-7. 安装 [ws](https://github.com/websockets/ws)：`npm install ws`。
-8. 安装 recharts：`npm install recharts`。
-9. 安装 md5：`npm install md5`。
+3. 安装 moment：`npm install moment`。
+4. 安装 mobx 和 mobx-react：`npm install mobx mobx-react`。
+5. 安装 axios：`npm install axios`。 
+6. 安装 recharts：`npm install recharts`。
+7. 安装 md5：`npm install md5`。
 
 ## 项目运行
 
-1. 运行后端：
-   - `npx json-server --watch public/db.json --port 3000`； 
-   - `npx json-server --watch public/train.json --port 3001`； 
-   - `npx json-server --watch tmp/model.json --port 3002`。 
+1. 运行后端：`python mock/app.py`。
 2. 运行网页：`npm run dev`。
-3. 运行 Web-Socket 服务：`node public/server.js`。
 
 ## gitignore
 
-注意 tmp 文件夹被 gitignore 了，所以需要自己创建 tmp/model.json 文件
+注意 需要自己创建 mock/model.json 文件
 ```json
 [
    {
