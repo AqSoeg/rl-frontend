@@ -24,6 +24,7 @@ npm install
 
 ## 项目结构
 
+```
 rl-frontend/  
 ├── mock/ # 模拟后端  
 ├── node_modules/ # 项目的各种依赖  
@@ -45,6 +46,7 @@ rl-frontend/
 ├── package-lock.json # 由 npm 生成的文件，用于锁定项目依赖的确切版本，确保项目在不同环境下的一致性  
 ├── README.md # 项目的说明文件  
 └── vite.config.js # Vite 的配置文件，用于定义构建、开发服务器、插件等配置选项
+```
 
 ## gitignore
 

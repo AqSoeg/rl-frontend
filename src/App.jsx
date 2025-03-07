@@ -5,6 +5,7 @@ import SettingsLogo from './assets/settings.svg';
 import AgentEditor from './components/AgentEditor/AgentEditor.jsx';
 import TrainingService from './components/TrainingService/TrainingService.jsx';
 import ModelManagement from './components/ModelManage/ModelManagement.jsx';
+import EvaluationOptimization from "./components/EvaluationOptimization/EvaluationOptimization.jsx";
 import './App.css';
 
 function App() {
@@ -78,11 +79,5 @@ function HomeLink() {
 function HomePage() {
   return <div>首页</div>;
 }
-
-
-function EvaluationOptimization() {
-  return <div>评估与优化页面</div>;
-}
-
 
 export default App;
