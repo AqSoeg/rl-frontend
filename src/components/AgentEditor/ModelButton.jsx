@@ -54,7 +54,7 @@ const ModelFunction = ({scenarios}) => {
         sidebarStore.setName(selectedModel.agentName);
         sidebarStore.setVersion(selectedModel.agentVersion);
         sidebarStore.setAgentCount(selectedModel.agentCount);
-        sidebarStore.selectedAgent = '';
+        sidebarStore.setSelectedAgent('智能体1');
         sidebarStore.modelID = selectedModel.agentID;
         sidebarStore.setLoadingModel(true);
 
@@ -69,6 +69,7 @@ const ModelFunction = ({scenarios}) => {
         entityAssignmentStore.entityCount = allEntities.length;
         entityAssignmentStore.entities = scenarios.find(s => s.id === selectedModel.scenarioID).roles.find(r => r.id === selectedModel.agentRoleID).entities;
         entityAssignmentStore.setAssignedEntities(assignedEntities);
+        entityAssignmentStore.setSelectedAgent('智能体1');
 
         const agent1Model = selectedModel.agentModel.find(model => model.name === '智能体1');
         if (agent1Model) {

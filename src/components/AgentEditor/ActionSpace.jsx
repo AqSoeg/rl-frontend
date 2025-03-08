@@ -376,7 +376,7 @@ const ActionContent = ({ action, onEdit, onDelete }) => {
                     {action.discreteValues.map((value, index) => (
                         <div className="action-text" key={index}>取值{index + 1}：{value}</div>
                     ))}
-                    <div className="action-text">可选取值：[{action.discreteOptions.join(', ')}]</div>
+                    <div className="action-text">可选取值：{`{${action.discreteOptions.join(', ')}}`}</div>
                 </>
             )}
             <div className="action-buttons">
@@ -481,6 +481,19 @@ const ActionModal = ({
                          getActionDiscreteValues,
                          onModalCancel
                      }) => {
+    useEffect(() => {
+        const range = getActionRange();
+        const discreteOptions = getActionDiscreteValues();
+
+        if (actionMode === '连续型' &&
+            (range.length !== 2 || range[0] >= range[1])) {
+            setActionMode('');
+        }
+        if (actionMode === '离散型' && discreteOptions.length === 0) {
+            setActionMode('');
+        }
+    }, [selectedActionType]);
+
     const handleAddDiscreteValue = () => {
         const availableOptions = getActionDiscreteValues().filter(value => !discreteValues.includes(value));
         if (availableOptions.length === 0) {
@@ -518,36 +531,30 @@ const ActionModal = ({
             const range = getActionRange();
             const errors = [];
 
-            // 检查取值上限是否为合法浮点数
             if (!/^\d*\.?\d+$/.test(upperLimit)) {
                 errors.push('取值上限必须是一个合法的浮点数！');
                 setUpperLimit('');
             }
 
-            // 检查取值下限是否为合法浮点数
             if (!/^\d*\.?\d+$/.test(lowerLimit)) {
                 errors.push('取值下限必须是一个合法的浮点数！');
                 setLowerLimit('');
             }
 
-            // 如果取值上限和下限是合法浮点数，继续检查范围
             if (/^\d*\.?\d+$/.test(upperLimit) && /^\d*\.?\d+$/.test(lowerLimit)) {
                 const upper = parseFloat(upperLimit);
                 const lower = parseFloat(lowerLimit);
 
-                // 检查取值上限是否在允许的范围内
                 if (range.length === 2 && (upper < range[0] || upper > range[1])) {
                     errors.push(`取值上限必须在${range[0]}到${range[1]}之间！`);
                     setUpperLimit('');
                 }
 
-                // 检查取值下限是否在允许的范围内
                 if (range.length === 2 && (lower < range[0] || lower > range[1])) {
                     errors.push(`取值下限必须在${range[0]}到${range[1]}之间！`);
                     setLowerLimit('');
                 }
 
-                // 检查取值下限是否小于取值上限
                 if (lower >= upper) {
                     errors.push('取值下限必须小于取值上限！');
                     setUpperLimit('');
@@ -555,9 +562,8 @@ const ActionModal = ({
                 }
             }
 
-            // 如果有错误，弹出提示并返回
             if (errors.length > 0) {
-                alert(errors.join('\n')); // 将所有错误信息合并为一条提示
+                alert(errors.join('\n'));
                 return;
             }
         }
@@ -608,8 +614,12 @@ const ActionModal = ({
                         style={{ width: '300px' }}
                         disabled={!selectedActionType}
                     >
-                        <Option value="连续型">连续型</Option>
-                        <Option value="离散型">离散型</Option>
+                        {getActionRange().length !== 2 && getActionRange()[0] < getActionRange()[1] && (
+                            <Option value="连续型">连续型</Option>
+                        )}
+                        {getActionDiscreteValues().length > 0 && (
+                            <Option value="离散型">离散型</Option>
+                        )}
                     </Select>
                 </div>
                 {actionMode && (

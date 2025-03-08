@@ -5,10 +5,10 @@ import os
 
 app = Flask(__name__)
 CORS(app)  # 允许所有跨域请求
-MODEL_FILE_PATH = 'C:/Users/21830/Desktop/Project/agent/frontend/mock/model.json'
+MODEL_FILE_PATH = 'mock/model.json'
 
 # 读取 db.json 文件
-with open('C:/Users/21830/Desktop/Project/agent/frontend/public/db.json', 'r', encoding='utf-8') as f:
+with open('public/db.json', 'r', encoding='utf-8') as f:
     db_data = json.load(f)
 
 @app.route('/scenarios', methods=['POST'])
