@@ -23,7 +23,7 @@ const Right = observer(() => {
   // 获取智能体列表
   const fetchAgents = async () => {
     try {
-      const response = await axios.get('tmp/model.json');
+      const response = await axios.get('mock/model.json');
       const models = response.data;
 
       // 根据 scenarioID 和 agentRoleID 过滤智能体
@@ -55,40 +55,72 @@ const Right = observer(() => {
       setHyperParametersValues(initialParams);
     }
   }, [intelligentStore.selectedAlgorithm]);
+  useEffect(() => {
+    setSelectedAgent(null); // 清除之前载入的智能体信息
+    setTraining(false); // 重置训练状态
+    intelligentStore.loadAgent(null); // 清除 IntelligentStore 中的智能体信息
+  }, [intelligentStore.selectedAlgorithm]);
+ 
+  const isModelCompatibleWithAlgorithm = (model, algorithm) => {
+    // 单智能体算法只能处理单智能体模型
+    if (algorithm.type_name === "单智能体" && model.agentType !== "单智能体") {
+      return false;
+    }
 
-  const [trainingStatus, setTrainingStatus] = useState("idle"); // 训练状态：idle、running、completed
+    // 异构多智能体模型需要分布式多智能体算法
+    if (model.agentType === "异构多智能体" && algorithm.type_name !== "分布式多智能体") {
+      return false;
+    }
 
- // 开始训练
+    // 分布式和共享式多智能体算法均支持同构多智能体模型
+    if (model.agentType === "同构多智能体" && !["分布式多智能体", "共享多智能体"].includes(algorithm.type_name)) {
+      return false;
+    }
+
+    // 其他情况视为匹配
+    return true;
+  };
   const trainAlgorithm = async () => {
-    if (!intelligentStore.selectedAgent) {
-      message.error('请先载入智能体！');
+    const selectedAgent = intelligentStore.selectedAgent;
+    const selectedAlgorithm = intelligentStore.selectedAlgorithm;
+
+    if (!selectedAgent) {
+      message.error("请先载入智能体！");
       return;
     }
 
-    setTraining(true);
+    if (!selectedAlgorithm) {
+      message.error("请先选择算法！");
+      return;
+    }
+
+    if (!isModelCompatibleWithAlgorithm(selectedAgent, selectedAlgorithm)) {
+      message.error("模型与算法类型不匹配，无法训练！");
+      return;
+    }
+
+    setTraining(true); // 开始训练时设置训练状态为 true
     try {
-      // 构建请求体
       const requestBody = {
         agentInfo: {
-          agentID: intelligentStore.selectedAgent.agentID,
-          agentName: intelligentStore.selectedAgent.agentName,
-          agentType: intelligentStore.selectedAgent.agentType,
-          scenarioID: intelligentStore.selectedAgent.scenarioID,
-          agentRoleID: intelligentStore.selectedAgent.agentRoleID,
+          agentID: selectedAgent.agentID,
+          agentName: selectedAgent.agentName,
+          agentType: selectedAgent.agentType,
+          scenarioID: selectedAgent.scenarioID,
+          agentRoleID: selectedAgent.agentRoleID,
         },
         algorithmInfo: {
-          algorithmType: intelligentStore.selectedAlgorithm.type,
-          algorithmName: intelligentStore.selectedAlgorithm.name,
+          algorithmType: selectedAlgorithm.type,
+          algorithmName: selectedAlgorithm.name,
           hyperParameters: hyperParametersValues,
         },
         scenarioEditInfo: {
-          // 从intelligence对象中提取场景编辑信息
           scenarioName: intelligentStore.selectedScenario.name,
           entities: intelligentStore.selectedAgentRole.id
         },
       };
 
-      const response = await fetch('http://localhost:5000/train', {
+      const response = await fetch(__APP_CONFIG__.train, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -103,28 +135,23 @@ const Right = observer(() => {
       const data = await response.json();
       if (data.status === 'success') {
         message.success('训练已开始！');
-        setTrainingStatus("running");
-
         // 轮询训练状态
         const checkTrainingStatus = async () => {
-          const statusResponse = await fetch('http://localhost:5000/training_status');
+          const statusResponse = await fetch(__APP_CONFIG__.training_status);
           const statusData = await statusResponse.json();
           if (statusData.status === "completed") {
-            setTrainingStatus("completed");
-            setTraining(false);
-
-            // 处理训练结果
+            setTraining(false); // 训练完成时设置训练状态为 false
             if (statusData.result.status === "success") {
               message.success('训练完成，模型已保存！');
               // 保存模型到 modelList
               const trainedModel = {
-                scenarioID: intelligentStore.selectedAgent.scenarioID,
-                agentRoleID: intelligentStore.selectedAgent.agentRoleID,
-                agentName: intelligentStore.selectedAgent.agentName,
+                scenarioID: selectedAgent.scenarioID,
+                agentRoleID: selectedAgent.agentRoleID,
+                agentName: selectedAgent.agentName,
                 decisionModelID: Date.now(),
-                agentType: intelligentStore.selectedAgent.agentType,
-                algorithmType: intelligentStore.selectedAlgorithm.type,
-                algorithmName: intelligentStore.selectedAlgorithm.name,
+                agentType: selectedAgent.agentType,
+                algorithmType: selectedAlgorithm.type,
+                algorithmName: selectedAlgorithm.name,
               };
               setModelList((prevModelList) => [...prevModelList, trainedModel]);
             } else if (statusData.result.status === "stopped") {
@@ -133,16 +160,16 @@ const Right = observer(() => {
               message.error('训练失败，请检查日志');
             }
           } else {
-            // 继续轮询
             setTimeout(checkTrainingStatus, 1000);
           }
         };
-
-        checkTrainingStatus(); // 开始轮询
+        checkTrainingStatus();
       } else {
+        setTraining(false); // 训练失败时设置训练状态为 false
         message.error('训练失败，请检查日志');
       }
     } catch (error) {
+      setTraining(false); // 训练失败时设置训练状态为 false
       console.error('训练过程中发生错误:', error);
       message.error('训练失败，请检查日志');
     }
@@ -151,19 +178,20 @@ const Right = observer(() => {
   // 终止训练
   const stopTraining = async () => {
     try {
-      const response = await fetch('http://localhost:5000/stop_training', {
+      const response = await fetch(__APP_CONFIG__.stop_training, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
       });
-  
+
       if (!response.ok) {
         throw new Error(`Network response was not ok: ${response.statusText}`);
       }
-  
+
       const data = await response.json();
       if (data.status === 'success') {
+        setTraining(false); // 终止训练时设置训练状态为 false
         message.success('训练终止请求已发送');
       } else {
         message.error('训练终止失败，请检查日志');
@@ -179,11 +207,23 @@ const Right = observer(() => {
     setIsDetailModalVisible(true);
   };
 
-  // 载入智能体
   const handleLoad = (agent) => {
+    const selectedAlgorithm = intelligentStore.selectedAlgorithm;
+    if (!selectedAlgorithm) {
+      message.error("请先选择算法！");
+      return;
+    }
+
+    // 检查模型与算法是否匹配
+    if (!isModelCompatibleWithAlgorithm(agent, selectedAlgorithm)) {
+      message.error("模型与算法类型不匹配，无法载入！");
+      return;
+    }
+
     intelligentStore.loadAgent(agent); // 将选中的智能体信息存储到 IntelligentStore
-    message.success('智能体载入成功！'); // 提示用户
+    message.success("智能体载入成功！"); // 提示用户
   };
+
 
   // 查看模型列表
   const handleViewModelListClick = () => {
@@ -199,7 +239,7 @@ const Right = observer(() => {
   // 查看模型效果
   const handleEffectModel = async (record) => {
     try {
-      const response = await fetch('http://localhost:5000/get_effect', {
+      const response = await fetch(__APP_CONFIG__.get_effect, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -223,7 +263,7 @@ const Right = observer(() => {
   // 发布模型
   const handlePublishModel = async (record) => {
     try {
-      const response = await fetch('http://localhost:5000/publish_model', {
+      const response = await fetch(__APP_CONFIG__.publish_model, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -257,6 +297,11 @@ const Right = observer(() => {
 
   // 表格列定义
   const scenarioColumns = [
+    {
+      title: '序号',
+      key: 'index',
+      render: (text, record, index) => index + 1, // 序号从1开始
+    },
     { title: '想定场景', dataIndex: 'scenarioID', key: 'scenarioID' },
     { title: '智能体角色', dataIndex: 'agentRoleID', key: 'agentRoleID' },
     { title: '智能体ID', dataIndex: 'agentID', key: 'agentID' },
@@ -269,14 +314,12 @@ const Right = observer(() => {
       dataIndex: 'entityAssignments',
       key: 'entityAssignments',
       render: (text, record) => {
-        // 提取 entityAssignments 中的智能体和实体名称
         const assignments = record.entityAssignments.map((assignment, index) => {
-          const agentName = Object.keys(assignment)[0]; // 获取智能体名称
-          const entities = assignment[agentName].join(', '); // 获取实体名称并拼接成字符串
-          return `${agentName}: ${entities}`; // 返回智能体和实体名称的组合
+          const agentName = Object.keys(assignment)[0];
+          const entities = assignment[agentName].join(', ');
+          return `${agentName}: ${entities}`;
         });
-
-        // 使用 <br /> 标签实现换行
+  
         return (
           <div>
             {assignments.map((assignment, index) => (
@@ -325,14 +368,15 @@ const Right = observer(() => {
   ];
 
   return (
-    <div className='right1' style={{height : '80vh'}}>
+    <div className='right1' style={{ height: '80vh' }}>
       {intelligentStore.selectedScenario && intelligentStore.selectedAgentRole && (
-        <Card title="已选想定场景、智能体角色的智能体设计列表" bordered={true} >
+        <Card title="已选想定场景、智能体角色的智能体设计列表" bordered={true}>
           <Table
             columns={scenarioColumns}
             dataSource={agents}
             pagination={{ pageSize: 4, showQuickJumper: true }}
             bordered
+            rowKey="agentID"
           />
         </Card>
       )}

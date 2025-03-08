@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Select, Button, Input, Card ,message} from 'antd';
+import { Select, Button, Input, Card } from 'antd';
 import { intelligentStore } from './IntelligentStore';
 import { observer } from 'mobx-react';
-import axios from 'axios';
 const { Option } = Select;
 
 const Middle = observer(() => {
@@ -82,29 +81,6 @@ const Middle = observer(() => {
       }
     } else {
       setEntityParamsInfo('请选择一个实体');
-    }
-  };
-  const handleSave = async () => {
-    try {
-      console.log('Saving modified params:', modifiedParams); // 打印请求数据
-  
-      const response = await axios.post('http://localhost:5000/save-scenario', {
-        modifiedParams,
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      // 处理后端响应
-      if (response.data && response.data.status === 'success') {
-        message.success('场景保存成功！');
-        setModifiedParams({});
-      } else {
-        message.error('场景保存失败，请检查日志');
-      }
-    } catch (error) {
-      console.error('场景保存失败:', error);
-      message.error('场景保存失败，请检查网络或联系管理员');
     }
   };
   const entityOptions = Object.keys(envParamsMap).map(name => (
