@@ -11,7 +11,7 @@ const Left = observer(({ scenarios, algorithms,datasets }) => {
   const [visible, setVisible] = useState(false);
   const [selectedDataset, setSelectedDataset] = useState('');
   const [agentRoles, setAgentRoles] = useState([]);
-  const [datasets, setDatasets] = useState([]); // 新增状态存储离线数据集
+  
 
 
 
