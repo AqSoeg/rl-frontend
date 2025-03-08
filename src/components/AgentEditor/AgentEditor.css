@@ -7,6 +7,7 @@
 }
 
 .gradient-box {
+    position: relative;
     display: flex;
     width: calc(100% - 40px);
     height: 75vh;
@@ -52,9 +53,9 @@
 /* ModelButton */
 
 .model-button-container {
-    position: fixed;
-    bottom: 100px;
-    right: 100px;
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
     display: flex;
     gap: 10px;
 }
@@ -88,7 +89,7 @@
     padding: 0.5rem;
     background-color: white;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    height: 70vh;
+    height: 65vh;
     margin-right: 1rem;
     border-radius: 8px;
     display: flex;
@@ -311,6 +312,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 999;
 }
 
 .reward-modal {

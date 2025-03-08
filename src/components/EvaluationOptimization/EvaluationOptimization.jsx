@@ -1,159 +1,277 @@
-// components/EvaluationOptimization/EvaluationOptimization.jsx
-import { useState, useEffect } from 'react';
+import {useState} from 'react';
+import {Button, Select} from 'antd';
 import './EvaluationOptimization.css';
 
+const {Option} = Select;
+
 const EvaluationOptimization = () => {
-    // 评估模式状态
-    const [evalMode, setEvalMode] = useState('online');
-    // 数据状态
-    const [chartData, setChartData] = useState(null);
-    const [eventData, setEventData] = useState([]);
-    const [radarData, setRadarData] = useState(null);
-    const [score, setScore] = useState(0);
-    const [suggestions, setSuggestions] = useState([]);
+    const [charts, setCharts] = useState([]);
+    const [events, setEvents] = useState([]);
+    const [radarImage, setRadarImage] = useState('');
+    const [dataLoaded, setDataLoaded] = useState(false);
+    const [evalScore, setEvalScore] = useState();
+    const [evalSuggestion, setEvalSuggestion] = useState([]);
+    const [sidebarData, setSidebarData] = useState({
+        scenarioParams: [],
+        agentInfo: [],
+        modelInfo: []
+    });
+    const [selectedEvaluationType, setSelectedEvaluationType] = useState();
+    const [chartSelections, setChartSelections] = useState([
+        {content: '', shape: ''},
+        {content: '', shape: ''},
+        {content: '', shape: ''},
+        {content: '', shape: ''}
+    ]);
+    const [chartOptions, setChartOptions] = useState([]);
 
-    // 轮询相关状态
-    const [polling, setPolling] = useState(false);
+    const handleLoadData = async () => {
+        setChartSelections([
+            {content: '', shape: ''},
+            {content: '', shape: ''},
+            {content: '', shape: ''},
+            {content: '', shape: ''}
+        ]);
+        setChartOptions([]);
+        setEvalScore(undefined);
+        setEvalSuggestion([]);
+        setRadarImage('');
+        setEvents([]);
+        setCharts(Array(4).fill({img: null}));
 
-    // 模拟API请求
-    const fetchData = async (mode) => {
-        // 实际应替换为axios/fetch请求
-        return new Promise(resolve => setTimeout(() => {
-            resolve({
-                chart_data: { /* 图表数据结构 */ },
-                event_data: ["事件1: 系统初始化完成", "事件2: 数据采样开始"],
-                radar_chart_data: { /* 雷达图数据 */ },
-                eval_score: 85,
-                eval_suggestion: ["建议1: 优化决策模型参数", "建议2: 增加训练数据多样性"]
-            });
-        }, 1000));
+        if (!selectedEvaluationType) {
+            alert('请先选择评估数据来源！');
+        } else if (selectedEvaluationType === '在线评估') {
+            try {
+                const response = await fetch(__APP_CONFIG__.loadEvaluationData, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                });
+                const data = await response.json();
+
+                setSidebarData({
+                    scenarioParams: data.scenario_params,
+                    agentInfo: data.agent_info,
+                    modelInfo: data.model_info
+                });
+                setDataLoaded(true);
+            } catch (error) {
+                console.error('数据载入失败:', error);
+                alert('数据载入失败，请检查网络连接！');
+            }
+        } else {
+            const localData = {
+                scenarioParams: ["场景名称：离线交通", "数据来源：本地日志"],
+                agentInfo: ["智能体名称：离线Agent", "版本：v2.0"],
+                modelInfo: ["模型类型：离线决策"]
+            };
+            setSidebarData(localData);
+            setDataLoaded(true);
+        }
     };
 
-    // 处理数据载入
-    const handleDataLoad = async () => {
+    const handleStartEvaluation = async () => {
+        if (!dataLoaded) {
+            alert('请先载入数据！');
+            return;
+        }
+        if (selectedEvaluationType === '离线评估') {
+            try {
+                const response = await fetch(__APP_CONFIG__.offlineEvaluation, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(sidebarData)
+                });
+                const result = await response.text();
+                alert(result);
+            } catch (error) {
+                console.error('数据发送失败:', error);
+                alert('数据发送失败，请检查网络连接！');
+            }
+        }
+
         try {
-            const response = await fetchData(evalMode);
-            setEventData(response.event_data);
-            setRadarData(response.radar_chart_data);
-            setScore(response.eval_score);
-            setSuggestions(response.eval_suggestion);
+            const response = await fetch(__APP_CONFIG__.startEvaluation, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}
+            });
+            const data = await response.json();
+
+            setChartOptions(data.chart_data);
+            setCharts(Array(4).fill({img: null}));
+
+            setEvents(data.event_data.map(content => ({content})));
+
+            setRadarImage(data.radar_chart_data);
+
+            setEvalScore(data.eval_score);
+            setEvalSuggestion(data.eval_suggestion);
         } catch (error) {
-            console.error('数据载入失败:', error);
+            console.error('评估失败:', error);
+            alert('评估请求失败，请稍后重试！');
         }
     };
 
-    // 轮询效果
-    useEffect(() => {
-        let interval;
-        if (polling && evalMode === 'online') {
-            interval = setInterval(async () => {
-                const newData = await fetchData('online');
-                setChartData(prev => ({ ...prev, ...newData.chart_data }));
-            }, 5000);
+    const handleContentChange = (index, value) => {
+        const newSelections = [...chartSelections];
+        newSelections[index] = {content: value, shape: ''};
+        setChartSelections(newSelections);
+        updateChartImage(index, value, '');
+    };
+
+    const handleShapeChange = (index, value) => {
+        const newSelections = [...chartSelections];
+        newSelections[index].shape = value;
+        setChartSelections(newSelections);
+        updateChartImage(index, newSelections[index].content, value);
+    };
+
+    const updateChartImage = (index, content, shape) => {
+        if (!content || !shape) {
+            setCharts(prev => {
+                const newCharts = [...prev];
+                newCharts[index] = {img: null};
+                return newCharts;
+            });
+            return;
         }
-        return () => clearInterval(interval);
-    }, [polling, evalMode]);
+
+        const contentData = chartOptions.find(item => item.content === content);
+        const shapeData = contentData.chart_data.find(item => item.shape === shape);
+
+        setCharts(prev => {
+            const newCharts = [...prev];
+            newCharts[index] = {img: shapeData.base64};
+            return newCharts;
+        });
+    };
+
+    const getShapeOptions = (content) => {
+        const target = chartOptions.find(item => item.content === content);
+        return target ? target.chart_data.map(item => item.shape) : [];
+    };
 
     return (
         <div className="EO-container">
-            {/* 左侧栏 */}
             <div className="EO-sidebar">
-                <div className="EO-modeSelector">
-                    <button
-                        className={`EO-modeButton ${evalMode === 'online' ? 'EO-active' : ''}`}
-                        onClick={() => setEvalMode('online')}
-                    >
-                        在线评估
-                    </button>
-                    <button
-                        className={`EO-modeButton ${evalMode === 'offline' ? 'EO-active' : ''}`}
-                        onClick={() => setEvalMode('offline')}
-                    >
-                        离线评估
-                    </button>
+                <div className="EO-sidebar-section">
+                    <div className="EO-text">评估数据来源</div>
+                    <Select onChange={value => setSelectedEvaluationType(value)}>
+                        <Option value="在线评估">在线评估</Option>
+                        <Option value="离线评估">离线评估</Option>
+                    </Select>
                 </div>
 
-                <div className="EO-controlPanel">
-                    <button className="EO-loadButton" onClick={handleDataLoad}>
-                        数据载入
-                    </button>
-                    <button
-                        className="EO-startButton"
-                        onClick={() => setPolling(!polling)}
-                    >
-                        {polling ? '停止评估' : '开始评估'}
-                    </button>
+                <div className="EO-sidebar-section">
+                    <div className="EO-text">场景参数</div>
+                    {sidebarData.scenarioParams.map((param, index) => (
+                        <div key={index}>{param}</div>
+                    ))}
                 </div>
 
-                <InfoPanel evalMode={evalMode} />
+                <div className="EO-sidebar-section">
+                    <div className="EO-text">智能体信息</div>
+                    {sidebarData.agentInfo.map((info, index) => (
+                        <div key={index}>{info}</div>
+                    ))}
+                </div>
+
+                <div className="EO-sidebar-section">
+                    <div className="EO-text">决策模型信息</div>
+                    {sidebarData.modelInfo.map((info, index) => (
+                        <div key={index}>{info}</div>
+                    ))}
+                </div>
             </div>
 
-            {/* 中间主区域 */}
-            <div className="EO-mainContent">
-                <ChartSection data={chartData} />
-                <EventList events={eventData} />
-            </div>
+            <div className="EO-gradient-box">
+                <div className="EO-middle-container">
+                    <div className="EO-chart-grid">
+                        {[0, 1, 2, 3].map((index) => (
+                            <div key={index} className="EO-chart-item">
+                                <p className="EO-text">图 {index + 1}</p>
+                                <div className="EO-evaluation">
+                                    <p className="EO-text">内容：</p>
+                                    <Select
+                                        value={chartSelections[index].content}
+                                        onChange={(value) => handleContentChange(index, value)}
+                                        options={chartOptions.map(item => ({
+                                            label: item.content,
+                                            value: item.content
+                                        }))}
+                                        placeholder="选择内容"
+                                    />
+                                </div>
 
-            {/* 右侧栏 */}
-            <div className="EO-sidebar">
-                <RadarChart data={radarData} />
-                <EvaluationResult score={score} suggestions={suggestions} />
+                                <div className="EO-evaluation">
+                                    <p className="EO-text">形状：</p>
+                                    <Select
+                                        value={chartSelections[index].shape}
+                                        onChange={(value) => handleShapeChange(index, value)}
+                                        options={getShapeOptions(chartSelections[index].content).map(shape => ({
+                                            label: shape,
+                                            value: shape
+                                        }))}
+                                        placeholder="选择形状"
+                                        disabled={!chartSelections[index].content}
+                                    />
+                                </div>
+
+                                {charts[index]?.img && (
+                                    <img
+                                        src={`data:image/png;base64,${charts[index].img}`}
+                                        alt={`图表${index + 1}`}
+                                    />
+                                )}
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="EO-text">事件：</div>
+                    <div className="EO-event-log">
+                        {events.map((event, i) => (
+                            <div key={i} className="EO-event-item">
+                                <span>事件{i + 1}：{event.content}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="EO-right-panel">
+                    {radarImage && (
+                        <div className="EO-radar-chart-container">
+                            <img src={`data:image/jpeg;base64,${radarImage}`} alt="雷达图"/>
+                        </div>
+                    )}
+
+                    <div className="EO-evaluation-module">
+                        <div className="EO-evaluation">
+                            <div className="EO-text">分数评估：</div>
+                            {evalScore && (<div className="EO-score">{evalScore}</div>)}
+                        </div>
+
+
+                        <div>
+                            <div className="EO-text">优化评估：</div>
+                            {evalSuggestion && (
+                                <div className="EO-optimization-suggestion">
+                                    {evalSuggestion.map((suggestion, index) => (
+                                        <div key={index} className="EO-suggestion-item">{suggestion}</div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                    </div>
+
+                    <div className="EO-model-button-container">
+                        <Button className="EO-model-button" onClick={handleLoadData}>数据载入</Button>
+                        <Button className="EO-model-button" onClick={handleStartEvaluation}>开始评估</Button>
+                    </div>
+                </div>
             </div>
         </div>
     );
 };
-
-// 信息显示面板子组件
-const InfoPanel = ({ evalMode }) => (
-    <div className="EO-infoPanel">
-        <h3>场景参数</h3>
-        <p>当前模式: {evalMode === 'online' ? '实时场景' : '历史场景'}</p>
-
-        <h3>智能体信息</h3>
-        <p>版本: v2.1.3</p>
-
-        <h3>决策模型</h3>
-        <p>类型: 深度强化学习</p>
-    </div>
-);
-
-// 图表区域子组件
-const ChartSection = ({ data }) => (
-    <div className="EO-chartArea">
-        {/* 这里应集成图表库组件 */}
-        <div className="EO-chartPlaceholder">图表区域</div>
-    </div>
-);
-
-// 事件列表子组件
-const EventList = ({ events }) => (
-    <div className="EO-eventList">
-        <h4>事件日志</h4>
-        {events.map((event, index) => (
-            <div key={index} className="EO-eventItem">{event}</div>
-        ))}
-    </div>
-);
-
-// 雷达图子组件
-const RadarChart = ({ data }) => (
-    <div className="EO-radarChart">
-        {/* 这里应集成雷达图组件 */}
-        <div className="EO-chartPlaceholder">雷达图区域</div>
-    </div>
-);
-
-// 评估结果子组件
-const EvaluationResult = ({ score, suggestions }) => (
-    <div className="EO-resultPanel">
-        <h3>综合评分: {score}</h3>
-        <h4>优化建议:</h4>
-        <ul>
-            {suggestions.map((suggestion, index) => (
-                <li key={index}>{suggestion}</li>
-            ))}
-        </ul>
-    </div>
-);
 
 export default EvaluationOptimization;

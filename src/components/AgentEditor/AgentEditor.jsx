@@ -20,10 +20,7 @@ const AgentEditor = () => {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        scenario_id: '',
-                    }),
+                    }
                 });
 
                 if (!response.ok) {
