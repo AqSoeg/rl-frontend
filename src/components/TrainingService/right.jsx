@@ -595,6 +595,7 @@ const Right = observer(() => {
           dataSource={modelList} // 使用 modelList 数据作为模型列表
           pagination={false}
           style={{ width: '100%' }} 
+          rowKey={'decisionModelID'}
         />
       </Modal>
 
@@ -618,6 +619,7 @@ const Right = observer(() => {
               columns={modelInfoColumns}
               dataSource={[currentModel]}
               pagination={false}
+              rowKey={"decisionModelID"}
             />
           </div>
         )}

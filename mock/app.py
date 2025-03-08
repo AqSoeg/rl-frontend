@@ -10,8 +10,10 @@ import time
 app = Flask(__name__)
 CORS(app)  # 允许所有跨域请求
 MODEL_FILE_PATH = 'mock/model.json'
-OFFLINE_DATASETS_JSON_FILE='public/dataset.json'
-TRAIN_JSON_FILE='public/train.json'
+training_thread = None
+training_stop_flag = False
+training_status = "idle"  # 初始状态为 "idle"
+training_result = None
 
 # 读取 db.json 文件
 with open('public/db.json', 'r', encoding='utf-8') as f:
@@ -70,10 +72,10 @@ def save_model():
         print(f'Error saving model: {str(e)}')
         return jsonify({'status': 'error', 'message': str(e)})
 
-@app.route('/get_datasets', methods=['GET'])
+@app.route('/get_datasets', methods=['POST'])
 def get_offline_datasets():
     try:
-        with open(OFFLINE_DATASETS_JSON_FILE, 'r', encoding='utf-8') as file:
+        with open('public/dataset.json', 'r', encoding='utf-8') as file:
             data = json.load(file)
         return jsonify(data)
     except Exception as e:
@@ -84,7 +86,7 @@ def get_offline_datasets():
 def get_algorithm():
     try:
         # 读取 JSON 文件
-        with open(TRAIN_JSON_FILE, 'r', encoding='utf-8') as file:
+        with open('public/train.json', 'r', encoding='utf-8') as file:
             data = json.load(file)
         
         # 返回算法信息
@@ -92,7 +94,6 @@ def get_algorithm():
     except Exception as e:
         print(f'Error reading JSON file: {str(e)}')
         return jsonify({'error': 'Failed to read JSON file'}), 500
-
 
 @app.route('/train', methods=['POST'])
 def train():
