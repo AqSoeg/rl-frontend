@@ -19,7 +19,7 @@ npm install
 
 ## 项目运行
 
-1. 运行后端：`python mock/app.py # pip install flask flask_cors`。
+1. 运行后端：`python mock/app.py # pip install flask flask_cors stable_baselines3`。
 2. 运行网页：`npm run dev`。
 
 ## 项目结构

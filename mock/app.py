@@ -88,15 +88,15 @@ def start_evaluation():
               "chart_data": [
                 {
                   "shape": "柱状图",
-                  "base64": image_to_base64("mock/柱状图1.png")
+                  "base64": image_to_base64("mock/figure/柱状图1.png")
                 },
                 {
                   "shape": "折线图",
-                  "base64": image_to_base64("mock/折线图1.png")
+                  "base64": image_to_base64("mock/figure/折线图1.png")
                 },
                 {
                   "shape": "饼图",
-                  "base64": image_to_base64("mock/饼图1.png")
+                  "base64": image_to_base64("mock/figure/饼图1.png")
                 }
               ]
             },
@@ -105,11 +105,11 @@ def start_evaluation():
               "chart_data": [
                 {
                   "shape": "柱状图",
-                  "base64": image_to_base64("mock/柱状图2.png")
+                  "base64": image_to_base64("mock/figure/柱状图2.png")
                 },
                 {
                   "shape": "折线图",
-                  "base64": image_to_base64("mock/折线图2.png")
+                  "base64": image_to_base64("mock/figure/折线图2.png")
                 }
               ]
             },
@@ -118,7 +118,7 @@ def start_evaluation():
               "chart_data": [
                 {
                   "shape": "饼图",
-                  "base64": image_to_base64("mock/饼图2.png")
+                  "base64": image_to_base64("mock/figure/饼图2.png")
                 }
               ]
             }
@@ -128,7 +128,7 @@ def start_evaluation():
             "传感器校准成功",
             "路径规划更新"
         ],
-        "radar_chart_data": image_to_base64("mock/雷达图.jpg"),
+        "radar_chart_data": image_to_base64("mock/figure/雷达图.jpg"),
         "eval_score": 96.5,
         "eval_suggestion": [
             "建议调整刹车参数",
