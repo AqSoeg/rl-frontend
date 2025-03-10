@@ -179,7 +179,7 @@
           "id": "total_timesteps",
           "name": "PPO总步数",
           "value": [1000000, 5000, 10000000],
-          "default": 1000000
+          "default": 5000
         }
       ]
     },

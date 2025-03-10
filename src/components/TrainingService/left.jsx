@@ -6,17 +6,14 @@ import sidebarStore from '../AgentEditor/SidebarStore';
 
 const { Option } = Select;
 
-const Left = observer(({ scenarios, algorithms }) => {
+const Left = observer(({ scenarios, algorithms,datasets }) => {
   const [trainingMode, setTrainingMode] = useState('offline');
   const [visible, setVisible] = useState(false);
   const [selectedDataset, setSelectedDataset] = useState('');
   const [agentRoles, setAgentRoles] = useState([]);
+  
 
-  const offlineDatasets = [
-    { id: 1, name: 'Dataset 1' },
-    { id: 2, name: 'Dataset 2' },
-    { id: 3, name: 'Dataset 3' },
-  ];
+
 
   // 使用 SidebarStore 中的状态初始化选定的想定场景和智能体角色
   const [selectedScenario, setSelectedScenario] = useState(sidebarStore.scenarioName);
@@ -201,7 +198,7 @@ const Left = observer(({ scenarios, algorithms }) => {
 
       <div className='form-item'>
         {intelligentStore.selectedAgent ? (
-          <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+          <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
             <h3>已载入智能体信息</h3>
             <p><strong>智能体名称：</strong>{intelligentStore.selectedAgent.agentName}</p>
             <p><strong>智能体ID：</strong>{intelligentStore.selectedAgent.agentID}</p>
@@ -263,11 +260,11 @@ const Left = observer(({ scenarios, algorithms }) => {
       >
         <Select
           placeholder="请选择数据集"
-          value={selectedDataset}
+          value={datasets}
           onChange={handleDatasetChange}
           style={{ width: '100%' }}
         >
-          {offlineDatasets.map((dataset) => (
+          {datasets.map((dataset) => (
             <Option key={dataset.id} value={dataset.name}>
               {dataset.name}
             </Option>

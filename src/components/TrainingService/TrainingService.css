@@ -1,23 +1,19 @@
 .trainingservice {
     display: flex;
     flex-direction: row; /* 指定水平排列 */
-    height: 100vh;
+    
   }
   
-  .left, .middle, .right {
-    padding: 10px; /* 内边距，根据需要调整 */
-    box-sizing: border-box; /* 包括内边距和边框在内的总宽度和高度 */
-  } 
 
   .left {
     flex: 0.5;
     display: flex; /* 使容器成为弹性容器 */
     flex-direction: column; /* 子元素垂直排列 */
     padding: 10px;
-    background-color: #7ed0e9; /* 左列背景色 */
+    background-color: #ffffff; /* 左列背景色 */
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0, 0.1);
-    height: 100vh;
+    height: 80vh;
   }
   
   .form-item {
@@ -25,52 +21,42 @@
     flex-direction: column; /* 子元素垂直排列 */
     margin-bottom: 8px;
     padding: 10px; /* 内边距 */
-    background-color: #e6f2ff; /* 表单项背景色 */
+    background-color: #e3ecf5; /* 表单项背景色 */
     border-radius: 4px; /* 圆角边框 */
   }
   
-  .form-item label {
-    font-weight: bold; /* 加粗字体 */
-    margin-bottom: 8px; /* 标签与选择器之间的间距 */
-  }
-  .left h5{
-    margin-top: 2px; /* 上边距 */
-    margin-bottom: 2px; /* 下边距 */
-  }
+
+
   .form-item .ant-select,
   .form-item .ant-btn {
-    margin-top: 8px; /* 选择器和按钮与上一个元素之间的间距 */
+    margin-top: 12px; /* 选择器和按钮与上一个元素之间的间距 */
   }
-  
-  /* 为算法选择的两个选择器设置布局 */
-  .form-item .ant-select + .ant-select {
-    margin-top: 16px; /* 两个选择器之间的间距 */
-  }
+
+
 
 
 
 
   .middle {
     flex: 1;
-    background-color: #6483e7;
+    background-color: #ffffff;
     padding: 20px; /* 内边距 */
-    height: 100vh;
+   
   }
 
   .image-container {
     background-color: #180c0c; /* 图片区域背景色 */
     border-radius: 4px; /* 图片区域圆角 */
-    height: 40vh; /* 图片区域高度 */
+    height: 45vh; /* 图片区域高度 */
     display: flex;
     justify-content: center;
     align-items: center;
   }
 
   .edit-container {
-    margin-top: 40px; /* 与图片区域的间距 */
+    margin-top: 80px; /* 与图片区域的间距 */
   }
   .select-style {
-    width: 100px; /* 固定选择器长度 */
     margin-right: 10px; /* 选择器之间的间隔 */
   }
   .update-button {
@@ -79,9 +65,7 @@
   .input{
     margin-top: 10px;
   }
-  .third-button {
-    margin-top: 20px; /* 保存场景按钮与编辑容器之间的间隔 */
-  }
+
 
 
 
@@ -90,25 +74,17 @@
   .right {
     flex: 2;
     background-color: #ffffff; /* 右列背景色，根据需要调整 */
-    height: 100vh;
+    position: relative;
   }
   .ant-card{
-    margin-top: 20px;
+    margin-top: 40px;
   }
-  .right {
-    position: relative;
-    height: 100vh; /* 确保父容器有高度 */
-  }
+
   
   .button-container {
     position: absolute;
-    bottom: 15vh;
-    left: 0;
+    margin-top: 40px;
     width: 100%;
-    background-color: white;
-    padding: 10px;
     text-align: center;
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-    
   }
 

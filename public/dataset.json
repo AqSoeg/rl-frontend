@@ -1,35 +1,5 @@
-{
-  "scenarios": [
-    {
-      "scenario_id": "1",
-      "scenario_name": "1",
-      "role": {
-        "role_id":"1",
-        "datasets": [
-        {
-          "dataset_id":"1",
-          "dataset_route": "1"
-        },
-        {
-          "dataset_id":"2",
-          "dataset_route": "2"
-        }
-      ]
-      }
-    },
-    {
-      "scenario_id": "2",
-      "scenario_name": "2",
-      "role": {
-        "role_id":"1",
-        "datasets": [
-        {
-          "dataset_id":"3",
-          "dataset_route": "3"
-        }
-      ]
-      }
-    }
-  ]
-}
-        
+[
+  {"id": 1, "name": "Dataset 1"},
+  {"id": 2, "name": "Dataset 2"},
+  {"id": 3, "name": "Dataset 3"}
+]
