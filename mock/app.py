@@ -7,6 +7,7 @@ from stable_baselines3.common.env_util import make_vec_env
 import threading
 import time
 import traceback
+import base64
 
 
 app = Flask(__name__)
