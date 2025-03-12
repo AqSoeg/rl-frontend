@@ -124,7 +124,7 @@ const Middle = observer(() => {
             value={entity}
             onChange={handleEntityChange}
             style={{ width: 'auto' }}
-            dropdownMatchSelectWidth={false}
+            popupMatchSelectWidth={false}
           >
             {entityOptions}
           </Select>
@@ -135,7 +135,7 @@ const Middle = observer(() => {
             value={attribute}
             onChange={handleAttributeChange}
             style={{ width: 'auto' }}
-            dropdownMatchSelectWidth={false}
+            popupMatchSelectWidth={false}
           >
             {attributeOptions()}
           </Select>
@@ -146,7 +146,7 @@ const Middle = observer(() => {
             value={value}
             onChange={handleValueChange}
             style={{ width: 'auto' }}
-            dropdownMatchSelectWidth={false}
+            popupMatchSelectWidth={false}
           >
             {valueOptions()}
           </Select>

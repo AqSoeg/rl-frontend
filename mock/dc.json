@@ -1,0 +1,13 @@
+[
+  {
+    "AGENT_MODEL_ID": "002",
+    "AGENT_NAME": "Model B",
+    "SCENARIO_NAME": "Scenario 2",
+    "ROLE_NAME": "Role 20",
+    "AGENT_MODEL_VERSION": "1.1",
+    "NN_MODEL_TYPE": "1000",
+    "MODEL_PATH": "/path/to/model2",
+    "IMG_URL": "http://example.com/image2",
+    "CREAT_TIME": "2025-03-12T10:05:24.083Z"
+  }
+]

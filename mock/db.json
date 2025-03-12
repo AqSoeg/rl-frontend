@@ -1,8 +1,9 @@
-{
-  "scenarios": [
+[
     {
       "id": "traffic",
       "name": "城市交通",
+      "description":"城市交通场景描述",
+      "createTime":"1234165",
       "env_params": [
         {
           "id": "traffic_light-1",
@@ -313,6 +314,8 @@
     {
       "id": "manufacturing",
       "name": "工业生产线",
+      "description":"工业生产线场景描述",
+      "createTime":"1234165",
       "env_params": [
         {
           "id": "robot-1",
@@ -553,6 +556,8 @@
     {
       "id": "logistics",
       "name": "物流调度",
+      "description":"物流调度场景描述",
+      "createTime":"1234165",
       "env_params": [
         {
           "id": "drone-1",
@@ -775,4 +780,4 @@
       ]
     }
   ]
-}
+  

@@ -430,7 +430,7 @@ const Right = observer(() => {
       {/* 智能体详情弹窗 */}
       <Modal
         title="智能体详情"
-        visible={isDetailModalVisible}
+        open={isDetailModalVisible}
         onOk={() => setIsDetailModalVisible(false)}
         onCancel={() => setIsDetailModalVisible(false)}
         footer={null}
@@ -585,7 +585,7 @@ const Right = observer(() => {
       {/* 模型列表弹窗 */}
       <Modal
         title="模型列表"
-        visible={isModelListModalVisible}
+        open={isModelListModalVisible}
         onOk={() => setIsModelListModalVisible(false)}
         onCancel={() => setIsModelListModalVisible(false)}
         width={1000} 
@@ -602,7 +602,7 @@ const Right = observer(() => {
       {/* 模型详情弹窗 */}
       <Modal
         title="模型详细信息"
-        visible={isModelInfoModalVisible}
+        open={isModelInfoModalVisible}
         onOk={() => setIsModelInfoModalVisible(false)}
         onCancel={() => setIsModelInfoModalVisible(false)}
       >
@@ -628,7 +628,7 @@ const Right = observer(() => {
       {/* 训练状态弹窗 */}
       <Modal
         title="训练状态"
-        visible={isSuccessModalVisible}
+        open={isSuccessModalVisible}
         onOk={() => setIsSuccessModalVisible(false)}
         onCancel={() => setIsSuccessModalVisible(false)}
         footer={[
@@ -643,7 +643,7 @@ const Right = observer(() => {
       {/* 训练效果图片弹窗 */}
       <Modal
         title="训练效果图片"
-        visible={isEffectImageModalVisible}
+        open={isEffectImageModalVisible}
         onOk={() => setIsEffectImageModalVisible(false)}
         onCancel={() => setIsEffectImageModalVisible(false)}
         footer={[

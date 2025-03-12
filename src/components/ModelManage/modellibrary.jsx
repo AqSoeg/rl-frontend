@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, Input, Card, Select } from 'antd';
+import React, { useState, useEffect } from'react';
+import { Table, Button, Modal, Form, Input, Card, Select, message } from 'antd';
 import { PlusOutlined, SettingOutlined } from '@ant-design/icons';
-import { Link } from 'react-router-dom';
-import moment from 'moment';
+import { Link } from'react-router-dom';
 
-const ModelLibrary = ({ data }) => {
+const ModelLibrary = ({ data, fetchModels }) => {
   const [models, setModels] = useState(data || []);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [currentModel, setCurrentModel] = useState(null);
@@ -15,11 +14,9 @@ const ModelLibrary = ({ data }) => {
 
   useEffect(() => {
     if (Array.isArray(data)) {
-      // 如果数据是数组，确保每个对象都有唯一的key
-      const modelsWithKeys = data.map((item, index) => ({ ...item, key: index }));
+      const modelsWithKeys = data.map((item, index) => ({...item, key: index }));
       setModels(modelsWithKeys);
-    } else if (data !== null && typeof data === 'object') {
-      // 如果数据是对象，将其包装在数组中并添加key
+    } else if (data!== null && typeof data === 'object') {
       setModels([data]);
     } else {
       console.error('Data is not an array:', data);
@@ -41,18 +38,31 @@ const ModelLibrary = ({ data }) => {
     }
   };
 
-  const handleFinish = (values) => {
-    const now = moment().format('YYYY年MM月DD日 HH:mm:ss');
-    let newModels = models.map(modelItem =>
-      modelItem.key === currentModel.key ? { ...modelItem, ...values, updateTime: now } : modelItem
-    );
-    newModels = newModels.map((model, index) => ({
-      ...model,
-      key: index, // 确保key是唯一的
-    }));
+  const handleFinish = async (values) => {
+    try {
+      const response = await fetch(__APP_CONFIG__.updateModel, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: currentModel.agentID,
+          type:'model', // 指定库
+          data: {...values, updateTime: new Date().toISOString() }, // 动态设置当前时间
+        }),
+      });
 
-    setIsModalVisible(false);
-    setModels(newModels); // 更新父组件的状态
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      message.success('模型更新成功');
+      fetchModels(); // 重新获取数据
+      setIsModalVisible(false);
+    } catch (error) {
+      console.error('Error updating model:', error);
+      message.error('模型更新失败');
+    }
   };
 
   const handleCancel = () => {
@@ -66,29 +76,65 @@ const ModelLibrary = ({ data }) => {
     setIsEditing(true);
   };
 
-  const handleDelete = (model) => {
-    const updatedModels = models.filter(m => m.key !== model.key); // 使用key来过滤
-    updatedModels.forEach((model, index) => {
-      model.key = index; // 重新分配key
-    });
-    setModels(updatedModels); // 使用setModels更新状态
+  const handleDelete = async (model) => {
+    try {
+      const response = await fetch(__APP_CONFIG__.deleteAll, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: model.agentID,
+          type:'model', // 指定库
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      message.success('模型删除成功');
+      fetchModels(); // 重新获取数据
+    } catch (error) {
+      console.error('Error deleting model:', error);
+      message.error('模型删除失败');
+    }
   };
 
-  const handleSearch = () => {
-    const filteredModels = models.filter(model =>
-      String(model[searchField]).includes(searchText)
-    );
-    setModels(filteredModels); // Update parent component's state
-  };
+  const handleSearch = async () => {
+    try {
+        const response = await fetch(__APP_CONFIG__.searchAll, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                type:'model', // 根据页面类型传入不同的 type
+                field: searchField,
+                value: searchText
+            })
+        });
 
+        const result = await response.json();
+        if (Array.isArray(result)) {
+            setModels(result); // 更新 models 状态
+        } else {
+            console.error('Expected an array but got:', result);
+            setModels([]); // 如果返回的不是数组，设置为空数组
+        }
+    } catch (error) {
+        console.error('Error searching models:', error);
+        message.error('模型搜索失败');
+    }
+};
   const columns = [
     {
       title: '序号',
       dataIndex: 'key',
       key: 'key',
-      render: (text, record, index) => index + 1, // 动态计算序号
+      render: (text, record, index) => index + 1,
     },
-    { title: '想定场景', dataIndex: 'scenarioID', key: 'scenarioID' },
+    { title: '想定场景', dataIndex:'scenarioID', key:'scenarioID' },
     { title: '智能体ID', dataIndex: 'agentID', key: 'agentID' },
     { title: '智能体名称', dataIndex: 'agentName', key: 'agentName' },
     { title: '版本', dataIndex: 'agentVersion', key: 'agentVersion' },
@@ -100,14 +146,12 @@ const ModelLibrary = ({ data }) => {
       dataIndex: 'entityAssignments',
       key: 'entityAssignments',
       render: (text, record) => {
-        // 提取 entityAssignments 中的智能体和实体名称
         const assignments = record.entityAssignments.map((assignment, index) => {
-          const agentName = Object.keys(assignment)[0]; // 获取智能体名称
-          const entities = assignment[agentName].join(', '); // 获取实体名称并拼接成字符串
-          return `${agentName}: ${entities}`; // 返回智能体和实体名称的组合
+          const agentName = Object.keys(assignment)[0];
+          const entities = assignment[agentName].join(', ');
+          return `${agentName}: ${entities}`;
         });
 
-        // 使用 <div> 包裹每个智能体和实体分配的组合
         return (
           <div>
             {assignments.map((assignment, index) => (
@@ -131,21 +175,33 @@ const ModelLibrary = ({ data }) => {
   ];
 
   return (
-    <Card title={
-      <div style={{ backgroundColor: '#f0f0f0', fontSize: '40px', textAlign: 'center' }}>
-        智能体模型管理
-        <SettingOutlined style={{ marginLeft: 8 }} /> {/* 功能图标 */}
-      </div>
-    } bordered={true}>
+    <Card
+      title={
+        <div
+          style={{
+            backgroundColor: '#f0f0f0',
+            fontSize: '40px',
+            textAlign: 'center',
+          }}
+        >
+          智能体模型管理
+          <SettingOutlined style={{ marginLeft: 8 }} />
+        </div>
+      }
+      bordered={true}
+    >
       <span>检索：</span>
-      <Select value={searchField} onChange={setSearchField} style={{ width: 120, marginRight: 8 }}>
+      <Select
+        value={searchField}
+        onChange={setSearchField}
+        style={{ width: 120, marginRight: 8 }}
+      >
         <Select.Option value="scenarioID">想定场景</Select.Option>
         <Select.Option value="agentID">智能体ID</Select.Option>
         <Select.Option value="agentName">智能体名称</Select.Option>
         <Select.Option value="agentType">智能体类型</Select.Option>
         <Select.Option value="agentRoleID">智能体角色</Select.Option>
         <Select.Option value="updateTime">更新时间</Select.Option>
-        {/* 添加其他搜索条件 */}
       </Select>
       <Input
         placeholder="单行输入"
@@ -153,9 +209,21 @@ const ModelLibrary = ({ data }) => {
         onChange={(e) => setSearchText(e.target.value)}
         style={{ width: 200, marginRight: 8 }}
       />
-      <Button type="primary" onClick={handleSearch}>搜索</Button>
-      <Table columns={columns} dataSource={models} pagination={{ pageSize: 3 }} />
-      <Modal title={isEditing ? "更新模型" : "模型详情"} visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
+      <Button type="primary" onClick={handleSearch}>
+        搜索
+      </Button>
+      <Table
+        columns={columns}
+        dataSource={models}
+        pagination={{ pageSize: 3 }}
+        rowKey={'agentID'}
+      />
+      <Modal
+        title={isEditing? '更新模型' : '模型详情'}
+        open={isModalVisible}
+        onOk={handleOk}
+        onCancel={handleCancel}
+      >
         <Form form={form} initialValues={currentModel} onFinish={handleFinish}>
           {currentModel && (
             <>
@@ -174,11 +242,11 @@ const ModelLibrary = ({ data }) => {
               <Form.Item label="智能体角色" name="agentRoleID">
                 <Input disabled={!isEditing} />
               </Form.Item>
-              {!isEditing ? (
+              {!isEditing && (
                 <Form.Item label="更新时间" name="updateTime">
-                  <Input disabled={!isEditing} />
+                  <Input disabled={true} />
                 </Form.Item>
-              ) : null}
+              )}
             </>
           )}
         </Form>

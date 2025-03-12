@@ -14,7 +14,12 @@ const appConfig = {
   training_status:"http://localhost:5000/training_status",
   get_effect:"http://localhost:5000/get_effect",
   publish_model:"http://localhost:5000/publish_model",
-  get_datasets:"http://localhost:5000/get_datasets"
+  get_datasets:"http://localhost:5000/get_datasets",
+  getDecisionModels:"http://localhost:5000/getDecisionModels",
+  searchAll:"http://localhost:5000/searchAll",
+  deleteAll:"http://localhost:5000/deleteAll",
+  updateAll:"http://localhost:5000/updateAll",
+  addAll:"http://localhost:5000/addAll",
 };
 
 export default defineConfig({

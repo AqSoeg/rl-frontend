@@ -252,7 +252,7 @@ const Left = observer(({ scenarios, algorithms,datasets }) => {
 
       <Modal
         title="载入离线数据"
-        visible={visible}
+        open={visible}
         onOk={handleOk}
         onCancel={handleCancel}
         okText="OK"
@@ -260,13 +260,13 @@ const Left = observer(({ scenarios, algorithms,datasets }) => {
       >
         <Select
           placeholder="请选择数据集"
-          value={datasets}
+          value={selectedDataset}
           onChange={handleDatasetChange}
           style={{ width: '100%' }}
         >
           {datasets.map((dataset) => (
-            <Option key={dataset.id} value={dataset.name}>
-              {dataset.name}
+            <Option key={dataset.OFFLINE_DATA_ID} value={dataset.DATASET_NAME}>
+              {dataset.DATASET_NAME}
             </Option>
           ))}
         </Select>

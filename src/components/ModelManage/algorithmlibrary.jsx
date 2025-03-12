@@ -1,165 +1,231 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, Input, Card, Select } from 'antd';
-import { PlusOutlined, SettingOutlined } from '@ant-design/icons';
-import moment from 'moment';
-import axios from 'axios';
+import { Table, Button, Modal, Form, Input, Card, Select, message } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 
-const AlgorithmLibrary = () => {
-  const [models, setModels] = useState([]);
-  const [filteredModels, setFilteredModels] = useState([]);
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [currentModel, setCurrentModel] = useState(null);
+const AlgorithmLibrary = ({ algorithms, fetchAlgorithms }) => {
+  const [isViewEditModalVisible, setIsViewEditModalVisible] = useState(false);
+  const [isAddModalVisible, setIsAddModalVisible] = useState(false);
+  const [isAddHyperParamModalVisible, setIsAddHyperParamModalVisible] = useState(false);
+  const [currentAlgorithm, setCurrentAlgorithm] = useState(null);
   const [searchText, setSearchText] = useState('');
-  const [searchField, setSearchField] = useState('modelId'); // 默认搜索字段
-  const [form] = Form.useForm();
+  const [searchField, setSearchField] = useState('name');
+  const [filteredAlgorithms, setFilteredAlgorithms] = useState(algorithms || []);
   const [isEditing, setIsEditing] = useState(false);
+  const [hyperParams, setHyperParams] = useState([]); // 存储新增的超参数
+  const editForm = Form.useForm()[0];
+  const addForm = Form.useForm()[0];
+  const hyperParamForm = Form.useForm()[0];
 
   useEffect(() => {
-    const fetchModels = async () => {
-      try {
-        const response = await axios.get('http://localhost:3000/agents');
-        const modelsWithKey = response.data.map((model, index) => ({
-          ...model,
-          key: `${index + 1}`, // 确保 key 是字符串类型
-        }));
-        setModels(modelsWithKey);
-        setFilteredModels(modelsWithKey); // 初始化过滤后的数据
-      } catch (error) {
-        console.error('Error fetching models:', error);
+    if (algorithms) {
+      setFilteredAlgorithms(algorithms);
+    }
+  }, [algorithms]);
+
+  useEffect(() => {
+    if (currentAlgorithm) {
+      editForm.setFieldsValue(currentAlgorithm);
+    } else {
+      editForm.resetFields();
+    }
+  }, [currentAlgorithm, editForm]);
+
+  // 新增算法
+  const handleAdd = async (values) => {
+    try {
+      const now = new Date().toISOString();
+      const response = await fetch(__APP_CONFIG__.addAll, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'algorithm',
+          data: { ...values, time: now, 'hyper-parameters': hyperParams },
+        }),
+      });
+      const result = await response.json();
+      if (result.status === 'success') {
+        message.success('算法新增成功');
+        fetchAlgorithms();
+        setIsAddModalVisible(false);
+        setHyperParams([]); // 清空超参数列表
+      } else {
+        message.error(result.message || '算法新增失败');
       }
-    };
-    fetchModels();
-  }, []);
-
-  const showModal = (model) => {
-    setCurrentModel(model);
-    form.setFieldsValue(model);
-    setIsModalVisible(true);
-    setIsEditing(false);
-  };
-
-  const handleOk = () => {
-    if (isEditing) {
-      form.submit();
-    } else {
-      setIsModalVisible(false);
+    } catch (error) {
+      console.error('Error adding algorithm:', error);
+      message.error('算法新增失败');
     }
   };
 
-  const handleFinish = (values) => {
-    let updatedModels;
-    
-    if (!isEditing) {
-      // 更新现有模型时，先更新对应的模型，然后更新所有模型的 key
-      const now = moment().format('YYYY年MM月DD日 HH:mm:ss');
-      updatedModels = models.map(modelItem =>
-        modelItem.key === currentModel.key ? { ...modelItem, ...values, updateTime: now } : modelItem
-      );
-    } else {
-      // 添加新模型时，首先添加新模型，然后更新所有模型的 key
-      const now = moment().format('YYYY年MM月DD日 HH:mm:ss');
-      const newModel = {
-        ...values,
-        key: `${models.length + 1}`,
-        modelId: values.id || `NEW-${Date.now()}`, // 如果没有提供ID，则使用时间戳生成一个临时ID
-        updateTime: now,
-      };
-      updatedModels = [...models, newModel];
+  // 新增超参数
+  const handleAddHyperParam = (values) => {
+    const { id, name, value, default: defaultValue } = values;
+    const valueArray = value.split(',').map(v => parseFloat(v.trim()));
+    if (!valueArray.includes(parseFloat(defaultValue))) {
+      message.error('默认值必须在可选值列表中');
+      return;
     }
-
-    // 更新所有模型的 key 和 序号，以保持连续性
-    updatedModels = updatedModels.map((model, index) => ({
-      ...model,
-      key: `${index + 1}`, // 确保 key 是字符串类型
-    }));
-
-    setModels(updatedModels); // 使用新的规则列表更新状态
-    setFilteredModels(updatedModels); // 同步过滤后的数据
-    setIsModalVisible(false);
+    setHyperParams([...hyperParams, { id, name, value: valueArray, default: parseFloat(defaultValue) }]);
+    setIsAddHyperParamModalVisible(false);
+    hyperParamForm.resetFields();
   };
 
-  const handleCancel = () => {
-    setIsModalVisible(false);
+  // 删除算法
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(__APP_CONFIG__.deleteAll, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'algorithm',
+          id: id,
+        }),
+      });
+      const result = await response.json();
+      if (result.status === 'success') {
+        message.success('算法删除成功');
+        fetchAlgorithms();
+      } else {
+        message.error(result.message || '算法删除失败');
+      }
+    } catch (error) {
+      console.error('Error deleting algorithm:', error);
+      message.error('算法删除失败');
+    }
   };
 
-  const handleDelete = (model) => {
-    let updatedModels = filteredModels.filter(m => m.key !== model.key);
-    // 更新所有模型的 key 和 序号，以保持连续性
-    updatedModels = updatedModels.map((model, index) => ({
-      ...model,
-      key: `${index + 1}`, // 确保 key 是字符串类型
-    }));
-    setModels(updatedModels);
-    setFilteredModels(updatedModels); // 同步过滤后的数据
+  const handleSearch = async () => {
+    try {
+      const response = await fetch(__APP_CONFIG__.searchAll, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'algorithm',
+          field: searchField,
+          value: searchText
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const result = await response.json();
+      setFilteredAlgorithms(result);
+    } catch (error) {
+      console.error('Error searching algorithms:', error);
+      message.error('算法搜索失败');
+    }
   };
 
-  const handleSearch = () => {
-    const filteredModels = models.filter(model =>
-      String(model[searchField]).includes(searchText)
-    );
-    setFilteredModels(filteredModels);
-  };
-
-  const addModel = () => {
-    // 创建一个新的模型对象，确保key和id是唯一的
-    const newModel = {
-      key: '',
-      sceneId: '', // 默认为空，待用户填写
-      modelId: '', // 默认为空，待用户填写
-      modelName: '', // 默认为空，待用户填写
-      agentType: '', // 默认为空，待用户填写
-      structure: '', // 默认为空，待用户填写
-      version: '', // 默认为空，待用户填写
-      input: '',
-      output: '',
-      route: '',
-      updateTime: '', // 默认为空，将在保存时填充
-    };
-    setCurrentModel(newModel);
-    form.setFieldsValue(newModel);
-    setIsModalVisible(true);
-    setIsEditing(true); // 标记为编辑状态，这样表单字段就是可编辑的
+  // 渲染超参数文本
+  const renderHyperParametersText = (params) => {
+    return params
+      .map(param => `${param.name}：默认值为${param.default}，可选值为${processSelectOptions(param.value).join(', ')}`)
+      .join('\n');
   };
 
   const columns = [
+    { title: '算法id', dataIndex: 'algorithm_id', key: 'algorithm_id' },
+    { title: '类型', dataIndex: 'type_name', key: 'type_name' },
+    { title: '名称', dataIndex: 'name', key: 'name' },
+    { title: '时间', dataIndex: 'time', key: 'time' },
     {
-      title: '序号',
-      dataIndex: 'key',
-      key: 'key',
-      render: (text, record, index) => index + 1, // 动态计算序号
+      title: '超参数',
+      dataIndex: 'hyper-parameters',
+      key: 'hyper-parameters',
+      render: (params) => <div style={{ whiteSpace: 'pre-wrap' }}>{renderHyperParametersText(params)}</div>,
     },
-    { title: '想定场景', dataIndex: 'sceneId', key: 'sceneId' },
-    { title: '智能体ID', dataIndex: 'modelId', key: 'modelId' },
-    { title: '智能体名称', dataIndex: 'modelName', key: 'modelName' },
-    { title: '智能体类型', dataIndex: 'agentType', key: 'agentType' },
-    { title: '模型结构', dataIndex: 'structure', key: 'structure' },
-    { title: '版本', dataIndex: 'version', key: 'version' },
-    { title: '输入', dataIndex: 'input', key: 'input' },
-    { title: '输出', dataIndex: 'output', key: 'output' },
-    { title: '更新时间', dataIndex: 'updateTime', key: 'updateTime' },
-    { title: '存储路径', dataIndex: 'route', key: 'route' },
-    { title: '操作', key: 'action', render: (text, record) => (
-      <>
-        <Button type="link" onClick={() => showModal(record)}>查看</Button>
-        <Button type="link" onClick={() => handleDelete(record)}>删除</Button>
-      </>
-    ) },
+    {
+      title: '操作',
+      key: 'action',
+      render: (text, record) => (
+        <>
+          <Button type="link" onClick={() => { setCurrentAlgorithm(record); setIsEditing(false); setIsViewEditModalVisible(true); }}>查看</Button>
+          <Button type="link" onClick={() => { setCurrentAlgorithm(record); setIsEditing(true); setIsViewEditModalVisible(true); }}>编辑</Button>
+          <Button type="link" onClick={() => handleDelete(record.algorithm_id)}>删除</Button>
+        </>
+      ),
+    },
   ];
 
+  // 数据处理：升序排序并去重
+  const processSelectOptions = (values) => {
+    const uniqueValues = [...new Set(values)];
+    return uniqueValues.sort((a, b) => a - b);
+  };
+
+  // 渲染超参数表单
+  const renderHyperParametersForm = () => {
+    if (!currentAlgorithm) return null;
+
+    const hyperParams = currentAlgorithm['hyper-parameters'] || [];
+    return hyperParams.map(param => (
+      <Form.Item
+        key={param.id}
+        label={param.name}
+        name={`hyper-parameters.${param.id}`}
+        initialValue={param.default}
+      >
+        <Select
+          placeholder={`${param.default}`}
+          disabled={!isEditing}
+          options={processSelectOptions(param.value).map(v => ({ label: v, value: v }))}
+        />
+      </Form.Item>
+    ));
+  };
+
+  // 提交表单
+  const handleUpdate = async (id, values) => {
+    try {
+      const now = new Date().toISOString();
+      const updatedHyperParameters = currentAlgorithm['hyper-parameters'].map(param => ({
+        ...param,
+        default: values[`hyper-parameters.${param.id}`] || param.default,
+      }));
+
+      const response = await fetch(__APP_CONFIG__.updateAlgorithm, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'algorithm',
+          id: id,
+          algorithm: {
+            ...values,
+            'hyper-parameters': updatedHyperParameters,
+            time: now
+          },
+        }),
+      });
+      const result = await response.json();
+      if (result.status === 'success') {
+        message.success('算法更新成功');
+        fetchAlgorithms();
+        setIsViewEditModalVisible(false);
+      } else {
+        message.error(result.message || '算法更新失败');
+      }
+    } catch (error) {
+      console.error('Error updating algorithm:', error);
+      message.error('算法更新失败');
+    }
+  };
+
   return (
-    <Card title={
-      <div style={{ backgroundColor: '#f0f0f0', fontSize: '40px', textAlign: 'center' }}>
-        算法模型管理
-        <SettingOutlined style={{ marginLeft: 8 }} /> {/* 功能图标 */}
-      </div>} bordered={true}>
+    <Card title="算法库" bordered={true}>
       <span>检索：</span>
       <Select value={searchField} onChange={setSearchField} style={{ width: 120, marginRight: 8 }}>
-        <Select.Option value="sceneId">想定场景</Select.Option>
-        <Select.Option value="modelId">智能体ID</Select.Option>
-        <Select.Option value="modelName">智能体名称</Select.Option>
-        <Select.Option value="agentType">智能体类型</Select.Option>
-        <Select.Option value="structure">模型结构</Select.Option>
-        <Select.Option value="updateTime">更新时间</Select.Option>
+        <Select.Option value="type_name">类型</Select.Option>
+        <Select.Option value="name">名称</Select.Option>
       </Select>
       <Input
         placeholder="单行输入"
@@ -168,44 +234,96 @@ const AlgorithmLibrary = () => {
         style={{ width: 200, marginRight: 8 }}
       />
       <Button type="primary" onClick={handleSearch}>搜索</Button>
-      <Table columns={columns} dataSource={filteredModels} pagination={{ pageSize: 5 }} />
-      <Modal title={isEditing ? "新增模型" : "模型详情"} visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
-        <Form form={form} initialValues={currentModel} onFinish={handleFinish}>
-          <Form.Item label="智能体ID" name="modelId">
+
+      <Table pagination={{pageSize:2}} dataSource={filteredAlgorithms} columns={columns} rowKey='algorithm_id' />
+
+      {/* 查看和编辑算法的弹窗 */}
+      <Modal
+        title={isEditing ? '编辑算法' : '算法详情'}
+        open={isViewEditModalVisible}
+        onOk={() => editForm.submit()}
+        onCancel={() => setIsViewEditModalVisible(false)}
+      >
+        <Form form={editForm} onFinish={(values) => isEditing ? handleUpdate(currentAlgorithm.algorithm_id, values) : setIsViewEditModalVisible(false)}>
+          <Form.Item label="算法id" name="algorithm_id">
+            <Input disabled={true} />
+          </Form.Item>
+          <Form.Item label="类型" name="type_name">
             <Input disabled={!isEditing} />
           </Form.Item>
-          <Form.Item label="智能体名称" name="modelName">
+          <Form.Item label="名称" name="name">
             <Input disabled={!isEditing} />
           </Form.Item>
-          <Form.Item label="智能体类型" name="agentType">
-            <Input disabled={!isEditing} />
+          <Form.Item label="时间" name="time">
+            <Input disabled={true} />
           </Form.Item>
-          <Form.Item label="模型结构" name="structure">
-            <Input disabled={!isEditing} />
-          </Form.Item>
-          <Form.Item label="版本" name="version">
-            <Input disabled={!isEditing} />
-          </Form.Item>
-          <Form.Item label="输入" name="input">
-            <Input disabled={!isEditing} />
-          </Form.Item>
-          <Form.Item label="输出" name="output">
-            <Input disabled={!isEditing} />
-          </Form.Item>
-          {!isEditing ? (
-            <Form.Item label="更新时间" name="updateTime">
-              <Input disabled={!isEditing} />
-            </Form.Item>
-          ) : null}
-          {isEditing && (
-            <Form.Item label="存储路径" name="route">
-              <Input disabled={!isEditing} />
-            </Form.Item>
-          )}
+          {renderHyperParametersForm()}
         </Form>
       </Modal>
-      <Button type="primary" icon={<PlusOutlined />} onClick={addModel} style={{ marginBottom: 20 }}>
-        新增模型
+
+      {/* 新增算法的弹窗 */}
+      <Modal
+        title="新增算法"
+        open={isAddModalVisible}
+        onOk={() => addForm.submit()}
+        onCancel={() => setIsAddModalVisible(false)}
+      >
+        <Form form={addForm} onFinish={handleAdd}>
+          <Form.Item label="算法id" name="algorithm_id">
+            <Input />
+          </Form.Item>
+          <Form.Item label="类型" name="type_name">
+            <Input />
+          </Form.Item>
+          <Form.Item label="名称" name="name">
+            <Input />
+          </Form.Item>
+          <Form.Item label="时间" name="time">
+            <Input disabled={true} />
+          </Form.Item>
+          <Form.Item label="超参数">
+            {hyperParams.map((param, index) => (
+              <div key={index}>
+                {param.name}：默认值为{param.default}，可选值为{param.value.join(', ')}
+              </div>
+            ))}
+            <Button type="link" onClick={() => setIsAddHyperParamModalVisible(true)}>新增超参数</Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* 新增超参数的弹窗 */}
+      <Modal
+        title="新增超参数"
+        open={isAddHyperParamModalVisible}
+        onOk={() => hyperParamForm.submit()}
+        onCancel={() => setIsAddHyperParamModalVisible(false)}
+      >
+        <Form form={hyperParamForm} onFinish={handleAddHyperParam}>
+          <Form.Item label="ID" name="id">
+            <Input />
+          </Form.Item>
+          <Form.Item label="名称" name="name">
+            <Input />
+          </Form.Item>
+          <Form.Item label="可选值" name="value">
+            <Input placeholder="用逗号分隔多个值" />
+          </Form.Item>
+          <Form.Item label="默认值" name="default">
+            <Input />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Button
+        type="primary"
+        icon={<PlusOutlined />}
+        onClick={() => {
+          addForm.resetFields();
+          setIsAddModalVisible(true);
+        }}
+      >
+        新增算法
       </Button>
     </Card>
   );
