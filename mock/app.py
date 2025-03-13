@@ -8,7 +8,7 @@ import threading
 import time
 import traceback
 import base64
-
+import datetime
 
 app = Flask(__name__)
 CORS(app)
@@ -189,37 +189,28 @@ def get_algorithm():
         print(f'Error reading JSON file: {str(e)}')
         return jsonify({'error': 'Failed to read JSON file'}), 500
 
-
 @app.route('/train', methods=['POST'])
 def train():
     global training_thread, training_stop_flag, training_status, training_result
 
-    # 如果已经有训练任务在运行，则返回错误
     if training_status == "running":
         return jsonify({"status": "error", "message": "A training task is already running."}), 400
 
-    # 重置停止标志和状态
     training_stop_flag = False
     training_status = "running"
     training_result = None
 
-    # 获取超参数
     data = request.json
     hyper_parameters = data.get('hyperParametersValues', {})
 
-    # 创建环境，这里以 CartPole-v1 为例
     env = make_vec_env('CartPole-v1', n_envs=4)
-
-    # 初始化 PPO 模型
     model = PPO('MlpPolicy', env, verbose=1, **{k: v for k, v in hyper_parameters.items() if k != 'total_timesteps'})
 
-    # 定义训练任务
     def train_task():
         global training_stop_flag, training_status, training_result
         try:
-            # 训练模型，定期检查是否收到停止请求
             total_timesteps = hyper_parameters.get('total_timesteps', 10000)
-            for i in range(0, total_timesteps, 1000):  # 每 1000 步检查一次
+            for i in range(0, total_timesteps, 1000):
                 if training_stop_flag:
                     print("Training stopped by user request.")
                     training_result = {"status": "stopped", "message": "Training stopped by user request."}
@@ -227,23 +218,40 @@ def train():
                 model.learn(total_timesteps=min(1000, total_timesteps - i))
                 print(f"Training progress: {i + 1000}/{total_timesteps}")
             else:
-                # 训练完成，保存模型
                 model_path = 'ppo_model.pkl'
                 model.save(model_path)
                 print(f"Model saved to {model_path}")
-                training_result = {"status": "success", "message": "Training completed and model saved."}
+
+                trained_model = {
+                    "AGENT_MODEL_ID": str(int(time.time())),  # 使用时间戳作为唯一ID
+                    "AGENT_NAME": data.get('agentInfo', {}).get('agentName', 'Unknown'),
+                    "SCENARIO_NAME": data.get('scenarioEditInfo', {}).get('scenarioName', 'Unknown'),
+                    "ROLE_NAME": data.get('agentInfo', {}).get('agentRoleID', 'Unknown'),
+                    "AGENT_MODEL_VERSION": "1.0",
+                    "NN_MODEL_TYPE": data.get('algorithmInfo', {}).get('algorithmType', 'Unknown'),
+                    "MODEL_PATH": model_path,
+                    "IMG_URL": "http://example.com/image",  # 效果图片URL
+                    "CREAT_TIME": datetime.datetime.now().isoformat(),
+                }
+
+                # 将训练结果保存到 dc.json
+                with open(Decision_FILE_PATH, 'r', encoding='utf-8') as f:
+                    existing_data = json.load(f)
+                existing_data.append(trained_model)
+                with open(Decision_FILE_PATH, 'w', encoding='utf-8') as f:
+                    json.dump(existing_data, f, ensure_ascii=False, indent=2)
+
+                training_result = {"status": "success", "message": "Training completed and model saved.", "model": trained_model}
         except Exception as e:
             print(f"Training error: {e}")
             training_result = {"status": "error", "message": str(e)}
         finally:
-            training_status = "completed"  # 更新训练状态为完成
+            training_status = "completed"
 
-    # 启动训练任务
     training_thread = threading.Thread(target=train_task)
     training_thread.start()
 
     return jsonify({"status": "success", "message": "Training started."})
-
 @app.route('/stop_training', methods=['POST'])
 def stop_training():
     global training_stop_flag
@@ -259,12 +267,23 @@ def get_training_status():
         return jsonify({"status": training_status, "result": training_result})
     return jsonify({"status": training_status})
 
-@app.route('/get_effect', methods=['GET'])
+@app.route('/get_effect', methods=['POST'])
 def get_effect_image():
-    # 这里可以添加逻辑来生成或获取图片
-    image_path = "v2-1a6b99afa539e303ba1474f9c572c4bb_r.jpg"
-    return send_file(image_path, mimetype='image/jpg')
+    data = request.json
+    decision_model_id = data.get('decisionModelID')
 
+    try:
+        with open(Decision_FILE_PATH, 'r', encoding='utf-8') as f:
+            decision_models = json.load(f)
+        
+        model = next((m for m in decision_models if m['AGENT_MODEL_ID'] == decision_model_id), None)
+        if model:
+            return jsonify({"status": "success", "img_url": model['IMG_URL']})
+        else:
+            return jsonify({"status": "error", "message": "Model not found"}), 404
+    except Exception as e:
+        print(f'Error getting effect image: {str(e)}')
+        return jsonify({"status": "error", "message": str(e)}), 500
 @app.route('/publish_model', methods=['POST'])
 def publish_model():
     data = request.json
@@ -463,6 +482,43 @@ def add_item():
     except Exception as e:
         print(f'Error adding {add_type}: {str(e)}')
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
+@app.route('/updateDbJson', methods=['POST'])
+def update_db_json():
+    try:
+        data = request.get_json()
+        scenario_id = data.get('scenarioId')
+        entity_name = data.get('entityName')
+        attribute_key = data.get('attributeKey')
+        new_value = data.get('newValue')
+
+        # 读取 db.json 文件
+        with open(SCENARIO_FILE_PATH, 'r', encoding='utf-8') as file:
+            scenarios = json.load(file)
+
+        # 找到对应的场景
+        scenario = next((s for s in scenarios if s['id'] == scenario_id), None)
+        if scenario:
+            # 找到对应的实体
+            entity = next((e for e in scenario['env_params'] if e['name'] == entity_name), None)
+            if entity:
+                # 找到对应的属性并更新值
+                for param in entity['params']:
+                    if param[0] == attribute_key:
+                        param[2] = new_value
+
+                # 写回 db.json 文件
+                with open(SCENARIO_FILE_PATH, 'w', encoding='utf-8') as file:
+                    json.dump(scenarios, file, ensure_ascii=False, indent=2)
+
+                # 返回更新后的场景数据
+                return jsonify({"message": "更新成功", "updatedScenario": scenario}), 200
+            else:
+                return jsonify({"message": "未找到对应的实体"}), 404
+        else:
+            return jsonify({"message": "未找到对应的场景"}), 404
+    except Exception as e:
+        return jsonify({"message": f"更新失败: {str(e)}"}), 500
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True)

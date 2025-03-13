@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Select, Button, Input, Card } from 'antd';
+import { Select, Button, Input, Card, message } from 'antd';
 import { intelligentStore } from './IntelligentStore';
 import { observer } from 'mobx-react';
+import axios from 'axios'; // 引入 axios 用于发送请求
+
 const { Option } = Select;
 
-const Middle = observer(() => {
+const Middle = observer(({ refreshData }) => {
   const [entity, setEntity] = useState('');
   const [attribute, setAttribute] = useState('');
   const [value, setValue] = useState('');
@@ -37,7 +39,7 @@ const Middle = observer(() => {
     setEntity(value);
     setAttribute('');
     setValue('');
-  
+
     if (intelligentStore.selectedScenario && intelligentStore.selectedScenario.env_params) {
       const selectedEntity = intelligentStore.selectedScenario.env_params.find(param => param.name === value);
       if (selectedEntity) {
@@ -60,22 +62,42 @@ const Middle = observer(() => {
     setValue(value);
   };
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => { // 改为异步函数
     const selectedEntityParams = envParamsMap[entity];
     if (selectedEntityParams) {
       const selectedAttributeInfo = selectedEntityParams.find(attr => attr.key === attribute);
       if (selectedAttributeInfo) {
-        // 将修改的信息存入状态
-        setModifiedParams(prevState => ({
-          ...prevState,
-          [entity]: {
-            ...prevState[entity],
-            [selectedAttributeInfo.label]: value,
-          },
-        }));
-  
-        // 显示更新成功信息
-        setEntityParamsInfo(`更新成功：${entity} 的 ${selectedAttributeInfo.label} 已修改为 ${value}`);
+        try {
+          // 发送请求到后端更新数据
+          const response = await axios.post(__APP_CONFIG__.updateDbJson, {
+            scenarioId: intelligentStore.selectedScenario.id,
+            entityName: entity,
+            attributeKey: selectedAttributeInfo.key,
+            newValue: value
+          });
+
+          if (response.status === 200) {
+            // 将修改的信息存入状态
+            setModifiedParams(prevState => ({
+              ...prevState,
+              [entity]: {
+                ...prevState[entity],
+                [selectedAttributeInfo.label]: value,
+              },
+            }));
+
+            // 显示更新成功信息
+            setEntityParamsInfo(`更新成功：${entity} 的 ${selectedAttributeInfo.label} 已修改为 ${value}`);
+            message.success('更新成功');
+            // 调用刷新函数
+            refreshData();
+          } else {
+            message.error('更新失败');
+          }
+        } catch (error) {
+          message.error('更新失败');
+          console.error('更新失败:', error);
+        }
       } else {
         setEntityParamsInfo('请选择一个属性');
       }
@@ -83,6 +105,7 @@ const Middle = observer(() => {
       setEntityParamsInfo('请选择一个实体');
     }
   };
+
   const entityOptions = Object.keys(envParamsMap).map(name => (
     <Option key={name} value={name}>
       {name}
@@ -156,7 +179,6 @@ const Middle = observer(() => {
           <Input.TextArea className='input' rows={4} value={entityParamsInfo} disabled />
         </Card>
       </div>
-
     </div>
   );
 });

@@ -20,6 +20,7 @@ const appConfig = {
   deleteAll:"http://localhost:5000/deleteAll",
   updateAll:"http://localhost:5000/updateAll",
   addAll:"http://localhost:5000/addAll",
+  updateDbJson:"http://localhost:5000/updateDbJson",
 };
 
 export default defineConfig({
