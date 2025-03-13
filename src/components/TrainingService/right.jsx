@@ -20,23 +20,46 @@ const Right = observer(() => {
   const [isEffectImageModalVisible, setIsEffectImageModalVisible] = useState(false);
   const [modelList, setModelList] = useState([]); // 用于保存训练好的模型列表
 
-  // 获取智能体列表
-  const fetchAgents = async () => {
-    try {
-      const response = await axios.get('mock/model.json');
-      const models = response.data;
+// 获取智能体列表
+const fetchAgents = async () => {
+  try {
+    // 定义请求体数据（如果需要传递参数）
+    const requestBody = {
+      scenarioID: intelligentStore.selectedScenario.id,
+      agentRoleID: intelligentStore.selectedAgentRole.id,
+    };
 
-      // 根据 scenarioID 和 agentRoleID 过滤智能体
-      const filteredAgents = models.filter(agent =>
+    // 使用 fetch 发送 POST 请求
+    const response = await fetch(__APP_CONFIG__.getModels, {
+      method: 'POST', // 使用 POST 方法
+      headers: {
+        'Content-Type': 'application/json', // 设置请求头为 JSON
+      },
+      body: JSON.stringify(requestBody), // 将请求体转换为 JSON 字符串
+    });
+
+    // 检查响应是否成功
+    if (!response.ok) {
+      throw new Error('Network response was not ok ' + response.statusText);
+    }
+
+    // 解析 JSON 数据
+    const data = await response.json();
+    const models = data.models;
+
+    // 根据 scenarioID 和 agentRoleID 过滤智能体
+    const filteredAgents = models.filter(
+      (agent) =>
         agent.scenarioID === intelligentStore.selectedScenario.id &&
         agent.agentRoleID === intelligentStore.selectedAgentRole.id
-      );
+    );
 
-      setAgents(filteredAgents);
-    } catch (error) {
-      console.error("Error fetching agents:", error);
-    }
-  };
+    // 更新状态
+    setAgents(filteredAgents);
+  } catch (error) {
+    console.error('Error fetching agents:', error);
+  }
+};
 
   // 当场景或智能体角色发生变化时，重新获取智能体列表
   useEffect(() => {
