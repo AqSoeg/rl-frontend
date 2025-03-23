@@ -221,7 +221,7 @@ def train():
                 model.learn(total_timesteps=min(1000, total_timesteps - i))
                 print(f"Training progress: {i + 1000}/{total_timesteps}")
             else:
-                model_path = 'ppo_model.pkl'
+                model_path = 'mock/ppo_model.pkl'
                 model.save(model_path)
                 print(f"Model saved to {model_path}")
 
