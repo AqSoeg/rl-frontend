@@ -1,13 +1,14 @@
-import {useState} from 'react';
-import {Button, Select} from 'antd';
+import { useState, useEffect, useRef } from 'react';
+import * as echarts from 'echarts';
+import { Button, Select } from 'antd';
 import './EvaluationOptimization.css';
 
-const {Option} = Select;
+const { Option } = Select;
 
 const EvaluationOptimization = () => {
     const [charts, setCharts] = useState([]);
     const [events, setEvents] = useState([]);
-    const [radarImage, setRadarImage] = useState('');
+    const [radarImage, setRadarImage] = useState(null);
     const [dataLoaded, setDataLoaded] = useState(false);
     const [evalScore, setEvalScore] = useState();
     const [evalSuggestion, setEvalSuggestion] = useState([]);
@@ -18,26 +19,204 @@ const EvaluationOptimization = () => {
     });
     const [selectedEvaluationType, setSelectedEvaluationType] = useState();
     const [chartSelections, setChartSelections] = useState([
-        {content: '', shape: ''},
-        {content: '', shape: ''},
-        {content: '', shape: ''},
-        {content: '', shape: ''}
+        { content: '', shape: '' },
+        { content: '', shape: '' },
+        { content: '', shape: '' },
+        { content: '', shape: '' },
     ]);
     const [chartOptions, setChartOptions] = useState([]);
+    const [selectedLegends, setSelectedLegends] = useState({});
+
+    const chartRefs = useRef(Array(4).fill(null));
+    const radarChartRef = useRef(null);
+
+    useEffect(() => {
+        chartRefs.current.forEach((_, index) => {
+            const chartDom = document.getElementById(`chart-${index}`);
+            if (chartDom) {
+                chartRefs.current[index] = echarts.init(chartDom);
+            }
+        });
+
+        if (radarChartRef.current) {
+            const radarChart = echarts.init(radarChartRef.current);
+            if (radarImage) {
+                const radarOption = {
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: (params) => {
+                            return params.value.map((v, i) =>
+                                `${radarImage.indicator[i].name}：${v}`
+                            ).join('<br>');
+                        }
+                    },
+                    legend: {
+                        data: Object.keys(radarImage.data),
+                        bottom: 10
+                    },
+                    radar: {
+                        indicator: radarImage.indicator,
+                        shape: 'circle',
+                        axisName: {
+                            formatter: (name, indicator) =>
+                                `${name}\n${indicator.max}`
+                        }
+                    },
+                    series: [{
+                        type: 'radar',
+                        emphasis: {
+                            lineStyle: {
+                                width: 4
+                            }
+                        },
+                        data: Object.entries(radarImage.data).map(([name, values]) => ({
+                            name,
+                            value: radarImage.indicator.map(ind => values[ind.name]),
+                            lineStyle: {
+                                type: 'dashed'
+                            },
+                            areaStyle: {
+                                opacity: 0.3
+                            }
+                        }))
+                    }]
+                };
+                radarChart.setOption(radarOption);
+            }
+        }
+
+        return () => {
+            chartRefs.current.forEach((chart) => chart && chart.dispose());
+            if (radarChartRef.current) {
+                echarts.dispose(radarChartRef.current);
+            }
+        };
+    }, [radarImage, charts]);
+
+    const updateChart = (index, content, shape) => {
+        const chartData = chartOptions.find((item) => item.content === content);
+        if (!chartData || !shape) return;
+
+        const chart = chartRefs.current[index];
+        if (!chart) return;
+
+        const option = {
+            tooltip: {},
+            legend: {
+                type: 'scroll',
+                orient: 'horizontal',
+                bottom: 0,
+                selected: selectedLegends[index] || {},
+                data: chartData.data_legend,
+            },
+            xAxis: {
+                show: shape !== '饼图',
+                type: 'category',
+                name: chartData.x_label,
+                nameLocation: 'center',
+                nameGap: 25,
+                data: [...new Set(chartData.chart_data.map((d) => d.x))],
+            },
+            yAxis: {
+                show: shape !== '饼图',
+                type: 'value',
+                name: chartData.y_label,
+                nameLocation: 'center',
+                nameGap: 25,
+            },
+            series: [],
+        };
+
+        if (shape === '柱状图') {
+            option.series = chartData.data_legend.map((legend) => ({
+                type: 'bar',
+                name: legend,
+                data: chartData.chart_data
+                    .filter((d) => d.legend === legend)
+                    .map((d) => d.y),
+                show: selectedLegends[index]?.[legend] !== false,
+            }));
+        } else if (shape === '折线图') {
+            option.series = chartData.data_legend.map((legend) => ({
+                type: 'line',
+                name: legend,
+                data: chartData.chart_data
+                    .filter((d) => d.legend === legend)
+                    .map((d) => d.y),
+                show: selectedLegends[index]?.[legend] !== false,
+            }));
+        } else if (shape === '饼图') {
+            option.xAxis.show = false;
+            option.yAxis.show = false;
+            option.legend = {
+                show: true, // 可根据需求开启
+                type: 'scroll',
+                orient: 'vertical',
+                right: 10,
+                top: 20
+            };
+            option.tooltip = {  // 新增tooltip配置
+                trigger: 'item',
+                formatter: ({ name, percent, value }) =>
+                    `${name}<br/>占比: ${percent}%<br/>数值: ${value}`
+            };
+            option.series = [
+                {
+                    type: 'pie',
+                    radius: '55%',
+                    label: {  // 关闭外部标签
+                        show: false
+                    },
+                    data: chartData.chart_data.map((d) => ({
+                        name: `${d.x} - ${d.legend}`,
+                        value: d.y
+                    })),
+                },
+            ];
+        }
+
+        chart.setOption(option, true);
+    };
+
+    const handleLegendSelect = (index, selected) => {
+        setSelectedLegends((prev) => ({
+            ...prev,
+            [index]: selected,
+        }));
+    };
+
+    useEffect(() => {
+        chartRefs.current.forEach((chart, index) => {
+            if (!chart) return;
+
+            chart.on('legendselectchanged', (params) => {
+                handleLegendSelect(index, {
+                    ...selectedLegends[index],
+                    [params.name]: params.selected[params.name],
+                });
+            });
+        });
+
+        return () => {
+            chartRefs.current.forEach((chart) => {
+                chart?.off('legendselectchanged');
+            });
+        };
+    }, [selectedLegends]);
 
     const handleLoadData = async () => {
         setChartSelections([
-            {content: '', shape: ''},
-            {content: '', shape: ''},
-            {content: '', shape: ''},
-            {content: '', shape: ''}
+            { content: '', shape: '' },
+            { content: '', shape: '' },
+            { content: '', shape: '' },
+            { content: '', shape: '' },
         ]);
         setChartOptions([]);
         setEvalScore(undefined);
         setEvalSuggestion([]);
-        setRadarImage('');
+        setRadarImage(null);
         setEvents([]);
-        setCharts(Array(4).fill({img: null}));
+        setCharts(Array(4).fill({ img: null }));
 
         if (!selectedEvaluationType) {
             alert('请先选择评估数据来源！');
@@ -45,7 +224,7 @@ const EvaluationOptimization = () => {
             try {
                 const response = await fetch(__APP_CONFIG__.loadEvaluationData, {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'}
+                    headers: { 'Content-Type': 'application/json' },
                 });
                 const data = await response.json();
 
@@ -61,9 +240,9 @@ const EvaluationOptimization = () => {
             }
         } else {
             const localData = {
-                scenarioParams: ["场景名称：离线交通", "数据来源：本地日志"],
-                agentInfo: ["智能体名称：离线Agent", "版本：v2.0"],
-                modelInfo: ["模型类型：离线决策"]
+                scenarioParams: ['场景名称：离线交通', '数据来源：本地日志'],
+                agentInfo: ['智能体名称：离线Agent', '版本：v2.0'],
+                modelInfo: ['模型类型：离线决策'],
             };
             setSidebarData(localData);
             setDataLoaded(true);
@@ -79,7 +258,7 @@ const EvaluationOptimization = () => {
             try {
                 const response = await fetch(__APP_CONFIG__.offlineEvaluation, {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(sidebarData)
                 });
                 const result = await response.text();
@@ -93,14 +272,14 @@ const EvaluationOptimization = () => {
         try {
             const response = await fetch(__APP_CONFIG__.startEvaluation, {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'}
+                headers: { 'Content-Type': 'application/json' },
             });
             const data = await response.json();
 
             setChartOptions(data.chart_data);
-            setCharts(Array(4).fill({img: null}));
+            setCharts(Array(4).fill({ img: null }));
 
-            setEvents(data.event_data.map(content => ({content})));
+            setEvents(data.event_data.map((content) => ({ content })));
 
             setRadarImage(data.radar_chart_data);
 
@@ -114,41 +293,21 @@ const EvaluationOptimization = () => {
 
     const handleContentChange = (index, value) => {
         const newSelections = [...chartSelections];
-        newSelections[index] = {content: value, shape: ''};
+        newSelections[index] = { content: value, shape: '' };
         setChartSelections(newSelections);
-        updateChartImage(index, value, '');
+        updateChart(index, value, '');
     };
 
     const handleShapeChange = (index, value) => {
         const newSelections = [...chartSelections];
         newSelections[index].shape = value;
         setChartSelections(newSelections);
-        updateChartImage(index, newSelections[index].content, value);
-    };
-
-    const updateChartImage = (index, content, shape) => {
-        if (!content || !shape) {
-            setCharts(prev => {
-                const newCharts = [...prev];
-                newCharts[index] = {img: null};
-                return newCharts;
-            });
-            return;
-        }
-
-        const contentData = chartOptions.find(item => item.content === content);
-        const shapeData = contentData.chart_data.find(item => item.shape === shape);
-
-        setCharts(prev => {
-            const newCharts = [...prev];
-            newCharts[index] = {img: shapeData.base64};
-            return newCharts;
-        });
+        updateChart(index, newSelections[index].content, value);
     };
 
     const getShapeOptions = (content) => {
-        const target = chartOptions.find(item => item.content === content);
-        return target ? target.chart_data.map(item => item.shape) : [];
+        const target = chartOptions.find((item) => item.content === content);
+        return target ? ['柱状图', '折线图', '饼图'] : [];
     };
 
     return (
@@ -156,7 +315,7 @@ const EvaluationOptimization = () => {
             <div className="EO-sidebar">
                 <div className="EO-sidebar-section">
                     <div className="EO-text">评估数据来源</div>
-                    <Select onChange={value => setSelectedEvaluationType(value)}>
+                    <Select onChange={(value) => setSelectedEvaluationType(value)}>
                         <Option value="在线评估">在线评估</Option>
                         <Option value="离线评估">离线评估</Option>
                     </Select>
@@ -195,9 +354,9 @@ const EvaluationOptimization = () => {
                                     <Select
                                         value={chartSelections[index].content}
                                         onChange={(value) => handleContentChange(index, value)}
-                                        options={chartOptions.map(item => ({
+                                        options={chartOptions.map((item) => ({
                                             label: item.content,
-                                            value: item.content
+                                            value: item.content,
                                         }))}
                                         placeholder="选择内容"
                                     />
@@ -208,21 +367,19 @@ const EvaluationOptimization = () => {
                                     <Select
                                         value={chartSelections[index].shape}
                                         onChange={(value) => handleShapeChange(index, value)}
-                                        options={getShapeOptions(chartSelections[index].content).map(shape => ({
+                                        options={getShapeOptions(chartSelections[index].content).map((shape) => ({
                                             label: shape,
-                                            value: shape
+                                            value: shape,
                                         }))}
                                         placeholder="选择形状"
                                         disabled={!chartSelections[index].content}
                                     />
                                 </div>
 
-                                {charts[index]?.img && (
-                                    <img
-                                        src={`data:image/png;base64,${charts[index].img}`}
-                                        alt={`图表${index + 1}`}
-                                    />
-                                )}
+                                <div
+                                    id={`chart-${index}`}
+                                    style={{ width: '100%', height: '300px' }}
+                                ></div>
                             </div>
                         ))}
                     </div>
@@ -240,16 +397,18 @@ const EvaluationOptimization = () => {
                 <div className="EO-right-panel">
                     {radarImage && (
                         <div className="EO-radar-chart-container">
-                            <img src={`data:image/jpeg;base64,${radarImage}`} alt="雷达图"/>
+                            <div
+                                ref={radarChartRef}
+                                style={{ width: '100%', height: '400px' }}
+                            ></div>
                         </div>
                     )}
 
                     <div className="EO-evaluation-module">
                         <div className="EO-evaluation">
                             <div className="EO-text">分数评估：</div>
-                            {evalScore && (<div className="EO-score">{evalScore}</div>)}
+                            {evalScore && <div className="EO-score">{evalScore}</div>}
                         </div>
-
 
                         <div>
                             <div className="EO-text">优化评估：</div>
@@ -261,7 +420,6 @@ const EvaluationOptimization = () => {
                                 </div>
                             )}
                         </div>
-
                     </div>
 
                     <div className="EO-model-button-container">

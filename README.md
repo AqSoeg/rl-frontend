@@ -14,7 +14,7 @@ npm install
 3. 安装 moment：`npm install moment`。
 4. 安装 mobx 和 mobx-react：`npm install mobx mobx-react`。
 5. 安装 axios：`npm install axios`。 
-6. 安装 recharts：`npm install recharts`。
+6. 安装 recharts：`npm install echarts`。
 7. 安装 md5：`npm install md5`。
 
 ## 项目运行

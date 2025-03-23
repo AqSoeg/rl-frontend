@@ -7,7 +7,6 @@ from stable_baselines3.common.env_util import make_vec_env
 import threading
 import time
 import traceback
-import base64
 import datetime
 
 app = Flask(__name__)
@@ -21,15 +20,6 @@ training_thread = None
 training_stop_flag = False
 training_status = "idle"
 training_result = None
-
-def image_to_base64(image_path):
-    try:
-        with open(image_path, "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
-            return encoded_string
-    except FileNotFoundError:
-        print(f"图片文件未找到: {image_path}")
-        return None
 
 
 @app.route('/scenarios', methods=['POST'])
@@ -94,43 +84,46 @@ def start_evaluation():
     return jsonify({
         "chart_data": [
             {
-              "content": "测试1",
-              "chart_data": [
-                {
-                  "shape": "柱状图",
-                  "base64": image_to_base64("mock/figure/柱状图1.png")
-                },
-                {
-                  "shape": "折线图",
-                  "base64": image_to_base64("mock/figure/折线图1.png")
-                },
-                {
-                  "shape": "饼图",
-                  "base64": image_to_base64("mock/figure/饼图1.png")
-                }
-              ]
+                "content": "测试1",
+                "x_label": "星期",
+                "y_label": "车流量",
+                "data_legend": ["北京", "上海"],
+                "chart_data": [
+                    {"x": "周一", "y": 87, "legend": "北京"},
+                    {"x": "周二", "y": 55, "legend": "北京"},
+                    {"x": "周三", "y": 70, "legend": "北京"},
+                    {"x": "周一", "y": 66, "legend": "上海"},
+                    {"x": "周二", "y": 95, "legend": "上海"},
+                    {"x": "周三", "y": 89, "legend": "上海"}
+                ]
             },
             {
-              "content": "测试2",
-              "chart_data": [
-                {
-                  "shape": "柱状图",
-                  "base64": image_to_base64("mock/figure/柱状图2.png")
-                },
-                {
-                  "shape": "折线图",
-                  "base64": image_to_base64("mock/figure/折线图2.png")
-                }
-              ]
+                "content": "测试2",
+                "x_label": "时间段",
+                "y_label": "车流量（辆/小时）",
+                "data_legend": ["早高峰", "午高峰", "晚高峰"],
+                "chart_data": [
+                    {"x": "主干道", "y": 3200, "legend": "早高峰"},
+                    {"x": "主干道", "y": 2800, "legend": "午高峰"},
+                    {"x": "主干道", "y": 4100, "legend": "晚高峰"},
+                    {"x": "快速路", "y": 2500, "legend": "早高峰"},
+                    {"x": "快速路", "y": 2100, "legend": "午高峰"},
+                    {"x": "快速路", "y": 3800, "legend": "晚高峰"}
+                ]
             },
             {
-              "content": "测试3",
-              "chart_data": [
-                {
-                  "shape": "饼图",
-                  "base64": image_to_base64("mock/figure/饼图2.png")
-                }
-              ]
+                "content": "测试3",
+                "x_label": "事故类型",
+                "y_label": "发生次数",
+                "data_legend": ["本周", "上周"],
+                "chart_data": [
+                    {"x": "追尾", "y": 15, "legend": "本周"},
+                    {"x": "追尾", "y": 22, "legend": "上周"},
+                    {"x": "侧翻", "y": 8, "legend": "本周"},
+                    {"x": "侧翻", "y": 12, "legend": "上周"},
+                    {"x": "闯红灯", "y": 30, "legend": "本周"},
+                    {"x": "闯红灯", "y": 45, "legend": "上周"}
+                ]
             }
         ],
         "event_data": [
@@ -138,7 +131,17 @@ def start_evaluation():
             "传感器校准成功",
             "路径规划更新"
         ],
-        "radar_chart_data": image_to_base64("mock/figure/雷达图.jpg"),
+        "radar_chart_data": {
+            "indicator": [
+                {"name": "销售", "max": 6500},
+                {"name": "管理", "max": 16000},
+                {"name": "信息技术", "max": 30000}
+            ],
+            "data": {
+                "预算分配": {"销售": 4300, "管理": 10000, "信息技术": 25000},
+                "实际开销": {"销售": 5000, "管理": 14000, "信息技术": 28000}
+            }
+        },
         "eval_score": 96.5,
         "eval_suggestion": [
             "建议调整刹车参数",
@@ -178,11 +181,11 @@ def get_algorithm():
         # 读取 JSON 文件
         with open(ALGORITHM_FILE_PATH, 'r', encoding='utf-8') as file:
             data = json.load(file)
-        
+
         # 确保 data 是一个列表
         if not isinstance(data, list):
             return jsonify({'error': 'Invalid JSON format'}), 500
-        
+
         # 返回算法信息
         return jsonify(data)
     except Exception as e:
@@ -275,7 +278,7 @@ def get_effect_image():
     try:
         with open(Decision_FILE_PATH, 'r', encoding='utf-8') as f:
             decision_models = json.load(f)
-        
+
         model = next((m for m in decision_models if m['AGENT_MODEL_ID'] == decision_model_id), None)
         if model:
             return jsonify({"status": "success", "img_url": model['IMG_URL']})
