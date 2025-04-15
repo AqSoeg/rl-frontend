@@ -225,40 +225,43 @@ const Left = observer(({ scenarios, algorithms,datasets }) => {
               bordered
             />
 
-            {/* 智能体状态信息 */}
             <h5>智能体状态信息：</h5>
-<Table
-  columns={[
-    { title: '智能体名称', dataIndex: 'name', key: 'name' },
-    ...intelligentStore.selectedAgent.agentModel.flatMap((model) => {
-      // 获取所有状态字段名称，使用 state[2] 作为列名
-      const stateFields = model.stateVector.map((state) => state[2]);
-      // 去重并生成动态列定义
-      return [...new Set(stateFields)].map((field) => ({
-        title: field,
-        dataIndex: field,
-        key: field,
-      }));
-    }),
-  ]}
-  dataSource={intelligentStore.selectedAgent.agentModel.map((model) => {
-    // 初始化状态信息
-    const entityState = {
-      key: model.name,
-      name: model.name,
-    };
+            <Table
+              columns={[
+                { title: '智能体名称', dataIndex: 'name', key: 'name' },
+                // 使用reduce来去除重复的列名
+                ...intelligentStore.selectedAgent.agentModel
+                  .flatMap((model) => model.stateVector.map((state) => state[2]))
+                  .reduce((uniqueColumns, field) => {
+                    if (!uniqueColumns.includes(field)) {
+                      uniqueColumns.push(field);
+                    }
+                    return uniqueColumns;
+                  }, [])
+                  .map((field) => ({
+                    title: field,
+                    dataIndex: field,
+                    key: field,
+                  }))
+              ]}
+              dataSource={intelligentStore.selectedAgent.agentModel.map((model) => {
+                // 初始化状态信息
+                const entityState = {
+                  key: model.name,
+                  name: model.name,
+                };
 
-    // 遍历状态向量，更新状态信息，使用 state[2] 作为字段名
-    model.stateVector.forEach((state) => {
-      const [, , fieldName, fieldValue] = state; // 使用 state[2] 作为字段名
-      entityState[fieldName] = fieldValue;
-    });
+                // 遍历状态向量，更新状态信息，使用 state[2] 作为字段名
+                model.stateVector.forEach((state) => {
+                  const [, , fieldName, fieldValue] = state;
+                  entityState[fieldName] = fieldValue;
+                });
 
-    return entityState;
-  })}
-  pagination={false}
-  bordered
-/>
+                return entityState;
+              })}
+              pagination={false}
+              bordered
+            />
           </div>
         ) : (
           <div>请选择一个智能体</div>

@@ -429,16 +429,19 @@ const Right = observer(({ decisionModels, fetchDecisions }) => {
             <Table
               columns={[
                 { title: '实体名称', dataIndex: 'name', key: 'name' },
+                // 使用reduce来去除重复的列名
                 ...selectedAgent.agentModel.flatMap((model) => {
-                  // 获取所有状态字段名称，使用 state[2] 作为列名
-                  const stateFields = model.stateVector.map((state) => state[2]);
-                  // 去重并生成动态列定义
-                  return [...new Set(stateFields)].map((field) => ({
-                    title: field,
-                    dataIndex: field,
-                    key: field,
-                  }));
-                }),
+                  return model.stateVector.map((state) => state[2]);
+                }).reduce((uniqueColumns, field) => {
+                  if (!uniqueColumns.includes(field)) {
+                    uniqueColumns.push(field);
+                  }
+                  return uniqueColumns;
+                }, []).map((field) => ({
+                  title: field,
+                  dataIndex: field,
+                  key: field,
+                }))
               ]}
               dataSource={selectedAgent.agentModel.flatMap((model) => {
                 // 获取所有实体名称
@@ -454,7 +457,7 @@ const Right = observer(({ decisionModels, fetchDecisions }) => {
 
                   // 遍历状态向量，更新状态信息，使用 state[2] 作为字段名
                   model.stateVector.forEach((state) => {
-                    const [entityName, , fieldName, fieldValue] = state; // 使用 state[2] 作为字段名
+                    const [entityName, , fieldName, fieldValue] = state;
                     if (entityName === entity) {
                       entityState[fieldName] = fieldValue;
                     }
@@ -500,24 +503,33 @@ const Right = observer(({ decisionModels, fetchDecisions }) => {
               bordered
             />
 
-<h3>奖励信息</h3>
-<Table
-  columns={[
-    { title: '奖励名称', dataIndex: 'rewardName', key: 'rewardName' },
-    { title: '奖励值', dataIndex: 'rewardValue', key: 'rewardValue' },
-  ]}
-  dataSource={selectedAgent.agentModel.flatMap((model) => {
-    return model.rewardFunction.map((reward, index) => {
-      return {
-        key: `${model.name}-${index}`,
-        rewardName: reward[1],
-        rewardValue: reward[0],
-      };
-    });
-  })}
-  pagination={false}
-  bordered
-/>
+            <h3>奖励信息</h3>
+            <Table
+              columns={[
+                { title: '奖励名称', dataIndex: 'rewardName', key: 'rewardName' },
+                { title: '奖励值', dataIndex: 'rewardValue', key: 'rewardValue' },
+              ]}
+              dataSource={
+                selectedAgent.agentModel
+                  .flatMap(model => model.rewardFunction)
+                  .reduce((acc, reward) => {
+                    const existing = acc.find(item => item.rewardName === reward[1]);
+                    if (existing) {
+                      // 如果奖励名称已存在，合并显示（这里保持原值，你也可以选择相加或其他处理）
+                      existing.rewardValue = `${existing.rewardValue}`;
+                    } else {
+                      acc.push({
+                        key: reward[1], // 使用奖励名称作为key
+                        rewardName: reward[1],
+                        rewardValue: reward[0],
+                      });
+                    }
+                    return acc;
+                  }, [])
+              }
+              pagination={false}
+              bordered
+            />
           </div>
         )}
       </Modal>
