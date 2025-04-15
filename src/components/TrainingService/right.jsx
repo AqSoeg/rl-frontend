@@ -76,10 +76,12 @@ const Right = observer(({ decisionModels, fetchDecisions }) => {
     setSelectedAgent(null); // 清除之前载入的智能体信息
     setTraining(false); // 重置训练状态
     intelligentStore.loadAgent(null); // 清除 IntelligentStore 中的智能体信息
-  }, [intelligentStore.selectedAlgorithm]);
+  }, [intelligentStore.selectedAlgorithm,intelligentStore.selectedAgentRole]);
+
+
 
   const isModelCompatibleWithAlgorithm = (model, algorithm) => {
-    if (algorithm.type_name === "单智能体" && model.agentType !== "单智能体") {
+    if (model.agentType === "单智能体" && algorithm.type_name !== "单智能体") {
       return false;
     }
 
@@ -427,38 +429,39 @@ const Right = observer(({ decisionModels, fetchDecisions }) => {
             <Table
               columns={[
                 { title: '实体名称', dataIndex: 'name', key: 'name' },
-                { title: '当前信号灯状态', dataIndex: 'trafficLightStatus', key: 'trafficLightStatus' },
-                { title: '等待通过的车辆数量', dataIndex: 'waitingVehicles', key: 'waitingVehicles' },
-                { title: '等待通过的行人数量', dataIndex: 'waitingPedestrians', key: 'waitingPedestrians' },
+                ...selectedAgent.agentModel.flatMap((model) => {
+                  // 获取所有状态字段名称，使用 state[2] 作为列名
+                  const stateFields = model.stateVector.map((state) => state[2]);
+                  // 去重并生成动态列定义
+                  return [...new Set(stateFields)].map((field) => ({
+                    title: field,
+                    dataIndex: field,
+                    key: field,
+                  }));
+                }),
               ]}
               dataSource={selectedAgent.agentModel.flatMap((model) => {
-                const entityStateMap = {};
+                // 获取所有实体名称
+                const entities = [...new Set(model.stateVector.map((state) => state[0]))];
 
-                model.stateVector.forEach((state) => {
-                  const entityName = state[0];
-                  const fieldName = state[1];
-                  const fieldValue = state[3];
+                // 遍历每个实体，获取其对应的状态信息
+                return entities.map((entity) => {
+                  // 初始化状态信息
+                  const entityState = {
+                    key: entity,
+                    name: entity,
+                  };
 
-                  if (!entityStateMap[entityName]) {
-                    entityStateMap[entityName] = {
-                      key: entityName,
-                      name: entityName,
-                      trafficLightStatus: '无',
-                      waitingVehicles: '无',
-                      waitingPedestrians: '无',
-                    };
-                  }
+                  // 遍历状态向量，更新状态信息，使用 state[2] 作为字段名
+                  model.stateVector.forEach((state) => {
+                    const [entityName, , fieldName, fieldValue] = state; // 使用 state[2] 作为字段名
+                    if (entityName === entity) {
+                      entityState[fieldName] = fieldValue;
+                    }
+                  });
 
-                  if (fieldName === 'Traffic Light Status') {
-                    entityStateMap[entityName].trafficLightStatus = fieldValue;
-                  } else if (fieldName === 'Number of Waiting Vehicles') {
-                    entityStateMap[entityName].waitingVehicles = fieldValue;
-                  } else if (fieldName === 'Number of Pedestrians') {
-                    entityStateMap[entityName].waitingPedestrians = fieldValue;
-                  }
+                  return entityState;
                 });
-
-                return Object.values(entityStateMap);
               })}
               pagination={false}
               bordered
@@ -483,8 +486,12 @@ const Right = observer(({ decisionModels, fetchDecisions }) => {
                     name: entity,
                     actionName: action ? action.name : '无',
                     actionType: action ? action.type : '无',
-                    actionValue: action ? (Array.isArray(action.action) ? action.action.join(', ') : '无') : '无',
-                    maxActionValue: action ? (Array.isArray(action.action[1]) ? action.action[1].join(', ') : '无') : '无',
+                    actionValue: action ? (Array.isArray(action.action[0]) ? action.action[0].join(', ') : '无') : '无',
+                    maxActionValue: action ? (
+                      action.type === '离散型' ? 
+                        (Array.isArray(action.action[1]) ? action.action[1].join(', ') : '无') :
+                        (Array.isArray(action.action[2]) ? action.action[2].join('-') : '无')
+                    ) : '无',
                     rule: action ? (Array.isArray(action.rule) ? action.rule.join(', ') : '无') : '无',
                   };
                 });
@@ -493,42 +500,24 @@ const Right = observer(({ decisionModels, fetchDecisions }) => {
               bordered
             />
 
-            <h3>奖励信息</h3>
-            <Table
-              columns={[
-                { title: '奖励名称', dataIndex: 'rewardName', key: 'rewardName' },
-                { title: '奖励值', dataIndex: 'rewardValue', key: 'rewardValue' },
-              ]}
-              dataSource={(() => {
-                const { rewards, teamReward } = selectedAgent.agentModel
-                  .flatMap((model) => model.rewardFunction)
-                  .reduce(
-                    (acc, reward) => {
-                      if (reward[1] === '团队奖励') {
-                        acc.teamReward = reward;
-                      } else {
-                        acc.rewards.push({
-                          key: acc.rewards.length,
-                          rewardName: reward[1],
-                          rewardValue: reward[0],
-                        });
-                      }
-                      return acc;
-                    },
-                    { rewards: [], teamReward: null }
-                  );
-
-                return teamReward
-                  ? rewards.concat({
-                      key: 'team-reward',
-                      rewardName: teamReward[1],
-                      rewardValue: teamReward[0],
-                    })
-                  : rewards;
-              })()}
-              pagination={false}
-              bordered
-            />
+<h3>奖励信息</h3>
+<Table
+  columns={[
+    { title: '奖励名称', dataIndex: 'rewardName', key: 'rewardName' },
+    { title: '奖励值', dataIndex: 'rewardValue', key: 'rewardValue' },
+  ]}
+  dataSource={selectedAgent.agentModel.flatMap((model) => {
+    return model.rewardFunction.map((reward, index) => {
+      return {
+        key: `${model.name}-${index}`,
+        rewardName: reward[1],
+        rewardValue: reward[0],
+      };
+    });
+  })}
+  pagination={false}
+  bordered
+/>
           </div>
         )}
       </Modal>

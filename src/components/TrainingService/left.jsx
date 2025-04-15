@@ -227,23 +227,38 @@ const Left = observer(({ scenarios, algorithms,datasets }) => {
 
             {/* 智能体状态信息 */}
             <h5>智能体状态信息：</h5>
-            <Table
-              columns={[
-                { title: '智能体名称', dataIndex: 'name', key: 'name' },
-                { title: '当前信号灯状态', dataIndex: 'trafficLightStatus', key: 'trafficLightStatus' },
-                { title: '等待通过的车辆数量', dataIndex: 'waitingVehicles', key: 'waitingVehicles' },
-                { title: '等待通过的行人数量', dataIndex: 'waitingPedestrians', key: 'waitingPedestrians' },
-              ]}
-              dataSource={intelligentStore.selectedAgent.agentModel.map((model) => ({
-                key: model.name,
-                name: model.name,
-                trafficLightStatus: model.stateVector.find((state) => state[1] === 'Traffic Light Status')?.[3] || '无',
-                waitingVehicles: model.stateVector.find((state) => state[1] === 'Number of Waiting Vehicles')?.[3] || '无',
-                waitingPedestrians: model.stateVector.find((state) => state[1] === 'Number of Pedestrians')?.[3] || '无',
-              }))}
-              pagination={false}
-              bordered
-            />
+<Table
+  columns={[
+    { title: '智能体名称', dataIndex: 'name', key: 'name' },
+    ...intelligentStore.selectedAgent.agentModel.flatMap((model) => {
+      // 获取所有状态字段名称，使用 state[2] 作为列名
+      const stateFields = model.stateVector.map((state) => state[2]);
+      // 去重并生成动态列定义
+      return [...new Set(stateFields)].map((field) => ({
+        title: field,
+        dataIndex: field,
+        key: field,
+      }));
+    }),
+  ]}
+  dataSource={intelligentStore.selectedAgent.agentModel.map((model) => {
+    // 初始化状态信息
+    const entityState = {
+      key: model.name,
+      name: model.name,
+    };
+
+    // 遍历状态向量，更新状态信息，使用 state[2] 作为字段名
+    model.stateVector.forEach((state) => {
+      const [, , fieldName, fieldValue] = state; // 使用 state[2] 作为字段名
+      entityState[fieldName] = fieldValue;
+    });
+
+    return entityState;
+  })}
+  pagination={false}
+  bordered
+/>
           </div>
         ) : (
           <div>请选择一个智能体</div>
