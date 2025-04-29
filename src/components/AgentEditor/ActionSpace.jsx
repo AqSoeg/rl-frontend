@@ -611,7 +611,7 @@ const ActionModal = ({
                         style={{ width: '300px' }}
                         disabled={!selectedActionType}
                     >
-                        {getActionRange().length !== 2 && getActionRange()[0] < getActionRange()[1] && (
+                        {getActionRange().length === 2 && getActionRange()[0] < getActionRange()[1] && (
                             <Option value="连续型">连续型</Option>
                         )}
                         {getActionDiscreteValues().length > 0 && (

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button, Table, Checkbox } from 'antd';
 import stateLogo from '../../assets/stateVector.svg';
+import communicationLogo from '../../assets/communication.svg';
 import entityAssignmentStore from './EntityAssignmentStore';
 import stateVectorStore from './StateVectorStore';
 import sidebarStore from './SidebarStore';
@@ -142,8 +143,11 @@ const StateVector = ({ entities }) => {
     return (
         <div className="sub-component">
             <div className="sub-component-banner">
-                <img src={stateLogo} alt="StateVector" className="sub-component-logo" />
+                <img src={stateLogo} alt="StateVector" className="sub-component-logo"/>
                 <div className="sub-component-title">状态向量</div>
+            </div>
+            <div className="upload-button">
+                <img src={communicationLogo} alt="Communication" className="upload-button-logo"/>
             </div>
             <div className="dropdown-container-wrapper">
                 {entityAssignmentStore.isAgentSelected && entities?.map((entity, i) => (
@@ -178,7 +182,7 @@ const StateVector = ({ entities }) => {
                                     ]}
                                     dataSource={getTableData(entity)}
                                     pagination={false}
-                                    scroll={{ y: 240 }}
+                                    scroll={{y: 240}}
                                     className="fixed-table"
                                 />
                             </div>
