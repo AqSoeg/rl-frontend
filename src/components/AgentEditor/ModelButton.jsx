@@ -119,10 +119,9 @@ const ModelFunction = ({scenarios}) => {
                     const uniqueKey = `${action.entity}：${action.name}`;
                     actionSpaceStore.setRuleForModel(agent, uniqueKey, {
                         ruleType: action.rule[0],
-                        condition1: action.rule[1],
-                        condition2: action.rule[2],
-                        execution1: action.rule[3],
-                        execution2: action.rule[4],
+                        condition: action.rule[1],
+                        execution1: action.rule[2],
+                        execution2: action.rule[3]
                     });
                 }
             });
@@ -172,7 +171,12 @@ const ModelFunction = ({scenarios}) => {
                                 action: action.mode === '连续型'
                                     ? [[parseFloat(action.lowerLimit), parseFloat(action.upperLimit)], action.unit, action.range]
                                     : [action.discreteValues, action.discreteOptions],
-                                rule: rule ? [rule.ruleType, rule.condition1, rule.condition2, rule.execution1, rule.execution2] : null
+                                rule: rule ? [
+                                    rule.ruleType,
+                                    rule.condition,
+                                    rule.execution1,
+                                    rule.execution2
+                                ] : null
                             };
                         });
 
