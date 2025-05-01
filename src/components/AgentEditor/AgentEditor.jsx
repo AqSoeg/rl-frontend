@@ -69,7 +69,7 @@ const AgentEditor = () => {
             <Sidebar scenarios={scenarios} />
             <div className="gradient-box">
                 <StateVector entities={selectedEntities} />
-                <ActionSpace entities={selectedEntities} actionTypes={selectedActionTypes} />
+                <ActionSpace entities={selectedEntities} actionTypes={selectedActionTypes} selectedParams={selectedParams} />
                 <RewardFunction selectedParams={selectedParams} />
                 <ModelFunction scenarios={scenarios} />
             </div>
