@@ -90,6 +90,30 @@ rl-frontend/
             "Number of Waiting Vehicles",
             "等待通过的车辆数量",
             "辆"
+          ],
+          [
+            "红绿灯2",
+            "Number of Pedestrians",
+            "等待通过的行人数量",
+            "人"
+          ],
+          [
+            "红绿灯4",
+            "Traffic Light Status",
+            "当前信号灯状态",
+            "状态"
+          ],
+          [
+            "红绿灯4",
+            "Number of Waiting Vehicles",
+            "等待通过的车辆数量",
+            "辆"
+          ],
+          [
+            "红绿灯4",
+            "Number of Pedestrians",
+            "等待通过的行人数量",
+            "人"
           ]
         ],
         "actionSpace": [
@@ -176,6 +200,30 @@ rl-frontend/
             "Number of Waiting Vehicles",
             "等待通过的车辆数量",
             "辆"
+          ],
+          [
+            "红绿灯1",
+            "Number of Pedestrians",
+            "等待通过的行人数量",
+            "人"
+          ],
+          [
+            "红绿灯3",
+            "Traffic Light Status",
+            "当前信号灯状态",
+            "状态"
+          ],
+          [
+            "红绿灯3",
+            "Number of Waiting Vehicles",
+            "等待通过的车辆数量",
+            "辆"
+          ],
+          [
+            "红绿灯3",
+            "Number of Pedestrians",
+            "等待通过的行人数量",
+            "人"
           ]
         ],
         "actionSpace": [
@@ -249,7 +297,7 @@ rl-frontend/
         ]
       }
     ],
-    "updateTime": "2025-04-30T08:49:02.289Z"
+    "updateTime": "2025-05-01T07:15:23.511Z"
   },
   {
     "agentID": "aa11c3eab13189e",
@@ -294,6 +342,12 @@ rl-frontend/
             "Number of Pedestrians",
             "等待通过的行人数量",
             "人"
+          ],
+          [
+            "红绿灯4",
+            "Traffic Light Status",
+            "当前信号灯状态",
+            "状态"
           ]
         ],
         "actionSpace": [
@@ -345,16 +399,22 @@ rl-frontend/
             "状态"
           ],
           [
-            "红绿灯4",
+            "红绿灯1",
             "Number of Waiting Vehicles",
             "等待通过的车辆数量",
             "辆"
           ],
           [
-            "红绿灯4",
+            "红绿灯2",
             "Number of Pedestrians",
             "等待通过的行人数量",
             "人"
+          ],
+          [
+            "红绿灯3",
+            "Traffic Light Status",
+            "当前信号灯状态",
+            "状态"
           ]
         ],
         "actionSpace": [
@@ -396,7 +456,7 @@ rl-frontend/
         ]
       }
     ],
-    "updateTime": "2025-04-30T08:54:17.457Z"
+    "updateTime": "2025-05-01T07:16:57.413Z"
   }
 ]
 ```

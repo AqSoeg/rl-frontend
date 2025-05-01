@@ -156,7 +156,8 @@ const ModelFunction = ({scenarios}) => {
 
             const allRewards = rewardFunctionStore.getAllRewards();
 
-            const agentModels = Object.entries(entityAssignmentStore.assignedEntities).map(([agent, entities], index) => {
+            const agentModels = Object.entries(entityAssignmentStore.assignedEntities).map(([agent, entities]) => {
+                // Regular entities assigned to the agent
                 const agentEntities = entities.map(entityName => {
                     const entity = role.entities.find(e => e.name === entityName);
 
@@ -182,7 +183,6 @@ const ModelFunction = ({scenarios}) => {
 
                     const selectedStateVectors = stateVectorStore.getSelectedStateVectors()[entityName] || [];
                     const stateVector = entity.stateVector.filter((_, idx) => selectedStateVectors.includes(idx));
-
                     const stateVectorWithEntityName = stateVector.map(vector => [entityName, ...vector]);
 
                     return {
@@ -191,6 +191,24 @@ const ModelFunction = ({scenarios}) => {
                         actionSpace: actionSpaceData
                     };
                 });
+
+                // Communication entities for the agent
+                const communicationEntities = stateVectorStore.getCommunicationEntities(agent).map(commEntity => {
+                    const baseEntityName = commEntity.name.replace('通信-', '');
+                    const entity = role.entities.find(e => e.name === baseEntityName);
+
+                    const selectedStateVectors = stateVectorStore.getSelectedStateVectors()[commEntity.name] || [];
+                    const stateVector = entity.stateVector.filter((_, idx) => selectedStateVectors.includes(idx));
+                    const stateVectorWithEntityName = stateVector.map(vector => [baseEntityName, ...vector]);
+
+                    return {
+                        name: baseEntityName,
+                        stateVector: stateVectorWithEntityName,
+                        actionSpace: [] // Communication entities have no actions
+                    };
+                });
+
+                const allAgentEntities = [...agentEntities, ...communicationEntities];
 
                 const agentRewards = allRewards.filter(reward => {
                     if (reward.type === '团队奖励') {
@@ -205,8 +223,8 @@ const ModelFunction = ({scenarios}) => {
 
                 return {
                     name: agent,
-                    stateVector: agentEntities.flatMap(entity => entity.stateVector),
-                    actionSpace: agentEntities.flatMap(entity => entity.actionSpace),
+                    stateVector: allAgentEntities.flatMap(entity => entity.stateVector),
+                    actionSpace: allAgentEntities.flatMap(entity => entity.actionSpace),
                     rewardFunction: agentRewards
                 };
             });
