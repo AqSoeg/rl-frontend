@@ -7,10 +7,12 @@ import stateVectorStore from './StateVectorStore';
 import sidebarStore from './SidebarStore';
 
 const StateVector = ({ entities }) => {
-    const [visible, setVisible] = useState(Array(entities?.length || 0).fill(false));
+    const [visible, setVisible] = useState([]);
     const [selectedVector, setSelectedVector] = useState(null);
     const [selectedVectorIndex, setSelectedVectorIndex] = useState(null);
     const [selectedRows, setSelectedRows] = useState({});
+    const [displayEntities, setDisplayEntities] = useState([]);
+    const [isCommunicationEnabled, setIsCommunicationEnabled] = useState(false);
 
     useEffect(() => {
         const selectedStateVectors = stateVectorStore.getSelectedStateVectors();
@@ -30,26 +32,66 @@ const StateVector = ({ entities }) => {
     }, [selectedRows]);
 
     useEffect(() => {
+        const updateEntities = () => {
+            if (entityAssignmentStore.isAgentSelected) {
+                const selectedAgent = entityAssignmentStore.selectedAgent;
+                const assignedEntities = entityAssignmentStore.assignedEntities[selectedAgent] || [];
+                const assignedEntityObjects = entities.filter(entity =>
+                    assignedEntities.includes(entity.name)
+                );
+                const communicationEntities = stateVectorStore.getCommunicationEntities(selectedAgent);
+                const allDisplayEntities = [...assignedEntityObjects, ...communicationEntities];
+                setDisplayEntities(allDisplayEntities);
+                setVisible(Array(allDisplayEntities.length).fill(false));
+                setIsCommunicationEnabled(
+                    sidebarStore.type !== '单智能体' && !!selectedAgent
+                );
+            } else {
+                setDisplayEntities([]);
+                setVisible([]);
+                setIsCommunicationEnabled(false);
+            }
+        };
+
+        updateEntities();
+        const unsubscribe = entityAssignmentStore.subscribe(updateEntities);
+        return () => unsubscribe();
+    }, [entities]);
+
+    const handleCommunicationToggle = () => {
         if (entityAssignmentStore.isAgentSelected) {
             const selectedAgent = entityAssignmentStore.selectedAgent;
+            stateVectorStore.toggleCommunication(selectedAgent);
             const assignedEntities = entityAssignmentStore.assignedEntities[selectedAgent] || [];
-            setVisible(Array(assignedEntities.length).fill(false));
-        } else {
-            setVisible([]);
+            const assignedEntityObjects = entities.filter(entity =>
+                assignedEntities.includes(entity.name)
+            );
+            const communicationEntities = stateVectorStore.getCommunicationEntities(selectedAgent);
+            const allDisplayEntities = [...assignedEntityObjects, ...communicationEntities];
+            setDisplayEntities(allDisplayEntities);
+            setVisible(Array(allDisplayEntities.length).fill(false));
+
+            const newSelectedRows = { ...selectedRows };
+            communicationEntities.forEach(entity => {
+                if (!newSelectedRows[entity.name]) {
+                    newSelectedRows[entity.name] = [];
+                }
+            });
+            setSelectedRows(newSelectedRows);
         }
-    }, [entityAssignmentStore.isAgentSelected, entityAssignmentStore.selectedAgent, entityAssignmentStore.assignedEntities]);
+    };
 
     const handleSelectChange = (index) => {
         const newVisible = [...visible];
         newVisible[index] = !newVisible[index];
         setVisible(newVisible);
-        setSelectedVector(entities[index]);
+        setSelectedVector(displayEntities[index]);
         setSelectedVectorIndex(index);
     };
 
     const handleSelectAll = (entityName, selected) => {
         const newSelectedRows = { ...selectedRows };
-        const entity = entities.find(e => e.name === entityName);
+        const entity = displayEntities.find(e => e.name === entityName);
         if (entity && Array.isArray(entity.stateVector)) {
             if (selected) {
                 newSelectedRows[entityName] = entity.stateVector.map((_, idx) => idx);
@@ -60,12 +102,15 @@ const StateVector = ({ entities }) => {
             if (sidebarStore.type === '同构多智能体') {
                 const agentEntityMapping = entityAssignmentStore.agentEntityMapping;
                 const entityGroup = agentEntityMapping.find(group =>
-                    Object.keys(group).some(name => name === entityName)
+                    Object.keys(group).some(name => name.replace('通信-', '') === entityName.replace('通信-', ''))
                 );
                 if (entityGroup) {
-                    Object.entries(entityGroup).forEach(([name]) => {
-                        if (name !== entityName) {
-                            newSelectedRows[name] = [...newSelectedRows[entityName]];
+                    Object.entries(entityGroup).forEach(([name, agent]) => {
+                        const mappedName = entity.isCommunication
+                            ? `通信-${Object.keys(entityGroup).find(k => entityGroup[k] !== agent)}`
+                            : name;
+                        if (mappedName !== entityName && mappedName.replace('通信-', '') !== entityName.replace('通信-', '')) {
+                            newSelectedRows[mappedName] = [...newSelectedRows[entityName]];
                         }
                     });
                 }
@@ -89,18 +134,22 @@ const StateVector = ({ entities }) => {
         if (sidebarStore.type === '同构多智能体') {
             const agentEntityMapping = entityAssignmentStore.agentEntityMapping;
             const entityGroup = agentEntityMapping.find(group =>
-                Object.keys(group).some(name => name === entityName)
+                Object.keys(group).some(name => name.replace('通信-', '') === entityName.replace('通信-', ''))
             );
             if (entityGroup) {
-                Object.entries(entityGroup).forEach(([name]) => {
-                    if (name !== entityName) {
-                        if (!newSelectedRows[name]) {
-                            newSelectedRows[name] = [];
+                const entity = displayEntities.find(e => e.name === entityName);
+                Object.entries(entityGroup).forEach(([name, agent]) => {
+                    const mappedName = entity.isCommunication
+                        ? `通信-${Object.keys(entityGroup).find(k => entityGroup[k] !== agent)}`
+                        : name;
+                    if (mappedName !== entityName && mappedName.replace('通信-', '') !== entityName.replace('通信-', '')) {
+                        if (!newSelectedRows[mappedName]) {
+                            newSelectedRows[mappedName] = [];
                         }
                         if (newSelectedRows[entityName].includes(rowIndex)) {
-                            newSelectedRows[name].push(rowIndex);
+                            newSelectedRows[mappedName].push(rowIndex);
                         } else {
-                            newSelectedRows[name] = newSelectedRows[name].filter(idx => idx !== rowIndex);
+                            newSelectedRows[mappedName] = newSelectedRows[mappedName].filter(idx => idx !== rowIndex);
                         }
                     }
                 });
@@ -136,7 +185,7 @@ const StateVector = ({ entities }) => {
             info,
             unit,
             key: idx,
-            entityName: vector.name, // 添加实体名称
+            entityName: vector.name,
         }));
     };
 
@@ -147,10 +196,28 @@ const StateVector = ({ entities }) => {
                 <div className="sub-component-title">状态向量</div>
             </div>
             <div className="upload-button">
-                <img src={communicationLogo} alt="Communication" className="upload-button-logo"/>
+                <img
+                    src={communicationLogo}
+                    alt="Toggle Communication"
+                    className="upload-button-logo"
+                    onClick={isCommunicationEnabled ? handleCommunicationToggle : undefined}
+                    onKeyDown={(e) => {
+                        if (isCommunicationEnabled && (e.key === 'Enter' || e.key === ' ')) {
+                            e.preventDefault();
+                            handleCommunicationToggle();
+                        }
+                    }}
+                    tabIndex={0}
+                    role="button"
+                    aria-disabled={!isCommunicationEnabled}
+                    style={{
+                        cursor: isCommunicationEnabled ? 'pointer' : 'not-allowed',
+                        opacity: isCommunicationEnabled ? 1 : 0.5,
+                    }}
+                />
             </div>
             <div className="dropdown-container-wrapper">
-                {entityAssignmentStore.isAgentSelected && entities?.map((entity, i) => (
+                {entityAssignmentStore.isAgentSelected && displayEntities?.map((entity, i) => (
                     <div key={i} className="dropdown-container">
                         <div className="dropdown-header" onClick={() => handleSelectChange(i)}>
                             <span>{entity.name}</span>
@@ -174,7 +241,7 @@ const StateVector = ({ entities }) => {
                                             render: (_, record, rowIndex) => (
                                                 <Checkbox
                                                     checked={selectedRows[entity.name]?.includes(rowIndex) || false}
-                                                    onChange={() => handleRowSelect(entity.name, rowIndex)}
+                                                    onChange={() => handleRowSelect(record.entityName, rowIndex)}
                                                 />
                                             ),
                                         },
