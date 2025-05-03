@@ -7,7 +7,7 @@ const appConfig = {
   saveModel: "http://localhost:5000/saveModel",
   loadEvaluationData: "http://localhost:5000/loadEvaluationData",
   startEvaluation: "http://localhost:5000/startEvaluation",
-  offlineEvaluation: "http://localhost:5000/offlineEvaluation",
+  loadEvaluationResult: "http://localhost:5000/loadEvaluationResult",
   get_algorithm:"http://localhost:5000/get_algorithm",
   train:"http://localhost:5000/train",
   stop_training: "http://localhost:5000/stop_training",

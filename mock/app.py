@@ -82,7 +82,26 @@ def start_evaluation():
         data = request.json
         evaluation_type = data.get('evaluationType')
         evaluation_data = data.get('evaluationData', {})
-        model_id = evaluation_data.get('modelId') if evaluation_type == '在线评估' else evaluation_data.get('modelInfo', {}).get('id')
+
+        if evaluation_type == '在线评估':
+            model_id = evaluation_data.get('modelId')
+            print(f"Starting online evaluation for model: {model_id}")
+        else:
+            print("离线评估模式：\n验证基础结构，验证模型信息、验证场景信息、验证智能体信息、验证训练信息•••\n验证成功！")
+            print("Starting offline evaluation with data:", evaluation_data)
+
+        return '数据发送成功，后台正在评估中•••'
+
+    except Exception as e:
+        print(f'Error during evaluation: {str(e)}')
+        return '数据发送失败，请检查网络连接！'
+
+@app.route('/loadEvaluationResult', methods=['POST'])
+def load_evaluation_result():
+    try:
+        data = request.json
+        model_id = data.get('modelId')
+        evaluation_type = data.get('evaluationType')
 
         with open(EVALUATION_RESULT_PATH, 'r', encoding='utf-8') as file:
             results = json.load(file)
@@ -99,14 +118,8 @@ def start_evaluation():
             'eval_suggestion': result['eval_suggestion']
         })
     except Exception as e:
-        print(f'Error during evaluation: {str(e)}')
-        return jsonify({'error': 'Evaluation failed'}), 500
-
-@app.route('/offlineEvaluation', methods=['POST'])
-def offline_evaluation():
-    data = request.json
-    print("[离线数据接收]:", data)
-    return jsonify({'status': 'success', 'message': '数据发送成功，后台正在评估中'})
+        print(f'Error loading evaluation result: {str(e)}')
+        return jsonify({'error': 'Failed to load evaluation result'}), 500
 
 @app.route('/get_datasets', methods=['POST'])
 def get_offline_datasets():

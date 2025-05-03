@@ -249,14 +249,47 @@ const EvaluationOptimization = () => {
                 });
                 data = await response.json();
             } else {
-                const response = await fetch('/mock/evaluation_data.json');
-                data = await response.json();
+                const file = await new Promise((resolve) => {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = '.json';
+                    input.onchange = (e) => resolve(e.target.files[0]);
+                    input.click();
+                });
+                if (!file) return;
+                if (!file.name.endsWith('.json')) {
+                    alert('仅支持JSON文件！');
+                    return;
+                }
+                const reader = new FileReader();
+                const content = await new Promise((resolve, reject) => {
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = reject;
+                    reader.readAsText(file);
+                });
+                data = JSON.parse(content);
+                const validateStructure = (data) => {
+                    const isValid = Array.isArray(data) && data.every(item =>
+                        item.model?.id &&
+                        item.scenario?.name &&
+                        item.agent?.role &&
+                        item.train?.algorithm &&
+                        Array.isArray(item.scenario.envParams) &&
+                        Array.isArray(item.agent.entityAssignments) &&
+                        Array.isArray(item.train.hyperParams)
+                    );
+                    return isValid;
+                };
+                if (!validateStructure(Array.isArray(data) ? data : [data])) {
+                    alert('文件格式错误：结构不符合要求！');
+                    return;
+                }
             }
-            setEvaluationData(data);
+            setEvaluationData(Array.isArray(data) ? data : [data]);
             setIsDataModalVisible(true);
         } catch (error) {
             console.error('数据载入失败:', error);
-            alert('数据载入失败，请检查网络连接！');
+            alert(`数据载入失败：${error.message || '文件格式错误'}`);
         }
     };
 
@@ -267,10 +300,18 @@ const EvaluationOptimization = () => {
         }
         try {
             let evalData = {};
+            let modelId = '';
             if (selectedEvaluationType === '在线评估') {
-                evalData = { modelId: selectedModel.model.id };
+                modelId = selectedModel.model.id;
+                evalData = { modelId };
             } else {
-                evalData = sidebarData;
+                evalData = {
+                    model: sidebarData.modelInfo,
+                    scenario: sidebarData.scenarioInfo,
+                    agent: sidebarData.agentInfo,
+                    train: sidebarData.trainInfo
+                };
+                modelId = sidebarData.modelInfo.id;
             }
             const response = await fetch(__APP_CONFIG__.startEvaluation, {
                 method: 'POST',
@@ -280,7 +321,22 @@ const EvaluationOptimization = () => {
                     evaluationData: evalData
                 }),
             });
-            const data = await response.json();
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || '评估请求失败');
+            }
+
+            const result = await response.text();
+            alert(result);
+            const resultResponse = await fetch(__APP_CONFIG__.loadEvaluationResult, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    modelId: modelId,
+                    evaluationType: selectedEvaluationType
+                }),
+            });
+            const data = await resultResponse.json();
             if (data.error) {
                 throw new Error(data.error);
             }
@@ -292,7 +348,7 @@ const EvaluationOptimization = () => {
             setEvalSuggestion(data.eval_suggestion);
         } catch (error) {
             console.error('评估失败:', error);
-            alert('评估请求失败，请稍后重试！');
+            alert(`评估失败：${error.message}`);
         }
     };
 
@@ -446,8 +502,8 @@ const EvaluationOptimization = () => {
                     <div className="EO-text">场景信息</div>
                     {sidebarData.scenarioInfo.name && (
                         <>
-                            <div className="EO-info-item EO-info-string">名称: {sidebarData.scenarioInfo.name}</div>
-                            <div className="EO-info-item EO-info-string">描述: {sidebarData.scenarioInfo.description}</div>
+                            <div className="EO-info-item">名称: {sidebarData.scenarioInfo.name}</div>
+                            <div className="EO-info-item">描述: {sidebarData.scenarioInfo.description}</div>
                             <Table
                                 columns={envParamsColumns}
                                 dataSource={sidebarData.scenarioInfo.envParams}
@@ -463,9 +519,9 @@ const EvaluationOptimization = () => {
                     <div className="EO-text">智能体信息</div>
                     {sidebarData.agentInfo.role && (
                         <>
-                            <div className="EO-info-item EO-info-string">角色: {sidebarData.agentInfo.role}</div>
-                            <div className="EO-info-item EO-info-string">类型: {sidebarData.agentInfo.type}</div>
-                            <div className="EO-info-item EO-info-string">数量: {sidebarData.agentInfo.count}</div>
+                            <div className="EO-info-item">角色: {sidebarData.agentInfo.role}</div>
+                            <div className="EO-info-item">类型: {sidebarData.agentInfo.type}</div>
+                            <div className="EO-info-item">数量: {sidebarData.agentInfo.count}</div>
                             <Table
                                 columns={entityAssignmentsColumns}
                                 dataSource={sidebarData.agentInfo.entityAssignments}
@@ -481,11 +537,11 @@ const EvaluationOptimization = () => {
                     <div className="EO-text">决策模型信息</div>
                     {sidebarData.modelInfo.id && (
                         <>
-                            <div className="EO-info-item EO-info-string">模型ID: {sidebarData.modelInfo.id}</div>
-                            <div className="EO-info-item EO-info-string">模型名称: {sidebarData.modelInfo.name}</div>
-                            <div className="EO-info-item EO-info-string">模型版本: {sidebarData.modelInfo.version}</div>
-                            <div className="EO-info-item EO-info-string">模型类型: {sidebarData.modelInfo.type}</div>
-                            <div className="EO-info-item EO-info-string">创建时间: {formatDate(sidebarData.modelInfo.time)}</div>
+                            <div className="EO-info-item">模型ID: {sidebarData.modelInfo.id}</div>
+                            <div className="EO-info-item">模型名称: {sidebarData.modelInfo.name}</div>
+                            <div className="EO-info-item">模型版本: {sidebarData.modelInfo.version}</div>
+                            <div className="EO-info-item">模型类型: {sidebarData.modelInfo.type}</div>
+                            <div className="EO-info-item">创建时间: {formatDate(sidebarData.modelInfo.time)}</div>
                         </>
                     )}
                 </div>
@@ -494,7 +550,7 @@ const EvaluationOptimization = () => {
                     <div className="EO-text">训练信息</div>
                     {sidebarData.trainInfo.algorithm && (
                         <>
-                            <div className="EO-info-item EO-info-string">训练算法: {sidebarData.trainInfo.algorithm}</div>
+                            <div className="EO-info-item">训练算法: {sidebarData.trainInfo.algorithm}</div>
                             <Table
                                 columns={hyperParamsColumns}
                                 dataSource={sidebarData.trainInfo.hyperParams}
@@ -614,16 +670,16 @@ const EvaluationOptimization = () => {
                     <div className="EO-detail-content">
                         <div className="EO-detail-section">
                             <div className="EO-text">决策模型信息</div>
-                            <div className="EO-info-item EO-info-string">模型ID: {selectedModel.model.id}</div>
-                            <div className="EO-info-item EO-info-string">模型名称: {selectedModel.model.name}</div>
-                            <div className="EO-info-item EO-info-string">模型版本: {selectedModel.model.version}</div>
-                            <div className="EO-info-item EO-info-string">模型类型: {selectedModel.model.type}</div>
-                            <div className="EO-info-item EO-info-string">创建时间: {formatDate(selectedModel.model.time)}</div>
+                            <div className="EO-info-item">模型ID: {selectedModel.model.id}</div>
+                            <div className="EO-info-item">模型名称: {selectedModel.model.name}</div>
+                            <div className="EO-info-item">模型版本: {selectedModel.model.version}</div>
+                            <div className="EO-info-item">模型类型: {selectedModel.model.type}</div>
+                            <div className="EO-info-item">创建时间: {formatDate(selectedModel.model.time)}</div>
                         </div>
                         <div className="EO-detail-section">
                             <div className="EO-text">场景信息</div>
-                            <div className="EO-info-item EO-info-string">名称: {selectedModel.scenario.name}</div>
-                            <div className="EO-info-item EO-info-string">描述: {selectedModel.scenario.description}</div>
+                            <div className="EO-info-item">名称: {selectedModel.scenario.name}</div>
+                            <div className="EO-info-item">描述: {selectedModel.scenario.description}</div>
                             <Table
                                 columns={envParamsColumns}
                                 dataSource={selectedModel.scenario.envParams}
@@ -634,9 +690,9 @@ const EvaluationOptimization = () => {
                         </div>
                         <div className="EO-detail-section">
                             <div className="EO-text">智能体信息</div>
-                            <div className="EO-info-item EO-info-string">角色: {selectedModel.agent.role}</div>
-                            <div className="EO-info-item EO-info-string">类型: {selectedModel.agent.type}</div>
-                            <div className="EO-info-item EO-info-string">数量: {selectedModel.agent.count}</div>
+                            <div className="EO-info-item">角色: {selectedModel.agent.role}</div>
+                            <div className="EO-info-item">类型: {selectedModel.agent.type}</div>
+                            <div className="EO-info-item">数量: {selectedModel.agent.count}</div>
                             <Table
                                 columns={entityAssignmentsColumns}
                                 dataSource={selectedModel.agent.entityAssignments}
@@ -647,7 +703,7 @@ const EvaluationOptimization = () => {
                         </div>
                         <div className="EO-detail-section">
                             <div className="EO-text">训练信息</div>
-                            <div className="EO-info-item EO-info-string">训练算法: {selectedModel.train.algorithm}</div>
+                            <div className="EO-info-item">训练算法: {selectedModel.train.algorithm}</div>
                             <Table
                                 columns={hyperParamsColumns}
                                 dataSource={selectedModel.train.hyperParams}
