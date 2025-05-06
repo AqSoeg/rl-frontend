@@ -61,25 +61,21 @@
 }
 
 .model-button {
-    background-color: #4caf50;
-    color: white;
-    padding: 30px 50px;
-    border: none;
-    border-radius: 25px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    font-size: 18px;
+    background: url(../../assets/button.png) no-repeat center/contain !important;
+    padding: 0 !important;
+    width: 180px !important;
+    height: 70px !important;
+    border: none !important;
+    box-shadow: none !important;
+    overflow: hidden;
 }
 
 .model-button:hover {
-    background-color: #43a047;
+    filter: brightness(0.9);
 }
 
 .model-button:active {
-    background-color: #388e3c;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-    transform: translateY(2px);
+    transform: translateY(1px);
 }
 
 /* StateVector, ActionSpace, RewardFunction */

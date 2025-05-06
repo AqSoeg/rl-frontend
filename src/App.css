@@ -4,24 +4,23 @@ body {
     font-family: Arial, sans-serif;
 }
 
-/* 应用容器样式 */
 .app-container {
     display: flex;
     flex-direction: column;
     height: 100vh;
 }
 
-/* 头部样式 */
 .app-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #0056b3; /* 蓝色背景 */
-    color: white; /* 白色文字 */
+    background-image: url('./assets/header.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    color: white;
     padding: 10px 20px;
-    width: 100vw; /* 横幅宽度100%视口宽度 */
-    box-sizing: border-box; /* 确保padding不会影响宽度 */
-    height: 60px; /* 设置头部高度比 reactLogo 稍微高一点 */
+    width: 100vw;
+    box-sizing: border-box;
 }
 
 .header-left, .header-right {
@@ -31,15 +30,16 @@ body {
 
 .settings-text {
     margin-right: 0.5rem;
-    font-weight: bold; /* 设置为黑体 */
-    font-size: 1.25rem; /* 字体变大一点 */
+    font-weight: bold;
+    font-size: 1.25rem;
+    color: black;
+    filter: invert(0.2);
 }
 
 .settings-button {
     background: none;
     border: none;
     cursor: pointer;
-    color: white;
     font-size: 1.25rem;
     display: flex;
     align-items: center;
@@ -47,17 +47,16 @@ body {
 
 .settings-icon {
     height: 2rem;
-    filter: invert(1);
+    filter: invert(0.2);
 }
 
-/* 导航栏样式 */
 .app-nav {
     display: flex;
     justify-content: space-around;
     background-color: #f8f9fa;
-    padding: 10px 0;
-    width: 100%; /* 导航栏占据整个窗口的宽度 */
-    box-sizing: border-box; /* 确保padding不会影响宽度 */
+    min-height: 60px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .nav-item {
@@ -70,22 +69,28 @@ body {
 .nav-link {
     text-decoration: none;
     color: black;
-    padding: 10px 20px;
+    padding: 15px 25px;
     border-radius: 5px;
     transition: background-color 0.3s, color 0.3s;
-    text-align: center; /* 使每个导航项在各自蓝底的中间 */
-    flex: 1; /* 使每个导航项占据相等的空间 */
-    font-size: 1.25rem; /* 字体变大一点 */
+    text-align: center;
+    flex: 1;
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
 }
 
 .nav-link:hover {
-    background-color: #007bff;
-    color: white;
+    background-image: url('./assets/nav.png');
+    background-size: cover;
+    background-repeat: no-repeat;
 }
 
 .nav-link.active {
-    background-color: #007bff;
-    color: white;
+    background-image: url('./assets/nav.png');
+    background-size: cover;
+    background-repeat: no-repeat;
 }
 
 .divider {
@@ -95,7 +100,6 @@ body {
     margin: 0 10px;
 }
 
-/* HomeLink 样式 */
 .home-link {
     cursor: pointer;
     display: flex;
@@ -114,13 +118,13 @@ body {
 }
 
 .main-title {
-    font-size: 1.5rem; /* 稍微小一点的字号 */
+    font-size: 1.5rem;
     font-weight: bold;
-    margin: 0; /* 确保与 v1.0 保持同一水平线 */
+    margin: 0;
 }
 
 .sub-title {
     font-size: 1.25rem;
     font-weight: bold;
-    margin: 0 0 0 0.5rem; /* 确保与智能体建模软件保持同一水平线，并在中间有空格 */
+    margin: 0 0 0 0.5rem;
 }
