@@ -262,7 +262,32 @@ const Right = observer(({ decisionModels, fetchDecisions }) => {
       message.error('获取效果图片失败，请检查网络或联系管理员');
     }
   };
+  const handlePublish = async (record) => {
+    try {
+      const response = await fetch(__APP_CONFIG__.publish_model, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ decisionModelID: record.AGENT_MODEL_ID }),
+      });
 
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      if (data.status === 'success') {
+        message.success("模型发布成功")
+        fetchDecisions();
+      } else {
+        message.error('发布模型失败，请检查日志');
+      }
+    } catch (error) {
+      console.error('发布模型失败:', error);
+      message.error('发布模型失败，请检查网络或联系管理员');
+    }
+  };
   const scenarioColumns = [
     {
       title: '序号',
@@ -316,6 +341,7 @@ const Right = observer(({ decisionModels, fetchDecisions }) => {
     { title: '模型版本', dataIndex: 'AGENT_MODEL_VERSION', key: 'AGENT_MODEL_VERSION' },
     { title: '模型类型', dataIndex: 'NN_MODEL_TYPE', key: 'NN_MODEL_TYPE' },
     { title: '创建时间', dataIndex: 'CREAT_TIME', key: 'CREAT_TIME', render: time => new Date(time).toLocaleString() },
+    { title: '发布状态', dataIndex: 'STATE', key: 'STATE' },
     {
       title: '操作',
       key: 'action',
@@ -323,6 +349,7 @@ const Right = observer(({ decisionModels, fetchDecisions }) => {
         <div style={{ display: 'flex', gap: 8 }}>
           <Button type="primary" onClick={() => handleViewModel(record)}>查看</Button>
           <Button type="primary" onClick={() => handleEffectModel(record)}>效果</Button>
+          <Button type="primary" onClick={() => handlePublish(record)}>发布</Button>
         </div>
       ),
     },

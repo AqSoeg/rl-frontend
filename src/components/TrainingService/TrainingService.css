@@ -34,27 +34,22 @@
 
 
 
-
-
-
-  .middle {
-    flex: 1;
-    background-color: #ffffff;
-    padding: 20px; /* 内边距 */
-   
+  .right {
+    flex: 4;
+    background-color: #ffffff; /* 右列背景色，根据需要调整 */
+    position: relative;
+  }
+  .ant-card{
+    margin-top: 10px;
+    
   }
 
-  .image-container {
-    background-color: #180c0c; /* 图片区域背景色 */
-    border-radius: 4px; /* 图片区域圆角 */
-    height: 45vh; /* 图片区域高度 */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .edit-container {
-    margin-top: 80px; /* 与图片区域的间距 */
+  
+  .button-container {
+    position: absolute;
+    margin-top: 10px;
+    width: 100%;
+    text-align: center;
   }
   .select-style {
     margin-right: 10px; /* 选择器之间的间隔 */
@@ -65,26 +60,3 @@
   .input{
     margin-top: 10px;
   }
-
-
-
-
-
-
-  .right {
-    flex: 2;
-    background-color: #ffffff; /* 右列背景色，根据需要调整 */
-    position: relative;
-  }
-  .ant-card{
-    margin-top: 40px;
-  }
-
-  
-  .button-container {
-    position: absolute;
-    margin-top: 40px;
-    width: 100%;
-    text-align: center;
-  }
-
