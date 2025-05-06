@@ -8,7 +8,8 @@
     "NN_MODEL_TYPE": "1000",
     "MODEL_PATH": "/path/to/model2",
     "IMG_URL": "http://example.com/image2",
-    "CREAT_TIME": "2025-03-12T10:05:24.083Z"
+    "CREAT_TIME": "2025-03-12T10:05:24.083Z",
+    "STATE": "未发布"
   },
   {
     "AGENT_MODEL_ID": "1741855526",
@@ -19,7 +20,8 @@
     "NN_MODEL_TYPE": "distributed_multi_agent",
     "MODEL_PATH": "mock/ppo_model.pkl",
     "IMG_URL": "http://example.com/image",
-    "CREAT_TIME": "2025-03-13T16:45:26.736949"
+    "CREAT_TIME": "2025-03-13T16:45:26.736949",
+    "STATE": "已发布"
   },
   {
     "AGENT_MODEL_ID": "1741855662",
@@ -30,6 +32,7 @@
     "NN_MODEL_TYPE": "distributed_multi_agent",
     "MODEL_PATH": "mock/ppo_model.pkl",
     "IMG_URL": "http://example.com/image",
-    "CREAT_TIME": "2025-03-13T16:47:42.557135"
+    "CREAT_TIME": "2025-03-13T16:47:42.557135",
+    "STATE": "已发布"
   }
 ]

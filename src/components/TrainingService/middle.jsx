@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Select, Button, Input, Card, message } from 'antd';
 import { intelligentStore } from './IntelligentStore';
 import { observer } from 'mobx-react';
-import axios from 'axios'; // 引入 axios 用于发送请求
 
 const { Option } = Select;
 
@@ -62,38 +61,46 @@ const Middle = observer(({ refreshData }) => {
     setValue(value);
   };
 
-  const handleUpdate = async () => { // 改为异步函数
+  const handleUpdate = async () => {
     const selectedEntityParams = envParamsMap[entity];
     if (selectedEntityParams) {
       const selectedAttributeInfo = selectedEntityParams.find(attr => attr.key === attribute);
       if (selectedAttributeInfo) {
         try {
-          // 发送请求到后端更新数据
-          const response = await axios.post(__APP_CONFIG__.updateDbJson, {
-            scenarioId: intelligentStore.selectedScenario.id,
-            entityName: entity,
-            attributeKey: selectedAttributeInfo.key,
-            newValue: value
+          // 使用 fetch 发送请求到后端更新数据
+          const response = await fetch(__APP_CONFIG__.updateDbJson, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              scenarioId: intelligentStore.selectedScenario.id,
+              entityName: entity,
+              attributeKey: selectedAttributeInfo.key,
+              newValue: value
+            }),
           });
-
-          if (response.status === 200) {
-            // 将修改的信息存入状态
-            setModifiedParams(prevState => ({
-              ...prevState,
-              [entity]: {
-                ...prevState[entity],
-                [selectedAttributeInfo.label]: value,
-              },
-            }));
-
-            // 显示更新成功信息
-            setEntityParamsInfo(`更新成功：${entity} 的 ${selectedAttributeInfo.label} 已修改为 ${value}`);
-            message.success('更新成功');
-            // 调用刷新函数
-            refreshData();
-          } else {
-            message.error('更新失败');
+  
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
           }
+  
+          const data = await response.json();
+          
+          // 将修改的信息存入状态
+          setModifiedParams(prevState => ({
+            ...prevState,
+            [entity]: {
+              ...prevState[entity],
+              [selectedAttributeInfo.label]: value,
+            },
+          }));
+  
+          // 显示更新成功信息
+          setEntityParamsInfo(`更新成功：${entity} 的 ${selectedAttributeInfo.label} 已修改为 ${value}`);
+          message.success('更新成功');
+          // 调用刷新函数
+          refreshData();
         } catch (error) {
           message.error('更新失败');
           console.error('更新失败:', error);
@@ -134,52 +141,48 @@ const Middle = observer(({ refreshData }) => {
   };
 
   return (
-    <div>
-      <div className="image-container">
-        <Button className="first-button">图片区域</Button>
-      </div>
-      <div className='edit-container'>
-        <Card title="场景编辑" bordered={false}>
-          <span>实体：</span>
-          <Select
-            className="select-style"
-            placeholder="选择实体"
-            value={entity}
-            onChange={handleEntityChange}
-            style={{ width: 'auto' }}
-            popupMatchSelectWidth={false}
-          >
-            {entityOptions}
-          </Select>
-          <span>属性：</span>
-          <Select
-            className="select-style"
-            placeholder="选择属性"
-            value={attribute}
-            onChange={handleAttributeChange}
-            style={{ width: 'auto' }}
-            popupMatchSelectWidth={false}
-          >
-            {attributeOptions()}
-          </Select>
-          <span>值：</span>
-          <Select
-            className="select-style"
-            placeholder="选择值"
-            value={value}
-            onChange={handleValueChange}
-            style={{ width: 'auto' }}
-            popupMatchSelectWidth={false}
-          >
-            {valueOptions()}
-          </Select>
-          <Button type="primary" className="update-button" onClick={handleUpdate}>
-            更新
-          </Button>
-          <Input.TextArea className='input' rows={4} value={entityParamsInfo} disabled />
-        </Card>
-      </div>
+    <div className='edit-container'>
+      <Card title="场景编辑" bordered={false}>
+        <span>实体：</span>
+        <Select
+          className="select-style"
+          placeholder="选择实体"
+          value={entity}
+          onChange={handleEntityChange}
+          style={{ width: 'auto' }}
+          popupMatchSelectWidth={false}
+        >
+          {entityOptions}
+        </Select>
+        <span>属性：</span>
+        <Select
+          className="select-style"
+          placeholder="选择属性"
+          value={attribute}
+          onChange={handleAttributeChange}
+          style={{ width: 'auto' }}
+          popupMatchSelectWidth={false}
+        >
+          {attributeOptions()}
+        </Select>
+        <span>值：</span>
+        <Select
+          className="select-style"
+          placeholder="选择值"
+          value={value}
+          onChange={handleValueChange}
+          style={{ width: 'auto' }}
+          popupMatchSelectWidth={false}
+        >
+          {valueOptions()}
+        </Select>
+        <Button type="primary" className="update-button" onClick={handleUpdate}>
+          更新
+        </Button>
+        <Input.TextArea className='input' rows={4} value={entityParamsInfo} disabled />
+      </Card>
     </div>
+
   );
 });
 

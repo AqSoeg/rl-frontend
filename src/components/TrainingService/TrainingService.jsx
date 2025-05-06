@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import Left from './left';
-import Middle from './middle';
-import Right from './right';
+
 import './TrainingService.css';
 import { observer } from 'mobx-react';
-
+import AgentTrainingPanel from './AgentTrainingPanel.jsx'
 const TrainingService = observer(() => {
   const [scenarios, setScenarios] = useState([]);
   const [algorithms, setAlgorithms] = useState([]);
@@ -107,15 +106,14 @@ const TrainingService = observer(() => {
        
         />
       </div>
-      <div className='middle'>
-        <Middle refreshData={fetchScenarios} />
-      </div>
       <div className='right'>
-        <Right
-          fetchDecisions={fetchDecisions}
-          decisionModels={decisionModels}
-        />
+      <AgentTrainingPanel 
+        decisionModels={decisionModels} 
+        fetchDecisions={fetchDecisions}
+        refreshData={fetchScenarios}
+      />
       </div>
+
     </div>
   );
 });

@@ -191,6 +191,7 @@ def train():
                     "MODEL_PATH": model_path,
                     "IMG_URL": "http://example.com/image",
                     "CREAT_TIME": datetime.datetime.now().isoformat(),
+                    "STATE":"未发布",
                 }
                 with open(DECISION_FILE_PATH, 'r', encoding='utf-8') as f:
                     existing_data = json.load(f)
@@ -241,6 +242,24 @@ def get_effect_image():
 def publish_model():
     data = request.json
     decision_model_id = data.get('decisionModelID')
+    try:
+        with open(Decision_FILE_PATH, 'r', encoding='utf-8') as f:
+            existing_data = json.load(f)
+        model_found = False
+        for model in existing_data:
+            if model['AGENT_MODEL_ID'] == decision_model_id:
+                model['STATE'] = '已发布'  # 更新状态为已发布
+                model_found = True
+                break
+
+        # 保存更新后的数据
+        with open(Decision_FILE_PATH, 'w', encoding='utf-8') as f:
+            json.dump(existing_data, f, ensure_ascii=False, indent=2)
+        
+        return jsonify({"status": "success", "message": f"Model {decision_model_id} published successfully"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": f"Failed to publish model: {str(e)}"})
+
     model_info = data.get('modelInfo')
     print(f"Received request to publish model: {decision_model_id}")
     print(f"Model info: {model_info}")
