@@ -119,10 +119,9 @@ const ModelFunction = ({scenarios}) => {
                     const uniqueKey = `${action.entity}：${action.name}`;
                     actionSpaceStore.setRuleForModel(agent, uniqueKey, {
                         ruleType: action.rule[0],
-                        condition1: action.rule[1],
-                        condition2: action.rule[2],
-                        execution1: action.rule[3],
-                        execution2: action.rule[4],
+                        condition: action.rule[1],
+                        execution1: action.rule[2],
+                        execution2: action.rule[3]
                     });
                 }
             });
@@ -157,7 +156,8 @@ const ModelFunction = ({scenarios}) => {
 
             const allRewards = rewardFunctionStore.getAllRewards();
 
-            const agentModels = Object.entries(entityAssignmentStore.assignedEntities).map(([agent, entities], index) => {
+            const agentModels = Object.entries(entityAssignmentStore.assignedEntities).map(([agent, entities]) => {
+                // Regular entities assigned to the agent
                 const agentEntities = entities.map(entityName => {
                     const entity = role.entities.find(e => e.name === entityName);
 
@@ -172,13 +172,17 @@ const ModelFunction = ({scenarios}) => {
                                 action: action.mode === '连续型'
                                     ? [[parseFloat(action.lowerLimit), parseFloat(action.upperLimit)], action.unit, action.range]
                                     : [action.discreteValues, action.discreteOptions],
-                                rule: rule ? [rule.ruleType, rule.condition1, rule.condition2, rule.execution1, rule.execution2] : null
+                                rule: rule ? [
+                                    rule.ruleType,
+                                    rule.condition,
+                                    rule.execution1,
+                                    rule.execution2
+                                ] : null
                             };
                         });
 
                     const selectedStateVectors = stateVectorStore.getSelectedStateVectors()[entityName] || [];
                     const stateVector = entity.stateVector.filter((_, idx) => selectedStateVectors.includes(idx));
-
                     const stateVectorWithEntityName = stateVector.map(vector => [entityName, ...vector]);
 
                     return {
@@ -187,6 +191,24 @@ const ModelFunction = ({scenarios}) => {
                         actionSpace: actionSpaceData
                     };
                 });
+
+                // Communication entities for the agent
+                const communicationEntities = stateVectorStore.getCommunicationEntities(agent).map(commEntity => {
+                    const baseEntityName = commEntity.name.replace('通信-', '');
+                    const entity = role.entities.find(e => e.name === baseEntityName);
+
+                    const selectedStateVectors = stateVectorStore.getSelectedStateVectors()[commEntity.name] || [];
+                    const stateVector = entity.stateVector.filter((_, idx) => selectedStateVectors.includes(idx));
+                    const stateVectorWithEntityName = stateVector.map(vector => [baseEntityName, ...vector]);
+
+                    return {
+                        name: baseEntityName,
+                        stateVector: stateVectorWithEntityName,
+                        actionSpace: [] // Communication entities have no actions
+                    };
+                });
+
+                const allAgentEntities = [...agentEntities, ...communicationEntities];
 
                 const agentRewards = allRewards.filter(reward => {
                     if (reward.type === '团队奖励') {
@@ -201,8 +223,8 @@ const ModelFunction = ({scenarios}) => {
 
                 return {
                     name: agent,
-                    stateVector: agentEntities.flatMap(entity => entity.stateVector),
-                    actionSpace: agentEntities.flatMap(entity => entity.actionSpace),
+                    stateVector: allAgentEntities.flatMap(entity => entity.stateVector),
+                    actionSpace: allAgentEntities.flatMap(entity => entity.actionSpace),
                     rewardFunction: agentRewards
                 };
             });

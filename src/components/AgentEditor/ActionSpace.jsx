@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button, Select, Input, Modal } from 'antd';
 import actionLogo from '../../assets/actionSpace.svg';
-import uploadLogo from '../../assets/upload.svg';
 import addLogo from "../../assets/add.svg";
 import entityAssignmentStore from './EntityAssignmentStore';
 import sidebarStore from "./SidebarStore";
@@ -9,7 +8,7 @@ import actionSpaceStore from './ActionSpaceStore';
 
 const { Option } = Select;
 
-const ActionSpace = ({ entities, actionTypes }) => {
+const ActionSpace = ({ entities, actionTypes, selectedParams }) => {
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedEntity, setSelectedEntity] = useState('');
     const [selectedActionType, setSelectedActionType] = useState('');
@@ -97,10 +96,12 @@ const ActionSpace = ({ entities, actionTypes }) => {
         };
 
         if (editingUniqueKey) {
+            actionSpaceStore.setRuleForModel(currentModelID, editingUniqueKey, null);
             actionSpaceStore.updateActionForModel(currentModelID, editingUniqueKey, action);
         } else {
             const existingAction = actions.find(a => `${a.entity}：${a.actionType}` === uniqueKey);
             if (existingAction) {
+                actionSpaceStore.setRuleForModel(currentModelID, uniqueKey, null);
                 actionSpaceStore.updateActionForModel(currentModelID, uniqueKey, action);
             } else {
                 actionSpaceStore.addActionForModel(currentModelID, action);
@@ -197,10 +198,8 @@ const ActionSpace = ({ entities, actionTypes }) => {
                     style={{
                         cursor: isAddButtonEnabled ? 'pointer' : 'not-allowed',
                         opacity: isAddButtonEnabled ? 1 : 0.5,
-                        marginRight: '20px'
                     }}
                 />
-                <img src={uploadLogo} alt="Upload" className="upload-button-logo"/>
             </div>
             <div className="dropdown-container-wrapper">
                 {actions.map(action => {
@@ -213,6 +212,7 @@ const ActionSpace = ({ entities, actionTypes }) => {
                             onEdit={handleEditAction}
                             onDelete={handleDeleteAction}
                             modelID={currentModelID}
+                            selectedParams={selectedParams}
                         />
                     );
                 })}
@@ -244,35 +244,89 @@ const ActionSpace = ({ entities, actionTypes }) => {
     );
 };
 
-const DropdownContainer = ({ uniqueKey, action, onEdit, onDelete, modelID }) => {
+const DropdownContainer = ({ uniqueKey, action, onEdit, onDelete, modelID, selectedParams }) => {
     const [actionOpen, setActionOpen] = useState(false);
     const [ruleOpen, setRuleOpen] = useState(false);
     const [ruleType, setRuleType] = useState('');
-    const [condition1, setCondition1] = useState('');
-    const [condition2, setCondition2] = useState('');
-    const [execution1, setExecution1] = useState('');
-    const [execution2, setExecution2] = useState('');
+    const [condition, setCondition] = useState('');
+    const [execution1, setExecution1] = useState([]);
+    const [execution2, setExecution2] = useState([]);
+    const [isConditionEditorOpen, setIsConditionEditorOpen] = useState(false);
+    const [hoveredParam, setHoveredParam] = useState(null);
+    const [isHovering, setIsHovering] = useState(false);
 
     const savedRule = actionSpaceStore.getRuleForModel(modelID, uniqueKey);
 
     useEffect(() => {
         if (savedRule) {
             setRuleType(savedRule.ruleType);
-            setCondition1(savedRule.condition1);
-            setCondition2(savedRule.condition2);
-            setExecution1(savedRule.execution1);
-            setExecution2(savedRule.execution2);
+            setCondition(savedRule.condition);
+            setExecution1(savedRule.execution1 || []);
+            setExecution2(savedRule.execution2 || []);
         } else {
             setRuleType('');
-            setCondition1('');
-            setCondition2('');
-            setExecution1('');
-            setExecution2('');
+            setCondition('');
+            if (action.mode === '离散型') {
+                setExecution1([...action.discreteValues]);
+            } else if (action.mode === '连续型') {
+                setExecution1([action.lowerLimit, action.upperLimit]);
+            }
+            setExecution2([]);
         }
-    }, [ruleOpen, savedRule]);
+    }, [ruleOpen, savedRule, action]);
 
     const handleRuleConfirm = () => {
-        actionSpaceStore.setRuleForModel(modelID, uniqueKey, { ruleType, condition1, condition2, execution1, execution2 });
+        if (action.mode === '连续型') {
+            const [min, max] = [parseFloat(action.lowerLimit), parseFloat(action.upperLimit)];
+            let hasError = false;
+            let resetExecution1 = false;
+            let resetExecution2 = false;
+
+            if (execution1.length !== 0 && execution1.length !== 2) {
+                hasError = true;
+                resetExecution1 = true;
+            } else if (execution1.length === 2) {
+                const [lower, upper] = execution1.map(Number);
+                if (isNaN(lower) || isNaN(upper) || lower >= upper || lower < min || upper > max) {
+                    hasError = true;
+                    resetExecution1 = true;
+                }
+            }
+
+            if (ruleType === 'IF ELSE') {
+                if (execution2.length !== 0 && execution2.length !== 2) {
+                    hasError = true;
+                    resetExecution2 = true;
+                } else if (execution2.length === 2) {
+                    const [lower, upper] = execution2.map(Number);
+                    if (isNaN(lower) || isNaN(upper) || lower >= upper || lower < min || upper > max) {
+                        hasError = true;
+                        resetExecution2 = true;
+                    }
+                }
+            }
+
+            if (hasError) {
+                let errorMessage = `请输入正确的取值下限和上限，必须在[${min}, ${max}]范围内且下限小于上限！`;
+                alert(errorMessage);
+
+                if (resetExecution1) {
+                    setExecution1([min, max]);
+                }
+                if (resetExecution2) {
+                    setExecution2([]);
+                }
+                return;
+            }
+        }
+
+        const rule = {
+            ruleType,
+            condition,
+            execution1: ruleType === 'FOR' ? execution1 : [...execution1],
+            execution2: ruleType === 'FOR' ? [] : [...execution2]
+        };
+        actionSpaceStore.setRuleForModel(modelID, uniqueKey, rule);
 
         if (sidebarStore.type === '同构多智能体') {
             const agentEntityMapping = entityAssignmentStore.agentEntityMapping;
@@ -283,7 +337,7 @@ const DropdownContainer = ({ uniqueKey, action, onEdit, onDelete, modelID }) => 
                 Object.entries(entityGroup).forEach(([entityName, agentName]) => {
                     if (!uniqueKey.startsWith(entityName)) {
                         const syncUniqueKey = `${entityName}：${uniqueKey.split('：')[1]}`;
-                        actionSpaceStore.setRuleForModel(agentName, syncUniqueKey, { ruleType, condition1, condition2, execution1, execution2 });
+                        actionSpaceStore.setRuleForModel(agentName, syncUniqueKey, rule);
                     }
                 });
             }
@@ -294,11 +348,6 @@ const DropdownContainer = ({ uniqueKey, action, onEdit, onDelete, modelID }) => 
 
     const handleRuleCancel = () => {
         if (window.confirm('是否取消该行为规则？')) {
-            setRuleType('');
-            setCondition1('');
-            setCondition2('');
-            setExecution1('');
-            setExecution2('');
             actionSpaceStore.setRuleForModel(modelID, uniqueKey, null);
 
             if (sidebarStore.type === '同构多智能体') {
@@ -320,6 +369,43 @@ const DropdownContainer = ({ uniqueKey, action, onEdit, onDelete, modelID }) => 
         }
     };
 
+    const toggleDiscreteValue = (value, isExecution1) => {
+        const setExecution = isExecution1 ? setExecution1 : setExecution2;
+        const execution = isExecution1 ? execution1 : execution2;
+
+        if (execution.includes(value)) {
+            setExecution(execution.filter(v => v !== value));
+        } else {
+            setExecution([...execution, value]);
+        }
+    };
+
+    const handleContinuousValueChange = (index, value, isExecution1) => {
+        const setExecution = isExecution1 ? setExecution1 : setExecution2;
+        const execution = isExecution1 ? [...execution1] : [...execution2];
+
+        execution[index] = value;
+        setExecution(execution);
+    };
+
+    const handleParamHover = (param) => {
+        setIsHovering(true);
+        setHoveredParam(param);
+    };
+
+    const handleParamLeave = () => {
+        setIsHovering(false);
+        setHoveredParam(null);
+    };
+
+    const handleConditionFocus = () => {
+        setIsConditionEditorOpen(true);
+    };
+
+    const handleSymbolClick = (symbol) => {
+        setCondition(prev => prev + symbol);
+    };
+
     return (
         <div className="dropdown-container">
             <div className="dropdown-header">
@@ -338,20 +424,166 @@ const DropdownContainer = ({ uniqueKey, action, onEdit, onDelete, modelID }) => 
                 <ActionContent action={action} onEdit={onEdit} onDelete={onDelete} />
             )}
             {ruleOpen && (
-                <RuleContent
-                    ruleType={ruleType}
-                    setRuleType={setRuleType}
-                    condition1={condition1}
-                    setCondition1={setCondition1}
-                    condition2={condition2}
-                    setCondition2={setCondition2}
-                    execution1={execution1}
-                    setExecution1={setExecution1}
-                    execution2={execution2}
-                    setExecution2={setExecution2}
-                    onConfirm={handleRuleConfirm}
-                    onCancel={handleRuleCancel}
-                />
+                <div className="rule-content-container">
+                    <div className="rule-row">
+                        <span>规则类型：</span>
+                        <Select
+                            style={{ width: 200 }}
+                            onChange={setRuleType}
+                            value={ruleType}
+                        >
+                            <Option key="IF ELSE" value="IF ELSE">IF ELSE</Option>
+                            <Option key="FOR" value="FOR">FOR</Option>
+                        </Select>
+                    </div>
+
+                    <div className="rule-row">
+                        <span>条件：</span>
+                        <Input
+                            placeholder="输入条件表达式"
+                            value={condition}
+                            onChange={(e) => setCondition(e.target.value)}
+                            className="common-input"
+                            onFocus={handleConditionFocus}
+                        />
+                    </div>
+
+                    {isConditionEditorOpen && (
+                        <div className="reward-modal-overlay">
+                            <div className="reward-modal">
+                                <div className="reward-modal-header">条件表达式编辑器</div>
+                                <div className="symbol-groups">
+                                    <div className="symbol-group">
+                                        {["+", "-", "×", "÷", "^", "√", "sin", "cos", "tan", "log", "ln", "∏", "∑", "∧", "∨", "¬", "⊕", "[", "]", "(", ")", "=", "≈", "∂", "e", "π", "∈", "±"].map((symbol, index) => (
+                                            <button key={index} onClick={() => handleSymbolClick(symbol)}>
+                                                {symbol}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div className="symbol-group">
+                                        {selectedParams?.map((param, index) => (
+                                            <button
+                                                key={index}
+                                                onMouseEnter={() => handleParamHover(param)}
+                                                onMouseLeave={handleParamLeave}
+                                                onClick={() => handleSymbolClick(param[0])}
+                                            >
+                                                {param[0]}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                {isHovering && hoveredParam && (
+                                    <div className="tooltip">
+                                        <div className="tooltip-content">
+                                            <div className="tooltip-title">{hoveredParam[0]}</div>
+                                            <div className="tooltip-description">{hoveredParam[1]}</div>
+                                            <div className="tooltip-unit">{hoveredParam[2]}</div>
+                                        </div>
+                                    </div>
+                                )}
+                                <textarea
+                                    className="equation-input"
+                                    value={condition}
+                                    onChange={(e) => setCondition(e.target.value)}
+                                    placeholder="在此输入或编辑条件表达式"
+                                />
+                                <div className="modal-buttons">
+                                    <Button onClick={() => setIsConditionEditorOpen(false)}>取消</Button>
+                                    <Button type="primary" onClick={() => setIsConditionEditorOpen(false)}>确认</Button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {ruleType && (
+                        <>
+                            <div className="rule-row">
+                                <span>{ruleType === 'FOR' ? 'DO：' : 'IF：'}</span>
+                                {action.mode === '离散型' && (
+                                    <div className="discrete-buttons">
+                                        {action.discreteValues.map(value => (
+                                            <Button
+                                                key={value}
+                                                type={execution1.includes(value) ? 'primary' : 'default'}
+                                                onClick={() => toggleDiscreteValue(value, true)}
+                                            >
+                                                {value}
+                                            </Button>
+                                        ))}
+                                    </div>
+                                )}
+                                {action.mode === '连续型' && (
+                                    <div className="continuous-inputs">
+                                        <Input
+                                            value={execution1[0] || ''}
+                                            onChange={(e) => handleContinuousValueChange(0, e.target.value, true)}
+                                            placeholder="下限"
+                                            style={{ width: 100 }}
+                                        />
+                                        <span> 至 </span>
+                                        <Input
+                                            value={execution1[1] || ''}
+                                            onChange={(e) => handleContinuousValueChange(1, e.target.value, true)}
+                                            placeholder="上限"
+                                            style={{ width: 100 }}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+
+                            {ruleType === 'IF ELSE' && (
+                                <div className="rule-row">
+                                    <span>ELSE：</span>
+                                    {action.mode === '离散型' && (
+                                        <div className="discrete-buttons">
+                                            {action.discreteValues.map(value => (
+                                                <Button
+                                                    key={value}
+                                                    type={execution2.includes(value) ? 'primary' : 'default'}
+                                                    onClick={() => toggleDiscreteValue(value, false)}
+                                                >
+                                                    {value}
+                                                </Button>
+                                            ))}
+                                        </div>
+                                    )}
+                                    {action.mode === '连续型' && (
+                                        <div className="continuous-inputs">
+                                            <Input
+                                                value={execution2[0] || ''}
+                                                onChange={(e) => handleContinuousValueChange(0, e.target.value, false)}
+                                                placeholder="下限"
+                                                style={{ width: 100 }}
+                                            />
+                                            <span> 至 </span>
+                                            <Input
+                                                value={execution2[1] || ''}
+                                                onChange={(e) => handleContinuousValueChange(1, e.target.value, false)}
+                                                placeholder="上限"
+                                                style={{ width: 100 }}
+                                            />
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            <div className="rule-row">
+                                <span>{action.mode === '离散型' ? '可选取值：' : '取值范围：'}</span>
+                                <span>
+                                    {action.mode === '离散型'
+                                        ? `{${action.discreteValues.join(', ')}}`
+                                        : `[${action.lowerLimit}, ${action.upperLimit}]`}
+                                </span>
+                            </div>
+
+                            <div className="rule-buttons">
+                                <Button type="primary" onClick={handleRuleConfirm}>确定</Button>
+                                <Button onClick={handleRuleCancel}>取消</Button>
+                            </div>
+                        </>
+                    )}
+                </div>
             )}
         </div>
     );
@@ -382,77 +614,6 @@ const ActionContent = ({ action, onEdit, onDelete }) => {
             <div className="action-buttons">
                 <Button type="primary" onClick={() => onEdit(`${action.entity}：${action.actionType}`)}>编辑</Button>
                 <Button onClick={() => onDelete(`${action.entity}：${action.actionType}`)}>删除</Button>
-            </div>
-        </div>
-    );
-};
-
-const RuleContent = ({
-                         ruleType,
-                         setRuleType,
-                         condition1,
-                         setCondition1,
-                         condition2,
-                         setCondition2,
-                         execution1,
-                         setExecution1,
-                         execution2,
-                         setExecution2,
-                         onConfirm,
-                         onCancel
-                     }) => {
-    return (
-        <div className="rule-container">
-            <div className="rule-row">
-                <span>规则类型：</span>
-                <Select
-                    style={{ width: 200 }}
-                    onChange={setRuleType}
-                    value={ruleType}
-                >
-                    <Option key="IF ELSE" value="IF ELSE">IF ELSE</Option>
-                    <Option key="FOR" value="FOR">FOR</Option>
-                </Select>
-            </div>
-            <div className="rule-row">
-                <span>条件1：</span>
-                <Input
-                    placeholder="单行输入"
-                    value={condition1}
-                    onChange={(e) => setCondition1(e.target.value)}
-                    className="common-input"
-                />
-            </div>
-            <div className="rule-row">
-                <span>条件2：</span>
-                <Input
-                    placeholder="单行输入"
-                    value={condition2}
-                    onChange={(e) => setCondition2(e.target.value)}
-                    className="common-input"
-                />
-            </div>
-            <div className="rule-row">
-                <span>执行内容1：</span>
-                <Input
-                    placeholder="单行输入"
-                    value={execution1}
-                    onChange={(e) => setExecution1(e.target.value)}
-                    className="common-input"
-                />
-            </div>
-            <div className="rule-row">
-                <span>执行内容2：</span>
-                <Input
-                    placeholder="单行输入"
-                    value={execution2}
-                    onChange={(e) => setExecution2(e.target.value)}
-                    className="common-input"
-                />
-            </div>
-            <div className="rule-buttons">
-                <Button type="primary" onClick={onConfirm}>确定</Button>
-                <Button onClick={onCancel}>取消</Button>
             </div>
         </div>
     );
@@ -614,7 +775,7 @@ const ActionModal = ({
                         style={{ width: '300px' }}
                         disabled={!selectedActionType}
                     >
-                        {getActionRange().length !== 2 && getActionRange()[0] < getActionRange()[1] && (
+                        {getActionRange().length === 2 && getActionRange()[0] < getActionRange()[1] && (
                             <Option value="连续型">连续型</Option>
                         )}
                         {getActionDiscreteValues().length > 0 && (

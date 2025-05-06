@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Button, Select, Modal, Form } from 'antd';
 import rewardLogo from '../../assets/rewardFunction.svg';
-import uploadLogo from '../../assets/upload.svg';
 import addLogo from '../../assets/add.svg';
 import sidebarStore from './SidebarStore';
 import rewardFunctionStore from './RewardFunctionStore';
@@ -141,10 +140,8 @@ const RewardFunction = observer(({ selectedParams }) => {
                     style={{
                         cursor: isAddButtonEnabled ? 'pointer' : 'not-allowed',
                         opacity: isAddButtonEnabled ? 1 : 0.5,
-                        marginRight: '20px'
                     }}
                 />
-                <img src={uploadLogo} alt="Upload" className="upload-button-logo"/>
             </div>
             <div className="dropdown-container-wrapper">
                 {rewardFunctionStore.selectedReward.map((reward, index) => (

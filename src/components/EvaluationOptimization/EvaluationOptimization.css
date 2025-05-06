@@ -14,6 +14,12 @@
     background-color: #ecf4fc;
     padding: 1rem;
     border-radius: 0.5rem;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.EO-sidebar-scrollable {
+    overflow-y: auto;
 }
 
 .ant-select {
@@ -25,6 +31,7 @@
     font-weight: bold;
     margin-top: 0.5rem;
     margin-bottom: 0.5rem;
+    color: #333;
 }
 
 .EO-gradient-box {
@@ -170,4 +177,41 @@
     background-color: #388e3c;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     transform: translateY(2px);
+}
+
+.EO-modal-button {
+    background-color: white;
+    color: black;
+    border: 1px solid #d9d9d9;
+    transition: all 0.3s;
+}
+
+.EO-modal-button:hover {
+    background-color: #1890ff;
+    color: white;
+    border-color: #1890ff;
+}
+
+.EO-modal-button:active {
+    background-color: #096dd9;
+    color: white;
+    border-color: #096dd9;
+}
+
+.EO-detail-modal .ant-modal-content {
+    background-color: white;
+    color: black;
+}
+
+.EO-detail-content {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.EO-detail-section {
+    margin-bottom: 20px;
+}
+
+.EO-info-item {
+    margin-bottom: 8px;
 }

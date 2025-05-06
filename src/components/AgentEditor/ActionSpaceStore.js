@@ -32,6 +32,7 @@ class ActionSpaceStore {
             const index = actions.findIndex(action => `${action.entity}：${action.actionType}` === uniqueKey);
             if (index !== -1) {
                 actions[index] = updatedAction;
+                this.setRuleForModel(modelID, uniqueKey, null);
                 this.notifyListeners();
             }
         }
@@ -41,6 +42,7 @@ class ActionSpaceStore {
         const actions = this.actionsByModel[modelID];
         if (actions) {
             this.actionsByModel[modelID] = actions.filter(action => `${action.entity}：${action.actionType}` !== uniqueKey);
+            this.setRuleForModel(modelID, uniqueKey, null);
             this.notifyListeners();
         }
     }

@@ -83,7 +83,8 @@ const EntityAssignmentModal = ({ open, onCancel, onConfirm }) => {
                 actionSpaceStore.clearActionsAndRulesForModel(`智能体${i}`);
             }
 
-            onConfirm(selectedEntities);
+            stateVectorStore.showCommunication = {};
+            stateVectorStore.communicationEntities = {};
 
             const defaultSelectedStateVectors = {};
             entityAssignmentStore.entities.forEach(entity => {
@@ -93,6 +94,7 @@ const EntityAssignmentModal = ({ open, onCancel, onConfirm }) => {
             });
 
             stateVectorStore.setSelectedStateVectors(defaultSelectedStateVectors);
+            onConfirm(selectedEntities);
         }
     };
 

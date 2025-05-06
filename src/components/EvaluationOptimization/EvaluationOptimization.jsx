@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
-import { Button, Select } from 'antd';
+import { Button, Select, Modal, Table, Space } from 'antd';
 import './EvaluationOptimization.css';
 
 const { Option } = Select;
@@ -13,9 +13,10 @@ const EvaluationOptimization = () => {
     const [evalScore, setEvalScore] = useState();
     const [evalSuggestion, setEvalSuggestion] = useState([]);
     const [sidebarData, setSidebarData] = useState({
-        scenarioParams: [],
-        agentInfo: [],
-        modelInfo: []
+        scenarioInfo: {},
+        agentInfo: {},
+        modelInfo: {},
+        trainInfo: {}
     });
     const [selectedEvaluationType, setSelectedEvaluationType] = useState();
     const [chartSelections, setChartSelections] = useState([
@@ -26,20 +27,41 @@ const EvaluationOptimization = () => {
     ]);
     const [chartOptions, setChartOptions] = useState([]);
     const [selectedLegends, setSelectedLegends] = useState({});
+    const [isDataModalVisible, setIsDataModalVisible] = useState(false);
+    const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
+    const [evaluationData, setEvaluationData] = useState([]);
+    const [selectedModel, setSelectedModel] = useState(null);
 
     const chartRefs = useRef(Array(4).fill(null));
     const radarChartRef = useRef(null);
 
     useEffect(() => {
-        chartRefs.current.forEach((_, index) => {
+        chartRefs.current = chartRefs.current.map((_, index) => {
             const chartDom = document.getElementById(`chart-${index}`);
-            if (chartDom) {
-                chartRefs.current[index] = echarts.init(chartDom);
+            if (chartDom && !chartRefs.current[index]) {
+                return echarts.init(chartDom);
             }
+            return chartRefs.current[index];
         });
 
-        if (radarChartRef.current) {
-            const radarChart = echarts.init(radarChartRef.current);
+        const radarDom = radarChartRef.current;
+        if (radarDom && !echarts.getInstanceByDom(radarDom)) {
+            echarts.init(radarDom);
+        }
+
+        return () => {
+            chartRefs.current.forEach((chart) => chart && chart.dispose());
+            if (radarChartRef.current) {
+                const radarChart = echarts.getInstanceByDom(radarChartRef.current);
+                radarChart && radarChart.dispose();
+            }
+        };
+    }, []);
+
+    useEffect(() => {
+        const radarDom = radarChartRef.current;
+        if (radarDom) {
+            const radarChart = echarts.getInstanceByDom(radarDom) || echarts.init(radarDom);
             if (radarImage) {
                 const radarOption = {
                     tooltip: {
@@ -81,17 +103,24 @@ const EvaluationOptimization = () => {
                         }))
                     }]
                 };
-                radarChart.setOption(radarOption);
+                radarChart.setOption(radarOption, true);
+            } else {
+                radarChart.clear();
             }
         }
+    }, [radarImage]);
 
-        return () => {
-            chartRefs.current.forEach((chart) => chart && chart.dispose());
-            if (radarChartRef.current) {
-                echarts.dispose(radarChartRef.current);
+    useEffect(() => {
+        chartRefs.current.forEach((chart, index) => {
+            if (!chart) return;
+            const { content, shape } = chartSelections[index];
+            if (content && shape) {
+                updateChart(index, content, shape);
+            } else {
+                chart.clear();
             }
-        };
-    }, [radarImage, charts]);
+        });
+    }, [chartSelections, chartOptions, selectedLegends]);
 
     const updateChart = (index, content, shape) => {
         const chartData = chartOptions.find((item) => item.content === content);
@@ -149,13 +178,13 @@ const EvaluationOptimization = () => {
             option.xAxis.show = false;
             option.yAxis.show = false;
             option.legend = {
-                show: true, // 可根据需求开启
+                show: true,
                 type: 'scroll',
                 orient: 'vertical',
                 right: 10,
                 top: 20
             };
-            option.tooltip = {  // 新增tooltip配置
+            option.tooltip = {
                 trigger: 'item',
                 formatter: ({ name, percent, value }) =>
                     `${name}<br/>占比: ${percent}%<br/>数值: ${value}`
@@ -164,9 +193,7 @@ const EvaluationOptimization = () => {
                 {
                     type: 'pie',
                     radius: '55%',
-                    label: {  // 关闭外部标签
-                        show: false
-                    },
+                    label: { show: false },
                     data: chartData.chart_data.map((d) => ({
                         name: `${d.x} - ${d.legend}`,
                         value: d.y
@@ -188,7 +215,6 @@ const EvaluationOptimization = () => {
     useEffect(() => {
         chartRefs.current.forEach((chart, index) => {
             if (!chart) return;
-
             chart.on('legendselectchanged', (params) => {
                 handleLegendSelect(index, {
                     ...selectedLegends[index],
@@ -196,7 +222,6 @@ const EvaluationOptimization = () => {
                 });
             });
         });
-
         return () => {
             chartRefs.current.forEach((chart) => {
                 chart?.off('legendselectchanged');
@@ -204,48 +229,67 @@ const EvaluationOptimization = () => {
         };
     }, [selectedLegends]);
 
-    const handleLoadData = async () => {
-        setChartSelections([
-            { content: '', shape: '' },
-            { content: '', shape: '' },
-            { content: '', shape: '' },
-            { content: '', shape: '' },
-        ]);
-        setChartOptions([]);
-        setEvalScore(undefined);
-        setEvalSuggestion([]);
-        setRadarImage(null);
-        setEvents([]);
-        setCharts(Array(4).fill({ img: null }));
+    const formatDate = (isoString) => {
+        const date = new Date(isoString);
+        return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+    };
 
+    const handleLoadData = async () => {
+        setEvaluationData([]);
         if (!selectedEvaluationType) {
             alert('请先选择评估数据来源！');
-        } else if (selectedEvaluationType === '在线评估') {
-            try {
+            return;
+        }
+        try {
+            let data = [];
+            if (selectedEvaluationType === '在线评估') {
                 const response = await fetch(__APP_CONFIG__.loadEvaluationData, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                 });
-                const data = await response.json();
-
-                setSidebarData({
-                    scenarioParams: data.scenario_params,
-                    agentInfo: data.agent_info,
-                    modelInfo: data.model_info
+                data = await response.json();
+            } else {
+                const file = await new Promise((resolve) => {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = '.json';
+                    input.onchange = (e) => resolve(e.target.files[0]);
+                    input.click();
                 });
-                setDataLoaded(true);
-            } catch (error) {
-                console.error('数据载入失败:', error);
-                alert('数据载入失败，请检查网络连接！');
+                if (!file) return;
+                if (!file.name.endsWith('.json')) {
+                    alert('仅支持JSON文件！');
+                    return;
+                }
+                const reader = new FileReader();
+                const content = await new Promise((resolve, reject) => {
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = reject;
+                    reader.readAsText(file);
+                });
+                data = JSON.parse(content);
+                const validateStructure = (data) => {
+                    const isValid = Array.isArray(data) && data.every(item =>
+                        item.model?.id &&
+                        item.scenario?.name &&
+                        item.agent?.role &&
+                        item.train?.algorithm &&
+                        Array.isArray(item.scenario.envParams) &&
+                        Array.isArray(item.agent.entityAssignments) &&
+                        Array.isArray(item.train.hyperParams)
+                    );
+                    return isValid;
+                };
+                if (!validateStructure(Array.isArray(data) ? data : [data])) {
+                    alert('文件格式错误：结构不符合要求！');
+                    return;
+                }
             }
-        } else {
-            const localData = {
-                scenarioParams: ['场景名称：离线交通', '数据来源：本地日志'],
-                agentInfo: ['智能体名称：离线Agent', '版本：v2.0'],
-                modelInfo: ['模型类型：离线决策'],
-            };
-            setSidebarData(localData);
-            setDataLoaded(true);
+            setEvaluationData(Array.isArray(data) ? data : [data]);
+            setIsDataModalVisible(true);
+        } catch (error) {
+            console.error('数据载入失败:', error);
+            alert(`数据载入失败：${error.message || '文件格式错误'}`);
         }
     };
 
@@ -254,40 +298,57 @@ const EvaluationOptimization = () => {
             alert('请先载入数据！');
             return;
         }
-        if (selectedEvaluationType === '离线评估') {
-            try {
-                const response = await fetch(__APP_CONFIG__.offlineEvaluation, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(sidebarData)
-                });
-                const result = await response.text();
-                alert(result);
-            } catch (error) {
-                console.error('数据发送失败:', error);
-                alert('数据发送失败，请检查网络连接！');
-            }
-        }
-
         try {
+            let evalData = {};
+            let modelId = '';
+            if (selectedEvaluationType === '在线评估') {
+                modelId = selectedModel.model.id;
+                evalData = { modelId };
+            } else {
+                evalData = {
+                    model: sidebarData.modelInfo,
+                    scenario: sidebarData.scenarioInfo,
+                    agent: sidebarData.agentInfo,
+                    train: sidebarData.trainInfo
+                };
+                modelId = sidebarData.modelInfo.id;
+            }
             const response = await fetch(__APP_CONFIG__.startEvaluation, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    evaluationType: selectedEvaluationType,
+                    evaluationData: evalData
+                }),
             });
-            const data = await response.json();
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || '评估请求失败');
+            }
 
+            const result = await response.text();
+            alert(result);
+            const resultResponse = await fetch(__APP_CONFIG__.loadEvaluationResult, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    modelId: modelId,
+                    evaluationType: selectedEvaluationType
+                }),
+            });
+            const data = await resultResponse.json();
+            if (data.error) {
+                throw new Error(data.error);
+            }
             setChartOptions(data.chart_data);
             setCharts(Array(4).fill({ img: null }));
-
             setEvents(data.event_data.map((content) => ({ content })));
-
             setRadarImage(data.radar_chart_data);
-
             setEvalScore(data.eval_score);
             setEvalSuggestion(data.eval_suggestion);
         } catch (error) {
             console.error('评估失败:', error);
-            alert('评估请求失败，请稍后重试！');
+            alert(`评估失败：${error.message}`);
         }
     };
 
@@ -310,36 +371,195 @@ const EvaluationOptimization = () => {
         return target ? ['柱状图', '折线图', '饼图'] : [];
     };
 
+    const dataColumns = [
+        { title: '模型ID', dataIndex: ['model', 'id'], key: 'modelId' },
+        { title: '模型名称', dataIndex: ['model', 'name'], key: 'modelName' },
+        { title: '模型版本', dataIndex: ['model', 'version'], key: 'modelVersion' },
+        { title: '模型类型', dataIndex: ['model', 'type'], key: 'modelType' },
+        { title: '场景名称', dataIndex: ['scenario', 'name'], key: 'scenarioName' },
+        { title: '智能体角色', dataIndex: ['agent', 'role'], key: 'agentRole' },
+        {
+            title: '创建时间',
+            dataIndex: ['model', 'time'],
+            key: 'createTime',
+            render: (text) => formatDate(text),
+        },
+        {
+            title: '操作',
+            key: 'action',
+            render: (_, record) => (
+                <Space size="middle">
+                    <Button
+                        className="EO-modal-button"
+                        onClick={() => {
+                            setSelectedModel(record);
+                            setIsDetailModalVisible(true);
+                        }}
+                    >
+                        查看
+                    </Button>
+                    <Button
+                        className="EO-modal-button"
+                        onClick={() => {
+                            setSelectedModel(record);
+                            setCharts([]);
+                            setEvents([]);
+                            setRadarImage(null);
+                            setEvalScore(undefined);
+                            setEvalSuggestion([]);
+                            setChartOptions([]);
+                            setChartSelections([
+                                { content: '', shape: '' },
+                                { content: '', shape: '' },
+                                { content: '', shape: '' },
+                                { content: '', shape: '' },
+                            ]);
+                            setSelectedLegends({});
+                            setSidebarData({
+                                scenarioInfo: record.scenario,
+                                agentInfo: record.agent,
+                                modelInfo: record.model,
+                                trainInfo: record.train
+                            });
+                            setDataLoaded(true);
+                            setIsDataModalVisible(false);
+                        }}
+                    >
+                        载入
+                    </Button>
+                </Space>
+            ),
+        },
+    ];
+
+    const envParamsColumns = [
+        {
+            title: '角色名称',
+            dataIndex: 'role',
+            key: 'role',
+            render: (_, record) => Object.keys(record)[0],
+        },
+        {
+            title: '变量数值',
+            dataIndex: 'params',
+            key: 'params',
+            render: (_, record) => {
+                const params = record[Object.keys(record)[0]];
+                return params.map((param, idx) => (
+                    <div key={idx}>
+                        {Object.entries(param).map(([key, value]) => `${key}: ${value}`).join(', ')}
+                    </div>
+                ));
+            },
+        },
+    ];
+
+    const entityAssignmentsColumns = [
+        {
+            title: '智能体名称',
+            dataIndex: 'agent',
+            key: 'agent',
+            render: (_, record) => Object.keys(record)[0]
+        },
+        {
+            title: '分配实体',
+            dataIndex: 'entities',
+            key: 'entities',
+            render: (_, record) => record[Object.keys(record)[0]].join(', ')
+        },
+    ];
+
+    const hyperParamsColumns = [
+        {
+            title: '超参数名称',
+            dataIndex: 'name',
+            key: 'name',
+            render: (_, record) => Object.keys(record)[0]
+        },
+        {
+            title: '数值',
+            dataIndex: 'value',
+            key: 'value',
+            render: (_, record) => record[Object.keys(record)[0]]
+        },
+    ];
+
     return (
         <div className="EO-container">
             <div className="EO-sidebar">
                 <div className="EO-sidebar-section">
                     <div className="EO-text">评估数据来源</div>
-                    <Select onChange={(value) => setSelectedEvaluationType(value)}>
+                    <Select
+                        onChange={(value) => setSelectedEvaluationType(value)}
+                        value={selectedEvaluationType}
+                    >
                         <Option value="在线评估">在线评估</Option>
                         <Option value="离线评估">离线评估</Option>
                     </Select>
                 </div>
 
-                <div className="EO-sidebar-section">
-                    <div className="EO-text">场景参数</div>
-                    {sidebarData.scenarioParams.map((param, index) => (
-                        <div key={index}>{param}</div>
-                    ))}
+                <div className="EO-sidebar-section EO-sidebar-scrollable">
+                    <div className="EO-text">场景信息</div>
+                    {sidebarData.scenarioInfo.name && (
+                        <>
+                            <div className="EO-info-item">名称: {sidebarData.scenarioInfo.name}</div>
+                            <div className="EO-info-item">描述: {sidebarData.scenarioInfo.description}</div>
+                            <Table
+                                columns={envParamsColumns}
+                                dataSource={sidebarData.scenarioInfo.envParams}
+                                pagination={false}
+                                size="small"
+                                rowKey={(record) => Object.keys(record)[0]}
+                            />
+                        </>
+                    )}
                 </div>
 
-                <div className="EO-sidebar-section">
+                <div className="EO-sidebar-section EO-sidebar-scrollable">
                     <div className="EO-text">智能体信息</div>
-                    {sidebarData.agentInfo.map((info, index) => (
-                        <div key={index}>{info}</div>
-                    ))}
+                    {sidebarData.agentInfo.role && (
+                        <>
+                            <div className="EO-info-item">角色: {sidebarData.agentInfo.role}</div>
+                            <div className="EO-info-item">类型: {sidebarData.agentInfo.type}</div>
+                            <div className="EO-info-item">数量: {sidebarData.agentInfo.count}</div>
+                            <Table
+                                columns={entityAssignmentsColumns}
+                                dataSource={sidebarData.agentInfo.entityAssignments}
+                                pagination={false}
+                                size="small"
+                                rowKey={(record) => Object.keys(record)[0]}
+                            />
+                        </>
+                    )}
                 </div>
 
-                <div className="EO-sidebar-section">
+                <div className="EO-sidebar-section EO-sidebar-scrollable">
                     <div className="EO-text">决策模型信息</div>
-                    {sidebarData.modelInfo.map((info, index) => (
-                        <div key={index}>{info}</div>
-                    ))}
+                    {sidebarData.modelInfo.id && (
+                        <>
+                            <div className="EO-info-item">模型ID: {sidebarData.modelInfo.id}</div>
+                            <div className="EO-info-item">模型名称: {sidebarData.modelInfo.name}</div>
+                            <div className="EO-info-item">模型版本: {sidebarData.modelInfo.version}</div>
+                            <div className="EO-info-item">模型类型: {sidebarData.modelInfo.type}</div>
+                            <div className="EO-info-item">创建时间: {formatDate(sidebarData.modelInfo.time)}</div>
+                        </>
+                    )}
+                </div>
+
+                <div className="EO-sidebar-section EO-sidebar-scrollable">
+                    <div className="EO-text">训练信息</div>
+                    {sidebarData.trainInfo.algorithm && (
+                        <>
+                            <div className="EO-info-item">训练算法: {sidebarData.trainInfo.algorithm}</div>
+                            <Table
+                                columns={hyperParamsColumns}
+                                dataSource={sidebarData.trainInfo.hyperParams}
+                                pagination={false}
+                                size="small"
+                                rowKey={(record) => Object.keys(record)[0]}
+                            />
+                        </>
+                    )}
                 </div>
             </div>
 
@@ -361,7 +581,6 @@ const EvaluationOptimization = () => {
                                         placeholder="选择内容"
                                     />
                                 </div>
-
                                 <div className="EO-evaluation">
                                     <p className="EO-text">形状：</p>
                                     <Select
@@ -375,7 +594,6 @@ const EvaluationOptimization = () => {
                                         disabled={!chartSelections[index].content}
                                     />
                                 </div>
-
                                 <div
                                     id={`chart-${index}`}
                                     style={{ width: '100%', height: '300px' }}
@@ -383,7 +601,6 @@ const EvaluationOptimization = () => {
                             </div>
                         ))}
                     </div>
-
                     <div className="EO-text">事件：</div>
                     <div className="EO-event-log">
                         {events.map((event, i) => (
@@ -403,13 +620,11 @@ const EvaluationOptimization = () => {
                             ></div>
                         </div>
                     )}
-
                     <div className="EO-evaluation-module">
                         <div className="EO-evaluation">
                             <div className="EO-text">分数评估：</div>
                             {evalScore && <div className="EO-score">{evalScore}</div>}
                         </div>
-
                         <div>
                             <div className="EO-text">优化评估：</div>
                             {evalSuggestion && (
@@ -421,13 +636,85 @@ const EvaluationOptimization = () => {
                             )}
                         </div>
                     </div>
-
                     <div className="EO-model-button-container">
                         <Button className="EO-model-button" onClick={handleLoadData}>数据载入</Button>
                         <Button className="EO-model-button" onClick={handleStartEvaluation}>开始评估</Button>
                     </div>
                 </div>
             </div>
+
+            <Modal
+                title="请选择需要评估的数据来源"
+                open={isDataModalVisible}
+                onCancel={() => setIsDataModalVisible(false)}
+                footer={null}
+                width={1000}
+            >
+                <Table
+                    columns={dataColumns}
+                    dataSource={evaluationData}
+                    pagination={false}
+                    rowKey={(record) => record.model.id}
+                />
+            </Modal>
+
+            <Modal
+                title="数据详细信息"
+                open={isDetailModalVisible}
+                onCancel={() => setIsDetailModalVisible(false)}
+                footer={null}
+                width={800}
+                className="EO-detail-modal"
+            >
+                {selectedModel && (
+                    <div className="EO-detail-content">
+                        <div className="EO-detail-section">
+                            <div className="EO-text">决策模型信息</div>
+                            <div className="EO-info-item">模型ID: {selectedModel.model.id}</div>
+                            <div className="EO-info-item">模型名称: {selectedModel.model.name}</div>
+                            <div className="EO-info-item">模型版本: {selectedModel.model.version}</div>
+                            <div className="EO-info-item">模型类型: {selectedModel.model.type}</div>
+                            <div className="EO-info-item">创建时间: {formatDate(selectedModel.model.time)}</div>
+                        </div>
+                        <div className="EO-detail-section">
+                            <div className="EO-text">场景信息</div>
+                            <div className="EO-info-item">名称: {selectedModel.scenario.name}</div>
+                            <div className="EO-info-item">描述: {selectedModel.scenario.description}</div>
+                            <Table
+                                columns={envParamsColumns}
+                                dataSource={selectedModel.scenario.envParams}
+                                pagination={false}
+                                size="small"
+                                rowKey={(record) => Object.keys(record)[0]}
+                            />
+                        </div>
+                        <div className="EO-detail-section">
+                            <div className="EO-text">智能体信息</div>
+                            <div className="EO-info-item">角色: {selectedModel.agent.role}</div>
+                            <div className="EO-info-item">类型: {selectedModel.agent.type}</div>
+                            <div className="EO-info-item">数量: {selectedModel.agent.count}</div>
+                            <Table
+                                columns={entityAssignmentsColumns}
+                                dataSource={selectedModel.agent.entityAssignments}
+                                pagination={false}
+                                size="small"
+                                rowKey={(record) => Object.keys(record)[0]}
+                            />
+                        </div>
+                        <div className="EO-detail-section">
+                            <div className="EO-text">训练信息</div>
+                            <div className="EO-info-item">训练算法: {selectedModel.train.algorithm}</div>
+                            <Table
+                                columns={hyperParamsColumns}
+                                dataSource={selectedModel.train.hyperParams}
+                                pagination={false}
+                                size="small"
+                                rowKey={(record) => Object.keys(record)[0]}
+                            />
+                        </div>
+                    </div>
+                )}
+            </Modal>
         </div>
     );
 };
