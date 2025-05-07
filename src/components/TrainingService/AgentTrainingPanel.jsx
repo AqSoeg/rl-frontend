@@ -14,6 +14,7 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshDa
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [agents, setAgents] = useState([]);
+  const [agents1, setAgents1] = useState([]);
   const [isModelListModalVisible, setIsModelListModalVisible] = useState(false);
   const [isModelInfoModalVisible, setIsModelInfoModalVisible] = useState(false);
   const [currentModel, setCurrentModel] = useState(null);
@@ -22,6 +23,12 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshDa
   const [hyperParametersValues, setHyperParametersValues] = useState({});
   const [effectImageUrl, setEffectImageUrl] = useState(null);
   const [isEffectImageModalVisible, setIsEffectImageModalVisible] = useState(false);
+
+  const [isScenarioModalVisible, setIsScenarioModalVisible] = useState(false);
+  const [deploymentImageUrl, setDeploymentImageUrl] = useState(null);
+  const [processData, setProcessData] = useState(null);
+  const [animationUrl, setAnimationUrl] = useState(null);
+  const [isProcessModalVisible, setIsProcessModalVisible] = useState(false);
   
   useEffect(() => {
     setEntity('');
@@ -177,6 +184,12 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshDa
         );
   
         setAgents(filteredAgents);
+        const filteredAgents1 = models.filter(
+            (agent) =>
+              agent.scenarioID === intelligentStore.selectedScenario.id
+          );
+    
+          setAgents1(filteredAgents1);
       } catch (error) {
         console.error('Error fetching agents:', error);
       }
@@ -482,12 +495,130 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshDa
         ),
       },
     ];
+    const scenarioViewColumns = [
+        {
+          title: '序号',
+          key: 'index',
+          render: (text, record, index) => index + 1,
+        },
+        { title: '想定场景', dataIndex: 'scenarioID', key: 'scenarioID' },
+        { title: '智能体角色', dataIndex: 'agentRoleID', key: 'agentRoleID' },
+        { title: '智能体ID', dataIndex: 'agentID', key: 'agentID' },
+        { title: '智能体名称', dataIndex: 'agentName', key: 'agentName' },
+        { title: '版本', dataIndex: 'agentVersion', key: 'agentVersion' },
+        { title: '智能体类型', dataIndex: 'agentType', key: 'agentType' },
+        { 
+          title: '更新时间', 
+          dataIndex: 'updateTime', 
+          key: 'updateTime', 
+          render: time => new Date(time).toLocaleString() 
+        },
+        {
+          title: '实体分配',
+          dataIndex: 'entityAssignments',
+          key: 'entityAssignments',
+          render: (text, record) => {
+            const assignments = record.entityAssignments.map((assignment, index) => {
+              const agentName = Object.keys(assignment)[0];
+              const entities = assignment[agentName].join(', ');
+              return `${agentName}: ${entities}`;
+            });
+      
+            return (
+              <div>
+                {assignments.map((assignment, index) => (
+                  <div key={index}>{assignment}</div>
+                ))}
+              </div>
+            );
+          },
+        },
+        {
+          title: '操作',
+          key: 'action',
+          render: (text, record) => (
+            <Button type="primary" onClick={() => handleView(record)}>查看</Button>
+          ),
+        },
+      ];
+    const viewscenario = async () => {
+        if (!intelligentStore.selectedScenario) {
+            message.error("请先选择想定场景");
+            return;
+        }
 
+        try {
+            // Fetch deployment image from backend
+            const response = await fetch(__APP_CONFIG__.get_deployment_image, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ scenarioId: intelligentStore.selectedScenario.id }),
+            });
+
+            if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            if (data.status === 'success') {
+            setDeploymentImageUrl(data.img_url);
+            setIsScenarioModalVisible(true);
+            } else {
+            message.error('获取部署图失败');
+            }
+        } catch (error) {
+            console.error('获取部署图失败:', error);
+            message.error('获取部署图失败，请检查网络或联系管理员');
+        }
+    };
+
+    const handleprocess = async () => {
+        if (!intelligentStore.selectedAgent) {
+          message.error("请先载入智能体");
+          return;
+        }
+      
+        try {
+          setIsProcessModalVisible(true);
+          setAnimationUrl(null); // 重置动画URL
+          
+          const selectedAgent = intelligentStore.selectedAgent;
+          
+          const response = await fetch(__APP_CONFIG__.get_process_data, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              agentId: selectedAgent.agentID,
+              scenarioId: intelligentStore.selectedScenario.id
+            }),
+          });
+      
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+      
+          const data = await response.json();
+          if (data.status === 'success') {
+            setAnimationUrl(data.animationUrl);
+          } else {
+            setAnimationUrl(null); // 确保设置为null以显示加载提示
+          }
+          
+        } catch (error) {
+          console.error('获取过程数据失败:', error);
+          setAnimationUrl(null); // 确保设置为null以显示加载提示
+          message.error('获取过程数据失败');
+        }
+      };
   // ================== 渲染部分 ==================
   return (
     <div className='right1' style={{ height: '80vh', width:'95%',margin: '0 auto' }}>
       <Card 
-        title={<div style={{ textAlign: 'center', backgroundColor: '#e6f7ff', padding: '8px 0' }}>已选想定场景、智能体角色的智能体设计列表</div>} 
+        title={<div style={{ textAlign: 'center', backgroundColor: '#e6f7ff', padding: '8px 0' }}>智能体载入</div>} 
         bordered={true}
         style={{ marginBottom: 16 }}
       >
@@ -551,6 +682,9 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshDa
             <Button type="primary" className="update-button" onClick={handleUpdate}>
             更新
             </Button>
+            <Button type="primary" className="update-button" onClick={viewscenario}>
+            场景查看
+            </Button>
             <Input.TextArea className='input' rows={4} value={entityParamsInfo} disabled />
         </Card>
       </div>
@@ -608,6 +742,7 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshDa
           {training ? '训练中...' : '开始训练'}
         </Button>
         <Button onClick={handleViewModelListClick}>查看模型列表</Button>
+        <Button onClick={handleprocess}>过程展示</Button>
         <Button onClick={stopTraining} disabled={!training}>
           终止训练
         </Button>
@@ -825,6 +960,178 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshDa
       >
         {effectImageUrl && <img src={effectImageUrl} alt="训练效果图片" style={{ width: '100%' }} />}
       </Modal>
+      <Modal
+        title="场景查看"
+        open={isScenarioModalVisible}
+        onOk={() => setIsScenarioModalVisible(false)}
+        onCancel={() => setIsScenarioModalVisible(false)}
+        width={1800} 
+        footer={null}
+        >
+        <Row gutter={10}>
+            <Col span={8}>
+            <Card title="部署图" bordered={false}>
+                {deploymentImageUrl ? (
+                <img 
+                    src={deploymentImageUrl} 
+                    alt="部署图" 
+                    style={{ width: '100%', maxHeight: '60vh', objectFit: 'contain' }}
+                />
+                ) : (
+                <div style={{ padding: 16, textAlign: 'center', color: 'rgba(0, 0, 0, 0.25)' }}>
+                    加载部署图中...
+                </div>
+                )}
+            </Card>
+            </Col>
+            <Col span={16}>
+            <Card 
+                title="场景信息" 
+                bordered={false}
+                style={{ height: '100%' }}
+                styles={{ body: { padding: 0 } }}
+            >
+                <div style={{ height: '60vh', overflowY: 'auto' }}>
+                {agents.length > 0 ? (
+                    <Table
+                    columns={scenarioViewColumns}
+                    dataSource={agents1}
+                    pagination={{ pageSize: 5 }}
+                    bordered
+                    rowKey="agentID"
+                    scroll={{ y: 'calc(60vh - 55px)' }}
+                    />
+                ) : (
+                    <div style={{ padding: 16, textAlign: 'center', color: 'rgba(0, 0, 0, 0.25)' }}>
+                    暂无智能体信息
+                    </div>
+                )}
+                </div>
+            </Card>
+            </Col>
+        </Row>
+        </Modal>
+        <Modal
+            title="过程展示"
+            open={isProcessModalVisible}
+            onOk={() => setIsProcessModalVisible(false)}
+            onCancel={() => setIsProcessModalVisible(false)}
+            width={1800}
+            footer={null}
+            >
+            <div style={{ display: 'flex', height: '600px' }}>
+                {/* 数据展示部分 - 复用智能体详情弹窗的内容 */}
+                <div style={{ 
+                flex: 1, 
+                borderRight: '1px solid #f0f0f0',
+                padding: '16px',
+                overflowY: 'auto'
+                }}>
+                {intelligentStore.selectedAgent ? (
+                    <div>
+                    <h3>智能体详细信息</h3>
+                    <p><strong>智能体名称：</strong>{intelligentStore.selectedAgent.agentName}</p>
+                    <p><strong>智能体ID：</strong>{intelligentStore.selectedAgent.agentID}</p>
+                    <p><strong>版本：</strong>{intelligentStore.selectedAgent.agentVersion}</p>
+                    <p><strong>智能体类型：</strong>{intelligentStore.selectedAgent.agentType}</p>
+                    <p><strong>更新时间：</strong>{new Date(intelligentStore.selectedAgent.updateTime).toLocaleString()}</p>
+                    <p><strong>想定场景：</strong>{intelligentStore.selectedAgent.scenarioID}</p>
+
+                    <h3>智能体分配信息</h3>
+                    <Table
+                        columns={[
+                        { title: '智能体名称', dataIndex: 'agentName', key: 'agentName' },
+                        { title: '分配实体', dataIndex: 'assignedEntities', key: 'assignedEntities' },
+                        ]}
+                        dataSource={intelligentStore.selectedAgent.entityAssignments.flatMap((assignment) =>
+                        Object.entries(assignment).map(([agentName, entities]) => ({
+                            key: agentName,
+                            agentName: agentName,
+                            assignedEntities: entities.join(', '),
+                        }))
+                        )}
+                        pagination={false}
+                        bordered
+                    />
+
+                    <h3>实体状态信息</h3>
+                    <Table
+                        columns={[
+                        { title: '实体名称', dataIndex: 'name', key: 'name' },
+                        ...intelligentStore.selectedAgent.agentModel.flatMap((model) => {
+                            return model.stateVector.map((state) => state[2]);
+                        }).reduce((uniqueColumns, field) => {
+                            if (!uniqueColumns.includes(field)) {
+                            uniqueColumns.push(field);
+                            }
+                            return uniqueColumns;
+                        }, []).map((field) => ({
+                            title: field,
+                            dataIndex: field,
+                            key: field,
+                        }))
+                        ]}
+                        dataSource={intelligentStore.selectedAgent.agentModel.flatMap((model) => {
+                        const entities = [...new Set(model.stateVector.map((state) => state[0]))];
+                        return entities.map((entity) => {
+                            const entityState = {
+                            key: entity,
+                            name: entity,
+                            };
+                            model.stateVector.forEach((state) => {
+                            const [entityName, , fieldName, fieldValue] = state;
+                            if (entityName === entity) {
+                                entityState[fieldName] = fieldValue;
+                            }
+                            });
+                            return entityState;
+                        });
+                        })}
+                        pagination={false}
+                        bordered
+                    />
+                    </div>
+                ) : (
+                    <div style={{ textAlign: 'center', padding: '20px' }}>
+                    <p>没有可用的智能体信息</p>
+                    </div>
+                )}
+                </div>
+                
+                {/* 动画展示部分 */}
+                <div style={{ 
+                flex: 1, 
+                padding: '16px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                backgroundColor: '#f5f5f5'
+                }}>
+                {animationUrl ? (
+                    <>
+                    <h3>训练过程动画</h3>
+                    <div style={{ width: '100%', height: '100%' }}>
+                        <img 
+                        src={animationUrl} 
+                        alt="训练过程动画" 
+                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                        onError={(e) => {
+                            e.target.onerror = null; // 防止无限循环
+                            setAnimationUrl(null); // 图片加载失败时设置为null
+                        }}
+                        />
+                    </div>
+                    </>
+                ) : (
+                    <div style={{ textAlign: 'center' }}>
+                    <h3>Sorry</h3>
+                    <p>没有载入智能体的动画显示</p>
+                    </div>
+                )}
+                </div>
+            </div>
+            </Modal>
     </div>
   );
 });

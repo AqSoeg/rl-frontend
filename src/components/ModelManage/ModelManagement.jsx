@@ -4,7 +4,9 @@ import ModelLibrary from './modellibrary';
 import OfflineDatabase from './offlinedatabase';
 import ScenarioLibrary from './scenariolibrary';
 import DecisionModelLibrary from './decisionmodellibrary';
+import EvaluateTable from './behaviorlibrary';
 import './ModelManagement.css';
+import { message } from 'antd';
 
 const ModelManagement = () => {
   const [activeComponent, setActiveComponent] = useState('ModelLibrary');
@@ -13,6 +15,7 @@ const ModelManagement = () => {
   const [scenarios, setScenarios] = useState([]);
   const [datasets, setDatasets] = useState([]);
   const [decisions, setDecisions] = useState([]);
+  const [evaluatetables, setEvaluateTables] = useState([]);
 
   const fetchModels = async () => {
     try {
@@ -106,13 +109,34 @@ const ModelManagement = () => {
       message.error('获取决策模型失败');
     }
   };
-  
+  const fetchEvaluatetables = async () => {
+    try {
+      const response = await fetch(__APP_CONFIG__.getEvaluateTables, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ library: 'evaluate' }), // 指定库
+      });
+      if (!response.ok) {
+        throw new Error('Network response was not ok ' + response.statusText);
+      }
+      const data = await response.json();
+      
+      setEvaluateTables(data);
+    } catch (error) {
+      console.error('Error fetching evaluate tables:', error);
+      message.error('获取评估数据失败');
+    }
+  };
+
   useEffect(() => {
     fetchModels();
     fetchAlgorithms();
     fetchDatasets();
     fetchScenarios();
     fetchDecisions(); // 调用 fetchDecisions
+    fetchEvaluatetables();
   }, []);
 
   const handleButtonClick = (componentName) => {
@@ -127,6 +151,7 @@ const ModelManagement = () => {
         <button className='button' onClick={() => handleButtonClick('OfflineDatabase')}>离线数据集库</button>
         <button className='button' onClick={() => handleButtonClick('ScenarioLibrary')}>想定场景库</button>
         <button className='button' onClick={() => handleButtonClick('DecisionModelLibrary')}>决策模型库</button>
+        <button className='button' onClick={() => handleButtonClick('EvaluateTable')}>评估数据表</button>
       </div>
       <div className='modelright'>
         {activeComponent === 'ModelLibrary' && <ModelLibrary data={models} fetchModels={fetchModels} />}
@@ -134,6 +159,7 @@ const ModelManagement = () => {
         {activeComponent === 'OfflineDatabase' && <OfflineDatabase datasets={datasets} fetchDatasets={fetchDatasets} />}
         {activeComponent === 'ScenarioLibrary' && <ScenarioLibrary scenarios={scenarios} fetchScenarios={fetchScenarios} />}
         {activeComponent === 'DecisionModelLibrary' && <DecisionModelLibrary decisions={decisions} fetchDecisions={fetchDecisions} />}
+        {activeComponent === 'EvaluateTable' && <EvaluateTable decisions={evaluatetables} fetchDecisions={fetchEvaluatetables} />}
       </div>
     </div>
   );

@@ -16,11 +16,14 @@ const appConfig = {
   publish_model:"http://localhost:5000/publish_model",
   get_datasets:"http://localhost:5000/get_datasets",
   getDecisionModels:"http://localhost:5000/getDecisionModels",
+  getEvaluateTables:"http://localhost:5000/getEvaluateTables",
   searchAll:"http://localhost:5000/searchAll",
   deleteAll:"http://localhost:5000/deleteAll",
   updateAll:"http://localhost:5000/updateAll",
   addAll:"http://localhost:5000/addAll",
   updateDbJson:"http://localhost:5000/updateDbJson",
+  get_deployment_image:"http://localhost:5000/get_deployment_image",
+  get_process_data:"http://localhost:5000/get_process_data",
 };
 
 export default defineConfig({
