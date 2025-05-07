@@ -15,6 +15,7 @@ ALGORITHM_FILE_PATH = 'mock/train.json'
 DATASET_FILE_PATH = 'mock/dataset.json'
 SCENARIO_FILE_PATH = 'mock/db.json'
 DECISION_FILE_PATH = 'mock/dc.json'
+EVALUATE_FILE_PATH = 'mock/evaluatetable.json'
 EVALUATION_DATA_PATH = 'mock/evaluation_data.json'
 EVALUATION_RESULT_PATH = 'mock/evaluation_result.json'
 training_thread = None
@@ -140,7 +141,15 @@ def get_decision_models():
     except Exception as e:
         print(f'Error reading decision models: {str(e)}')
         return jsonify({'error': 'Failed to read decision models'}), 500
-
+@app.route('/getEvaluateTables', methods=['POST'])
+def get_evaluate_tables():
+    try:
+        with open(EVALUATE_FILE_PATH, 'r', encoding='utf-8') as f:
+            evaluate_tables = json.load(f)
+        return jsonify(evaluate_tables)
+    except Exception as e:
+        print(f'Error reading evaluate tables: {str(e)}')
+        return jsonify({'error': 'Failed to read evaluate tables'}), 500
 @app.route('/get_algorithm', methods=['POST'])
 def get_algorithm():
     try:
@@ -282,6 +291,8 @@ def search_all():
             file_path = DECISION_FILE_PATH
         elif search_type == 'model':
             file_path = MODEL_FILE_PATH
+        elif search_type == 'evaluate':
+            file_path = EVALUATE_FILE_PATH
         else:
             return jsonify({'status': 'error', 'message': 'Invalid search type'})
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -311,6 +322,8 @@ def delete_item():
             file_path = DECISION_FILE_PATH
         elif delete_type == 'model':
             file_path = MODEL_FILE_PATH
+        elif search_type == 'evaluate':
+            file_path = EVALUATE_FILE_PATH
         else:
             return jsonify({'status': 'error', 'message': 'Invalid delete type'}), 400
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -325,6 +338,8 @@ def delete_item():
             existing_data = [item for item in existing_data if item.get('AGENT_MODEL_ID') != item_id]
         elif delete_type == 'model':
             existing_data = [item for item in existing_data if item.get('agentID') != item_id]
+        elif delete_type == 'evaluate':
+            existing_data = [item for item in existing_data if item.get('AGENT_MODEL_ID') != item_id]
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(existing_data, f, ensure_ascii=False, indent=2)
         return jsonify({'status': 'success', 'message': f'{delete_type.capitalize()} deleted successfully'})
@@ -349,6 +364,8 @@ def update_item():
             file_path = DECISION_FILE_PATH
         elif update_type == 'model':
             file_path = MODEL_FILE_PATH
+        elif search_type == 'evaluate':
+            file_path = EVALUATE_FILE_PATH
         else:
             return jsonify({'status': 'error', 'message': 'Invalid update type'}), 400
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -368,6 +385,9 @@ def update_item():
                 item.update(updated_data)
                 updated = True
             elif update_type == 'model' and item.get('agentID') == item_id:
+                item.update(updated_data)
+                updated = True
+            elif update_type == 'evaluate' and item.get('AGENT_MODEL_ID') == item_id:
                 item.update(updated_data)
                 updated = True
         if not updated:
@@ -441,5 +461,32 @@ def update_db_json():
     except Exception as e:
         return jsonify({"message": f"更新失败: {str(e)}"}), 500
 
+@app.route('/get_deployment_image', methods=['POST'])
+def get_deployment_image():
+    data = request.get_json()
+    scenario_id = data.get('scenarioId')
+    if not scenario_id:
+        return jsonify({"status": "error", "message": "Missing scenarioId"}), 400
+    
+    return jsonify({
+        "status": "success",
+        "img_url": f"mock/scenarios/{scenario_id}.jpeg"  # 或者返回完整的URL
+    })
+
+@app.route('/get_process_data', methods=['POST'])
+def get_process_data():
+    data = request.get_json()
+    agent_id = data.get('agentId')
+    scenario_id = data.get('scenarioId')
+    
+    if not agent_id or not scenario_id:
+        return jsonify({"status": "error", "message": "Missing parameters"}), 400
+
+    animation_url = f"mock/process/{scenario_id}_{agent_id}.webp"
+    
+    return jsonify({
+        "status": "success",
+        "animationUrl": animation_url
+    })
 if __name__ == '__main__':
     app.run(port=5000, debug=True)

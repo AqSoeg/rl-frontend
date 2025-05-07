@@ -1,0 +1,35 @@
+[
+    {
+      "AGENT_MODEL_ID": "002",
+      "AGENT_NAME": "Model B",
+      "SCENARIO_NAME": "Scenario 2",
+      "ROLE_NAME": "Role 20",
+      "AGENT_MODEL_VERSION": "1.1",
+      "NN_MODEL_TYPE": "1000",
+      "MODEL_PATH": "/path/to/model2",
+      "DATA_FILE": "./mock/1.json",
+      "CREAT_TIME": "2025-03-12T10:05:24.083Z"
+    },
+    {
+      "AGENT_MODEL_ID": "1741855526",
+      "AGENT_NAME": "agent",
+      "SCENARIO_NAME": "城市交通",
+      "ROLE_NAME": "traffic_light",
+      "AGENT_MODEL_VERSION": "1.0",
+      "NN_MODEL_TYPE": "distributed_multi_agent",
+      "MODEL_PATH": "mock/ppo_model.pkl",
+      "DATA_FILE": "./mock/2.json",
+      "CREAT_TIME": "2025-03-13T16:45:26.736949"
+    },
+    {
+      "AGENT_MODEL_ID": "1741855662",
+      "AGENT_NAME": "Agent",
+      "SCENARIO_NAME": "城市交通",
+      "ROLE_NAME": "traffic_light",
+      "AGENT_MODEL_VERSION": "1.0",
+      "NN_MODEL_TYPE": "distributed_multi_agent",
+      "MODEL_PATH": "mock/ppo_model.pkl",
+      "DATA_FILE": "./mock/3.json",
+      "CREAT_TIME": "2025-03-13T16:47:42.557135"
+    }
+  ]

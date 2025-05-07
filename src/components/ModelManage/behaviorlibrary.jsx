@@ -1,294 +1,259 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, Input, Card, Select } from 'antd';
-import { PlusOutlined, SettingOutlined } from '@ant-design/icons';
-import moment from 'moment';
+import { Table, Button, Modal, Form, Input, Card, Select, message } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 
+const EvaluateTable = ({ decisions, fetchDecisions }) => {
+    const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+    const [isAddModalVisible, setIsAddModalVisible] = useState(false);
+    const [currentDecision, setCurrentDecision] = useState(null);
+    const [isEditMode, setIsEditMode] = useState(false);
+    const [searchText, setSearchText] = useState('');
+    const [searchField, setSearchField] = useState('AGENT_MODEL_ID');
+    const [filteredDecisions, setFilteredDecisions] = useState(decisions || []);
+    const editForm = Form.useForm()[0];
+    const addForm = Form.useForm()[0];
 
-const BehaviorLibrary = ({data}) => {
-  const [rules, setRules] = useState(data);
-  const [filteredRules, setFilteredRules] = useState([]); // 新增状态用于存储过滤后的数据
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [currentRule, setCurrentRule] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [searchText, setSearchText] = useState('');
-  const [searchField, setSearchField] = useState('id'); // 默认搜索字段
-  const [isAdding, setIsAdding] = useState(false);
-  const [form] = Form.useForm();
-
-  const showModal = (rule) => {
-    setCurrentRule(rule);
-    form.setFieldsValue(rule);
-    setIsModalVisible(true);
-    setIsEditing(false);
-    setIsAdding(false);
-  };
-  useEffect(() => {
-    console.log('Data in BehaviorLibrary:', data); // 添加日志
-    if (Array.isArray(data)) {
-      // 如果数据是数组，确保每个对象都有唯一的key
-      const rulesWithKeys = data.map((item, index) => ({ ...item, key: index }));
-      setRules(rulesWithKeys);
-    } else if (data !== null && typeof data === 'object') {
-      // 如果数据是对象，将其包装在数组中并添加key
-      setRules([data]);
-    } else if (data === null) {
-      // 特别处理 null 值
-      console.log('Data is null');
-      setRules([]);
-    } else {
-      console.error('Data is not an array:', data);
-    }
-  }, [data]);
-  const handleOk = () => {
-    if (isEditing || isAdding) {
-      form.submit();
-    } else {
-      setIsModalVisible(false);
-    }
-  };
-
-  const handleFinish = (values) => {
-    let updatedRules;
-    if (isAdding) {
-      // 添加新规则时，首先添加新规则，然后更新所有规则的 key
-      const now = moment().format('YYYY年MM月DD日 HH:mm:ss');
-      const newRule = {
-        ...values,
-        key: `${rules.length + 1}`,
-        id: values.id || `NEW-${Date.now()}`, // 如果没有提供ID，则使用时间戳生成一个临时ID
-        date: now,
-      };
-      updatedRules = [...rules, newRule];
-    } else {
-      // 更新现有规则时，先更新对应的规则，然后更新所有规则的 key
-      const now = moment().format('YYYY年MM月DD日 HH:mm:ss');
-      updatedRules = rules.map(ruleItem =>
-        ruleItem.key === currentRule.key ? { ...ruleItem, ...values, date: now } : ruleItem
-      );
-    }
-
-    // 更新所有规则的 key 和 序号，以保持连续性
-    updatedRules = updatedRules.map((rule, index) => ({
-      ...rule,
-      key: `${index + 1}`, // 确保 key 是字符串类型
-    }));
-
-    setRules(updatedRules); // 使用新的规则列表更新状态
-    setFilteredRules(updatedRules); // 同步过滤后的数据
-    setIsModalVisible(false);
-    setIsAdding(false);
-  };
-
-  const handleCancel = () => {
-    setIsModalVisible(false);
-  };
-
-  const update = (rule) => {
-    setCurrentRule(rule);
-    form.setFieldsValue(rule);
-    setIsModalVisible(true);
-    setIsEditing(true);
-    setIsAdding(false);
-  };
-
-  const handleDelete = (rule) => {
-    let updatedRules = filteredRules.filter(m => m.key !== rule.key);
-    // 更新所有规则的 key 和 序号，以保持连续性
-    updatedRules = updatedRules.map((rule, index) => ({
-      ...rule,
-      key: `${index + 1}`, // 确保 key 是字符串类型
-    }));
-    setRules(updatedRules);
-    setFilteredRules(updatedRules); // 同步过滤后的数据
-  };
-
-  const handleSearch = () => {
-    const filteredRules = rules.filter(rule =>
-      String(rule[searchField]).includes(searchText)
-    );
-    setFilteredRules(filteredRules);
-  };
-
-  const addRule = () => {
-    // 创建一个新的规则对象，确保key和id是唯一的
-    const newRule = {
-      key: '',
-      id: '',
-      sceneId: '', // 默认为空，待用户填写
-      agentRoleId: '', // 默认为空，待用户填写
-      action: '', // 默认为空，待用户填写
-      type: '', // 默认为空，待用户填写
-      condition1: '', // 默认为空，待用户填写
-      condition2: '', // 默认为空，待用户填写
-      content1: '',
-      content2: '',
-      date: '', // 默认为空，将在保存时填充
-    };
-    setCurrentRule(newRule);
-    form.setFieldsValue(newRule);
-    setIsModalVisible(true);
-    setIsEditing(true); // 标记为编辑状态，这样表单字段就是可编辑的
-    setIsAdding(true);
-  };
-
-  const columns = [
-    {
-      title: '序号',
-      dataIndex: 'key',
-      key: 'key',
-      render: (text, record, index) => index + 1,
-    },
-    {
-      title: '行为规则ID',
-      dataIndex: 'id',
-      key: 'id',
-    },
-    {
-      title: '想定场景',
-      dataIndex: 'scenarioID',
-      key: 'scenarioID',
-    },
-    {
-      title: '智能体角色',
-      dataIndex: 'agentRoleID',
-      key: 'agentRoleID',
-    },
-    {
-      title: '动作',
-      dataIndex: 'action',
-      key: 'action',
-    },
-    {
-      title: '行为规则类型',
-      dataIndex: 'rule',
-      key: 'ruleStyle',
-      render: (text, record) => record.rule[0], // 假设 ruleFunction 数组中第5个元素是行为规则类型
-    },
-    {
-      title: '条件1',
-      dataIndex: 'rule',
-      key: 'condition1',
-      render: (text, record) => record.rule[1], // 假设 rule 数组中第1个元素是条件1
-    },
-    {
-      title: '条件2',
-      dataIndex: 'rule',
-      key: 'condition2',
-      render: (text, record) => record.rule[2], // 假设 rule 数组中第2个元素是条件2
-    },
-    {
-      title: '内容1',
-      dataIndex: 'rule',
-      key: 'content1',
-      render: (text, record) => record.rule[3], // 假设 rule 数组中第3个元素是内容1
-    },
-    {
-      title: '内容2',
-      dataIndex: 'rule',
-      key: 'content2',
-      render: (text, record) => record.rule[4], // 假设 rule 数组中第4个元素是内容2
-    },
-    {
-      title: '更新时间',
-      dataIndex: 'updateTime',
-      key: 'updateTime',
-      render: time => new Date(time).toLocaleString(),
-    },
-    {
-      title: '操作',
-      key: 'action',
-      render: (text, record) => (
-        <>
-          <Button type="link" onClick={() => showModal(record)}>查看</Button>
-          <Button type="link" onClick={() => update(record)}>更新</Button>
-          <Button type="link" onClick={() => handleDelete(record)}>删除</Button>
-        </>
-      ),
-    },
-  ];
-
-  return (
-    <Card title={
-      <div style={{ backgroundColor: '#f0f0f0', fontSize: '40px', textAlign: 'center' }}>
-        行为规则模型管理
-        <SettingOutlined style={{ marginLeft: 8 }} /> {/* 功能图标 */}
-      </div>} bordered={true}>
-      <span>检索：</span>
-      <Select value={searchField} onChange={setSearchField} style={{ width: 120, marginRight: 8 }}>
-        <Select.Option value="id">行为规则ID</Select.Option>
-        <Select.Option value="sceneId">想定场景</Select.Option>
-        <Select.Option value="agentRoleId">智能体角色</Select.Option>
-        <Select.Option value="action">动作</Select.Option>
-        <Select.Option value="type">行为规则类型</Select.Option>
-        {/* 添加其他搜索条件 */}
-      </Select>
-      <Input
-        placeholder="单行输入"
-        value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
-        style={{ width: 200, marginRight: 8 }}
-      />
-      <Button type="primary" onClick={handleSearch}>搜索</Button>
-      <Table columns={columns} dataSource={filteredRules} pagination={{ pageSize: 5 }} />
-      <Modal
-        title={
-          isAdding 
-            ? "增加行为准则"
-            : isEditing 
-              ? "更新行为准则" 
-              : "行为准则详情"
+    useEffect(() => {
+        if (decisions) {
+            setFilteredDecisions(decisions);
         }
-        visible={isModalVisible}
-        onOk={handleOk}
-        onCancel={handleCancel}
-      >
-        <Form form={form} initialValues={currentRule} onFinish={handleFinish}>
-          {currentRule && (
-            <>
-              <Form.Item label="序号" name="key">
-                <Input disabled />
-              </Form.Item>
-              <Form.Item label="行为规则ID" name="id">
-                <Input disabled={!isEditing && !isAdding} />
-              </Form.Item>
-              <Form.Item label="想定场景" name="sceneId">
-                <Input disabled={!isEditing && !isAdding}/>
-              </Form.Item>
-              <Form.Item label="智能体角色" name="agentRoleId">
-                <Input disabled={!isEditing && !isAdding}/>
-              </Form.Item>
-              <Form.Item label="动作" name="action">
-                <Input disabled={!isEditing && !isAdding}/>
-              </Form.Item>
-              <Form.Item label="行为规则类型" name="type">
-                <Input disabled={!isEditing && !isAdding}/>
-              </Form.Item>
-              <Form.Item label="条件1" name="condition1">
-                <Input disabled={!isEditing && !isAdding}/>
-              </Form.Item>
-              <Form.Item label="条件2" name="condition2">
-                <Input disabled={!isEditing && !isAdding} />
-              </Form.Item>
-              <Form.Item label="内容1" name="content1">
-                <Input disabled={!isEditing && !isAdding}/>
-              </Form.Item>
-              <Form.Item label="内容2" name="content2">
-                <Input disabled={!isEditing && !isAdding}/>
-              </Form.Item>
-              {!isAdding && !isEditing ? (
-                <Form.Item label="更新时间" name="date">
-                  <Input disabled={!isEditing && !isAdding} />
-                </Form.Item>
-              ) : null}
-            </>
-          )}  
-        </Form>
-      </Modal>
-      <Button type="primary" onClick={addRule} style={{ marginBottom: 20 }}>
-        <PlusOutlined /> 新增行为准则
-      </Button>
-    </Card>
-  );
+    }, [decisions]);
+
+    useEffect(() => {
+        if (currentDecision) {
+            editForm.setFieldsValue({
+                ...currentDecision,
+                CREAT_TIME: currentDecision.CREAT_TIME || new Date().toISOString() // 确保有默认值
+            });
+        } else {
+            editForm.resetFields();
+        }
+    }, [currentDecision, editForm]);
+
+    const handleDelete = async (id) => {
+        try {
+            const response = await fetch(__APP_CONFIG__.deleteAll, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'decision', id: id }),
+            });
+            const result = await response.json();
+            if (result.status === 'success') {
+                message.success('决策模型删除成功');
+                fetchDecisions();
+            }
+        } catch (error) {
+            console.error('Error deleting decision model:', error);
+            message.error('决策模型删除失败');
+        }
+    };
+
+    const handleUpdate = async (id, values) => {
+        try {
+            const response = await fetch(__APP_CONFIG__.updateDecisionModel, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'decision',
+                    id: id,
+                    data: { ...values, CREAT_TIME: new Date().toISOString() } // 添加当前时间
+                }),
+            });
+            const result = await response.json();
+            if (result.status === 'success') {
+                message.success('决策模型更新成功');
+                fetchDecisions();
+                setIsEditModalVisible(false);
+            }
+        } catch (error) {
+            console.error('Error updating decision model:', error);
+            message.error('决策模型更新失败');
+        }
+    };
+
+    const handleSearch = async () => {
+      try {
+          const response = await fetch(__APP_CONFIG__.searchAll, {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                  type: 'decision', // 根据页面类型传入不同的 type
+                  field: searchField,
+                  value: searchText
+              })
+          });
+  
+          const result = await response.json();
+          if (Array.isArray(result)) {
+              setFilteredDecisions(result); // 假设你使用 setFilteredDecisions 来更新状态
+          } else {
+              console.error('Expected an array but got:', result);
+              setFilteredDecisions([]); // 如果返回的不是数组，设置为空数组
+          }
+      } catch (error) {
+          console.error('Error searching decision models:', error);
+          message.error('决策模型搜索失败');
+      }
+  };
+
+    const handleOkEdit = () => {
+        if (isEditMode) {
+            editForm.submit();
+        } else {
+            setIsEditModalVisible(false);
+        }
+    };
+
+    const handleFinishEdit = async (values) => {
+        await handleUpdate(currentDecision.AGENT_MODEL_ID, values);
+    };
+
+    const handleAdd = async (values) => {
+        try {
+            const response = await fetch(__APP_CONFIG__.addDecisionModel, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'decision',
+                    data: { ...values, CREAT_TIME: new Date().toISOString() } // 添加当前时间
+                }),
+            });
+            const result = await response.json();
+            if (result.status === 'success') {
+                message.success('决策模型新增成功');
+                fetchDecisions();
+                setIsAddModalVisible(false);
+            }
+        } catch (error) {
+            console.error('Error adding decision model:', error);
+            message.error('决策模型新增失败');
+        }
+    };
+
+    const columns = [
+        { title: '序号', dataIndex: 'key', key: 'key', render: (text, record, index) => index + 1 },
+        { title: '智能体模型 ID', dataIndex: 'AGENT_MODEL_ID', key: 'AGENT_MODEL_ID' },
+        { title: '智能体模型名称', dataIndex: 'AGENT_NAME', key: 'AGENT_NAME' },
+        { title: '所属想定场景名称', dataIndex: 'SCENARIO_NAME', key: 'SCENARIO_NAME' },
+        { title: '角色名称', dataIndex: 'ROLE_NAME', key: 'ROLE_NAME' },
+        { title: '神经网络模型类型', dataIndex: 'NN_MODEL_TYPE', key: 'NN_MODEL_TYPE' },
+        { title: '模型路径', dataIndex: 'MODEL_PATH', key: 'MODEL_PATH' },
+        { title: '文件位置', dataIndex: 'DATA_FILE', key: 'DATA_FILE' },
+        { title: '创建时间', dataIndex: 'CREAT_TIME', key: 'CREAT_TIME' },
+        {
+            title: '操作',
+            key: 'action',
+            render: (text, record) => (
+                <div>
+                    <Button type="link" onClick={() => { setCurrentDecision(record); setIsEditMode(false); setIsEditModalVisible(true); }}>查看</Button>
+                    <Button type="link" onClick={() => { setCurrentDecision(record); setIsEditMode(true); setIsEditModalVisible(true); editForm.setFieldsValue(record); }}>编辑</Button>
+                    <Button type="link" onClick={() => handleDelete(record.AGENT_MODEL_ID)}>删除</Button>
+                </div>
+            ),
+        },
+    ];
+
+    return (
+        <Card title="决策模型库" bordered={true}>
+            <span>检索：</span>
+            <Select value={searchField} onChange={setSearchField} style={{ width: 120, marginRight: 8 }}>
+                <Select.Option value="AGENT_MODEL_ID">智能体模型 ID</Select.Option>
+                <Select.Option value="AGENT_NAME">智能体模型名称</Select.Option>
+                <Select.Option value="SCENARIO_NAME">所属想定场景名称</Select.Option>
+                <Select.Option value="ROLE_NAME">角色名称</Select.Option>
+                <Select.Option value="NN_MODEL_TYPE">神经网络模型类型</Select.Option>
+                <Select.Option value="MODEL_PATH">模型路径</Select.Option>
+                <Select.Option value="DATA_FILE">文件位置</Select.Option>
+                <Select.Option value="CREAT_TIME">创建时间</Select.Option>
+            </Select>
+            <Input placeholder="单行输入" value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ width: 200, marginRight: 8 }} />
+            <Button type="primary" onClick={handleSearch}>搜索</Button>
+            <Table dataSource={filteredDecisions} columns={columns} rowKey="AGENT_MODEL_ID" />
+
+            {/* 编辑和查看的模态框 */}
+            <Modal
+                title={isEditMode ? '编辑评估数据' : '查看评估数据'}
+                open={isEditModalVisible}
+                onOk={handleOkEdit}
+                onCancel={() => setIsEditModalVisible(false)}
+            >
+                <Form form={editForm} initialValues={currentDecision} onFinish={handleFinishEdit}>
+                    <Form.Item label="智能体模型 ID" name="AGENT_MODEL_ID">
+                        <Input disabled={!isEditMode} />
+                    </Form.Item>
+                    <Form.Item label="智能体模型名称" name="AGENT_NAME">
+                        <Input disabled={!isEditMode} />
+                    </Form.Item>
+                    <Form.Item label="所属想定场景名称" name="SCENARIO_NAME">
+                        <Input disabled={!isEditMode} />
+                    </Form.Item>
+                    <Form.Item label="角色名称" name="ROLE_NAME">
+                        <Input disabled={!isEditMode} />
+                    </Form.Item>
+                    <Form.Item label="神经网络模型类型" name="NN_MODEL_TYPE">
+                        <Input disabled={!isEditMode} />
+                    </Form.Item>
+                    <Form.Item label="模型路径" name="MODEL_PATH">
+                        <Input disabled={!isEditMode} />
+                    </Form.Item>
+                    <Form.Item label="文件位置" name="DATA_FILE">
+                        <Input disabled={!isEditMode} />
+                    </Form.Item>
+                    <Form.Item label="创建时间" name="CREAT_TIME">
+                        <Input disabled={true} />
+                    </Form.Item>
+                </Form>
+            </Modal>
+
+            {/* 新增决策模型的模态框 */}
+            <Modal
+                title="新增评估数据"
+                open={isAddModalVisible}
+                onOk={() => addForm.submit()}
+                onCancel={() => setIsAddModalVisible(false)}
+            >
+                <Form form={addForm} onFinish={handleAdd}>
+                    <Form.Item label="智能体模型 ID" name="AGENT_MODEL_ID">
+                        <Input />
+                    </Form.Item>
+                    <Form.Item label="智能体模型名称" name="AGENT_NAME">
+                        <Input />
+                    </Form.Item>
+                    <Form.Item label="所属想定场景名称" name="SCENARIO_NAME">
+                        <Input />
+                    </Form.Item>
+                    <Form.Item label="角色名称" name="ROLE_NAME">
+                        <Input />
+                    </Form.Item>
+                    <Form.Item label="神经网络模型类型" name="NN_MODEL_TYPE">
+                        <Input />
+                    </Form.Item>
+                    <Form.Item label="模型路径" name="MODEL_PATH">
+                        <Input />
+                    </Form.Item>
+                    <Form.Item label="文件位置" name="DATA_FILE">
+                        <Input />
+                    </Form.Item>
+                    <Form.Item label="创建时间" name="CREAT_TIME">
+                        <Input disabled={true} />
+                    </Form.Item>
+                </Form>
+            </Modal>
+
+            <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => {
+                    setIsAddModalVisible(true);
+                    addForm.resetFields();
+                }}
+            >
+                新增评估数据
+            </Button>
+        </Card>
+    );
 };
 
-export default BehaviorLibrary;
+export default EvaluateTable;
