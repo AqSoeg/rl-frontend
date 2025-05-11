@@ -47,16 +47,54 @@ class ActionSpaceStore {
         }
     }
 
-    setRuleForModel(modelID, uniqueKey, rule) {
+    setRuleForModel(modelID, uniqueKey, rule, ruleNumber) {
         if (!this.rulesByModel[modelID]) {
             this.rulesByModel[modelID] = {};
         }
-        this.rulesByModel[modelID][uniqueKey] = rule;
+
+        const ruleKey = ruleNumber ? `${uniqueKey}_${ruleNumber}` : uniqueKey;
+
+        if (rule) {
+            this.rulesByModel[modelID][ruleKey] = {
+                ...rule,
+                uniqueKey,
+                ruleNumber
+            };
+        } else {
+            if (ruleNumber) {
+                delete this.rulesByModel[modelID][ruleKey];
+            } else {
+                Object.keys(this.rulesByModel[modelID]).forEach(key => {
+                    if (key.startsWith(`${uniqueKey}_`)) {
+                        delete this.rulesByModel[modelID][key];
+                    }
+                });
+            }
+        }
         this.notifyListeners();
     }
 
-    getRuleForModel(modelID, uniqueKey) {
-        return this.rulesByModel[modelID]?.[uniqueKey] || null;
+    getRuleForModel(modelID, uniqueKey, ruleNumber) {
+        if (ruleNumber) {
+            return this.rulesByModel[modelID]?.[`${uniqueKey}_${ruleNumber}`] || null;
+        }
+        const rules = Object.entries(this.rulesByModel[modelID] || {})
+            .filter(([key]) => key.startsWith(`${uniqueKey}_`))
+            .map(([_, rule]) => rule);
+
+        return rules.length > 0 ? rules[0] : null;
+    }
+
+    getAllRulesForAction(modelID, uniqueKey) {
+        return Object.entries(this.rulesByModel[modelID] || {})
+            .filter(([key]) => key.startsWith(`${uniqueKey}_`))
+            .map(([_, rule]) => rule)
+            .sort((a, b) => a.ruleNumber - b.ruleNumber);
+    }
+
+    getNextRuleNumber(modelID, uniqueKey) {
+        const rules = this.getAllRulesForAction(modelID, uniqueKey);
+        return rules.length > 0 ? Math.max(...rules.map(rule => rule.ruleNumber)) + 1 : 1;
     }
 
     clearActionsAndRulesForModel(modelID) {

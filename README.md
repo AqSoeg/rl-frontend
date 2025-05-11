@@ -54,7 +54,7 @@ rl-frontend/
 ```json
 [
   {
-    "agentID": "ecb74ee5f7a1301",
+    "agentID": "407cb54f5528f7e",
     "scenarioID": "traffic",
     "agentRoleID": "traffic_light",
     "agentType": "同构多智能体",
@@ -133,26 +133,37 @@ rl-frontend/
                 3
               ]
             ],
-            "rule": [
-              "IF ELSE",
-              "x>y",
+            "rules": [
               [
-                1,
-                2
+                "IF ELSE",
+                "x'+b'",
+                [
+                  1,
+                  2
+                ],
+                [
+                  2,
+                  3
+                ]
               ],
               [
-                2,
-                3
+                "FOR",
+                "R-R̄",
+                [
+                  1,
+                  3
+                ],
+                []
               ]
             ]
           },
           {
-            "entity": "红绿灯1",
+            "entity": "红绿灯3",
             "name": "切换频率",
             "type": "连续型",
             "action": [
               [
-                5,
+                15,
                 55
               ],
               "秒",
@@ -161,16 +172,27 @@ rl-frontend/
                 60
               ]
             ],
-            "rule": [
-              "IF ELSE",
-              "a>b",
+            "rules": [
               [
-                "10",
-                "55"
+                "IF ELSE",
+                "u×U",
+                [
+                  "15",
+                  "30"
+                ],
+                [
+                  "35",
+                  "55"
+                ]
               ],
               [
-                "5",
-                "10"
+                "FOR",
+                "α÷b_u",
+                [
+                  "25",
+                  "50"
+                ],
+                []
               ]
             ]
           }
@@ -243,26 +265,37 @@ rl-frontend/
                 3
               ]
             ],
-            "rule": [
-              "IF ELSE",
-              "x>y",
+            "rules": [
               [
-                1,
-                2
+                "IF ELSE",
+                "x'+b'",
+                [
+                  1,
+                  2
+                ],
+                [
+                  2,
+                  3
+                ]
               ],
               [
-                2,
-                3
+                "FOR",
+                "R-R̄",
+                [
+                  1,
+                  3
+                ],
+                []
               ]
             ]
           },
           {
-            "entity": "红绿灯2",
+            "entity": "红绿灯4",
             "name": "切换频率",
             "type": "连续型",
             "action": [
               [
-                5,
+                15,
                 55
               ],
               "秒",
@@ -271,16 +304,27 @@ rl-frontend/
                 60
               ]
             ],
-            "rule": [
-              "IF ELSE",
-              "a>b",
+            "rules": [
               [
-                "10",
-                "55"
+                "IF ELSE",
+                "u×U",
+                [
+                  "15",
+                  "30"
+                ],
+                [
+                  "35",
+                  "55"
+                ]
               ],
               [
-                "5",
-                "10"
+                "FOR",
+                "α÷b_u",
+                [
+                  "25",
+                  "50"
+                ],
+                []
               ]
             ]
           }
@@ -297,10 +341,10 @@ rl-frontend/
         ]
       }
     ],
-    "updateTime": "2025-05-01T07:15:23.511Z"
+    "updateTime": "2025-05-11T08:30:44.861Z"
   },
   {
-    "agentID": "aa11c3eab13189e",
+    "agentID": "4c4fa8d4f591fc6",
     "scenarioID": "traffic",
     "agentRoleID": "traffic_light",
     "agentType": "异构多智能体",
@@ -358,8 +402,7 @@ rl-frontend/
             "action": [
               [
                 1,
-                2,
-                3
+                2
               ],
               [
                 1,
@@ -367,14 +410,26 @@ rl-frontend/
                 3
               ]
             ],
-            "rule": [
-              "FOR",
-              "x<=y",
+            "rules": [
               [
-                1,
-                3
+                "IF ELSE",
+                "x'-u",
+                [
+                  1
+                ],
+                [
+                  2
+                ]
               ],
-              []
+              [
+                "FOR",
+                "b'+U",
+                [
+                  1,
+                  2
+                ],
+                []
+              ]
             ]
           }
         ],
@@ -433,14 +488,28 @@ rl-frontend/
                 60
               ]
             ],
-            "rule": [
-              "FOR",
-              "a<=b",
+            "rules": [
               [
-                "10",
-                "40"
+                "IF ELSE",
+                "R×α",
+                [
+                  "10",
+                  "30"
+                ],
+                [
+                  "35",
+                  "50"
+                ]
               ],
-              []
+              [
+                "FOR",
+                "R̄÷b_u",
+                [
+                  "10",
+                  "40"
+                ],
+                []
+              ]
             ]
           }
         ],
@@ -456,7 +525,7 @@ rl-frontend/
         ]
       }
     ],
-    "updateTime": "2025-05-01T07:16:57.413Z"
+    "updateTime": "2025-05-11T08:37:24.640Z"
   }
 ]
 ```
