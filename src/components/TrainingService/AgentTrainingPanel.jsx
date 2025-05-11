@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { DownOutlined } from '@ant-design/icons';
 import { Card, Select, Row, Col, Space, Button, Modal, Table, message, Input } from 'antd';
 import { intelligentStore } from './IntelligentStore';
 import { observer } from 'mobx-react';
@@ -267,7 +268,7 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshDa
             agentRoleID: selectedAgent.agentRoleID,
           },
           algorithmInfo: {
-            algorithmType: selectedAlgorithm.type,
+            algorithmType: selectedAlgorithm.type_name,
             algorithmName: selectedAlgorithm.name,
             hyperParameters: hyperParametersValues,
           },
@@ -476,14 +477,35 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshDa
   
     const modelListColumns = [
       { 
-        title: '决策模型ID', 
+        title: '', 
+        key: 'expand',
+        width: 50,
+        render: (text, record) => (
+          <Button 
+            type="text" 
+            icon={<DownOutlined />} 
+            onClick={(e) => {
+              e.stopPropagation();
+              setExpandedRowKeys(expandedRowKeys.includes(record.model.id) ? 
+                expandedRowKeys.filter(key => key !== record.model.id) : 
+                [...expandedRowKeys, record.model.id]);
+            }}
+            style={{
+              transform: expandedRowKeys.includes(record.model.id) ? 'rotate(180deg)' : 'none',
+              transition: 'transform 0.3s'
+            }}
+          />
+        ),
+      },
+      { 
+        title: '训练ID', 
         dataIndex: ['model', 'id'], 
         key: 'modelId' 
       },
       { 
         title: '决策模型名称', 
         dataIndex: ['model', 'name'], 
-        key: 'modelName' 
+        key: 'agentName' 
       },
       { 
         title: '场景名称', 
@@ -496,14 +518,19 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshDa
         key: 'roleName' 
       },
       { 
+        title: '模型类型', 
+        dataIndex: ['model', 'type'], 
+        key: 'modelType' 
+      },
+      { 
         title: '模型版本', 
         dataIndex: ['model', 'version'], 
         key: 'modelVersion' 
       },
       { 
-        title: '模型类型', 
-        dataIndex: ['model', 'type'], 
-        key: 'modelType' 
+        title: '发布状态', 
+        dataIndex: ['model', 'state'], 
+        key: 'modelState' 
       },
       { 
         title: '创建时间', 
@@ -512,17 +539,12 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshDa
         render: time => new Date(time).toLocaleString() 
       },
       { 
-        title: '发布状态', 
-        dataIndex: ['model', 'state'], 
-        key: 'state',
-      },
-      {  title: '操作',
+        title: '操作',
         key: 'action',
         render: (text, record) => (
           <div style={{ display: 'flex', gap: 8 }}>
             <Button type="primary" onClick={() => handleViewModel(record)}>查看</Button>
             <Button type="primary" onClick={() => handleEffectModel(record)}>效果</Button>
-            <Button type="primary" onClick={() => handlePublish(record)}>发布</Button>
           </div>
         ),
       },
@@ -646,6 +668,51 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshDa
           message.error('获取过程数据失败');
         }
       };
+      const [expandedRowKeys, setExpandedRowKeys] = useState([]);
+      const [publishedModels, setPublishedModels] = useState({});
+
+      const expandedRowRender = (record) => {
+
+        const isAnyPublished = record.model.model_list.some(modelId => 
+          publishedModels[modelId] || record.model.state === "已发布"
+        );
+      
+        return (
+          <Table
+            columns={[
+              { 
+                title: '决策模型ID', 
+                dataIndex: 'id', 
+                key: 'modelId',
+                render: (text) => text.split('-').pop() === '0' ? 
+                  `${text}` : text
+              },
+              { 
+                title: '操作',
+                key: 'action',
+                render: (text, subRecord) => (
+                  <Button 
+                    type="primary" 
+                    onClick={() => handlePublish(record, subRecord.id)}
+                    disabled={isAnyPublished}
+                  >
+                    发布
+                  </Button>
+                ),
+              },
+            ]}
+            dataSource={record.model.model_list.map(modelId => ({
+              id: modelId,
+              parentId: record.model.id
+            }))}
+            pagination={false}
+            rowKey="id"
+          />
+        );
+      };
+
+
+
   // ================== 渲染部分 ==================
   return (
     <div className='right1' style={{ height: '80vh', width:'95%',margin: '0 auto' }}>
@@ -924,13 +991,12 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshDa
         )}
       </Modal>
 
-      {/* 模型列表弹窗 */}
       <Modal
         title="模型列表"
         open={isModelListModalVisible}
         onOk={() => setIsModelListModalVisible(false)}
         onCancel={() => setIsModelListModalVisible(false)}
-        width={1000}
+        width={1500}
       >
         <Table
           columns={modelListColumns}
@@ -938,9 +1004,18 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshDa
           pagination={false}
           style={{ width: '100%' }}
           rowKey={(record) => record.model.id}
+          expandable={{
+            expandedRowRender,
+            expandedRowKeys,
+            onExpand: (expanded, record) => {
+              setExpandedRowKeys(expanded ? 
+                [...expandedRowKeys, record.model.id] : 
+                expandedRowKeys.filter(key => key !== record.model.id));
+            },
+            expandIcon: ({ expanded, onExpand, record }) => null, // Hide default expand icon
+          }}
         />
       </Modal>
-
       {/* 模型详情弹窗 */}
       <Modal
         title="模型详细信息"

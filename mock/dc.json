@@ -6,9 +6,13 @@
       "version": "1",
       "type": "共享多智能体",
       "time": "2025-05-01T07:15:23.511Z",
-      "state": "已发布",
+      "state": "未发布",
       "img_url": "http://example.com/image2",
-      "path": "/path/to/model2"
+      "path": "/path/to/model2",
+      "model_list": [
+        "ecb74ee5f7a1301-0",
+        "ecb74ee5f7a1301-20"
+      ]
     },
     "scenario": {
       "name": "城市交通",
@@ -195,9 +199,13 @@
       "version": "2",
       "type": "分布多智能体",
       "time": "2025-05-01T07:16:57.413Z",
-      "state": "已发布",
+      "state": "未发布",
       "img_url": "http://example.com/image1",
-      "path": "/path/to/model1"
+      "path": "/path/to/model1",
+      "model_list": [
+        "aa11c3eab13189e-0",
+        "aa11c3eab13189e-20"
+      ]
     },
     "scenario": {
       "name": "城市交通",
@@ -386,7 +394,11 @@
       "time": "2025-05-02T10:30:45.789Z",
       "state": "未发布",
       "img_url": "http://example.com/image3",
-      "path": "/path/to/model3"
+      "path": "/path/to/model3",
+      "model_list": [
+        "b2c45d6e8f90123-0",
+        "b2c45d6e8f90123-20"
+      ]
     },
     "scenario": {
       "name": "工业生产线",
