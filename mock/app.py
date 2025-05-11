@@ -232,24 +232,67 @@ def train():
                 model_path = 'mock/ppo_model.pkl'
                 model.save(model_path)
                 print(f"Model saved to {model_path}")
+                
+                # 创建与dc.json格式一致的模型数据
+                model_id = str(int(time.time()))
                 trained_model = {
-                    "AGENT_MODEL_ID": str(int(time.time())),
-                    "AGENT_NAME": data.get('agentInfo', {}).get('agentName', 'Unknown'),
-                    "SCENARIO_NAME": data.get('scenarioEditInfo', {}).get('scenarioName', 'Unknown'),
-                    "ROLE_NAME": data.get('agentInfo', {}).get('agentRoleID', 'Unknown'),
-                    "AGENT_MODEL_VERSION": "1.0",
-                    "NN_MODEL_TYPE": data.get('algorithmInfo', {}).get('algorithmType', 'Unknown'),
-                    "MODEL_PATH": model_path,
-                    "IMG_URL": "http://example.com/image",
-                    "CREAT_TIME": datetime.datetime.now().isoformat(),
-                    "STATE":"未发布",
+                    "model": {
+                        "id": model_id,
+                        "name": data.get('agentInfo', {}).get('agentName', 'Unknown'),
+                        "version": "1.0",
+                        "type": data.get('algorithmInfo', {}).get('algorithmType', 'Unknown'),
+                        "time": datetime.datetime.now().isoformat(),
+                        "state": "未发布",
+                        "img_url": "http://example.com/image",
+                        "path": model_path,
+                        "model_list": [f"{model_id}-0", f"{model_id}-20"]  # 假设有两个子模型
+                    },
+                    "scenario": {
+                        "name": data.get('scenarioEditInfo', {}).get('scenarioName', 'Unknown'),
+                        "description": "场景描述",
+                        "envParams": [
+                            {"实体1": [{"属性1": 30}, {"属性2": 1}]},
+                            {"实体2": [{"属性1": 25}, {"属性2": 1}]}
+                        ]
+                    },
+                    "agent": {
+                        "role": data.get('agentInfo', {}).get('agentRoleID', 'Unknown'),
+                        "type": data.get('agentInfo', {}).get('agentType', 'Unknown'),
+                        "count": "1",
+                        "entityAssignments": [
+                            {"智能体1": ["实体1", "实体2"]}
+                        ]
+                    },
+                    "train": {
+                        "algorithm": data.get('algorithmInfo', {}).get('algorithmName', 'Unknown'),
+                        "hyperParams": [
+                            {"学习率": hyper_parameters.get('learning_rate', 0.0003)},
+                            {"折扣因子": hyper_parameters.get('gamma', 0.99)},
+                            {"采样步数": hyper_parameters.get('n_steps', 256)},
+                            {"批量大小": hyper_parameters.get('batch_size', 64)},
+                            {"更新步数": hyper_parameters.get('n_epochs', 10)},
+                            {"GAE参数": hyper_parameters.get('gae_lambda', 0.95)},
+                            {"裁剪范围": hyper_parameters.get('clip_range', 0.2)},
+                            {"策略熵系数": hyper_parameters.get('ent_coef', 0.01)},
+                            {"总步数": total_timesteps}
+                        ]
+                    }
                 }
+
+                # 读取现有数据并追加新模型
                 with open(DECISION_FILE_PATH, 'r', encoding='utf-8') as f:
                     existing_data = json.load(f)
                 existing_data.append(trained_model)
+                
+                # 保存更新后的数据
                 with open(DECISION_FILE_PATH, 'w', encoding='utf-8') as f:
                     json.dump(existing_data, f, ensure_ascii=False, indent=2)
-                training_result = {"status": "success", "message": "Training completed and model saved.", "model": trained_model}
+                
+                training_result = {
+                    "status": "success", 
+                    "message": "Training completed and model saved.", 
+                    "model": trained_model
+                }
         except Exception as e:
             print(f"Training error: {e}")
             training_result = {"status": "error", "message": str(e)}
