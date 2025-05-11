@@ -76,6 +76,48 @@ def save_model():
         print(f'Error saving model: {str(e)}')
         return jsonify({'status': 'error', 'message': str(e)})
 
+@app.route('/evaluate_data_generate', methods=['POST'])
+def evaluate_data_generate():
+    try:
+        data = request.json
+        decision_model = data.get('decisionModel')
+
+        print("Received decision model information:")
+        print(decision_model)
+        print("Starting data generation for evaluation...")
+
+        new_entry = {
+            "AGENT_MODEL_ID": decision_model['model']['id'],
+            "AGENT_NAME": decision_model['model']['name'],
+            "SCENARIO_NAME": decision_model['scenario']['name'],
+            "ROLE_NAME": decision_model['agent']['role'],
+            "AGENT_MODEL_VERSION": decision_model['model']['version'],
+            "NN_MODEL_TYPE": decision_model['model']['type'],
+            "MODEL_PATH": decision_model['model']['path'],
+            "DATA_FILE": f"./mock/{decision_model['model']['id']}.json",
+            "CREAT_TIME": datetime.datetime.now().isoformat()
+        }
+
+        try:
+            with open(EVALUATE_FILE_PATH, 'r', encoding='utf-8') as f:
+                existing_data = json.load(f)
+                if not isinstance(existing_data, list):
+                    existing_data = []
+        except FileNotFoundError:
+            existing_data = []
+
+        existing_data.append(new_entry)
+
+        with open(EVALUATE_FILE_PATH, 'w', encoding='utf-8') as f:
+            json.dump(existing_data, f, ensure_ascii=False, indent=2)
+
+        print("Data generation completed and saved to evaluatetable.json")
+
+        return jsonify({"status": "success", "message": "Evaluation data generated successfully"})
+    except Exception as e:
+        print(f"Error generating evaluation data: {str(e)}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 @app.route('/loadEvaluationData', methods=['POST'])
 def load_evaluation_data():
     try:

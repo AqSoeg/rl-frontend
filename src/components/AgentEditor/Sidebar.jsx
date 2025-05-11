@@ -131,12 +131,17 @@ const Sidebar = ({ scenarios }) => {
 
     const getAgentTypeOptions = (role) => {
         const selectedRole = agentRoles.find(r => r.id === role);
-        if (selectedRole && selectedRole.entities.length === 1) {
-            return ['单智能体'];
-        } else if (selectedRole && selectedRole.entities.length > 1) {
-            return ['单智能体', '同构多智能体', '异构多智能体'];
+        if (selectedRole) {
+            if (selectedRole.agentTypes?.length) {
+                return selectedRole.agentTypes;
+            }
+            if (selectedRole.entities.length === 1) {
+                return ['单智能体'];
+            } else if (selectedRole.entities.length > 1) {
+                return ['单智能体', '同构多智能体', '异构多智能体'];
+            }
         }
-        return [''];
+        return [];
     };
 
     const getAgentCountOptions = (type) => {

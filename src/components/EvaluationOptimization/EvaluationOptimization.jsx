@@ -29,8 +29,14 @@ const EvaluationOptimization = () => {
     const [selectedLegends, setSelectedLegends] = useState({});
     const [isDataModalVisible, setIsDataModalVisible] = useState(false);
     const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
+    const [isModelListModalVisible, setIsModelListModalVisible] = useState(false);
+    const [isEffectImageModalVisible, setIsEffectImageModalVisible] = useState(false);
+    const [isModelInfoModalVisible, setIsModelInfoModalVisible] = useState(false);
+    const [effectImageUrl, setEffectImageUrl] = useState(null);
     const [evaluationData, setEvaluationData] = useState([]);
     const [selectedModel, setSelectedModel] = useState(null);
+    const [decisionModels, setDecisionModels] = useState([]);
+    const [currentModel, setCurrentModel] = useState(null);
 
     const chartRefs = useRef(Array(4).fill(null));
     const radarChartRef = useRef(null);
@@ -371,6 +377,78 @@ const EvaluationOptimization = () => {
         return target ? ['柱状图', '折线图', '饼图'] : [];
     };
 
+    const handleViewModelList = async () => {
+        try {
+            const response = await fetch(__APP_CONFIG__.getDecisionModels, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+            });
+            if (!response.ok) {
+                throw new Error('Failed to fetch decision models');
+            }
+            const data = await response.json();
+            setDecisionModels(data);
+            setIsModelListModalVisible(true);
+        } catch (error) {
+            console.error('Error fetching decision models:', error);
+            alert('获取决策模型列表失败！');
+        }
+    };
+
+    const handleGenerate = async (record) => {
+        try {
+            const response = await fetch(__APP_CONFIG__.evaluateDataGenerate, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    decisionModel: record
+                }),
+            });
+            if (!response.ok) {
+                throw new Error('Failed to generate evaluation data');
+            }
+            const data = await response.json();
+            if (data.status === 'success') {
+                alert('数据生成成功！');
+            } else {
+                alert('数据生成失败！');
+            }
+        } catch (error) {
+            console.error('Error generating evaluation data:', error);
+            alert('数据生成失败！');
+        }
+    };
+
+    const handleEffectModel = async (record) => {
+        try {
+            const response = await fetch(__APP_CONFIG__.get_effect, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ decisionModelID: record.model.id }),
+            });
+
+            if (!response.ok) {
+                throw new Error(`Network response was not ok: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            if (data.status === 'success') {
+                setEffectImageUrl(data.img_url);
+                setIsEffectImageModalVisible(true);
+            } else {
+                alert('获取效果图片失败，请检查日志！');
+            }
+        } catch (error) {
+            console.error('获取效果图片失败:', error);
+            alert('获取效果图片失败，请检查网络或联系管理员！');
+        }
+    };
+
+    const handleViewModel = (model) => {
+        setCurrentModel(model);
+        setIsModelInfoModalVisible(true);
+    };
+
     const dataColumns = [
         { title: '模型ID', dataIndex: ['model', 'id'], key: 'modelId' },
         { title: '模型名称', dataIndex: ['model', 'name'], key: 'modelName' },
@@ -426,6 +504,52 @@ const EvaluationOptimization = () => {
                         }}
                     >
                         载入
+                    </Button>
+                </Space>
+            ),
+        },
+    ];
+
+    const modelListColumns = [
+        { title: '决策模型ID', dataIndex: ['model', 'id'], key: 'modelId' },
+        { title: '决策模型名称', dataIndex: ['model', 'name'], key: 'modelName' },
+        { title: '场景名称', dataIndex: ['scenario', 'name'], key: 'scenarioName' },
+        { title: '角色名称', dataIndex: ['agent', 'role'], key: 'roleName' },
+        { title: '模型版本', dataIndex: ['model', 'version'], key: 'modelVersion' },
+        { title: '模型类型', dataIndex: ['model', 'type'], key: 'modelType' },
+        {
+            title: '创建时间',
+            dataIndex: ['model', 'time'],
+            key: 'createTime',
+            render: time => new Date(time).toLocaleString()
+        },
+        {
+            title: '发布状态',
+            dataIndex: ['model', 'state'],
+            key: 'state',
+        },
+        {
+            title: '操作',
+            key: 'action',
+            render: (_, record) => (
+                <Space size="middle">
+                    <Button
+                        className="EO-modal-button"
+                        onClick={() => handleViewModel(record)}
+                    >
+                        查看
+                    </Button>
+                    <Button
+                        className="EO-modal-button"
+                        onClick={() => handleEffectModel(record)}
+                    >
+                        效果
+                    </Button>
+                    <Button
+                        className="EO-modal-button"
+                        onClick={() => handleGenerate(record)}
+                    >
+                        生成
                     </Button>
                 </Space>
             ),
@@ -637,6 +761,7 @@ const EvaluationOptimization = () => {
                         </div>
                     </div>
                     <div className="EO-model-button-container">
+                        <Button className="EO-model-button" onClick={handleViewModelList}>数据生成</Button>
                         <Button className="EO-model-button" onClick={handleLoadData}>数据载入</Button>
                         <Button className="EO-model-button" onClick={handleStartEvaluation}>开始评估</Button>
                     </div>
@@ -714,6 +839,51 @@ const EvaluationOptimization = () => {
                         </div>
                     </div>
                 )}
+            </Modal>
+
+            <Modal
+                title="模型列表"
+                open={isModelListModalVisible}
+                onCancel={() => setIsModelListModalVisible(false)}
+                footer={null}
+                width={1000}
+            >
+                <Table
+                    columns={modelListColumns}
+                    dataSource={decisionModels}
+                    pagination={false}
+                    rowKey={(record) => record.model.id}
+                />
+            </Modal>
+
+            <Modal
+                title="模型详细信息"
+                open={isModelInfoModalVisible}
+                onCancel={() => setIsModelInfoModalVisible(false)}
+                footer={null}
+            >
+                {currentModel && (
+                    <div>
+                        <p><strong>决策模型ID：</strong>{currentModel.model.id}</p>
+                        <p><strong>智能体名称：</strong>{currentModel.model.name}</p>
+                        <p><strong>场景名称：</strong>{currentModel.scenario.name}</p>
+                        <p><strong>角色名称：</strong>{currentModel.agent.role}</p>
+                        <p><strong>模型版本：</strong>{currentModel.model.version}</p>
+                        <p><strong>模型类型：</strong>{currentModel.model.type}</p>
+                        <p><strong>创建时间：</strong>{new Date(currentModel.model.time).toLocaleString()}</p>
+                        <p><strong>模型存放路径：</strong>{currentModel.model.path || '未提供'}</p>
+                        <p><strong>模型效果图路径：</strong>{currentModel.model.img_url || '未提供'}</p>
+                    </div>
+                )}
+            </Modal>
+
+            <Modal
+                title="训练效果图片"
+                open={isEffectImageModalVisible}
+                onCancel={() => setIsEffectImageModalVisible(false)}
+                footer={null}
+            >
+                {effectImageUrl && <img src={effectImageUrl} alt="训练效果图片" style={{ width: '100%' }} />}
             </Modal>
         </div>
     );

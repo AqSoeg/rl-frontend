@@ -277,10 +277,6 @@
     justify-content: center;
 }
 
-.rule-row span {
-    margin-right: 10px;
-}
-
 .rule-buttons {
     display: flex;
     justify-content: flex-end;
