@@ -47,7 +47,7 @@ const OfflineDatabase = ({ datasets, fetchDatasets }) => {
 
     const handleUpdate = async (id, values) => {
         try {
-            const response = await fetch(__APP_CONFIG__.updateDataset, {
+            const response = await fetch(__APP_CONFIG__.updateAll, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

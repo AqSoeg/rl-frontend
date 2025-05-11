@@ -3,12 +3,12 @@
     "model": {
       "id": "ecb74ee5f7a1301",
       "name": "同构多智能体模型",
-      "version": "1",
       "type": "共享多智能体",
-      "time": "2025-05-01T07:15:23.511Z",
-      "state": "未发布",
-      "img_url": "http://example.com/image2",
       "path": "/path/to/model2",
+      "img_url": "http://example.com/image2",
+      "time": "2025-05-11T13:16:48.449Z",
+      "version": "1",
+      "state": "未发布",
       "model_list": [
         "ecb74ee5f7a1301-0",
         "ecb74ee5f7a1301-20"
@@ -196,12 +196,12 @@
     "model": {
       "id": "aa11c3eab13189e",
       "name": "异构多智能体模型",
-      "version": "2",
       "type": "分布多智能体",
-      "time": "2025-05-01T07:16:57.413Z",
-      "state": "未发布",
-      "img_url": "http://example.com/image1",
       "path": "/path/to/model1",
+      "img_url": "http://example.com/image1",
+      "time": "2025-05-11T13:08:13.225Z",
+      "version": "2",
+      "state": "未发布",
       "model_list": [
         "aa11c3eab13189e-0",
         "aa11c3eab13189e-20"
@@ -334,7 +334,7 @@
       ]
     },
     "agent": {
-      "role": "红绿灯",
+      "role": "红绿灯2",
       "type": "异构多智能体",
       "count": "2",
       "entityAssignments": [

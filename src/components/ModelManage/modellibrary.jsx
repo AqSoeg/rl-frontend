@@ -40,7 +40,7 @@ const ModelLibrary = ({ data, fetchModels }) => {
 
   const handleFinish = async (values) => {
     try {
-      const response = await fetch(__APP_CONFIG__.updateModel, {
+      const response = await fetch(__APP_CONFIG__.updateAll, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -191,7 +191,7 @@ const AlgorithmLibrary = ({ algorithms, fetchAlgorithms }) => {
         default: values[`hyper-parameters.${param.id}`] || param.default,
       }));
 
-      const response = await fetch(__APP_CONFIG__.updateAlgorithm, {
+      const response = await fetch(__APP_CONFIG__.updateAll, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -199,7 +199,7 @@ const AlgorithmLibrary = ({ algorithms, fetchAlgorithms }) => {
         body: JSON.stringify({
           type: 'algorithm',
           id: id,
-          algorithm: {
+          data: {
             ...values,
             'hyper-parameters': updatedHyperParameters,
             time: now

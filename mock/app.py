@@ -22,7 +22,16 @@ training_thread = None
 training_stop_flag = False
 training_status = "idle"
 training_result = None
-
+def get_nested_field(item, field):
+    try:
+        keys = field.split('.')
+        value = item
+        for key in keys:
+            value = value[key]
+        return value
+    except (KeyError, TypeError):
+        return None
+        
 @app.route('/scenarios', methods=['POST'])
 def get_scenarios():
     try:
@@ -337,17 +346,18 @@ def search_all():
         elif search_type == 'evaluate':
             file_path = EVALUATE_FILE_PATH
         else:
-            return jsonify({'status': 'error', 'message': 'Invalid search type'})
+            return jsonify({'status': 'error', 'message': 'Invalid search type'}), 400
         with open(file_path, 'r', encoding='utf-8') as f:
             existing_data = json.load(f)
         filtered_data = []
         for item in existing_data:
-            if field in item and str(item[field]).find(str(value)) != -1:
+            item_value = get_nested_field(item, field) if search_type == 'decision' else item.get(field)
+            if item_value and str(item_value).find(str(value)) != -1:
                 filtered_data.append(item)
         return jsonify(filtered_data)
     except Exception as e:
         print(f'Error searching: {str(e)}')
-        return jsonify({'status': 'error', 'message': str(e)})
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @app.route('/deleteAll', methods=['POST'])
 def delete_item():
@@ -365,7 +375,7 @@ def delete_item():
             file_path = DECISION_FILE_PATH
         elif delete_type == 'model':
             file_path = MODEL_FILE_PATH
-        elif search_type == 'evaluate':
+        elif delete_type == 'evaluate':
             file_path = EVALUATE_FILE_PATH
         else:
             return jsonify({'status': 'error', 'message': 'Invalid delete type'}), 400
@@ -378,7 +388,7 @@ def delete_item():
         elif delete_type == 'scenario':
             existing_data = [item for item in existing_data if item.get('id') != item_id]
         elif delete_type == 'decision':
-            existing_data = [item for item in existing_data if item.get('AGENT_MODEL_ID') != item_id]
+            existing_data = [item for item in existing_data if item.get('model', {}).get('id') != item_id]
         elif delete_type == 'model':
             existing_data = [item for item in existing_data if item.get('agentID') != item_id]
         elif delete_type == 'evaluate':
@@ -407,7 +417,7 @@ def update_item():
             file_path = DECISION_FILE_PATH
         elif update_type == 'model':
             file_path = MODEL_FILE_PATH
-        elif search_type == 'evaluate':
+        elif update_type == 'evaluate':
             file_path = EVALUATE_FILE_PATH
         else:
             return jsonify({'status': 'error', 'message': 'Invalid update type'}), 400
@@ -424,7 +434,7 @@ def update_item():
             elif update_type == 'scenario' and item.get('id') == item_id:
                 item.update(updated_data)
                 updated = True
-            elif update_type == 'decision' and item.get('AGENT_MODEL_ID') == item_id:
+            elif update_type == 'decision' and item.get('model', {}).get('id') == item_id:
                 item.update(updated_data)
                 updated = True
             elif update_type == 'model' and item.get('agentID') == item_id:
@@ -459,16 +469,23 @@ def add_item():
             id_field = 'id'
         elif add_type == 'decision':
             file_path = DECISION_FILE_PATH
-            id_field = 'AGENT_MODEL_ID'
+            id_field = 'model.id'
         elif add_type == 'model':
             file_path = MODEL_FILE_PATH
             id_field = 'agentID'
+        elif add_type == 'evaluate':
+            file_path = EVALUATE_FILE_PATH
+            id_field = 'AGENT_MODEL_ID'
         else:
             return jsonify({'status': 'error', 'message': 'Invalid add type'}), 400
         with open(file_path, 'r', encoding='utf-8') as f:
             existing_data = json.load(f)
-        if any(item.get(id_field) == new_item.get(id_field) for item in existing_data):
-            return jsonify({'status': 'error', 'message': f'{add_type.capitalize()} ID already exists'}), 400
+        if add_type == 'decision':
+            if any(get_nested_field(item, id_field) == get_nested_field(new_item, id_field) for item in existing_data):
+                return jsonify({'status': 'error', 'message': f'{add_type.capitalize()} ID already exists'}), 400
+        else:
+            if any(item.get(id_field) == new_item.get(id_field) for item in existing_data):
+                return jsonify({'status': 'error', 'message': f'{add_type.capitalize()} ID already exists'}), 400
         existing_data.append(new_item)
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(existing_data, f, ensure_ascii=False, indent=2)
@@ -476,7 +493,6 @@ def add_item():
     except Exception as e:
         print(f'Error adding {add_type}: {str(e)}')
         return jsonify({'status': 'error', 'message': str(e)}), 500
-
 @app.route('/updateDbJson', methods=['POST'])
 def update_db_json():
     try:

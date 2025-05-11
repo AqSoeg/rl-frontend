@@ -35,39 +35,39 @@ const EvaluateTable = ({ decisions, fetchDecisions }) => {
             const response = await fetch(__APP_CONFIG__.deleteAll, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type: 'decision', id: id }),
+                body: JSON.stringify({ type: 'evaluate', id: id }),
             });
             const result = await response.json();
             if (result.status === 'success') {
-                message.success('决策模型删除成功');
+                message.success('评估数据删除成功');
                 fetchDecisions();
             }
         } catch (error) {
             console.error('Error deleting decision model:', error);
-            message.error('决策模型删除失败');
+            message.error('评估数据删除失败');
         }
     };
 
     const handleUpdate = async (id, values) => {
         try {
-            const response = await fetch(__APP_CONFIG__.updateDecisionModel, {
+            const response = await fetch(__APP_CONFIG__.updateAll, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    type: 'decision',
+                    type: 'evaluate',
                     id: id,
                     data: { ...values, CREAT_TIME: new Date().toISOString() } // 添加当前时间
                 }),
             });
             const result = await response.json();
             if (result.status === 'success') {
-                message.success('决策模型更新成功');
+                message.success('评估数据更新成功');
                 fetchDecisions();
                 setIsEditModalVisible(false);
             }
         } catch (error) {
             console.error('Error updating decision model:', error);
-            message.error('决策模型更新失败');
+            message.error('评估数据更新失败');
         }
     };
 
@@ -79,7 +79,7 @@ const EvaluateTable = ({ decisions, fetchDecisions }) => {
                   'Content-Type': 'application/json',
               },
               body: JSON.stringify({
-                  type: 'decision', // 根据页面类型传入不同的 type
+                  type: 'evaluate', // 根据页面类型传入不同的 type
                   field: searchField,
                   value: searchText
               })
@@ -94,7 +94,7 @@ const EvaluateTable = ({ decisions, fetchDecisions }) => {
           }
       } catch (error) {
           console.error('Error searching decision models:', error);
-          message.error('决策模型搜索失败');
+          message.error('评估数据搜索失败');
       }
   };
 
@@ -112,23 +112,23 @@ const EvaluateTable = ({ decisions, fetchDecisions }) => {
 
     const handleAdd = async (values) => {
         try {
-            const response = await fetch(__APP_CONFIG__.addDecisionModel, {
+            const response = await fetch(__APP_CONFIG__.addAll, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    type: 'decision',
+                    type: 'evaluate',
                     data: { ...values, CREAT_TIME: new Date().toISOString() } // 添加当前时间
                 }),
             });
             const result = await response.json();
             if (result.status === 'success') {
-                message.success('决策模型新增成功');
+                message.success('评估数据新增成功');
                 fetchDecisions();
                 setIsAddModalVisible(false);
             }
         } catch (error) {
             console.error('Error adding decision model:', error);
-            message.error('决策模型新增失败');
+            message.error('评估数据新增失败');
         }
     };
 
@@ -156,7 +156,7 @@ const EvaluateTable = ({ decisions, fetchDecisions }) => {
     ];
 
     return (
-        <Card title="决策模型库" bordered={true}>
+        <Card title="评估数据表" bordered={true}>
             <span>检索：</span>
             <Select value={searchField} onChange={setSearchField} style={{ width: 120, marginRight: 8 }}>
                 <Select.Option value="AGENT_MODEL_ID">智能体模型 ID</Select.Option>
