@@ -1,35 +1,35 @@
 [
-    {
-      "AGENT_MODEL_ID": "002",
-      "AGENT_NAME": "Model B",
-      "SCENARIO_NAME": "Scenario 2",
-      "ROLE_NAME": "Role 20",
-      "AGENT_MODEL_VERSION": "1.1",
-      "NN_MODEL_TYPE": "1000",
-      "MODEL_PATH": "/path/to/model2",
-      "DATA_FILE": "./mock/1.json",
-      "CREAT_TIME": "2025-03-12T10:05:24.083Z"
-    },
-    {
-      "AGENT_MODEL_ID": "1741855526",
-      "AGENT_NAME": "agent",
-      "SCENARIO_NAME": "城市交通",
-      "ROLE_NAME": "traffic_light",
-      "AGENT_MODEL_VERSION": "1.0",
-      "NN_MODEL_TYPE": "distributed_multi_agent",
-      "MODEL_PATH": "mock/ppo_model.pkl",
-      "DATA_FILE": "./mock/2.json",
-      "CREAT_TIME": "2025-03-13T16:45:26.736949"
-    },
-    {
-      "AGENT_MODEL_ID": "1741855662",
-      "AGENT_NAME": "Agent",
-      "SCENARIO_NAME": "城市交通",
-      "ROLE_NAME": "traffic_light",
-      "AGENT_MODEL_VERSION": "1.0",
-      "NN_MODEL_TYPE": "distributed_multi_agent",
-      "MODEL_PATH": "mock/ppo_model.pkl",
-      "DATA_FILE": "./mock/3.json",
-      "CREAT_TIME": "2025-03-13T16:47:42.557135"
-    }
-  ]
+  {
+    "AGENT_MODEL_ID": "ecb74ee5f7a1301",
+    "AGENT_NAME": "同构多智能体模型",
+    "SCENARIO_NAME": "城市交通",
+    "ROLE_NAME": "红绿灯",
+    "AGENT_MODEL_VERSION": "1",
+    "NN_MODEL_TYPE": "共享多智能体",
+    "MODEL_PATH": "/path/to/model2",
+    "DATA_FILE": "./mock/ecb74ee5f7a1301.json",
+    "CREAT_TIME": "2025-05-11T17:55:16.138563"
+  },
+  {
+    "AGENT_MODEL_ID": "aa11c3eab13189e",
+    "AGENT_NAME": "异构多智能体模型",
+    "SCENARIO_NAME": "城市交通",
+    "ROLE_NAME": "红绿灯",
+    "AGENT_MODEL_VERSION": "2",
+    "NN_MODEL_TYPE": "分布多智能体",
+    "MODEL_PATH": "/path/to/model1",
+    "DATA_FILE": "./mock/aa11c3eab13189e.json",
+    "CREAT_TIME": "2025-05-11T17:55:18.053325"
+  },
+  {
+    "AGENT_MODEL_ID": "b2c45d6e8f90123",
+    "AGENT_NAME": "单智能体模型",
+    "SCENARIO_NAME": "工业生产线",
+    "ROLE_NAME": "机器人",
+    "AGENT_MODEL_VERSION": "3",
+    "NN_MODEL_TYPE": "单智能体",
+    "MODEL_PATH": "/path/to/model3",
+    "DATA_FILE": "./mock/b2c45d6e8f90123.json",
+    "CREAT_TIME": "2025-05-11T17:55:20.387972"
+  }
+]
