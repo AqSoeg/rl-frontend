@@ -247,6 +247,7 @@ const ActionSpace = ({ entities, actionTypes, selectedParams }) => {
 const DropdownContainer = ({ uniqueKey, action, onEdit, onDelete, modelID, selectedParams }) => {
     const [actionOpen, setActionOpen] = useState(false);
     const [ruleOpen, setRuleOpen] = useState(false);
+    const [selectedRuleNumber, setSelectedRuleNumber] = useState(null);
     const [ruleType, setRuleType] = useState('');
     const [condition, setCondition] = useState('');
     const [execution1, setExecution1] = useState([]);
@@ -255,14 +256,17 @@ const DropdownContainer = ({ uniqueKey, action, onEdit, onDelete, modelID, selec
     const [hoveredParam, setHoveredParam] = useState(null);
     const [isHovering, setIsHovering] = useState(false);
 
-    const savedRule = actionSpaceStore.getRuleForModel(modelID, uniqueKey);
+    const savedRules = actionSpaceStore.getAllRulesForAction(modelID, uniqueKey);
+    const currentRule = selectedRuleNumber
+        ? actionSpaceStore.getRuleForModel(modelID, uniqueKey, selectedRuleNumber)
+        : null;
 
     useEffect(() => {
-        if (savedRule) {
-            setRuleType(savedRule.ruleType);
-            setCondition(savedRule.condition);
-            setExecution1(savedRule.execution1 || []);
-            setExecution2(savedRule.execution2 || []);
+        if (currentRule) {
+            setRuleType(currentRule.ruleType);
+            setCondition(currentRule.condition);
+            setExecution1(currentRule.execution1 || []);
+            setExecution2(currentRule.execution2 || []);
         } else {
             setRuleType('');
             setCondition('');
@@ -273,9 +277,24 @@ const DropdownContainer = ({ uniqueKey, action, onEdit, onDelete, modelID, selec
             }
             setExecution2([]);
         }
-    }, [ruleOpen, savedRule, action]);
+    }, [currentRule, action]);
+
+    const handleAddRule = () => {
+        const nextRuleNumber = savedRules.length + 1;
+        setSelectedRuleNumber(nextRuleNumber);
+        setRuleType('');
+        setCondition('');
+        if (action.mode === '离散型') {
+            setExecution1([...action.discreteValues]);
+        } else if (action.mode === '连续型') {
+            setExecution1([action.lowerLimit, action.upperLimit]);
+        }
+        setExecution2([]);
+    };
 
     const handleRuleConfirm = () => {
+        if (!selectedRuleNumber) return;
+
         if (action.mode === '连续型') {
             const [min, max] = [parseFloat(action.lowerLimit), parseFloat(action.upperLimit)];
             let hasError = false;
@@ -326,7 +345,7 @@ const DropdownContainer = ({ uniqueKey, action, onEdit, onDelete, modelID, selec
             execution1: ruleType === 'FOR' ? execution1 : [...execution1],
             execution2: ruleType === 'FOR' ? [] : [...execution2]
         };
-        actionSpaceStore.setRuleForModel(modelID, uniqueKey, rule);
+        actionSpaceStore.setRuleForModel(modelID, uniqueKey, rule, selectedRuleNumber);
 
         if (sidebarStore.type === '同构多智能体') {
             const agentEntityMapping = entityAssignmentStore.agentEntityMapping;
@@ -337,7 +356,7 @@ const DropdownContainer = ({ uniqueKey, action, onEdit, onDelete, modelID, selec
                 Object.entries(entityGroup).forEach(([entityName, agentName]) => {
                     if (!uniqueKey.startsWith(entityName)) {
                         const syncUniqueKey = `${entityName}：${uniqueKey.split('：')[1]}`;
-                        actionSpaceStore.setRuleForModel(agentName, syncUniqueKey, rule);
+                        actionSpaceStore.setRuleForModel(agentName, syncUniqueKey, rule, selectedRuleNumber);
                     }
                 });
             }
@@ -348,7 +367,26 @@ const DropdownContainer = ({ uniqueKey, action, onEdit, onDelete, modelID, selec
 
     const handleRuleCancel = () => {
         if (window.confirm('是否取消该行为规则？')) {
+            actionSpaceStore.setRuleForModel(modelID, uniqueKey, null, selectedRuleNumber);
+
+            const remainingRules = savedRules
+                .filter(rule => rule.ruleNumber !== selectedRuleNumber)
+                .sort((a, b) => a.ruleNumber - b.ruleNumber);
+
             actionSpaceStore.setRuleForModel(modelID, uniqueKey, null);
+
+            remainingRules.forEach((rule, index) => {
+                const newRuleNumber = index + 1;
+                actionSpaceStore.setRuleForModel(
+                    modelID,
+                    uniqueKey,
+                    {
+                        ...rule,
+                        ruleNumber: newRuleNumber
+                    },
+                    newRuleNumber
+                );
+            });
 
             if (sidebarStore.type === '同构多智能体') {
                 const agentEntityMapping = entityAssignmentStore.agentEntityMapping;
@@ -360,11 +398,25 @@ const DropdownContainer = ({ uniqueKey, action, onEdit, onDelete, modelID, selec
                         if (!uniqueKey.startsWith(entityName)) {
                             const syncUniqueKey = `${entityName}：${uniqueKey.split('：')[1]}`;
                             actionSpaceStore.setRuleForModel(agentName, syncUniqueKey, null);
+
+                            remainingRules.forEach((rule, index) => {
+                                const newRuleNumber = index + 1;
+                                actionSpaceStore.setRuleForModel(
+                                    agentName,
+                                    syncUniqueKey,
+                                    {
+                                        ...rule,
+                                        ruleNumber: newRuleNumber
+                                    },
+                                    newRuleNumber
+                                );
+                            });
                         }
                     });
                 }
             }
 
+            setSelectedRuleNumber(null);
             setRuleOpen(false);
         }
     };
@@ -426,161 +478,184 @@ const DropdownContainer = ({ uniqueKey, action, onEdit, onDelete, modelID, selec
             {ruleOpen && (
                 <div className="rule-content-container">
                     <div className="rule-row">
-                        <span>规则类型：</span>
+                        <span>规则编号：</span>
                         <Select
-                            style={{ width: 200 }}
-                            onChange={setRuleType}
-                            value={ruleType}
+                            style={{ width: 200, marginRight: 10 }}
+                            value={selectedRuleNumber}
+                            onChange={setSelectedRuleNumber}
+                            placeholder="选择规则编号"
                         >
-                            <Option key="IF ELSE" value="IF ELSE">IF ELSE</Option>
-                            <Option key="FOR" value="FOR">FOR</Option>
+                            {savedRules.map(rule => (
+                                <Option key={rule.ruleNumber} value={rule.ruleNumber}>
+                                    规则{rule.ruleNumber}
+                                </Option>
+                            ))}
                         </Select>
+                        <Button className="centered-button" onClick={handleAddRule}>+</Button>
                     </div>
 
-                    <div className="rule-row">
-                        <span>条件：</span>
-                        <Input
-                            placeholder="输入条件表达式"
-                            value={condition}
-                            onChange={(e) => setCondition(e.target.value)}
-                            className="common-input"
-                            onFocus={handleConditionFocus}
-                        />
-                    </div>
-
-                    {isConditionEditorOpen && (
-                        <div className="reward-modal-overlay">
-                            <div className="reward-modal">
-                                <div className="reward-modal-header">条件表达式编辑器</div>
-                                <div className="symbol-groups">
-                                    <div className="symbol-group">
-                                        {["+", "-", "×", "÷", "^", "√", "sin", "cos", "tan", "log", "ln", "∏", "∑", "∧", "∨", "¬", "⊕", "[", "]", "(", ")", "=", "≈", "∂", "e", "π", "∈", "±"].map((symbol, index) => (
-                                            <button key={index} onClick={() => handleSymbolClick(symbol)}>
-                                                {symbol}
-                                            </button>
-                                        ))}
-                                    </div>
-                                    <div className="symbol-group">
-                                        {selectedParams?.map((param, index) => (
-                                            <button
-                                                key={index}
-                                                onMouseEnter={() => handleParamHover(param)}
-                                                onMouseLeave={handleParamLeave}
-                                                onClick={() => handleSymbolClick(param[0])}
-                                            >
-                                                {param[0]}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                                {isHovering && hoveredParam && (
-                                    <div className="tooltip">
-                                        <div className="tooltip-content">
-                                            <div className="tooltip-title">{hoveredParam[0]}</div>
-                                            <div className="tooltip-description">{hoveredParam[1]}</div>
-                                            <div className="tooltip-unit">{hoveredParam[2]}</div>
-                                        </div>
-                                    </div>
-                                )}
-                                <textarea
-                                    className="equation-input"
-                                    value={condition}
-                                    onChange={(e) => setCondition(e.target.value)}
-                                    placeholder="在此输入或编辑条件表达式"
-                                />
-                                <div className="modal-buttons">
-                                    <Button onClick={() => setIsConditionEditorOpen(false)}>取消</Button>
-                                    <Button type="primary" onClick={() => setIsConditionEditorOpen(false)}>确认</Button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {ruleType && (
+                    {selectedRuleNumber && (
                         <>
                             <div className="rule-row">
-                                <span>{ruleType === 'FOR' ? 'DO：' : 'IF：'}</span>
-                                {action.mode === '离散型' && (
-                                    <div className="discrete-buttons">
-                                        {action.discreteValues.map(value => (
-                                            <Button
-                                                key={value}
-                                                type={execution1.includes(value) ? 'primary' : 'default'}
-                                                onClick={() => toggleDiscreteValue(value, true)}
-                                            >
-                                                {value}
-                                            </Button>
-                                        ))}
-                                    </div>
-                                )}
-                                {action.mode === '连续型' && (
-                                    <div className="continuous-inputs">
-                                        <Input
-                                            value={execution1[0] || ''}
-                                            onChange={(e) => handleContinuousValueChange(0, e.target.value, true)}
-                                            placeholder="下限"
-                                            style={{ width: 100 }}
-                                        />
-                                        <span> 至 </span>
-                                        <Input
-                                            value={execution1[1] || ''}
-                                            onChange={(e) => handleContinuousValueChange(1, e.target.value, true)}
-                                            placeholder="上限"
-                                            style={{ width: 100 }}
-                                        />
-                                    </div>
-                                )}
+                                <span>规则类型：</span>
+                                <Select
+                                    style={{ width: 200 }}
+                                    onChange={setRuleType}
+                                    value={ruleType}
+                                >
+                                    <Option key="IF ELSE" value="IF ELSE">IF ELSE</Option>
+                                    <Option key="FOR" value="FOR">FOR</Option>
+                                </Select>
                             </div>
 
-                            {ruleType === 'IF ELSE' && (
-                                <div className="rule-row">
-                                    <span>ELSE：</span>
-                                    {action.mode === '离散型' && (
-                                        <div className="discrete-buttons">
-                                            {action.discreteValues.map(value => (
-                                                <Button
-                                                    key={value}
-                                                    type={execution2.includes(value) ? 'primary' : 'default'}
-                                                    onClick={() => toggleDiscreteValue(value, false)}
-                                                >
-                                                    {value}
-                                                </Button>
-                                            ))}
+                            <div className="rule-row">
+                                <span>条件：</span>
+                                <Input
+                                    placeholder="输入条件表达式"
+                                    value={condition}
+                                    onChange={(e) => setCondition(e.target.value)}
+                                    className="common-input"
+                                    onFocus={handleConditionFocus}
+                                />
+                            </div>
+
+                            {isConditionEditorOpen && (
+                                <div className="reward-modal-overlay">
+                                    <div className="reward-modal">
+                                        <div className="reward-modal-header">条件表达式编辑器</div>
+                                        <div className="symbol-groups">
+                                            <div className="symbol-group">
+                                                {["+", "-", "×", "÷", "^", "√", "sin", "cos", "tan", "log", "ln", "∏", "∑", "∧", "∨", "¬", "⊕", "[", "]", "(", ")", "=", "≈", "∂", "e", "π", "∈", "±"].map((symbol, index) => (
+                                                    <button key={index} onClick={() => handleSymbolClick(symbol)}>
+                                                        {symbol}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            <div className="symbol-group">
+                                                {selectedParams?.map((param, index) => (
+                                                    <button
+                                                        key={index}
+                                                        onMouseEnter={() => handleParamHover(param)}
+                                                        onMouseLeave={handleParamLeave}
+                                                        onClick={() => handleSymbolClick(param[0])}
+                                                    >
+                                                        {param[0]}
+                                                    </button>
+                                                ))}
+                                            </div>
                                         </div>
-                                    )}
-                                    {action.mode === '连续型' && (
-                                        <div className="continuous-inputs">
-                                            <Input
-                                                value={execution2[0] || ''}
-                                                onChange={(e) => handleContinuousValueChange(0, e.target.value, false)}
-                                                placeholder="下限"
-                                                style={{ width: 100 }}
-                                            />
-                                            <span> 至 </span>
-                                            <Input
-                                                value={execution2[1] || ''}
-                                                onChange={(e) => handleContinuousValueChange(1, e.target.value, false)}
-                                                placeholder="上限"
-                                                style={{ width: 100 }}
-                                            />
+                                        {isHovering && hoveredParam && (
+                                            <div className="tooltip">
+                                                <div className="tooltip-content">
+                                                    <div className="tooltip-title">{hoveredParam[0]}</div>
+                                                    <div className="tooltip-description">{hoveredParam[1]}</div>
+                                                    <div className="tooltip-unit">{hoveredParam[2]}</div>
+                                                </div>
+                                            </div>
+                                        )}
+                                        <textarea
+                                            className="equation-input"
+                                            value={condition}
+                                            onChange={(e) => setCondition(e.target.value)}
+                                            placeholder="在此输入或编辑条件表达式"
+                                        />
+                                        <div className="modal-buttons">
+                                            <Button onClick={() => setIsConditionEditorOpen(false)}>取消</Button>
+                                            <Button type="primary" onClick={() => setIsConditionEditorOpen(false)}>确认</Button>
                                         </div>
-                                    )}
+                                    </div>
                                 </div>
                             )}
 
-                            <div className="rule-row">
-                                <span>{action.mode === '离散型' ? '可选取值：' : '取值范围：'}</span>
-                                <span>
-                                    {action.mode === '离散型'
-                                        ? `{${action.discreteValues.join(', ')}}`
-                                        : `[${action.lowerLimit}, ${action.upperLimit}]`}
-                                </span>
-                            </div>
+                            {ruleType && (
+                                <>
+                                    <div className="rule-row">
+                                        <span>{ruleType === 'FOR' ? 'DO：' : 'IF：'}</span>
+                                        {action.mode === '离散型' && (
+                                            <div className="discrete-buttons">
+                                                {action.discreteValues.map(value => (
+                                                    <Button
+                                                        style={{ marginRight: 10 }}
+                                                        key={value}
+                                                        type={execution1.includes(value) ? 'primary' : 'default'}
+                                                        onClick={() => toggleDiscreteValue(value, true)}
+                                                    >
+                                                        {value}
+                                                    </Button>
+                                                ))}
+                                            </div>
+                                        )}
+                                        {action.mode === '连续型' && (
+                                            <div className="continuous-inputs">
+                                                <Input
+                                                    value={execution1[0] || ''}
+                                                    onChange={(e) => handleContinuousValueChange(0, e.target.value, true)}
+                                                    placeholder="下限"
+                                                    style={{ width: 100 }}
+                                                />
+                                                <span> 至 </span>
+                                                <Input
+                                                    value={execution1[1] || ''}
+                                                    onChange={(e) => handleContinuousValueChange(1, e.target.value, true)}
+                                                    placeholder="上限"
+                                                    style={{ width: 100 }}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
 
-                            <div className="rule-buttons">
-                                <Button type="primary" onClick={handleRuleConfirm}>确定</Button>
-                                <Button onClick={handleRuleCancel}>取消</Button>
-                            </div>
+                                    {ruleType === 'IF ELSE' && (
+                                        <div className="rule-row">
+                                            <span>ELSE：</span>
+                                            {action.mode === '离散型' && (
+                                                <div className="discrete-buttons">
+                                                    {action.discreteValues.map(value => (
+                                                        <Button
+                                                            style={{ marginRight: 10 }}
+                                                            key={value}
+                                                            type={execution2.includes(value) ? 'primary' : 'default'}
+                                                            onClick={() => toggleDiscreteValue(value, false)}
+                                                        >
+                                                            {value}
+                                                        </Button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                            {action.mode === '连续型' && (
+                                                <div className="continuous-inputs">
+                                                    <Input
+                                                        value={execution2[0] || ''}
+                                                        onChange={(e) => handleContinuousValueChange(0, e.target.value, false)}
+                                                        placeholder="下限"
+                                                        style={{ width: 100 }}
+                                                    />
+                                                    <span> 至 </span>
+                                                    <Input
+                                                        value={execution2[1] || ''}
+                                                        onChange={(e) => handleContinuousValueChange(1, e.target.value, false)}
+                                                        placeholder="上限"
+                                                        style={{ width: 100 }}
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    <div className="rule-row">
+                                        <span>{action.mode === '离散型' ? '可选取值：' : '取值范围：'}</span>
+                                        <span>
+                                            {action.mode === '离散型'
+                                                ? `{${action.discreteValues.join(', ')}}`
+                                                : `[${action.lowerLimit}, ${action.upperLimit}]`}
+                                        </span>
+                                    </div>
+
+                                    <div className="rule-buttons">
+                                        <Button type="primary" onClick={handleRuleConfirm}>确定</Button>
+                                        <Button onClick={handleRuleCancel}>取消</Button>
+                                    </div>
+                                </>
+                            )}
                         </>
                     )}
                 </div>

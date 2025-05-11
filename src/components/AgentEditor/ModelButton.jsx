@@ -115,13 +115,20 @@ const ModelFunction = ({scenarios}) => {
                 };
                 actionSpaceStore.addActionForModel(agent, actionData);
 
-                if (action.rule) {
+                if (action.rules && action.rules.length > 0) {
                     const uniqueKey = `${action.entity}：${action.name}`;
-                    actionSpaceStore.setRuleForModel(agent, uniqueKey, {
-                        ruleType: action.rule[0],
-                        condition: action.rule[1],
-                        execution1: action.rule[2],
-                        execution2: action.rule[3]
+                    action.rules.forEach((rule, index) => {
+                        actionSpaceStore.setRuleForModel(
+                            agent,
+                            uniqueKey,
+                            {
+                                ruleType: rule[0],
+                                condition: rule[1],
+                                execution1: rule[2],
+                                execution2: rule[3]
+                            },
+                            index + 1
+                        );
                     });
                 }
             });
@@ -157,14 +164,21 @@ const ModelFunction = ({scenarios}) => {
             const allRewards = rewardFunctionStore.getAllRewards();
 
             const agentModels = Object.entries(entityAssignmentStore.assignedEntities).map(([agent, entities]) => {
-                // Regular entities assigned to the agent
                 const agentEntities = entities.map(entityName => {
                     const entity = role.entities.find(e => e.name === entityName);
 
                     const actionSpaceData = actionSpaceStore.getActionsForModel(agent)
                         .filter(action => action.entity === entityName)
                         .map(action => {
-                            const rule = actionSpaceStore.getRuleForModel(agent, `${action.entity}：${action.actionType}`);
+                            const uniqueKey = `${action.entity}：${action.actionType}`;
+                            const allRules = actionSpaceStore.getAllRulesForAction(agent, uniqueKey);
+                            const rulesArray = allRules.map(rule => [
+                                rule.ruleType,
+                                rule.condition,
+                                rule.execution1,
+                                rule.execution2
+                            ]);
+
                             return {
                                 entity: entityName,
                                 name: action.actionType,
@@ -172,12 +186,7 @@ const ModelFunction = ({scenarios}) => {
                                 action: action.mode === '连续型'
                                     ? [[parseFloat(action.lowerLimit), parseFloat(action.upperLimit)], action.unit, action.range]
                                     : [action.discreteValues, action.discreteOptions],
-                                rule: rule ? [
-                                    rule.ruleType,
-                                    rule.condition,
-                                    rule.execution1,
-                                    rule.execution2
-                                ] : null
+                                rules: rulesArray.length > 0 ? rulesArray : undefined
                             };
                         });
 
@@ -192,7 +201,6 @@ const ModelFunction = ({scenarios}) => {
                     };
                 });
 
-                // Communication entities for the agent
                 const communicationEntities = stateVectorStore.getCommunicationEntities(agent).map(commEntity => {
                     const baseEntityName = commEntity.name.replace('通信-', '');
                     const entity = role.entities.find(e => e.name === baseEntityName);
@@ -204,7 +212,7 @@ const ModelFunction = ({scenarios}) => {
                     return {
                         name: baseEntityName,
                         stateVector: stateVectorWithEntityName,
-                        actionSpace: [] // Communication entities have no actions
+                        actionSpace: []
                     };
                 });
 
@@ -256,7 +264,7 @@ const ModelFunction = ({scenarios}) => {
                 const result = await response.json();
                 if (result.status === 'success') {
                     alert('模型保存成功！');
-                    fetchModels(); // 刷新模型列表
+                    fetchModels();
                 } else {
                     alert('模型保存失败，请重试！');
                 }
