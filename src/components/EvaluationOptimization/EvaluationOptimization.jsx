@@ -859,8 +859,8 @@ const EvaluationOptimization = () => {
             <Modal
                 title="模型详细信息"
                 open={isModelInfoModalVisible}
-                onOk={() => setIsModelInfoModalVisible(false)}
                 onCancel={() => setIsModelInfoModalVisible(false)}
+                footer={null}
             >
                 {currentModel && (
                     <div>
@@ -880,13 +880,8 @@ const EvaluationOptimization = () => {
             <Modal
                 title="训练效果图片"
                 open={isEffectImageModalVisible}
-                onOk={() => setIsEffectImageModalVisible(false)}
                 onCancel={() => setIsEffectImageModalVisible(false)}
-                footer={[
-                    <Button key="ok" type="primary" onClick={() => setIsEffectImageModalVisible(false)}>
-                        关闭
-                    </Button>,
-                ]}
+                footer={null}
             >
                 {effectImageUrl && <img src={effectImageUrl} alt="训练效果图片" style={{ width: '100%' }} />}
             </Modal>
