@@ -384,7 +384,7 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshDa
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ decisionModelID: record.AGENT_MODEL_ID }),
+          body: JSON.stringify({ decisionModelID: record.model.id }),
         });
   
         if (!response.ok) {
@@ -410,7 +410,7 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshDa
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ decisionModelID: record.AGENT_MODEL_ID }),
+          body: JSON.stringify({ decisionModelID: record.model.id}),
         });
   
         if (!response.ok) {
@@ -475,16 +475,48 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshDa
     ];
   
     const modelListColumns = [
-      { title: '决策模型ID', dataIndex: 'AGENT_MODEL_ID', key: 'AGENT_MODEL_ID' },
-      { title: '智能体名称', dataIndex: 'AGENT_NAME', key: 'AGENT_NAME' },
-      { title: '场景名称', dataIndex: 'SCENARIO_NAME', key: 'SCENARIO_NAME' },
-      { title: '角色名称', dataIndex: 'ROLE_NAME', key: 'ROLE_NAME' },
-      { title: '模型版本', dataIndex: 'AGENT_MODEL_VERSION', key: 'AGENT_MODEL_VERSION' },
-      { title: '模型类型', dataIndex: 'NN_MODEL_TYPE', key: 'NN_MODEL_TYPE' },
-      { title: '创建时间', dataIndex: 'CREAT_TIME', key: 'CREAT_TIME', render: time => new Date(time).toLocaleString() },
-      { title: '发布状态', dataIndex: 'STATE', key: 'STATE' },
-      {
-        title: '操作',
+      { 
+        title: '决策模型ID', 
+        dataIndex: ['model', 'id'], 
+        key: 'modelId' 
+      },
+      { 
+        title: '决策模型名称', 
+        dataIndex: ['model', 'name'], 
+        key: 'modelName' 
+      },
+      { 
+        title: '场景名称', 
+        dataIndex: ['scenario', 'name'], 
+        key: 'scenarioName' 
+      },
+      { 
+        title: '角色名称', 
+        dataIndex: ['agent', 'role'], 
+        key: 'roleName' 
+      },
+      { 
+        title: '模型版本', 
+        dataIndex: ['model', 'version'], 
+        key: 'modelVersion' 
+      },
+      { 
+        title: '模型类型', 
+        dataIndex: ['model', 'type'], 
+        key: 'modelType' 
+      },
+      { 
+        title: '创建时间', 
+        dataIndex: ['model', 'time'], 
+        key: 'createTime', 
+        render: time => new Date(time).toLocaleString() 
+      },
+      { 
+        title: '发布状态', 
+        dataIndex: ['model', 'state'], 
+        key: 'state',
+      },
+      {  title: '操作',
         key: 'action',
         render: (text, record) => (
           <div style={{ display: 'flex', gap: 8 }}>
@@ -905,7 +937,7 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshDa
           dataSource={decisionModels}
           pagination={false}
           style={{ width: '100%' }}
-          rowKey={'AGENT_MODEL_ID'}
+          rowKey={(record) => record.model.id}
         />
       </Modal>
 
@@ -918,15 +950,15 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshDa
       >
         {currentModel && (
           <div>
-            <p><strong>决策模型ID：</strong>{currentModel.AGENT_MODEL_ID}</p>
-            <p><strong>智能体名称：</strong>{currentModel.AGENT_NAME}</p>
-            <p><strong>场景名称：</strong>{currentModel.SCENARIO_NAME}</p>
-            <p><strong>角色名称：</strong>{currentModel.ROLE_NAME}</p>
-            <p><strong>模型版本：</strong>{currentModel.AGENT_MODEL_VERSION}</p>
-            <p><strong>模型类型：</strong>{currentModel.NN_MODEL_TYPE}</p>
-            <p><strong>创建时间：</strong>{currentModel.CREAT_TIME}</p>
-            <p><strong>模型存放路径：</strong>{currentModel.MODEL_PATH}</p>
-            <p><strong>模型效果图路径：</strong>{currentModel.IMG_URL}</p>
+            <p><strong>决策模型ID：</strong>{currentModel.model.id}</p>
+            <p><strong>智能体名称：</strong>{currentModel.model.name}</p>
+            <p><strong>场景名称：</strong>{currentModel.scenario.name}</p>
+            <p><strong>角色名称：</strong>{currentModel.agent.role}</p>
+            <p><strong>模型版本：</strong>{currentModel.model.version}</p>
+            <p><strong>模型类型：</strong>{currentModel.model.type}</p>
+            <p><strong>创建时间：</strong>{currentModel.model.time}</p>
+            <p><strong>模型存放路径：</strong>{currentModel.model.path}</p>
+            <p><strong>模型效果图路径：</strong>{currentModel.model.img_url}</p>
           </div>
         )}
       </Modal>

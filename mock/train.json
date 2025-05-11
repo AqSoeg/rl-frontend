@@ -1,9 +1,10 @@
 [
   {
-    "algorithm_id": "1",
+    "algorithm_id": "MAPPO",
     "type": "shared_multi_agent",
     "type_name": "共享多智能体",
     "name": "MAPPO000",
+    "train_mode":"online",
     "hyper-parameters": [
       {
         "id": "learning_rate",
@@ -106,10 +107,11 @@
 
   },
   {
-    "algorithm_id": "2",
+    "algorithm_id": "MADDPG",
     "type": "distributed_multi_agent",
     "type_name": "分布式多智能体",
     "name": "MADDPG0000",
+    "train_mode":"online",
     "hyper-parameters": [
       {
         "id": "learning_rate",
@@ -212,10 +214,11 @@
 
   },
   {
-    "algorithm_id": "3",
+    "algorithm_id": "PPO",
     "type": "single_agent",
     "type_name": "单智能体",
     "name": "PPO",
+    "train_mode":"online",
     "hyper-parameters": [
       {
         "id": "learning_rate",
@@ -317,9 +320,10 @@
     "time": "2025-01-11T10:45:42.302Z"
   },
   {
-    "algorithm_id": "4",
+    "algorithm_id": "DDPG",
     "type": "single_agent",
     "type_name": "单智能体",
+    "train_mode":"offline",
     "name": "DDPG",
     "hyper-parameters": [
       {
