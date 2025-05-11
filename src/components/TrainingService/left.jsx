@@ -6,15 +6,12 @@ import sidebarStore from '../AgentEditor/SidebarStore';
 
 const { Option } = Select;
 
-const Left = observer(({ scenarios, algorithms,datasets }) => {
-  const [trainingMode, setTrainingMode] = useState('offline');
+const Left = observer(({ scenarios, algorithms, datasets }) => {
+  const [trainingMode, setTrainingMode] = useState('online'); // 默认选择在线交互
   const [visible, setVisible] = useState(false);
   const [selectedDataset, setSelectedDataset] = useState('');
   const [agentRoles, setAgentRoles] = useState([]);
   
-
-
-
   // 使用 SidebarStore 中的状态初始化选定的想定场景和智能体角色
   const [selectedScenario, setSelectedScenario] = useState(sidebarStore.scenarioName);
   const [selectedAgentRole, setSelectedAgentRole] = useState(sidebarStore.roleName);
@@ -52,13 +49,28 @@ const Left = observer(({ scenarios, algorithms,datasets }) => {
     }
   }, [agentRoles, selectedAgentRole]);
 
-  // 初始化算法类型和算法列表
-  useEffect(() => {
-    if (intelligentStore.algorithmType) {
-      const filteredAlgorithms = algorithms.filter(algo => algo.type_name === intelligentStore.algorithmType);
-      intelligentStore.setAlgorithmsByType(filteredAlgorithms);
+  // 根据训练模式过滤算法类型
+  const getFilteredAlgorithmTypes = () => {
+    if (trainingMode === 'offline') {
+      return ['单智能体']; // 离线模式下只返回单智能体
     }
-  }, [algorithms, intelligentStore.algorithmType]);
+    
+    const uniqueTypes = new Set();
+    algorithms.forEach(algo => {
+      if (algo.train_mode === 'online') {
+        uniqueTypes.add(algo.type_name);
+      }
+    });
+    return Array.from(uniqueTypes);
+  };
+
+  // 根据算法类型和训练模式过滤算法
+  const getFilteredAlgorithms = (typeName) => {
+    return algorithms.filter(algo => 
+      algo.type_name === typeName && 
+      algo.train_mode === trainingMode
+    );
+  };
 
   const showDataLoadModal = () => {
     setVisible(true);
@@ -70,13 +82,19 @@ const Left = observer(({ scenarios, algorithms,datasets }) => {
 
   const handleTrainingModeChange = (value) => {
     setTrainingMode(value);
-    setVisible(false);
+    // 重置算法选择
+    intelligentStore.setAlgorithmType('');
+    intelligentStore.setAlgorithmsByType([]);
+    intelligentStore.selectAlgorithm(null);
+    if (value === 'offline') {
+      setVisible(false);
+    }
   };
 
   const handleAlgorithmTypeChange = (value) => {
-    intelligentStore.setAlgorithmType(value); // 更新全局状态
-    const filteredAlgorithms = algorithms.filter(algo => algo.type_name === value);
-    intelligentStore.setAlgorithmsByType(filteredAlgorithms); // 更新算法列表
+    intelligentStore.setAlgorithmType(value);
+    const filteredAlgorithms = getFilteredAlgorithms(value);
+    intelligentStore.setAlgorithmsByType(filteredAlgorithms);
   };
 
   const handleAlgorithmSelectChange = (value) => {
@@ -122,8 +140,8 @@ const Left = observer(({ scenarios, algorithms,datasets }) => {
     setVisible(false);
   };
 
-  const uniqueAlgorithmTypeNames = Array.from(new Set(algorithms.map(algo => algo.type_name)));
-
+  const filteredAlgorithmTypes = getFilteredAlgorithmTypes();
+  
   return (
     <div className='left'>
       <div className="form-item">
@@ -157,8 +175,8 @@ const Left = observer(({ scenarios, algorithms,datasets }) => {
       <div className="form-item">
         <label>训练方式</label>
         <Select value={trainingMode} onChange={handleTrainingModeChange}>
-          <Option value="offline">离线数据</Option>
           <Option value="online">在线交互</Option>
+          <Option value="offline">离线数据</Option>
         </Select>
         {trainingMode === 'offline' && (
           <Button type="default" onClick={showDataLoadModal}>
@@ -169,11 +187,11 @@ const Left = observer(({ scenarios, algorithms,datasets }) => {
       <div className="form-item">
         <label>算法类型</label>
         <Select
-          value={intelligentStore.algorithmType} // 使用全局状态
+          value={intelligentStore.algorithmType}
           onChange={handleAlgorithmTypeChange}
           placeholder="请选择"
         >
-          {uniqueAlgorithmTypeNames.map((typeName) => (
+          {filteredAlgorithmTypes.map((typeName) => (
             <Option key={typeName} value={typeName}>
               {typeName}
             </Option>
@@ -196,6 +214,7 @@ const Left = observer(({ scenarios, algorithms,datasets }) => {
         </Select>
       </div>
 
+      
       <div className='form-item'>
         {intelligentStore.selectedAgent ? (
           <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
@@ -207,7 +226,6 @@ const Left = observer(({ scenarios, algorithms,datasets }) => {
             <p><strong>更新时间：</strong>{new Date(intelligentStore.selectedAgent.updateTime).toLocaleString()}</p>
             <p><strong>想定场景：</strong>{intelligentStore.selectedAgent.scenarioID}</p>
 
-            {/* 智能体分配信息 */}
             <h5>智能体分配信息：</h5>
             <Table
               columns={[
@@ -229,7 +247,6 @@ const Left = observer(({ scenarios, algorithms,datasets }) => {
             <Table
               columns={[
                 { title: '智能体名称', dataIndex: 'name', key: 'name' },
-                // 使用reduce来去除重复的列名
                 ...intelligentStore.selectedAgent.agentModel
                   .flatMap((model) => model.stateVector.map((state) => state[2]))
                   .reduce((uniqueColumns, field) => {
@@ -245,13 +262,11 @@ const Left = observer(({ scenarios, algorithms,datasets }) => {
                   }))
               ]}
               dataSource={intelligentStore.selectedAgent.agentModel.map((model) => {
-                // 初始化状态信息
                 const entityState = {
                   key: model.name,
                   name: model.name,
                 };
 
-                // 遍历状态向量，更新状态信息，使用 state[2] 作为字段名
                 model.stateVector.forEach((state) => {
                   const [, , fieldName, fieldValue] = state;
                   entityState[fieldName] = fieldValue;

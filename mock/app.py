@@ -16,7 +16,7 @@ DATASET_FILE_PATH = 'mock/dataset.json'
 SCENARIO_FILE_PATH = 'mock/db.json'
 DECISION_FILE_PATH = 'mock/dc.json'
 EVALUATE_FILE_PATH = 'mock/evaluatetable.json'
-EVALUATION_DATA_PATH = 'mock/evaluation_data.json'
+EVALUATION_DATA_PATH = 'mock/dc.json'
 EVALUATION_RESULT_PATH = 'mock/evaluation_result.json'
 training_thread = None
 training_stop_flag = False
@@ -238,9 +238,9 @@ def get_effect_image():
     try:
         with open(DECISION_FILE_PATH, 'r', encoding='utf-8') as f:
             decision_models = json.load(f)
-        model = next((m for m in decision_models if m['AGENT_MODEL_ID'] == decision_model_id), None)
+        model = next((m for m in decision_models if m['model']['id'] == decision_model_id), None)
         if model:
-            return jsonify({"status": "success", "img_url": model['IMG_URL']})
+            return jsonify({"status": "success", "img_url": model['model']['img_url']})
         else:
             return jsonify({"status": "error", "message": "Model not found"}), 404
     except Exception as e:
@@ -252,17 +252,17 @@ def publish_model():
     data = request.json
     decision_model_id = data.get('decisionModelID')
     try:
-        with open(Decision_FILE_PATH, 'r', encoding='utf-8') as f:
+        with open(DECISION_FILE_PATH, 'r', encoding='utf-8') as f:
             existing_data = json.load(f)
         model_found = False
         for model in existing_data:
-            if model['AGENT_MODEL_ID'] == decision_model_id:
-                model['STATE'] = '已发布'  # 更新状态为已发布
+            if model['model']['id'] == decision_model_id:
+                model['model']['state'] = '已发布'  # 更新状态为已发布
                 model_found = True
                 break
 
         # 保存更新后的数据
-        with open(Decision_FILE_PATH, 'w', encoding='utf-8') as f:
+        with open(DECISION_FILE_PATH, 'w', encoding='utf-8') as f:
             json.dump(existing_data, f, ensure_ascii=False, indent=2)
         
         return jsonify({"status": "success", "message": f"Model {decision_model_id} published successfully"})
