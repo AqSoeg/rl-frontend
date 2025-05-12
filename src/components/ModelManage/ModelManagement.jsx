@@ -4,7 +4,7 @@ import ModelLibrary from './modellibrary';
 import OfflineDatabase from './offlinedatabase';
 import ScenarioLibrary from './scenariolibrary';
 import DecisionModelLibrary from './decisionmodellibrary';
-import EvaluateTable from './behaviorlibrary';
+import EvaluateTable from './evaluatetable';
 import './ModelManagement.css';
 import { message } from 'antd';
 

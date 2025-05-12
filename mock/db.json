@@ -471,7 +471,11 @@
       {
         "id": "vehicle",
         "name": "车辆",
-        "agentTypes": ["单智能体", "同构多智能体", "异构多智能体"],
+        "agentTypes": [
+          "单智能体",
+          "同构多智能体",
+          "异构多智能体"
+        ],
         "actionTypes": [
           [
             "行驶",
@@ -1163,7 +1167,9 @@
       {
         "id": "robot",
         "name": "机器人",
-        "agentTypes": ["单智能体"],
+        "agentTypes": [
+          "单智能体"
+        ],
         "actionTypes": [
           [
             "操作",
@@ -1368,7 +1374,9 @@
       {
         "id": "conveyor_belt",
         "name": "传送带",
-        "agentTypes": ["同构多智能体"],
+        "agentTypes": [
+          "同构多智能体"
+        ],
         "actionTypes": [
           [
             "速度控制",
@@ -1530,7 +1538,9 @@
       {
         "id": "camera",
         "name": "监控摄像头",
-        "agentTypes": ["异构多智能体"],
+        "agentTypes": [
+          "异构多智能体"
+        ],
         "actionTypes": [
           [
             "转向",
@@ -1918,7 +1928,10 @@
       {
         "id": "drone",
         "name": "无人机",
-        "agentTypes": ["单智能体", "同构多智能体"],
+        "agentTypes": [
+          "单智能体",
+          "同构多智能体"
+        ],
         "actionTypes": [
           [
             "飞行",
@@ -2102,7 +2115,10 @@
       {
         "id": "truck",
         "name": "货车",
-        "agentTypes": ["单智能体", "异构多智能体"],
+        "agentTypes": [
+          "单智能体",
+          "异构多智能体"
+        ],
         "actionTypes": [
           [
             "行驶",
@@ -2271,7 +2287,10 @@
       {
         "id": "warehouse_manager",
         "name": "仓库管理员",
-        "agentTypes": ["同构多智能体", "异构多智能体"],
+        "agentTypes": [
+          "同构多智能体",
+          "异构多智能体"
+        ],
         "actionTypes": [
           [
             "操作",
