@@ -358,10 +358,17 @@ const ModelFunction = ({scenarios}) => {
                     dataSource={tableData}
                     rowSelection={{
                         type: 'radio',
+                        selectedRowKeys: selectedModel ? [tableData.findIndex(item => item.agentID === selectedModel.agentID)] : [],
                         onChange: (selectedRowKeys, selectedRows) => {
                             handleModelSelect(selectedRows[0]);
                         },
                     }}
+                    onRow={(record) => ({
+                        onClick: () => {
+                            const isSelected = selectedModel && selectedModel.agentID === record.agentID;
+                            handleModelSelect(isSelected ? null : record);
+                        },
+                    })}
                     pagination={false}
                 />
             </Modal>
