@@ -132,16 +132,7 @@ def load_evaluation_data():
 def start_evaluation():
     try:
         data = request.json
-        evaluation_type = data.get('evaluationType')
-        evaluation_data = data.get('evaluationData', {})
-
-        if evaluation_type == '在线评估':
-            model_id = evaluation_data.get('modelId')
-            print(f"Starting online evaluation for model: {model_id}")
-        else:
-            print("离线评估模式：\n验证基础结构，验证模型信息、验证场景信息、验证智能体信息、验证训练信息•••\n验证成功！")
-            print("Starting offline evaluation with data:", evaluation_data)
-
+        print("开始评估:", data)
         return '数据发送成功，后台正在评估中•••'
 
     except Exception as e:
@@ -153,7 +144,6 @@ def load_evaluation_result():
     try:
         data = request.json
         model_id = data.get('modelId')
-        evaluation_type = data.get('evaluationType')
 
         with open(EVALUATION_RESULT_PATH, 'r', encoding='utf-8') as file:
             results = json.load(file)

@@ -3,8 +3,6 @@ import * as echarts from 'echarts';
 import { Button, Select, Modal, Table, Space } from 'antd';
 import './EvaluationOptimization.css';
 
-const { Option } = Select;
-
 const EvaluationOptimization = () => {
     const [charts, setCharts] = useState([]);
     const [events, setEvents] = useState([]);
@@ -18,7 +16,6 @@ const EvaluationOptimization = () => {
         modelInfo: {},
         trainInfo: {}
     });
-    const [selectedEvaluationType, setSelectedEvaluationType] = useState();
     const [chartSelections, setChartSelections] = useState([
         { content: '', shape: '' },
         { content: '', shape: '' },
@@ -242,60 +239,17 @@ const EvaluationOptimization = () => {
 
     const handleLoadData = async () => {
         setEvaluationData([]);
-        if (!selectedEvaluationType) {
-            alert('请先选择评估数据来源！');
-            return;
-        }
         try {
-            let data = [];
-            if (selectedEvaluationType === '在线评估') {
-                const response = await fetch(__APP_CONFIG__.loadEvaluationData, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                });
-                data = await response.json();
-            } else {
-                const file = await new Promise((resolve) => {
-                    const input = document.createElement('input');
-                    input.type = 'file';
-                    input.accept = '.json';
-                    input.onchange = (e) => resolve(e.target.files[0]);
-                    input.click();
-                });
-                if (!file) return;
-                if (!file.name.endsWith('.json')) {
-                    alert('仅支持JSON文件！');
-                    return;
-                }
-                const reader = new FileReader();
-                const content = await new Promise((resolve, reject) => {
-                    reader.onload = (e) => resolve(e.target.result);
-                    reader.onerror = reject;
-                    reader.readAsText(file);
-                });
-                data = JSON.parse(content);
-                const validateStructure = (data) => {
-                    const isValid = Array.isArray(data) && data.every(item =>
-                        item.model?.id &&
-                        item.scenario?.name &&
-                        item.agent?.role &&
-                        item.train?.algorithm &&
-                        Array.isArray(item.scenario.envParams) &&
-                        Array.isArray(item.agent.entityAssignments) &&
-                        Array.isArray(item.train.hyperParams)
-                    );
-                    return isValid;
-                };
-                if (!validateStructure(Array.isArray(data) ? data : [data])) {
-                    alert('文件格式错误：结构不符合要求！');
-                    return;
-                }
-            }
+            const response = await fetch(__APP_CONFIG__.loadEvaluationData, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+            });
+            const data = await response.json();
             setEvaluationData(Array.isArray(data) ? data : [data]);
             setIsDataModalVisible(true);
         } catch (error) {
             console.error('数据载入失败:', error);
-            alert(`数据载入失败：${error.message || '文件格式错误'}`);
+            alert(`数据载入失败：${error.message}`);
         }
     };
 
@@ -305,27 +259,17 @@ const EvaluationOptimization = () => {
             return;
         }
         try {
-            let evalData = {};
-            let modelId = '';
-            if (selectedEvaluationType === '在线评估') {
-                modelId = selectedModel.model.id;
-                evalData = { modelId };
-            } else {
-                evalData = {
-                    model: sidebarData.modelInfo,
-                    scenario: sidebarData.scenarioInfo,
-                    agent: sidebarData.agentInfo,
-                    train: sidebarData.trainInfo
-                };
-                modelId = sidebarData.modelInfo.id;
-            }
+            const evalData = {
+                model: sidebarData.modelInfo,
+                scenario: sidebarData.scenarioInfo,
+                agent: sidebarData.agentInfo,
+                train: sidebarData.trainInfo
+            };
+            const modelId = sidebarData.modelInfo.id;
             const response = await fetch(__APP_CONFIG__.startEvaluation, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    evaluationType: selectedEvaluationType,
-                    evaluationData: evalData
-                }),
+                body: JSON.stringify(evalData),
             });
             if (!response.ok) {
                 const errorData = await response.json();
@@ -338,8 +282,7 @@ const EvaluationOptimization = () => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    modelId: modelId,
-                    evaluationType: selectedEvaluationType
+                    modelId: modelId
                 }),
             });
             const data = await resultResponse.json();
@@ -611,17 +554,6 @@ const EvaluationOptimization = () => {
     return (
         <div className="EO-container">
             <div className="EO-sidebar">
-                <div className="EO-sidebar-section">
-                    <div className="EO-text">评估数据来源</div>
-                    <Select
-                        onChange={(value) => setSelectedEvaluationType(value)}
-                        value={selectedEvaluationType}
-                    >
-                        <Option value="在线评估">在线评估</Option>
-                        <Option value="离线评估">离线评估</Option>
-                    </Select>
-                </div>
-
                 <div className="EO-sidebar-section EO-sidebar-scrollable">
                     <div className="EO-text">场景信息</div>
                     {sidebarData.scenarioInfo.name && (
