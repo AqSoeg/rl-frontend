@@ -134,7 +134,7 @@ const ScenarioLibrary = ({ scenarios, fetchScenarios }) => {
         { title: '想定场景 ID', dataIndex: 'id', key: 'id' },
         { title: '想定场景名称', dataIndex: 'name', key: 'name' },
         { title: '描述', dataIndex: 'description', key: 'description' },
-        { title: '创建时间', dataIndex: 'createTime', key: 'createTime' },
+        { title: '创建时间', dataIndex: 'createTime', key: 'createTime',render: time => new Date(time).toLocaleString() },
         {
             title: '角色列表',
             dataIndex: 'roles',

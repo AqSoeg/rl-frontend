@@ -141,7 +141,7 @@ const EvaluateTable = ({ decisions, fetchDecisions }) => {
         { title: '神经网络模型类型', dataIndex: 'NN_MODEL_TYPE', key: 'NN_MODEL_TYPE' },
         { title: '模型路径', dataIndex: 'MODEL_PATH', key: 'MODEL_PATH' },
         { title: '文件位置', dataIndex: 'DATA_FILE', key: 'DATA_FILE' },
-        { title: '创建时间', dataIndex: 'CREAT_TIME', key: 'CREAT_TIME' },
+        { title: '创建时间', dataIndex: 'CREAT_TIME', key: 'CREAT_TIME' ,render: time => new Date(time).toLocaleString()},
         {
             title: '操作',
             key: 'action',

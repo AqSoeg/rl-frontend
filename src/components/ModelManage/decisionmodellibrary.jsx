@@ -219,7 +219,7 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
         { title: '神经网络模型类型', dataIndex: 'NN_MODEL_TYPE', key: 'NN_MODEL_TYPE' },
         { title: '模型路径', dataIndex: 'MODEL_PATH', key: 'MODEL_PATH' },
         { title: '图片链接', dataIndex: 'IMG_URL', key: 'IMG_URL' },
-        { title: '创建时间', dataIndex: 'CREAT_TIME', key: 'CREAT_TIME' },
+        { title: '创建时间', dataIndex: 'CREAT_TIME', key: 'CREAT_TIME' ,render: time => new Date(time).toLocaleString()},
         {
             title: '操作',
             key: 'action',

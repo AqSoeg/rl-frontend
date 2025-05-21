@@ -140,7 +140,7 @@ const ModelLibrary = ({ data, fetchModels }) => {
     { title: '版本', dataIndex: 'agentVersion', key: 'agentVersion' },
     { title: '智能体类型', dataIndex: 'agentType', key: 'agentType' },
     { title: '智能体角色', dataIndex: 'agentRoleID', key: 'agentRoleID' },
-    { title: '更新时间', dataIndex: 'updateTime', key: 'updateTime' },
+    { title: '更新时间', dataIndex: 'updateTime', key: 'updateTime',render: time => new Date(time).toLocaleString()  },
     {
       title: '实体分配',
       dataIndex: 'entityAssignments',
