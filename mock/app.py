@@ -222,6 +222,7 @@ def train():
     training_status = "running"
     training_result = None
     data = request.json
+    print(data)
     hyper_parameters = data.get('hyperParametersValues', {})
     env = make_vec_env('CartPole-v1', n_envs=4)
     model = PPO('MlpPolicy', env, verbose=1, **{k: v for k, v in hyper_parameters.items() if k != 'total_timesteps'})
@@ -589,5 +590,20 @@ def get_process_data():
         "status": "success",
         "animationUrl": animation_url
     })
+@app.route('/load_dataset', methods=['POST'])
+def load_dataset():
+    try:
+        data = request.get_json()
+        return jsonify({
+            "success": True,
+            "dataset": data,
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"服务器错误: {str(e)}"
+        }), 500
+
 if __name__ == '__main__':
     app.run(port=5000, debug=True)

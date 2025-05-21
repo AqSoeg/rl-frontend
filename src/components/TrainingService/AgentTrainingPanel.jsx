@@ -4,7 +4,7 @@ import { Card, Select, Row, Col, Space, Button, Modal, Table, message, Input } f
 import { intelligentStore } from './IntelligentStore';
 import { observer } from 'mobx-react';
 const { Option } = Select;
-const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshData }) => {
+const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
   const [entity, setEntity] = useState('');
   const [attribute, setAttribute] = useState('');
   const [value, setValue] = useState('');
@@ -27,7 +27,6 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshDa
 
   const [isScenarioModalVisible, setIsScenarioModalVisible] = useState(false);
   const [deploymentImageUrl, setDeploymentImageUrl] = useState(null);
-  const [processData, setProcessData] = useState(null);
   const [animationUrl, setAnimationUrl] = useState(null);
   const [isProcessModalVisible, setIsProcessModalVisible] = useState(false);
   
@@ -62,7 +61,7 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshDa
       if (selectedEntity) {
         const paramsInfo = selectedEntity.params.map(param => {
           const [key, label, defaultValue, options] = param;
-          return `${label}：${defaultValue}（默认值）`;
+          return `${label}：${defaultValue}`;
         }).join('，');
         setEntityParamsInfo(paramsInfo);
       }
@@ -112,11 +111,13 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshDa
             },
           }));
 
-          setEntityParamsInfo(`更新成功：${entity} 的 ${selectedAttributeInfo.label} 已修改为 ${value}`);
-          message.success('更新成功', 5, () => {
-            // 刷新页面
-            refreshData();
-          });
+          const displayText = selectedEntityParams
+          .map(attr => `${attr.label}：${attr.key === attribute ? value : attr.value}`)
+          .join(',');
+
+        // 更新显示的文本框内容
+        setEntityParamsInfo(displayText);
+          message.success('更新成功')
         } catch (error) {
           message.error('更新失败');
           console.error('更新失败:', error);
@@ -241,24 +242,28 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshDa
     const trainAlgorithm = async () => {
       const selectedAgent = intelligentStore.selectedAgent;
       const selectedAlgorithm = intelligentStore.selectedAlgorithm;
-  
+
       if (!selectedAgent) {
         message.error("请先载入智能体！");
         return;
       }
-  
+
       if (!selectedAlgorithm) {
         message.error("请先选择算法！");
         return;
       }
-  
+
       if (!isModelCompatibleWithAlgorithm(selectedAgent, selectedAlgorithm)) {
         message.error("模型与算法类型不匹配，无法训练！");
         return;
       }
-  
+      if (intelligentStore.trainingMode === 'offline' && !intelligentStore.selectedDataset) {
+        message.error("离线训练模式必须先载入一个数据集！");
+        return;
+      }
       setTraining(true); // 开始训练时设置训练状态为 true
       try {
+        // 构建基本请求体
         const requestBody = {
           agentInfo: {
             agentID: selectedAgent.agentID,
@@ -274,10 +279,33 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshDa
           },
           scenarioEditInfo: {
             scenarioName: intelligentStore.selectedScenario.name,
-            entities: intelligentStore.selectedAgentRole.id
-          },
+            agentRoleID: intelligentStore.selectedAgentRole.id,
+            env_params: intelligentStore.selectedScenario.env_params.map(param => ({
+              id: param.id,
+              name: param.name,
+              params: param.params.map(p => ({
+                key: p[0],
+                label: p[1],
+                value: p[2]
+              }))
+            }))
+          }
         };
-  
+
+        // 如果是离线训练模式，添加离线数据集信息
+        if (intelligentStore.trainingMode === 'offline' && intelligentStore.selectedDataset) {
+          requestBody.offlineInfo = {
+            OFFLINE_DATA_ID: intelligentStore.selectedDataset.OFFLINE_DATA_ID,
+            DATASET_NAME: intelligentStore.selectedDataset.DATASET_NAME,
+            SCENARIO_NAME: intelligentStore.selectedDataset.SCENARIO_NAME,
+            AGENT_ROLE: intelligentStore.selectedDataset.AGENT_ROLE,
+            DATA_STATE: intelligentStore.selectedDataset.DATA_STATE,
+            DATA_ACTION: intelligentStore.selectedDataset.DATA_ACTION,
+            DATASET_PATH: intelligentStore.selectedDataset.DATASET_PATH,
+            CREAT_TIME: intelligentStore.selectedDataset.CREAT_TIME
+          };
+        }
+
         const response = await fetch(__APP_CONFIG__.train, {
           method: 'POST',
           headers: {
@@ -285,11 +313,11 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshDa
           },
           body: JSON.stringify(requestBody),
         });
-  
+
         if (!response.ok) {
           throw new Error(`Network response was not ok: ${response.statusText}`);
         }
-  
+
         const data = await response.json();
         if (data.status === 'success') {
           message.success('训练已开始！');
@@ -528,11 +556,6 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshDa
         key: 'modelVersion' 
       },
       { 
-        title: '发布状态', 
-        dataIndex: ['model', 'state'], 
-        key: 'modelState' 
-      },
-      { 
         title: '创建时间', 
         dataIndex: ['model', 'time'], 
         key: 'createTime', 
@@ -688,16 +711,33 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshDa
                   `${text}` : text
               },
               { 
+                title: '发布状态', 
+                
+              },
+              { 
+                title: '载入状态(持续训练)', 
+                
+              },
+              { 
                 title: '操作',
                 key: 'action',
                 render: (text, subRecord) => (
-                  <Button 
-                    type="primary" 
-                    onClick={() => handlePublish(record, subRecord.id)}
-                    disabled={isAnyPublished}
-                  >
-                    发布
-                  </Button>
+                  <div>
+                    <Button 
+                      type="primary" 
+                      onClick={() => handlePublish(record, subRecord.id)}
+                      disabled={isAnyPublished}
+                    >
+                      发布
+                    </Button>
+                    <Button 
+                      type="primary" 
+                      onClick={() => handlePublish(record, subRecord.id)}
+                      disabled={isAnyPublished}
+                    >
+                      载入
+                    </Button>
+                  </div>
                 ),
               },
             ]}
@@ -883,49 +923,55 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions, refreshDa
             />
 
             <h3>实体状态信息</h3>
-            <Table
-              columns={[
-                { title: '实体名称', dataIndex: 'name', key: 'name' },
-                // 使用reduce来去除重复的列名
-                ...selectedAgent.agentModel.flatMap((model) => {
-                  return model.stateVector.map((state) => state[2]);
-                }).reduce((uniqueColumns, field) => {
-                  if (!uniqueColumns.includes(field)) {
-                    uniqueColumns.push(field);
-                  }
-                  return uniqueColumns;
-                }, []).map((field) => ({
-                  title: field,
-                  dataIndex: field,
-                  key: field,
-                }))
-              ]}
-              dataSource={selectedAgent.agentModel.flatMap((model) => {
-                // 获取所有实体名称
-                const entities = [...new Set(model.stateVector.map((state) => state[0]))];
-
-                // 遍历每个实体，获取其对应的状态信息
-                return entities.map((entity) => {
-                  // 初始化状态信息
-                  const entityState = {
-                    key: entity,
-                    name: entity,
-                  };
-
-                  // 遍历状态向量，更新状态信息，使用 state[2] 作为字段名
-                  model.stateVector.forEach((state) => {
-                    const [entityName, , fieldName, fieldValue] = state;
-                    if (entityName === entity) {
-                      entityState[fieldName] = fieldValue;
-                    }
-                  });
-
-                  return entityState;
-                });
-              })}
-              pagination={false}
-              bordered
-            />
+            {selectedAgent.agentModel.flatMap((model) => {
+              // 获取所有实体名称
+              const entities = [...new Set(model.stateVector.map((state) => state[0]))];
+              
+              return entities.map((entity) => {
+                // 收集该实体的所有状态信息
+                const stateInfo = model.stateVector
+                  .filter((state) => state[0] === entity)
+                  .map((state) => ({
+                    fieldName: state[2], // 状态字段名
+                    fieldValue: state[3] // 状态值
+                  }));
+                
+                return (
+                  <div key={entity} style={{ 
+                    marginBottom: 16,
+                    border: '1px solid #d9d9d9',
+                    borderRadius: 4,
+                    padding: 12
+                  }}>
+                    <div style={{ 
+                      fontWeight: 'bold', 
+                      fontSize: 16,
+                      marginBottom: 8,
+                      color: '#1890ff'
+                    }}>
+                      {entity}
+                    </div>
+                    {stateInfo.map((state, index) => (
+                      <div key={index} style={{ 
+                        display: 'flex',
+                        marginBottom: 4,
+                        paddingLeft: 12
+                      }}>
+                        <div style={{ 
+                          flex: '0 0 180px',
+                          color: '#666'
+                        }}>
+                          {state.fieldName}
+                        </div>
+                        <div style={{ flex: 1 }}>
+                          {state.fieldValue || '-'}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              });
+            })}
 
             <h3>模型动作信息</h3>
             <Table

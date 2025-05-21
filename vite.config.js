@@ -25,6 +25,7 @@ const appConfig = {
   updateDbJson:"http://localhost:5000/updateDbJson",
   get_deployment_image:"http://localhost:5000/get_deployment_image",
   get_process_data:"http://localhost:5000/get_process_data",
+  load_dataset:"http://localhost:5000/load_dataset",
 };
 
 export default defineConfig({

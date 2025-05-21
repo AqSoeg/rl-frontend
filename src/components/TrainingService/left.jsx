@@ -9,7 +9,7 @@ const { Option } = Select;
 const Left = observer(({ scenarios, algorithms, datasets }) => {
   const [trainingMode, setTrainingMode] = useState('online'); // 默认选择在线交互
   const [visible, setVisible] = useState(false);
-  const [selectedDataset, setSelectedDataset] = useState('');
+  const [selectedDataset, setSelectedDataset] = useState(null); // 本地状态跟踪选中的数据集
   const [agentRoles, setAgentRoles] = useState([]);
   
   // 使用 SidebarStore 中的状态初始化选定的想定场景和智能体角色
@@ -73,23 +73,57 @@ const Left = observer(({ scenarios, algorithms, datasets }) => {
   };
 
   const showDataLoadModal = () => {
+    if (trainingMode !== 'offline') {
+      message.warning('请先选择离线训练模式！');
+      return;
+    }
     setVisible(true);
   };
 
-  const handleDatasetChange = (value) => {
-    setSelectedDataset(value);
+  const handleLoadDataset = async (record) => {
+    try {
+      const response = await fetch(__APP_CONFIG__.load_dataset, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ dataset: record }),
+      });
+      if (!response.ok) {
+        throw new Error('Network response was not ok ' + response.statusText);
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        message.success(`数据集加载成功！`);
+        const dataset = result.dataset.dataset;
+        console.log(dataset)
+        setSelectedDataset(dataset); // 更新本地状态
+        intelligentStore.setSelectedDataset(dataset); // 保存到 store
+        setVisible(false);
+      } else {
+        message.error(result.message || '数据集加载失败');
+      }
+    } catch (error) {
+      console.error("加载数据集失败:", error);
+      message.error('加载数据集失败，请稍后再试');
+    } 
   };
 
-  const handleTrainingModeChange = (value) => {
-    setTrainingMode(value);
-    // 重置算法选择
-    intelligentStore.setAlgorithmType('');
-    intelligentStore.setAlgorithmsByType([]);
-    intelligentStore.selectAlgorithm(null);
-    if (value === 'offline') {
-      setVisible(false);
-    }
-  };
+const handleTrainingModeChange = (value) => {
+  setTrainingMode(value);
+  intelligentStore.setTrainingMode(value);
+  // 重置算法选择
+  intelligentStore.setAlgorithmType('');
+  intelligentStore.setAlgorithmsByType([]);
+  intelligentStore.selectAlgorithm(null);
+
+  // 仅在从 offline 切换到 online 时清空数据集
+  if (value === 'online') {
+    setSelectedDataset(null);
+    intelligentStore.setSelectedDataset(null);
+  }
+};
 
   const handleAlgorithmTypeChange = (value) => {
     intelligentStore.setAlgorithmType(value);
@@ -122,26 +156,68 @@ const Left = observer(({ scenarios, algorithms, datasets }) => {
     }
   };
 
-  const handleOk = async () => {
-    try {
-      if (!selectedDataset) {
-        message.error('请选择一个数据集！');
-        return;
-      }
-      message.success('数据集加载成功！');
-      setVisible(false);
-    } catch (error) {
-      console.error("There was an error loading the dataset!", error);
-      message.error('发生错误，请检查网络连接或稍后再试。');
+  const handleOk = () => {
+    if (!selectedDataset) {
+      message.error('请选择一个数据集！');
+      return;
     }
+    message.success('数据集选择确认！');
+    setVisible(false);
   };
 
   const handleCancel = () => {
     setVisible(false);
   };
 
-  const filteredAlgorithmTypes = getFilteredAlgorithmTypes();
-  
+  const datasetColumns = [
+    {
+      title: '数据集ID',
+      dataIndex: 'OFFLINE_DATA_ID',
+      key: 'OFFLINE_DATA_ID',
+    },
+    {
+      title: '数据集名称',
+      dataIndex: 'DATASET_NAME',
+      key: 'DATASET_NAME',
+    },
+    {
+      title: '场景名称',
+      dataIndex: 'SCENARIO_NAME',
+      key: 'SCENARIO_NAME',
+    },
+    {
+      title: '角色名称',
+      dataIndex: 'AGENT_ROLE',
+      key: 'AGENT_ROLE',
+    },
+    {
+      title: '状态描述',
+      dataIndex: 'DATA_STATE',
+      key: 'DATA_STATE',
+    },
+    {
+      title: '动作描述',
+      dataIndex: 'DATA_ACTION',
+      key: 'DATA_ACTION',
+    },
+    {
+      title: '创建时间',
+      dataIndex: 'CREAT_TIME',
+      key: 'CREAT_TIME',
+      render: (text) => new Date(text).toLocaleString(),
+    },
+    {
+      title: '操作',
+      key: 'action',
+      render: (_, record) => (
+        <Button 
+          onClick={() => handleLoadDataset(record)}
+        >
+          载入
+        </Button>
+      ),
+    },
+  ];
   return (
     <div className='left'>
       <div className="form-item">
@@ -191,7 +267,7 @@ const Left = observer(({ scenarios, algorithms, datasets }) => {
           onChange={handleAlgorithmTypeChange}
           placeholder="请选择"
         >
-          {filteredAlgorithmTypes.map((typeName) => (
+          {getFilteredAlgorithmTypes().map((typeName) => (
             <Option key={typeName} value={typeName}>
               {typeName}
             </Option>
@@ -225,58 +301,6 @@ const Left = observer(({ scenarios, algorithms, datasets }) => {
             <p><strong>智能体类型：</strong>{intelligentStore.selectedAgent.agentType}</p>
             <p><strong>更新时间：</strong>{new Date(intelligentStore.selectedAgent.updateTime).toLocaleString()}</p>
             <p><strong>想定场景：</strong>{intelligentStore.selectedAgent.scenarioID}</p>
-
-            <h5>智能体分配信息：</h5>
-            <Table
-              columns={[
-                { title: '智能体名称', dataIndex: 'agentName', key: 'agentName' },
-                { title: '分配实体', dataIndex: 'assignedEntities', key: 'assignedEntities' },
-              ]}
-              dataSource={intelligentStore.selectedAgent.entityAssignments.flatMap((assignment) =>
-                Object.entries(assignment).map(([agentName, entities]) => ({
-                  key: agentName,
-                  agentName: agentName,
-                  assignedEntities: entities.join(', '),
-                }))
-              )}
-              pagination={false}
-              bordered
-            />
-
-            <h5>智能体状态信息：</h5>
-            <Table
-              columns={[
-                { title: '智能体名称', dataIndex: 'name', key: 'name' },
-                ...intelligentStore.selectedAgent.agentModel
-                  .flatMap((model) => model.stateVector.map((state) => state[2]))
-                  .reduce((uniqueColumns, field) => {
-                    if (!uniqueColumns.includes(field)) {
-                      uniqueColumns.push(field);
-                    }
-                    return uniqueColumns;
-                  }, [])
-                  .map((field) => ({
-                    title: field,
-                    dataIndex: field,
-                    key: field,
-                  }))
-              ]}
-              dataSource={intelligentStore.selectedAgent.agentModel.map((model) => {
-                const entityState = {
-                  key: model.name,
-                  name: model.name,
-                };
-
-                model.stateVector.forEach((state) => {
-                  const [, , fieldName, fieldValue] = state;
-                  entityState[fieldName] = fieldValue;
-                });
-
-                return entityState;
-              })}
-              pagination={false}
-              bordered
-            />
           </div>
         ) : (
           <div>请选择一个智能体</div>
@@ -290,19 +314,13 @@ const Left = observer(({ scenarios, algorithms, datasets }) => {
         onCancel={handleCancel}
         okText="OK"
         cancelText="Cancel"
+        width={1000}
       >
-        <Select
-          placeholder="请选择数据集"
-          value={selectedDataset}
-          onChange={handleDatasetChange}
-          style={{ width: '100%' }}
-        >
-          {datasets.map((dataset) => (
-            <Option key={dataset.OFFLINE_DATA_ID} value={dataset.DATASET_NAME}>
-              {dataset.DATASET_NAME}
-            </Option>
-          ))}
-        </Select>
+        <Table
+          columns={datasetColumns}
+          dataSource={datasets}
+          rowKey="OFFLINE_DATA_ID"
+        />
       </Modal>
     </div>
   );

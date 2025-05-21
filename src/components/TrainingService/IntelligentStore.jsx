@@ -5,8 +5,10 @@ class IntelligentStore {
   selectedScenario = null;
   selectedAlgorithm = null;
   selectedAgentRole = null;
-  algorithmType = ''; // 新增算法类型状态
-  algorithmsByType = []; // 新增算法列表状态
+  algorithmType = ''; // 算法类型状态
+  algorithmsByType = []; // 算法列表状态
+  trainingMode = 'online'; // 默认训练方式为在线
+  selectedDataset = null; // 存储加载的离线数据集
 
   constructor() {
     makeAutoObservable(this);
@@ -29,14 +31,22 @@ class IntelligentStore {
     this.selectedAgentRole = agentRole;
   }
 
-  setAlgorithmType(type) { // 新增方法
+  setAlgorithmType(type) {
     this.algorithmType = type;
-    this.algorithmsByType = []; // 重置算法列表
-    this.selectedAlgorithm = null; // 重置具体算法选择
+    this.algorithmsByType = [];
+    this.selectedAlgorithm = null;
   }
 
-  setAlgorithmsByType(algorithms) { // 新增方法
+  setAlgorithmsByType(algorithms) {
     this.algorithmsByType = algorithms;
+  }
+
+  setTrainingMode(mode) {
+    this.trainingMode = mode; // 更新训练方式
+  }
+
+  setSelectedDataset(dataset) {
+    this.selectedDataset = dataset; // 保存加载的离线数据集
   }
 }
 
