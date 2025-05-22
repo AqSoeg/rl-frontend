@@ -393,7 +393,7 @@ const EvaluationOptimization = () => {
     };
 
     const dataColumns = [
-        { title: '模型ID', dataIndex: ['model', 'id'], key: 'modelId' },
+        { title: '评估数据ID', dataIndex: ['model', 'id'], key: 'modelId' },
         { title: '模型名称', dataIndex: ['model', 'name'], key: 'modelName' },
         { title: '模型版本', dataIndex: ['model', 'version'], key: 'modelVersion' },
         { title: '模型类型', dataIndex: ['model', 'type'], key: 'modelType' },
