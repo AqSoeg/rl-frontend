@@ -230,5 +230,119 @@
       "reward2": "R-R̄",
       "reward3": "u×U"
     }
+  },
+  {
+    "model": {
+      "id": "1747908210",
+      "name": "1",
+      "version": "1",
+      "nn_model_type": "单智能体",
+      "time": "2025-05-22T18:03:30.146166",
+      "img_url": "http://example.com/image",
+      "model_path": "mock/ppo_model.pkl",
+      "model_list": [
+        "1747908210-0",
+        "1747908210-20"
+      ],
+      "role_name": "交警",
+      "scenario_name": "城市交通"
+    },
+    "env_parm": {
+      "间隔时间1": 30,
+      "额外时间1": 2,
+      "间隔时间2": 35,
+      "额外时间2": 1,
+      "间隔时间3": 23,
+      "额外时间3": 1,
+      "间隔时间4": 24,
+      "额外时间4": 1,
+      "行驶速度1": 201,
+      "行驶速度2": 202,
+      "行驶速度3": 203,
+      "行驶速度4": 204,
+      "行驶速度5": 105,
+      "行驶速度6": 206,
+      "行驶速度7": 207,
+      "行驶速度8": 108,
+      "行驶速度9": 209,
+      "行驶速度10": 200,
+      "身高1": 170,
+      "体重1": 70
+    },
+    "algorithm": {
+      "id": "DDPG",
+      "name": "DDPG",
+      "mode": "单智能体",
+      "hyperParams": {
+        "actor_learning_rate": 0.0001,
+        "critic_learning_rate": 0.001,
+        "gamma": 0.9,
+        "tau": 0.005,
+        "batch_size": 64,
+        "buffer_size": 10000,
+        "exploration_noise": 0.1,
+        "total_timesteps": 1000000
+      }
+    },
+    "reward": {
+      "reward1": "√√√√√√√√"
+    }
+  },
+  {
+    "model": {
+      "id": "1747908326",
+      "name": "1",
+      "version": "1",
+      "nn_model_type": "单智能体",
+      "time": "2025-05-22T18:05:26.588935",
+      "img_url": "http://example.com/image",
+      "model_path": "mock/ppo_model.pkl",
+      "model_list": [
+        "1747908326-0",
+        "1747908326-20"
+      ],
+      "role_name": "交警",
+      "scenario_name": "城市交通"
+    },
+    "env_parm": {
+      "间隔时间1": 30,
+      "额外时间1": 2,
+      "间隔时间2": 35,
+      "额外时间2": 1,
+      "间隔时间3": 23,
+      "额外时间3": 1,
+      "间隔时间4": 24,
+      "额外时间4": 1,
+      "行驶速度1": 201,
+      "行驶速度2": 202,
+      "行驶速度3": 203,
+      "行驶速度4": 204,
+      "行驶速度5": 105,
+      "行驶速度6": 206,
+      "行驶速度7": 207,
+      "行驶速度8": 108,
+      "行驶速度9": 209,
+      "行驶速度10": 200,
+      "身高1": 170,
+      "体重1": 70
+    },
+    "algorithm": {
+      "id": "DDPG",
+      "name": "DDPG",
+      "mode": "单智能体",
+      "hyperParams": {
+        "actor_learning_rate": 0.0001,
+        "critic_learning_rate": 0.001,
+        "gamma": 0.9,
+        "tau": 0.005,
+        "batch_size": 64,
+        "buffer_size": 10000,
+        "exploration_noise": 0.1,
+        "total_timesteps": 1000000
+      }
+    },
+    "reward": {
+      "reward1": "√√√√√√√√"
+    }
   }
 ]

@@ -501,42 +501,38 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
     }
   };
   const handleLoadModel = async (record, subModelId) => {
-  try {
-    const modelToLoad = decisionModels.find(
-      (model) => model.model.model_list.includes(subModelId)
-    );
-    if (!modelToLoad) {
-      message.error("未找到对应的模型");
-      return;
-    }
-    const selectedAlgorithm = intelligentStore.selectedAlgorithm;
-    if (!selectedAlgorithm) {
-      message.error("请先选择算法！");
-      return;
-    }
-    if (modelToLoad.algorithm.id !== selectedAlgorithm.algorithm_id) {
-      message.error("模型与当前选择的算法不匹配，无法载入！");
-      return;
-    }
-    setLoadedModel({
-      ...modelToLoad,
-      model: {
-        ...modelToLoad.model,
-        id: subModelId 
+    try {
+      const modelToLoad = decisionModels.find(
+        (model) => model.model.model_list.includes(subModelId)
+      );
+      if (!modelToLoad) {
+        message.error("未找到对应的模型");
+        return;
       }
-    });
+      const selectedAlgorithm = intelligentStore.selectedAlgorithm;
+      if (!selectedAlgorithm) {
+        message.error("请先选择算法！");
+        return;
+      }
+      if (modelToLoad.algorithm.id !== selectedAlgorithm.algorithm_id) {
+        message.error("模型与当前选择的算法不匹配，无法载入！");
+        return;
+      }
+      setLoadedModel({
+        ...modelToLoad,
+        model: {
+          ...modelToLoad.model,
+          id: subModelId 
+        }
+      });
 
-    setSubModelPublishStatus(prev => ({
-      ...prev,
-      [subModelId]: true
-    }));
-
-    message.success("模型载入成功！");
-  } catch (error) {
-    console.error('模型载入失败:', error);
-    message.error('模型载入失败，请检查网络或联系管理员');
-  }
-};
+      // Only update the load status, not publish status
+      message.success("模型载入成功！");
+    } catch (error) {
+      console.error('模型载入失败:', error);
+      message.error('模型载入失败，请检查网络或联系管理员');
+    }
+  };
 
   const scenarioColumns = [
     {
@@ -968,6 +964,7 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
         onCancel={() => setIsDetailModalVisible(false)}
         footer={null}
         width={800}
+        zIndex={1001}
       >
         {selectedAgent && (
           <div>
