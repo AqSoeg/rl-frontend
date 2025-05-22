@@ -18,10 +18,10 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
         key: decision.model.id || `fallback-${index}`, // Ensure unique key
         AGENT_MODEL_ID: decision.model.id,
         AGENT_NAME: decision.model.name,
-        SCENARIO_NAME: decision.scenario.name,
-        ROLE_NAME: decision.agent.role,
-        NN_MODEL_TYPE: decision.model.type,
-        MODEL_PATH: decision.model.path,
+        SCENARIO_NAME: decision.model.scenario_name,
+        ROLE_NAME: decision.model.role_name,
+        NN_MODEL_TYPE: decision.model.nn_model_type,
+        MODEL_PATH: decision.model.model_path,
         IMG_URL: decision.model.img_url,
         CREAT_TIME: decision.model.time,
         rawData: decision // Store raw data for editing
@@ -219,7 +219,7 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
         { title: '神经网络模型类型', dataIndex: 'NN_MODEL_TYPE', key: 'NN_MODEL_TYPE' },
         { title: '模型路径', dataIndex: 'MODEL_PATH', key: 'MODEL_PATH' },
         { title: '图片链接', dataIndex: 'IMG_URL', key: 'IMG_URL' },
-        { title: '创建时间', dataIndex: 'CREAT_TIME', key: 'CREAT_TIME' },
+        { title: '创建时间', dataIndex: 'CREAT_TIME', key: 'CREAT_TIME' ,render: time => new Date(time).toLocaleString()},
         {
             title: '操作',
             key: 'action',

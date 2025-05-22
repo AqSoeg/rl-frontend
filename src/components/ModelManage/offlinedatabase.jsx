@@ -137,7 +137,7 @@ const OfflineDatabase = ({ datasets, fetchDatasets }) => {
         { title: '离线数据中的状态信息', dataIndex: 'DATA_STATE', key: 'DATA_STATE' },
         { title: '离线数据中的动作信息描述', dataIndex: 'DATA_ACTION', key: 'DATA_ACTION' },
         { title: '数据库文件路径', dataIndex: 'DATASET_PATH', key: 'DATASET_PATH' },
-        { title: '创建时间', dataIndex: 'CREAT_TIME', key: 'CREAT_TIME' },
+        { title: '创建时间', dataIndex: 'CREAT_TIME', key: 'CREAT_TIME',render: time => new Date(time).toLocaleString() },
         {
             title: '操作',
             key: 'action',

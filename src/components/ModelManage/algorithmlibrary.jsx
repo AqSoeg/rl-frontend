@@ -135,7 +135,7 @@ const AlgorithmLibrary = ({ algorithms, fetchAlgorithms }) => {
     { title: '算法id', dataIndex: 'algorithm_id', key: 'algorithm_id' },
     { title: '类型', dataIndex: 'type_name', key: 'type_name' },
     { title: '名称', dataIndex: 'name', key: 'name' },
-    { title: '时间', dataIndex: 'time', key: 'time' },
+    { title: '时间', dataIndex: 'time', key: 'time' ,render: time => new Date(time).toLocaleString()},
     {
       title: '超参数',
       dataIndex: 'hyper-parameters',

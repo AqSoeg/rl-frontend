@@ -212,6 +212,7 @@ def train():
     training_status = "running"
     training_result = None
     data = request.json
+    print(data)
     hyper_parameters = data.get('hyperParametersValues', {})
     env = make_vec_env('CartPole-v1', n_envs=4)
     model = PPO('MlpPolicy', env, verbose=1, **{k: v for k, v in hyper_parameters.items() if k != 'total_timesteps'})
@@ -234,48 +235,36 @@ def train():
                 
                 # 创建与dc.json格式一致的模型数据
                 model_id = str(int(time.time()))
+                env_params=data.get('scenarioEditInfo', {}).get('env_params', 'Unknown')
+                rewards_list=data.get('agentInfo', {}).get('reward', 'Unknown')
+                env_param = {}
+                reward = {}
+                for param in env_params:
+                    for p in param.get('params', []):
+                        env_param[p.get('label', f'unknown_label_{len(env_param)}')] = p.get('value', None)
+                for i, reward_item in enumerate(rewards_list, 1):  # 从 1 开始计数
+                        reward[f"reward{i}"] = reward_item.get('rewardValue', f"unknown_reward_{i}")
                 trained_model = {
                     "model": {
                         "id": model_id,
                         "name": data.get('agentInfo', {}).get('agentName', 'Unknown'),
-                        "version": "1.0",
-                        "type": data.get('algorithmInfo', {}).get('algorithmType', 'Unknown'),
+                        "version":data.get('agentInfo', {}).get('agentVersion', 'Unknown'),
+                        "nn_model_type": data.get('algorithmInfo', {}).get('algorithmType', 'Unknown'),
                         "time": datetime.datetime.now().isoformat(),
-                        "state": "未发布",
                         "img_url": "http://example.com/image",
-                        "path": model_path,
-                        "model_list": [f"{model_id}-0", f"{model_id}-20"]  # 假设有两个子模型
+                        "model_path": model_path,
+                        "model_list": [f"{model_id}-0", f"{model_id}-20"] ,
+                        "role_name": data.get('scenarioEditInfo', {}).get('agentRoleName', 'Unknown'),
+                        "scenario_name": data.get('scenarioEditInfo', {}).get('scenarioName', 'Unknown'),
                     },
-                    "scenario": {
-                        "name": data.get('scenarioEditInfo', {}).get('scenarioName', 'Unknown'),
-                        "description": "场景描述",
-                        "envParams": [
-                            {"实体1": [{"属性1": 30}, {"属性2": 1}]},
-                            {"实体2": [{"属性1": 25}, {"属性2": 1}]}
-                        ]
+                    "env_parm":env_param,
+                    "algorithm": {
+                        "id":data.get('algorithmInfo', {}).get('algorithmID', 'Unknown'),
+                        "name":data.get('algorithmInfo', {}).get('algorithmName', 'Unknown'),
+                        "mode":data.get('algorithmInfo', {}).get('algorithmType', 'Unknown'),
+                        "hyperParams": data.get('algorithmInfo', {}).get('hyperParameters', 'Unknown'),
                     },
-                    "agent": {
-                        "role": data.get('agentInfo', {}).get('agentRoleID', 'Unknown'),
-                        "type": data.get('agentInfo', {}).get('agentType', 'Unknown'),
-                        "count": "1",
-                        "entityAssignments": [
-                            {"智能体1": ["实体1", "实体2"]}
-                        ]
-                    },
-                    "train": {
-                        "algorithm": data.get('algorithmInfo', {}).get('algorithmName', 'Unknown'),
-                        "hyperParams": [
-                            {"学习率": hyper_parameters.get('learning_rate', 0.0003)},
-                            {"折扣因子": hyper_parameters.get('gamma', 0.99)},
-                            {"采样步数": hyper_parameters.get('n_steps', 256)},
-                            {"批量大小": hyper_parameters.get('batch_size', 64)},
-                            {"更新步数": hyper_parameters.get('n_epochs', 10)},
-                            {"GAE参数": hyper_parameters.get('gae_lambda', 0.95)},
-                            {"裁剪范围": hyper_parameters.get('clip_range', 0.2)},
-                            {"策略熵系数": hyper_parameters.get('ent_coef', 0.01)},
-                            {"总步数": total_timesteps}
-                        ]
-                    }
+                    "reward":reward
                 }
 
                 # 读取现有数据并追加新模型
@@ -336,19 +325,6 @@ def publish_model():
     data = request.json
     decision_model_id = data.get('decisionModelID')
     try:
-        with open(DECISION_FILE_PATH, 'r', encoding='utf-8') as f:
-            existing_data = json.load(f)
-        model_found = False
-        for model in existing_data:
-            if model['model']['id'] == decision_model_id:
-                model['model']['state'] = '已发布'  # 更新状态为已发布
-                model_found = True
-                break
-
-        # 保存更新后的数据
-        with open(DECISION_FILE_PATH, 'w', encoding='utf-8') as f:
-            json.dump(existing_data, f, ensure_ascii=False, indent=2)
-        
         return jsonify({"status": "success", "message": f"Model {decision_model_id} published successfully"})
     except Exception as e:
         return jsonify({"status": "error", "message": f"Failed to publish model: {str(e)}"})
@@ -579,5 +555,20 @@ def get_process_data():
         "status": "success",
         "animationUrl": animation_url
     })
+@app.route('/load_dataset', methods=['POST'])
+def load_dataset():
+    try:
+        data = request.get_json()
+        return jsonify({
+            "success": True,
+            "dataset": data,
+        })
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"服务器错误: {str(e)}"
+        }), 500
+
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
