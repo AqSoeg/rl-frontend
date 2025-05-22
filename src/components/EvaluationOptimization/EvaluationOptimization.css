@@ -5,8 +5,8 @@
 }
 
 .EO-sidebar {
+    flex: 0 0 10%;
     padding: 1rem;
-    width: 250px;
 }
 
 .EO-sidebar-section {
@@ -42,6 +42,7 @@
     padding: 20px;
     background: linear-gradient(to bottom, #b2dfdb, #b0bec5, #ffffff);
     border-radius: 8px;
+    margin: 0 20px;
 }
 
 .EO-middle-container {

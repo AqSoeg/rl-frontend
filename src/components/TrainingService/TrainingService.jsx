@@ -98,14 +98,11 @@ const TrainingService = observer(() => {
 
   return (
     <div className='trainingservice'>
-      <div className='left'>
-        <Left
+      <Left
           scenarios={scenarios}
           algorithms={algorithms}
           datasets={datasets}
-       
-        />
-      </div>
+      />
       <div className='right'>
       <AgentTrainingPanel 
         decisionModels={decisionModels} 
