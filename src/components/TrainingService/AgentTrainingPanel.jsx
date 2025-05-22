@@ -4,6 +4,7 @@ import { Card, Select, Row, Col, Space, Button, Modal, Table, message, Input } f
 import { intelligentStore } from './IntelligentStore';
 import { observer } from 'mobx-react';
 const { Option } = Select;
+
 const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
   const [entity, setEntity] = useState('');
   const [attribute, setAttribute] = useState('');
@@ -11,7 +12,6 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
   const [envParamsMap, setEnvParamsMap] = useState({});
   const [entityParamsInfo, setEntityParamsInfo] = useState('');
   const [modifiedParams, setModifiedParams] = useState({});
-
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [agents, setAgents] = useState([]);
@@ -24,12 +24,13 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
   const [hyperParametersValues, setHyperParametersValues] = useState({});
   const [effectImageUrl, setEffectImageUrl] = useState(null);
   const [isEffectImageModalVisible, setIsEffectImageModalVisible] = useState(false);
-
   const [isScenarioModalVisible, setIsScenarioModalVisible] = useState(false);
   const [deploymentImageUrl, setDeploymentImageUrl] = useState(null);
   const [animationUrl, setAnimationUrl] = useState(null);
   const [isProcessModalVisible, setIsProcessModalVisible] = useState(false);
-  
+  const [loadedModel, setLoadedModel] = useState(null);
+  const [subModelPublishStatus, setSubModelPublishStatus] = useState({});
+
   useEffect(() => {
     setEntity('');
     setAttribute('');
@@ -72,12 +73,12 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
     setAttribute(value);
     const attributeInfo = envParamsMap[entity].find(attr => attr.key === value);
     setValue(attributeInfo ? attributeInfo.value : '');
-    
   };
 
   const handleValueChange = (value) => {
     setValue(value);
   };
+
   const handleUpdate = async () => {
     const selectedEntityParams = envParamsMap[entity];
     if (selectedEntityParams) {
@@ -112,12 +113,11 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
           }));
 
           const displayText = selectedEntityParams
-          .map(attr => `${attr.label}：${attr.key === attribute ? value : attr.value}`)
-          .join(',');
+            .map(attr => `${attr.label}：${attr.key === attribute ? value : attr.value}`)
+            .join(',');
 
-        // 更新显示的文本框内容
-        setEntityParamsInfo(displayText);
-          message.success('更新成功')
+          setEntityParamsInfo(displayText);
+          message.success('更新成功');
         } catch (error) {
           message.error('更新失败');
           console.error('更新失败:', error);
@@ -136,624 +136,698 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
     </Option>
   ));
 
-    const attributeOptions = () => {
-        return envParamsMap[entity] ? envParamsMap[entity].map(param => (
-        <Option key={param.key} value={param.key}>
-            {param.label}
-        </Option>
-        )) : [];
-    };
+  const attributeOptions = () => {
+    return envParamsMap[entity] ? envParamsMap[entity].map(param => (
+      <Option key={param.key} value={param.key}>
+        {param.label}
+      </Option>
+    )) : [];
+  };
 
-    const valueOptions = () => {
-        if (!intelligentStore.selectedScenario || !envParamsMap[entity]) return [];
+  const valueOptions = () => {
+    if (!intelligentStore.selectedScenario || !envParamsMap[entity]) return [];
 
-        const currentParam = envParamsMap[entity].find(param => param.key === attribute);
-        if (!currentParam) return [];
+    const currentParam = envParamsMap[entity].find(param => param.key === attribute);
+    if (!currentParam) return [];
 
-        return currentParam.options.map(option => (
-        <Option key={option} value={option}>
-            {option}
-        </Option>
-        ));
-    };
-   // 获取智能体列表
-    const fetchAgents = async () => {
-      try {
-        const requestBody = {
-          scenarioID: intelligentStore.selectedScenario.id,
-          agentRoleID: intelligentStore.selectedAgentRole.id,
-        };
-  
-        const response = await fetch(__APP_CONFIG__.getModels, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(requestBody),
-        });
-  
-        if (!response.ok) {
-          throw new Error('Network response was not ok ' + response.statusText);
-        }
-  
-        const data = await response.json();
-        const models = data.models;
-  
-        const filteredAgents = models.filter(
-          (agent) =>
-            agent.scenarioID === intelligentStore.selectedScenario.id &&
-            agent.agentRoleID === intelligentStore.selectedAgentRole.id
-        );
-  
-        setAgents(filteredAgents);
-        const filteredAgents1 = models.filter(
-            (agent) =>
-              agent.scenarioID === intelligentStore.selectedScenario.id
-          );
-    
-          setAgents1(filteredAgents1);
-      } catch (error) {
-        console.error('Error fetching agents:', error);
-      }
-    };
-  
-    // 当场景或智能体角色发生变化时，重新获取智能体列表
-    useEffect(() => {
-      if (intelligentStore.selectedScenario && intelligentStore.selectedAgentRole) {
-        fetchAgents();
-      }
-    }, [intelligentStore.selectedScenario, intelligentStore.selectedAgentRole]);
-  
-    // 初始化超参数值
-    useEffect(() => {
-      if (intelligentStore.selectedAlgorithm && intelligentStore.selectedAlgorithm['hyper-parameters']) {
-        const initialParams = intelligentStore.selectedAlgorithm['hyper-parameters'].reduce((acc, param) => {
-          acc[param.id] = param.default;
-          return acc;
-        }, {});
-        setHyperParametersValues(initialParams);
-      }
-    }, [intelligentStore.selectedAlgorithm]);
-  
-    useEffect(() => {
-      setSelectedAgent(null); // 清除之前载入的智能体信息
-      setTraining(false); // 重置训练状态
-      intelligentStore.loadAgent(null); // 清除 IntelligentStore 中的智能体信息
-    }, [intelligentStore.selectedAlgorithm,intelligentStore.selectedAgentRole]);
-  
-  
-  
-    const isModelCompatibleWithAlgorithm = (model, algorithm) => {
-      if (model.agentType === "单智能体" && algorithm.type_name !== "单智能体") {
-        return false;
-      }
-  
-      if (model.agentType === "异构多智能体" && algorithm.type_name !== "分布式多智能体") {
-        return false;
-      }
-  
-      if (model.agentType === "同构多智能体" && !["分布式多智能体", "共享多智能体"].includes(algorithm.type_name)) {
-        return false;
-      }
-  
-      return true;
-    };
-  
-    const trainAlgorithm = async () => {
-      const selectedAgent = intelligentStore.selectedAgent;
-      const selectedAlgorithm = intelligentStore.selectedAlgorithm;
+    return currentParam.options.map(option => (
+      <Option key={option} value={option}>
+        {option}
+      </Option>
+    ));
+  };
 
-      if (!selectedAgent) {
-        message.error("请先载入智能体！");
-        return;
+  const fetchAgents = async () => {
+    try {
+      const requestBody = {
+        scenarioID: intelligentStore.selectedScenario.id,
+        agentRoleID: intelligentStore.selectedAgentRole.id,
+      };
+
+      const response = await fetch(__APP_CONFIG__.getModels, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok ' + response.statusText);
       }
 
-      if (!selectedAlgorithm) {
-        message.error("请先选择算法！");
-        return;
-      }
+      const data = await response.json();
+      const models = data.models;
 
-      if (!isModelCompatibleWithAlgorithm(selectedAgent, selectedAlgorithm)) {
-        message.error("模型与算法类型不匹配，无法训练！");
-        return;
-      }
-      if (intelligentStore.trainingMode === 'offline' && !intelligentStore.selectedDataset) {
-        message.error("离线训练模式必须先载入一个数据集！");
-        return;
-      }
-      setTraining(true); // 开始训练时设置训练状态为 true
-      try {
-        // 构建基本请求体
-        const requestBody = {
-          agentInfo: {
-            agentID: selectedAgent.agentID,
-            agentName: selectedAgent.agentName,
-            agentType: selectedAgent.agentType,
-            scenarioID: selectedAgent.scenarioID,
-            agentRoleID: selectedAgent.agentRoleID,
-          },
-          algorithmInfo: {
-            algorithmType: selectedAlgorithm.type_name,
-            algorithmName: selectedAlgorithm.name,
-            hyperParameters: hyperParametersValues,
-          },
-          scenarioEditInfo: {
-            scenarioName: intelligentStore.selectedScenario.name,
-            agentRoleID: intelligentStore.selectedAgentRole.id,
-            env_params: intelligentStore.selectedScenario.env_params.map(param => ({
-              id: param.id,
-              name: param.name,
-              params: param.params.map(p => ({
-                key: p[0],
-                label: p[1],
-                value: p[2]
-              }))
+      const filteredAgents = models.filter(
+        (agent) =>
+          agent.scenarioID === intelligentStore.selectedScenario.id &&
+          agent.agentRoleID === intelligentStore.selectedAgentRole.id
+      );
+
+      setAgents(filteredAgents);
+      const filteredAgents1 = models.filter(
+        (agent) =>
+          agent.scenarioID === intelligentStore.selectedScenario.id
+      );
+
+      setAgents1(filteredAgents1);
+    } catch (error) {
+      console.error('Error fetching agents:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (intelligentStore.selectedScenario && intelligentStore.selectedAgentRole) {
+      fetchAgents();
+    }
+  }, [intelligentStore.selectedScenario, intelligentStore.selectedAgentRole]);
+
+  useEffect(() => {
+    if (intelligentStore.selectedAlgorithm && intelligentStore.selectedAlgorithm['hyper-parameters']) {
+      const initialParams = intelligentStore.selectedAlgorithm['hyper-parameters'].reduce((acc, param) => {
+        acc[param.id] = param.default;
+        return acc;
+      }, {});
+      setHyperParametersValues(initialParams);
+    }
+  }, [intelligentStore.selectedAlgorithm]);
+
+  useEffect(() => {
+    setSelectedAgent(null);
+    setTraining(false);
+    intelligentStore.loadAgent(null);
+  }, [intelligentStore.selectedAlgorithm, intelligentStore.selectedAgentRole]);
+
+  const isModelCompatibleWithAlgorithm = (model, algorithm) => {
+    if (model.agentType === "单智能体" && algorithm.type_name !== "单智能体") {
+      return false;
+    }
+
+    if (model.agentType === "异构多智能体" && algorithm.type_name !== "分布式多智能体") {
+      return false;
+    }
+
+    if (model.agentType === "同构多智能体" && !["分布式多智能体", "共享多智能体"].includes(algorithm.type_name)) {
+      return false;
+    }
+
+    return true;
+  };
+
+  const trainAlgorithm = async () => {
+    const selectedAgent = intelligentStore.selectedAgent;
+    const selectedAlgorithm = intelligentStore.selectedAlgorithm;
+
+    if (!selectedAgent) {
+      message.error("请先载入智能体！");
+      return;
+    }
+
+    if (!selectedAlgorithm) {
+      message.error("请先选择算法！");
+      return;
+    }
+
+    if (!isModelCompatibleWithAlgorithm(selectedAgent, selectedAlgorithm)) {
+      message.error("模型与算法类型不匹配，无法训练！");
+      return;
+    }
+
+    if (intelligentStore.trainingMode === 'offline' && !intelligentStore.selectedDataset) {
+      message.error("离线训练模式必须先载入一个数据集！");
+      return;
+    }
+
+    setTraining(true);
+    try {
+      const requestBody = {
+        agentInfo: {
+          agentID: selectedAgent.agentID,
+          agentName: selectedAgent.agentName,
+          agentType: selectedAgent.agentType,
+          agentVersion: selectedAgent.agentVersion,
+          scenarioID: selectedAgent.scenarioID,
+          agentRoleID: selectedAgent.agentRoleID,
+          reward: selectedAgent.agentModel
+            .flatMap(model => model.rewardFunction)
+            .reduce((acc, reward) => {
+              const existing = acc.find(item => item.rewardName === reward[1]);
+              if (existing) {
+                existing.rewardValue = `${existing.rewardValue}`;
+              } else {
+                acc.push({
+                  key: reward[1],
+                  rewardName: reward[1],
+                  rewardValue: reward[0],
+                });
+              }
+              return acc;
+            }, [])
+        },
+        algorithmInfo: {
+          algorithmID: selectedAlgorithm.algorithm_id,
+          algorithmType: selectedAlgorithm.type_name,
+          algorithmName: selectedAlgorithm.name,
+          hyperParameters: hyperParametersValues,
+        },
+        scenarioEditInfo: {
+          scenarioName: intelligentStore.selectedScenario.name,
+          agentRoleName: intelligentStore.selectedAgentRole.name,
+          env_params: intelligentStore.selectedScenario.env_params.map(param => ({
+            id: param.id,
+            name: param.name,
+            params: param.params.map(p => ({
+              key: p[0],
+              label: p[1],
+              value: p[2]
             }))
+          }))
+        },
+        model: loadedModel ? {
+          id: loadedModel.model.id,
+          img_url: loadedModel.model.img_url,
+          name: loadedModel.model.name,
+          nn_model_type: loadedModel.model.nn_model_type,
+          time: loadedModel.model.time,
+          model_path: loadedModel.model.model_path,
+          model_list: loadedModel.model.model_list,
+          role_name: loadedModel.model.role_name,
+          scenario_name: loadedModel.model.scenario_name,
+          version: loadedModel.model.version,
+        } : null,
+      };
+
+      if (intelligentStore.trainingMode === 'offline' && intelligentStore.selectedDataset) {
+        requestBody.offlineInfo = {
+          OFFLINE_DATA_ID: intelligentStore.selectedDataset.OFFLINE_DATA_ID,
+          DATASET_NAME: intelligentStore.selectedDataset.DATASET_NAME,
+          SCENARIO_NAME: intelligentStore.selectedDataset.SCENARIO_NAME,
+          AGENT_ROLE: intelligentStore.selectedDataset.AGENT_ROLE,
+          DATA_STATE: intelligentStore.selectedDataset.DATA_STATE,
+          DATA_ACTION: intelligentStore.selectedDataset.DATA_ACTION,
+          DATASET_PATH: intelligentStore.selectedDataset.DATASET_PATH,
+          CREAT_TIME: intelligentStore.selectedDataset.CREAT_TIME
+        };
+      }
+
+      const response = await fetch(__APP_CONFIG__.train, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      if (data.status === 'success') {
+        message.success('训练已开始！');
+        const checkTrainingStatus = async () => {
+          const statusResponse = await fetch(__APP_CONFIG__.training_status);
+          const statusData = await statusResponse.json();
+          if (statusData.status === "completed") {
+            setTraining(false);
+            if (statusData.result.status === "success") {
+              message.success('训练完成，模型已保存！');
+              fetchDecisions();
+            } else if (statusData.result.status === "stopped") {
+              message.warning('训练已终止，模型未保存');
+            } else {
+              message.error('训练失败，请检查日志');
+            }
+          } else {
+            setTimeout(checkTrainingStatus, 1000);
           }
         };
-
-        // 如果是离线训练模式，添加离线数据集信息
-        if (intelligentStore.trainingMode === 'offline' && intelligentStore.selectedDataset) {
-          requestBody.offlineInfo = {
-            OFFLINE_DATA_ID: intelligentStore.selectedDataset.OFFLINE_DATA_ID,
-            DATASET_NAME: intelligentStore.selectedDataset.DATASET_NAME,
-            SCENARIO_NAME: intelligentStore.selectedDataset.SCENARIO_NAME,
-            AGENT_ROLE: intelligentStore.selectedDataset.AGENT_ROLE,
-            DATA_STATE: intelligentStore.selectedDataset.DATA_STATE,
-            DATA_ACTION: intelligentStore.selectedDataset.DATA_ACTION,
-            DATASET_PATH: intelligentStore.selectedDataset.DATASET_PATH,
-            CREAT_TIME: intelligentStore.selectedDataset.CREAT_TIME
-          };
-        }
-
-        const response = await fetch(__APP_CONFIG__.train, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(requestBody),
-        });
-
-        if (!response.ok) {
-          throw new Error(`Network response was not ok: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        if (data.status === 'success') {
-          message.success('训练已开始！');
-          const checkTrainingStatus = async () => {
-            const statusResponse = await fetch(__APP_CONFIG__.training_status);
-            const statusData = await statusResponse.json();
-            if (statusData.status === "completed") {
-              setTraining(false); // 训练完成时设置训练状态为 false
-              if (statusData.result.status === "success") {
-                message.success('训练完成，模型已保存！');
-                fetchDecisions();
-              } else if (statusData.result.status === "stopped") {
-                message.warning('训练已终止，模型未保存');
-              } else {
-                message.error('训练失败，请检查日志');
-              }
-            } else {
-              setTimeout(checkTrainingStatus, 1000);
-            }
-          };
-          checkTrainingStatus();
-        } else {
-          setTraining(false); // 训练失败时设置训练状态为 false
-          message.error('训练失败，请检查日志');
-        }
-      } catch (error) {
-        setTraining(false); // 训练失败时设置训练状态为 false
-        console.error('训练过程中发生错误:', error);
+        checkTrainingStatus();
+      } else {
+        setTraining(false);
         message.error('训练失败，请检查日志');
       }
-    };
-  
-    const stopTraining = async () => {
-      try {
-        const response = await fetch(__APP_CONFIG__.stop_training, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-  
-        if (!response.ok) {
-          throw new Error(`Network response was not ok: ${response.statusText}`);
-        }
-  
-        const data = await response.json();
-        if (data.status === 'success') {
-          setTraining(false); // 终止训练时设置训练状态为 false
-          message.success('训练终止请求已发送');
-        } else {
-          message.error('训练终止失败，请检查日志');
-        }
-      } catch (error) {
-        console.error('训练终止失败:', error);
-        message.error('训练终止失败，请检查网络或联系管理员');
-      }
-    };
-  
-    const handleView = (agent) => {
-      setSelectedAgent(agent);
-      setIsDetailModalVisible(true);
-    };
-  
-    const handleLoad = (agent) => {
-      const selectedAlgorithm = intelligentStore.selectedAlgorithm;
-      if (!selectedAlgorithm) {
-        message.error("请先选择算法！");
-        return;
-      }
-  
-      if (!isModelCompatibleWithAlgorithm(agent, selectedAlgorithm)) {
-        message.error("模型与算法类型不匹配，无法载入！");
-        return;
-      }
-  
-      intelligentStore.loadAgent(agent);
-      message.success("智能体载入成功！");
-    };
-  
-    const handleViewModelListClick = () => {
-      setIsModelListModalVisible(true);
-    };
-  
-    const handleViewModel = (model) => {
-      setCurrentModel(model);
-      setIsModelInfoModalVisible(true);
-    };
-  
-    const handleEffectModel = async (record) => {
-      try {
-        const response = await fetch(__APP_CONFIG__.get_effect, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ decisionModelID: record.model.id }),
-        });
-  
-        if (!response.ok) {
-          throw new Error(`Network response was not ok: ${response.statusText}`);
-        }
-  
-        const data = await response.json();
-        if (data.status === 'success') {
-          setEffectImageUrl(data.img_url);
-          setIsEffectImageModalVisible(true);
-        } else {
-          message.error('获取效果图片失败，请检查日志');
-        }
-      } catch (error) {
-        console.error('获取效果图片失败:', error);
-        message.error('获取效果图片失败，请检查网络或联系管理员');
-      }
-    };
-    const handlePublish = async (record) => {
-      try {
-        const response = await fetch(__APP_CONFIG__.publish_model, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ decisionModelID: record.model.id}),
-        });
-  
-        if (!response.ok) {
-          throw new Error(`Network response was not ok: ${response.statusText}`);
-        }
-  
-        const data = await response.json();
-        if (data.status === 'success') {
-          message.success("模型发布成功")
-          fetchDecisions();
-        } else {
-          message.error('发布模型失败，请检查日志');
-        }
-      } catch (error) {
-        console.error('发布模型失败:', error);
-        message.error('发布模型失败，请检查网络或联系管理员');
-      }
-    };
-    const scenarioColumns = [
-      {
-        title: '序号',
-        key: 'index',
-        render: (text, record, index) => index + 1,
-      },
-      { title: '想定场景', dataIndex: 'scenarioID', key: 'scenarioID' },
-      { title: '智能体角色', dataIndex: 'agentRoleID', key: 'agentRoleID' },
-      { title: '智能体ID', dataIndex: 'agentID', key: 'agentID' },
-      { title: '智能体名称', dataIndex: 'agentName', key: 'agentName' },
-      { title: '版本', dataIndex: 'agentVersion', key: 'agentVersion' },
-      { title: '智能体类型', dataIndex: 'agentType', key: 'agentType' },
-      { title: '更新时间', dataIndex: 'updateTime', key: 'updateTime', render: time => new Date(time).toLocaleString() },
-      {
-        title: '实体分配',
-        dataIndex: 'entityAssignments',
-        key: 'entityAssignments',
-        render: (text, record) => {
-          const assignments = record.entityAssignments.map((assignment, index) => {
-            const agentName = Object.keys(assignment)[0];
-            const entities = assignment[agentName].join(', ');
-            return `${agentName}: ${entities}`;
-          });
-  
-          return (
-            <div>
-              {assignments.map((assignment, index) => (
-                <div key={index}>{assignment}</div>
-              ))}
-            </div>
-          );
-        },
-      },
-      {
-        title: '操作',
-        key: 'action',
-        render: (text, record) => (
-          <div style={{ display: 'flex', gap: 8 }}>
-            <Button type="primary" onClick={() => handleView(record)}>查看</Button>
-            <Button type="primary" onClick={() => handleLoad(record)}>载入</Button>
-          </div>
-        ),
-      },
-    ];
-  
-    const modelListColumns = [
-      { 
-        title: '', 
-        key: 'expand',
-        width: 50,
-        render: (text, record) => (
-          <Button 
-            type="text" 
-            icon={<DownOutlined />} 
-            onClick={(e) => {
-              e.stopPropagation();
-              setExpandedRowKeys(expandedRowKeys.includes(record.model.id) ? 
-                expandedRowKeys.filter(key => key !== record.model.id) : 
-                [...expandedRowKeys, record.model.id]);
-            }}
-            style={{
-              transform: expandedRowKeys.includes(record.model.id) ? 'rotate(180deg)' : 'none',
-              transition: 'transform 0.3s'
-            }}
-          />
-        ),
-      },
-      { 
-        title: '训练ID', 
-        dataIndex: ['model', 'id'], 
-        key: 'modelId' 
-      },
-      { 
-        title: '决策模型名称', 
-        dataIndex: ['model', 'name'], 
-        key: 'agentName' 
-      },
-      { 
-        title: '场景名称', 
-        dataIndex: ['scenario', 'name'], 
-        key: 'scenarioName' 
-      },
-      { 
-        title: '角色名称', 
-        dataIndex: ['agent', 'role'], 
-        key: 'roleName' 
-      },
-      { 
-        title: '模型类型', 
-        dataIndex: ['model', 'type'], 
-        key: 'modelType' 
-      },
-      { 
-        title: '模型版本', 
-        dataIndex: ['model', 'version'], 
-        key: 'modelVersion' 
-      },
-      { 
-        title: '创建时间', 
-        dataIndex: ['model', 'time'], 
-        key: 'createTime', 
-        render: time => new Date(time).toLocaleString() 
-      },
-      { 
-        title: '操作',
-        key: 'action',
-        render: (text, record) => (
-          <div style={{ display: 'flex', gap: 8 }}>
-            <Button type="primary" onClick={() => handleViewModel(record)}>查看</Button>
-            <Button type="primary" onClick={() => handleEffectModel(record)}>效果</Button>
-          </div>
-        ),
-      },
-    ];
-    const scenarioViewColumns = [
-        {
-          title: '序号',
-          key: 'index',
-          render: (text, record, index) => index + 1,
-        },
-        { title: '想定场景', dataIndex: 'scenarioID', key: 'scenarioID' },
-        { title: '智能体角色', dataIndex: 'agentRoleID', key: 'agentRoleID' },
-        { title: '智能体ID', dataIndex: 'agentID', key: 'agentID' },
-        { title: '智能体名称', dataIndex: 'agentName', key: 'agentName' },
-        { title: '版本', dataIndex: 'agentVersion', key: 'agentVersion' },
-        { title: '智能体类型', dataIndex: 'agentType', key: 'agentType' },
-        { 
-          title: '更新时间', 
-          dataIndex: 'updateTime', 
-          key: 'updateTime', 
-          render: time => new Date(time).toLocaleString() 
-        },
-        {
-          title: '实体分配',
-          dataIndex: 'entityAssignments',
-          key: 'entityAssignments',
-          render: (text, record) => {
-            const assignments = record.entityAssignments.map((assignment, index) => {
-              const agentName = Object.keys(assignment)[0];
-              const entities = assignment[agentName].join(', ');
-              return `${agentName}: ${entities}`;
-            });
-      
-            return (
-              <div>
-                {assignments.map((assignment, index) => (
-                  <div key={index}>{assignment}</div>
-                ))}
-              </div>
-            );
-          },
-        },
-        {
-          title: '操作',
-          key: 'action',
-          render: (text, record) => (
-            <Button type="primary" onClick={() => handleView(record)}>查看</Button>
-          ),
-        },
-      ];
-    const viewscenario = async () => {
-        if (!intelligentStore.selectedScenario) {
-            message.error("请先选择想定场景");
-            return;
-        }
+    } catch (error) {
+      setTraining(false);
+      console.error('训练过程中发生错误:', error);
+      message.error('训练失败，请检查日志');
+    }
+  };
 
-        try {
-            // Fetch deployment image from backend
-            const response = await fetch(__APP_CONFIG__.get_deployment_image, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ scenarioId: intelligentStore.selectedScenario.id }),
-            });
+  const stopTraining = async () => {
+    try {
+      const response = await fetch(__APP_CONFIG__.stop_training, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
 
-            if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-            }
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.statusText}`);
+      }
 
-            const data = await response.json();
-            if (data.status === 'success') {
-            setDeploymentImageUrl(data.img_url);
-            setIsScenarioModalVisible(true);
-            } else {
-            message.error('获取部署图失败');
-            }
-        } catch (error) {
-            console.error('获取部署图失败:', error);
-            message.error('获取部署图失败，请检查网络或联系管理员');
-        }
-    };
+      const data = await response.json();
+      if (data.status === 'success') {
+        setTraining(false);
+        message.success('训练终止请求已发送');
+      } else {
+        message.error('训练终止失败，请检查日志');
+      }
+    } catch (error) {
+      console.error('训练终止失败:', error);
+      message.error('训练终止失败，请检查网络或联系管理员');
+    }
+  };
 
-    const handleprocess = async () => {
-        if (!intelligentStore.selectedAgent) {
-          message.error("请先载入智能体");
-          return;
-        }
-      
-        try {
-          setIsProcessModalVisible(true);
-          setAnimationUrl(null); // 重置动画URL
-          
-          const selectedAgent = intelligentStore.selectedAgent;
-          
-          const response = await fetch(__APP_CONFIG__.get_process_data, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              agentId: selectedAgent.agentID,
-              scenarioId: intelligentStore.selectedScenario.id
-            }),
-          });
-      
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+  const handleView = (agent) => {
+    setSelectedAgent(agent);
+    setIsDetailModalVisible(true);
+  };
+
+  const handleLoad = (agent) => {
+    const selectedAlgorithm = intelligentStore.selectedAlgorithm;
+    if (!selectedAlgorithm) {
+      message.error("请先选择算法！");
+      return;
+    }
+
+    if (!isModelCompatibleWithAlgorithm(agent, selectedAlgorithm)) {
+      message.error("模型与算法类型不匹配，无法载入！");
+      return;
+    }
+
+    intelligentStore.loadAgent(agent);
+    message.success("智能体载入成功！");
+  };
+
+  const handleViewModelListClick = () => {
+
+    setSubModelPublishStatus(prevStatus => {
+      const updatedStatus = { ...prevStatus };
+      decisionModels.forEach(record => {
+        record.model.model_list.forEach(subModelId => {
+          if (!(subModelId in updatedStatus)) {
+            updatedStatus[subModelId] = false; 
           }
-      
-          const data = await response.json();
-          if (data.status === 'success') {
-            setAnimationUrl(data.animationUrl);
-          } else {
-            setAnimationUrl(null); // 确保设置为null以显示加载提示
-          }
-          
-        } catch (error) {
-          console.error('获取过程数据失败:', error);
-          setAnimationUrl(null); // 确保设置为null以显示加载提示
-          message.error('获取过程数据失败');
-        }
-      };
-      const [expandedRowKeys, setExpandedRowKeys] = useState([]);
-      const [publishedModels, setPublishedModels] = useState({});
+        });
+      });
+      return updatedStatus;
+    });
+    setIsModelListModalVisible(true);
+  };
 
-      const expandedRowRender = (record) => {
+  const handleViewModel = (model) => {
+    setCurrentModel(model);
+    setIsModelInfoModalVisible(true);
+  };
 
-        const isAnyPublished = record.model.model_list.some(modelId => 
-          publishedModels[modelId] || record.model.state === "已发布"
-        );
-      
+  const handleEffectModel = async (record) => {
+    try {
+      const response = await fetch(__APP_CONFIG__.get_effect, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ decisionModelID: record.model.id }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      if (data.status === 'success') {
+        setEffectImageUrl(data.img_url);
+        setIsEffectImageModalVisible(true);
+      } else {
+        message.error('获取效果图片失败，请检查日志');
+      }
+    } catch (error) {
+      console.error('获取效果图片失败:', error);
+      message.error('获取效果图片失败，请检查网络或联系管理员');
+    }
+  };
+
+  const handlePublish = async (record, subModelId) => {
+    try {
+      const response = await fetch(__APP_CONFIG__.publish_model, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ decisionModelID: subModelId }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      if (data.status === 'success') {
+        message.success("模型发布成功");
+        setSubModelPublishStatus(prev => ({
+          ...prev,
+          [subModelId]: true
+        }));
+        fetchDecisions();
+      } else {
+        message.error('发布模型失败，请检查日志');
+      }
+    } catch (error) {
+      console.error('发布模型失败:', error);
+      message.error('发布模型失败，请检查网络或联系管理员');
+    }
+  };
+  const handleLoadModel = async (record, subModelId) => {
+  try {
+    const modelToLoad = decisionModels.find(
+      (model) => model.model.model_list.includes(subModelId)
+    );
+    if (!modelToLoad) {
+      message.error("未找到对应的模型");
+      return;
+    }
+    const selectedAlgorithm = intelligentStore.selectedAlgorithm;
+    if (!selectedAlgorithm) {
+      message.error("请先选择算法！");
+      return;
+    }
+    if (modelToLoad.algorithm.id !== selectedAlgorithm.algorithm_id) {
+      message.error("模型与当前选择的算法不匹配，无法载入！");
+      return;
+    }
+    setLoadedModel({
+      ...modelToLoad,
+      model: {
+        ...modelToLoad.model,
+        id: subModelId 
+      }
+    });
+
+    setSubModelPublishStatus(prev => ({
+      ...prev,
+      [subModelId]: true
+    }));
+
+    message.success("模型载入成功！");
+  } catch (error) {
+    console.error('模型载入失败:', error);
+    message.error('模型载入失败，请检查网络或联系管理员');
+  }
+};
+
+  const scenarioColumns = [
+    {
+      title: '序号',
+      key: 'index',
+      render: (text, record, index) => index + 1,
+    },
+    { title: '想定场景', dataIndex: 'scenarioID', key: 'scenarioID' },
+    { title: '智能体角色', dataIndex: 'agentRoleID', key: 'agentRoleID' },
+    { title: '智能体ID', dataIndex: 'agentID', key: 'agentID' },
+    { title: '智能体名称', dataIndex: 'agentName', key: 'agentName' },
+    { title: '版本', dataIndex: 'agentVersion', key: 'agentVersion' },
+    { title: '智能体类型', dataIndex: 'agentType', key: 'agentType' },
+    { title: '更新时间', dataIndex: 'updateTime', key: 'updateTime', render: time => new Date(time).toLocaleString() },
+    {
+      title: '实体分配',
+      dataIndex: 'entityAssignments',
+      key: 'entityAssignments',
+      render: (text, record) => {
+        const assignments = record.entityAssignments.map((assignment, index) => {
+          const agentName = Object.keys(assignment)[0];
+          const entities = assignment[agentName].join(', ');
+          return `${agentName}: ${entities}`;
+        });
+
         return (
-          <Table
-            columns={[
-              { 
-                title: '决策模型ID', 
-                dataIndex: 'id', 
-                key: 'modelId',
-                render: (text) => text.split('-').pop() === '0' ? 
-                  `${text}` : text
-              },
-              { 
-                title: '发布状态', 
-                
-              },
-              { 
-                title: '载入状态(持续训练)', 
-                
-              },
-              { 
-                title: '操作',
-                key: 'action',
-                render: (text, subRecord) => (
-                  <div>
-                    <Button 
-                      type="primary" 
-                      onClick={() => handlePublish(record, subRecord.id)}
-                      disabled={isAnyPublished}
-                    >
-                      发布
-                    </Button>
-                    <Button 
-                      type="primary" 
-                      onClick={() => handlePublish(record, subRecord.id)}
-                      disabled={isAnyPublished}
-                    >
-                      载入
-                    </Button>
-                  </div>
-                ),
-              },
-            ]}
-            dataSource={record.model.model_list.map(modelId => ({
-              id: modelId,
-              parentId: record.model.id
-            }))}
-            pagination={false}
-            rowKey="id"
-          />
+          <div>
+            {assignments.map((assignment, index) => (
+              <div key={index}>{assignment}</div>
+            ))}
+          </div>
         );
-      };
+      },
+    },
+    {
+      title: '操作',
+      key: 'action',
+      render: (text, record) => (
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Button type="primary" onClick={() => handleView(record)}>查看</Button>
+          <Button type="primary" onClick={() => handleLoad(record)}>载入</Button>
+        </div>
+      ),
+    },
+  ];
 
+  const modelListColumns = [
+    { 
+      title: '', 
+      key: 'expand',
+      width: 50,
+      render: (text, record) => (
+        <Button 
+          type="text" 
+          icon={<DownOutlined />} 
+          onClick={(e) => {
+            e.stopPropagation();
+            setExpandedRowKeys(expandedRowKeys.includes(record.model.id) ? 
+              expandedRowKeys.filter(key => key !== record.model.id) : 
+              [...expandedRowKeys, record.model.id]);
+          }}
+          style={{
+            transform: expandedRowKeys.includes(record.model.id) ? 'rotate(180deg)' : 'none',
+            transition: 'transform 0.3s'
+          }}
+        />
+      ),
+    },
+    { 
+      title: '训练ID', 
+      dataIndex: ['model', 'id'], 
+      key: 'modelId' 
+    },
+    { 
+      title: '决策模型名称', 
+      dataIndex: ['model', 'name'], 
+      key: 'agentName' 
+    },
+    { 
+      title: '场景名称', 
+      dataIndex: ['model', 'scenario_name'], 
+      key: 'scenarioName' 
+    },
+    { 
+      title: '角色名称', 
+      dataIndex: ['model', 'role_name'], 
+      key: 'roleName' 
+    },
+    { 
+      title: '模型类型', 
+      dataIndex: ['model', 'nn_model_type'], 
+      key: 'modelType' 
+    },
+    { 
+      title: '模型版本', 
+      dataIndex: ['model', 'version'], 
+      key: 'modelVersion' 
+    },
+    { 
+      title: '创建时间', 
+      dataIndex: ['model', 'time'], 
+      key: 'createTime', 
+      render: time => new Date(time).toLocaleString() 
+    },
+    { 
+      title: '操作',
+      key: 'action',
+      render: (text, record) => (
+        <div style={{ display: 'flex', gap: 8 }}>
+          <Button type="primary" onClick={() => handleViewModel(record)}>查看</Button>
+          <Button type="primary" onClick={() => handleEffectModel(record)}>效果</Button>
+        </div>
+      ),
+    },
+  ];
 
+  const scenarioViewColumns = [
+    {
+      title: '序号',
+      key: 'index',
+      render: (text, record, index) => index + 1,
+    },
+    { title: '想定场景', dataIndex: 'scenarioID', key: 'scenarioID' },
+    { title: '智能体角色', dataIndex: 'agentRoleID', key: 'agentRoleID' },
+    { title: '智能体ID', dataIndex: 'agentID', key: 'agentID' },
+    { title: '智能体名称', dataIndex: 'agentName', key: 'agentName' },
+    { title: '版本', dataIndex: 'agentVersion', key: 'agentVersion' },
+    { title: '智能体类型', dataIndex: 'agentType', key: 'agentType' },
+    { 
+      title: '更新时间', 
+      dataIndex: 'updateTime', 
+      key: 'updateTime', 
+      render: time => new Date(time).toLocaleString() 
+    },
+    {
+      title: '实体分配',
+      dataIndex: 'entityAssignments',
+      key: 'entityAssignments',
+      render: (text, record) => {
+        const assignments = record.entityAssignments.map((assignment, index) => {
+          const agentName = Object.keys(assignment)[0];
+          const entities = assignment[agentName].join(', ');
+          return `${agentName}: ${entities}`;
+        });
 
-  // ================== 渲染部分 ==================
+        return (
+          <div>
+            {assignments.map((assignment, index) => (
+              <div key={index}>{assignment}</div>
+            ))}
+          </div>
+        );
+      },
+    },
+    {
+      title: '操作',
+      key: 'action',
+      render: (text, record) => (
+        <Button type="primary" onClick={() => handleView(record)}>查看</Button>
+      ),
+    },
+  ];
+
+  const viewscenario = async () => {
+    if (!intelligentStore.selectedScenario) {
+      message.error("请先选择想定场景");
+      return;
+    }
+
+    try {
+      const response = await fetch(__APP_CONFIG__.get_deployment_image, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ scenarioId: intelligentStore.selectedScenario.id }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.status === 'success') {
+        setDeploymentImageUrl(data.img_url);
+        setIsScenarioModalVisible(true);
+      } else {
+        message.error('获取部署图失败');
+      }
+    } catch (error) {
+      console.error('获取部署图失败:', error);
+      message.error('获取部署图失败，请检查网络或联系管理员');
+    }
+  };
+
+  const handleprocess = async () => {
+    if (!intelligentStore.selectedAgent) {
+      message.error("请先载入智能体");
+      return;
+    }
+
+    try {
+      setIsProcessModalVisible(true);
+      setAnimationUrl(null);
+
+      const selectedAgent = intelligentStore.selectedAgent;
+
+      const response = await fetch(__APP_CONFIG__.get_process_data, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          agentId: selectedAgent.agentID,
+          scenarioId: intelligentStore.selectedScenario.id
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data.status === 'success') {
+        setAnimationUrl(data.animationUrl);
+      } else {
+        setAnimationUrl(null);
+      }
+    } catch (error) {
+      console.error('获取过程数据失败:', error);
+      setAnimationUrl(null);
+      message.error('获取过程数据失败');
+    }
+  };
+
+  const [expandedRowKeys, setExpandedRowKeys] = useState([]);
+
+  const expandedRowRender = (record) => {
+    return (
+      <Table
+        columns={[
+          { 
+            title: '决策模型ID', 
+            dataIndex: 'id', 
+            key: 'modelId',
+            render: (text) => text.split('-').pop() === '0' ? 
+              `${text}` : text
+          },
+          { 
+            title: '发布状态', 
+            key: 'publishStatus',
+            render: (text, subRecord) => subModelPublishStatus[subRecord.id] ? '已发布' : '未发布'
+          },
+          { 
+            title: '载入状态(持续训练)', 
+            key: 'loadStatus',
+            render: (text, subRecord) => loadedModel && loadedModel.model.id === subRecord.id ? '已载入' : '未载入'  
+          },
+          { 
+            title: '操作',
+            key: 'action',
+            render: (text, subRecord) => (
+              <div style={{ display: 'flex', gap: 8 }}>
+                <Button 
+                  type="primary" 
+                  onClick={() => handlePublish(record, subRecord.id)}
+                  disabled={subModelPublishStatus[subRecord.id]}
+                >
+                  发布
+                </Button>
+                <Button 
+                  type="primary" 
+                  onClick={() => handleLoadModel(record, subRecord.id)}
+                  disabled={loadedModel && loadedModel.model.id === subRecord.id}
+                >
+                  载入
+                </Button>
+              </div>
+            ),
+          },
+        ]}
+        dataSource={record.model.model_list.map(modelId => ({
+          id: modelId,
+          parentId: record.model.id
+        }))}
+        pagination={false}
+        rowKey="id"
+      />
+    );
+  };
+
   return (
     <div className='right1' style={{ height: '80vh', width:'95%',margin: '0 auto' }}>
       <Card 
@@ -785,46 +859,46 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
           bordered={false}
           style={{ marginBottom: 16 }}
         >
-            <span>实体：</span>
-            <Select
+          <span>实体：</span>
+          <Select
             className="select-style"
             placeholder="选择实体"
             value={entity}
             onChange={handleEntityChange}
             style={{ width: 'auto' }}
             popupMatchSelectWidth={false}
-            >
+          >
             {entityOptions}
-            </Select>
-            <span>属性：</span>
-            <Select
+          </Select>
+          <span>属性：</span>
+          <Select
             className="select-style"
             placeholder="选择属性"
             value={attribute}
             onChange={handleAttributeChange}
             style={{ width: 'auto' }}
             popupMatchSelectWidth={false}
-            >
+          >
             {attributeOptions()}
-            </Select>
-            <span>值：</span>
-            <Select
+          </Select>
+          <span>值：</span>
+          <Select
             className="select-style"
             placeholder="选择值"
             value={value}
             onChange={handleValueChange}
             style={{ width: 'auto' }}
             popupMatchSelectWidth={false}
-            >
+          >
             {valueOptions()}
-            </Select>
-            <Button type="primary" className="update-button" onClick={handleUpdate}>
+          </Select>
+          <Button type="primary" className="update-button" onClick={handleUpdate}>
             更新
-            </Button>
-            <Button type="primary" className="update-button" onClick={viewscenario}>
+          </Button>
+          <Button type="primary" className="update-button" onClick={viewscenario}>
             场景查看
-            </Button>
-            <Input.TextArea className='input' rows={4} value={entityParamsInfo} disabled />
+          </Button>
+          <Input.TextArea className='input' rows={4} value={entityParamsInfo} disabled />
         </Card>
       </div>
       <Card 
@@ -833,7 +907,7 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
         style={{ marginBottom: 16 }}
       >
         {intelligentStore.selectedAlgorithm && intelligentStore.selectedAlgorithm['hyper-parameters'] ? (
-          <Row >
+          <Row>
             {intelligentStore.selectedAlgorithm['hyper-parameters'].map((param, index) => {
               const uniqueValues = [...new Set(param.value)].sort((a, b) => a - b);
               const defaultValueExists = uniqueValues.includes(param.default);
@@ -873,9 +947,9 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
 
       <div className="button-container" style={{ 
         display: 'flex', 
-        gap: '16px', // 设置按钮之间的间隙为16px
-        justifyContent: 'center', // 水平居中
-        marginTop: '16px' // 与上方内容的间距
+        gap: '16px',
+        justifyContent: 'center',
+        marginTop: '16px'
       }}>
         <Button onClick={trainAlgorithm} disabled={training}>
           {training ? '训练中...' : '开始训练'}
@@ -887,7 +961,6 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
         </Button>
       </div>
 
-      {/* 智能体详情弹窗 */}
       <Modal
         title="智能体详情"
         open={isDetailModalVisible}
@@ -924,18 +997,16 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
 
             <h3>实体状态信息</h3>
             {selectedAgent.agentModel.flatMap((model) => {
-              // 获取所有实体名称
               const entities = [...new Set(model.stateVector.map((state) => state[0]))];
-              
+
               return entities.map((entity) => {
-                // 收集该实体的所有状态信息
                 const stateInfo = model.stateVector
                   .filter((state) => state[0] === entity)
                   .map((state) => ({
-                    fieldName: state[2], // 状态字段名
-                    fieldValue: state[3] // 状态值
+                    fieldName: state[2],
+                    fieldValue: state[3]
                   }));
-                
+
                 return (
                   <div key={entity} style={{ 
                     marginBottom: 16,
@@ -1018,11 +1089,10 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
                   .reduce((acc, reward) => {
                     const existing = acc.find(item => item.rewardName === reward[1]);
                     if (existing) {
-                      // 如果奖励名称已存在，合并显示（这里保持原值，你也可以选择相加或其他处理）
                       existing.rewardValue = `${existing.rewardValue}`;
                     } else {
                       acc.push({
-                        key: reward[1], // 使用奖励名称作为key
+                        key: reward[1],
                         rewardName: reward[1],
                         rewardValue: reward[0],
                       });
@@ -1058,11 +1128,11 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
                 [...expandedRowKeys, record.model.id] : 
                 expandedRowKeys.filter(key => key !== record.model.id));
             },
-            expandIcon: ({ expanded, onExpand, record }) => null, // Hide default expand icon
+            expandIcon: ({ expanded, onExpand, record }) => null,
           }}
         />
       </Modal>
-      {/* 模型详情弹窗 */}
+
       <Modal
         title="模型详细信息"
         open={isModelInfoModalVisible}
@@ -1073,18 +1143,17 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
           <div>
             <p><strong>决策模型ID：</strong>{currentModel.model.id}</p>
             <p><strong>智能体名称：</strong>{currentModel.model.name}</p>
-            <p><strong>场景名称：</strong>{currentModel.scenario.name}</p>
-            <p><strong>角色名称：</strong>{currentModel.agent.role}</p>
+            <p><strong>场景名称：</strong>{currentModel.model.scenario_name}</p>
+            <p><strong>角色名称：</strong>{currentModel.model.role_name}</p>
             <p><strong>模型版本：</strong>{currentModel.model.version}</p>
-            <p><strong>模型类型：</strong>{currentModel.model.type}</p>
+            <p><strong>模型类型：</strong>{currentModel.model.nn_model_type}</p>
             <p><strong>创建时间：</strong>{currentModel.model.time}</p>
-            <p><strong>模型存放路径：</strong>{currentModel.model.path}</p>
+            <p><strong>模型存放路径：</strong>{currentModel.model.model_path}</p>
             <p><strong>模型效果图路径：</strong>{currentModel.model.img_url}</p>
           </div>
         )}
       </Modal>
 
-      {/* 训练状态弹窗 */}
       <Modal
         title="训练状态"
         open={isSuccessModalVisible}
@@ -1099,7 +1168,6 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
         <p>训练完成！</p>
       </Modal>
 
-      {/* 训练效果图片弹窗 */}
       <Modal
         title="训练效果图片"
         open={isEffectImageModalVisible}
@@ -1120,171 +1188,169 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
         onCancel={() => setIsScenarioModalVisible(false)}
         width={1800} 
         footer={null}
-        >
+      >
         <Row gutter={10}>
-            <Col span={8}>
+          <Col span={8}>
             <Card title="部署图" bordered={false}>
-                {deploymentImageUrl ? (
+              {deploymentImageUrl ? (
                 <img 
-                    src={deploymentImageUrl} 
-                    alt="部署图" 
-                    style={{ width: '100%', maxHeight: '60vh', objectFit: 'contain' }}
+                  src={deploymentImageUrl} 
+                  alt="部署图" 
+                  style={{ width: '100%', maxHeight: '60vh', objectFit: 'contain' }}
                 />
-                ) : (
+              ) : (
                 <div style={{ padding: 16, textAlign: 'center', color: 'rgba(0, 0, 0, 0.25)' }}>
-                    加载部署图中...
+                  加载部署图中...
                 </div>
-                )}
+              )}
             </Card>
-            </Col>
-            <Col span={16}>
+          </Col>
+          <Col span={16}>
             <Card 
-                title="场景信息" 
-                bordered={false}
-                style={{ height: '100%' }}
-                styles={{ body: { padding: 0 } }}
+              title="场景信息" 
+              bordered={false}
+              style={{ height: '100%' }}
+              styles={{ body: { padding: 0 } }}
             >
-                <div style={{ height: '60vh', overflowY: 'auto' }}>
+              <div style={{ height: '60vh', overflowY: 'auto' }}>
                 {agents.length > 0 ? (
-                    <Table
+                  <Table
                     columns={scenarioViewColumns}
                     dataSource={agents1}
                     pagination={{ pageSize: 5 }}
                     bordered
                     rowKey="agentID"
                     scroll={{ y: 'calc(60vh - 55px)' }}
-                    />
+                  />
                 ) : (
-                    <div style={{ padding: 16, textAlign: 'center', color: 'rgba(0, 0, 0, 0.25)' }}>
+                  <div style={{ padding: 16, textAlign: 'center', color: 'rgba(0, 0, 0, 0.25)' }}>
                     暂无智能体信息
-                    </div>
+                  </div>
                 )}
-                </div>
+              </div>
             </Card>
-            </Col>
+          </Col>
         </Row>
-        </Modal>
-        <Modal
-            title="过程展示"
-            open={isProcessModalVisible}
-            onOk={() => setIsProcessModalVisible(false)}
-            onCancel={() => setIsProcessModalVisible(false)}
-            width={1800}
-            footer={null}
-            >
-            <div style={{ display: 'flex', height: '600px' }}>
-                {/* 数据展示部分 - 复用智能体详情弹窗的内容 */}
-                <div style={{ 
-                flex: 1, 
-                borderRight: '1px solid #f0f0f0',
-                padding: '16px',
-                overflowY: 'auto'
-                }}>
-                {intelligentStore.selectedAgent ? (
-                    <div>
-                    <h3>智能体详细信息</h3>
-                    <p><strong>智能体名称：</strong>{intelligentStore.selectedAgent.agentName}</p>
-                    <p><strong>智能体ID：</strong>{intelligentStore.selectedAgent.agentID}</p>
-                    <p><strong>版本：</strong>{intelligentStore.selectedAgent.agentVersion}</p>
-                    <p><strong>智能体类型：</strong>{intelligentStore.selectedAgent.agentType}</p>
-                    <p><strong>更新时间：</strong>{new Date(intelligentStore.selectedAgent.updateTime).toLocaleString()}</p>
-                    <p><strong>想定场景：</strong>{intelligentStore.selectedAgent.scenarioID}</p>
+      </Modal>
+      <Modal
+        title="过程展示"
+        open={isProcessModalVisible}
+        onOk={() => setIsProcessModalVisible(false)}
+        onCancel={() => setIsProcessModalVisible(false)}
+        width={1800}
+        footer={null}
+      >
+        <div style={{ display: 'flex', height: '600px' }}>
+          <div style={{ 
+            flex: 1, 
+            borderRight: '1px solid #f0f0f0',
+            padding: '16px',
+            overflowY: 'auto'
+          }}>
+            {intelligentStore.selectedAgent ? (
+              <div>
+                <h3>智能体详细信息</h3>
+                <p><strong>智能体名称：</strong>{intelligentStore.selectedAgent.agentName}</p>
+                <p><strong>智能体ID：</strong>{intelligentStore.selectedAgent.agentID}</p>
+                <p><strong>版本：</strong>{intelligentStore.selectedAgent.agentVersion}</p>
+                <p><strong>智能体类型：</strong>{intelligentStore.selectedAgent.agentType}</p>
+                <p><strong>更新时间：</strong>{new Date(intelligentStore.selectedAgent.updateTime).toLocaleString()}</p>
+                <p><strong>想定场景：</strong>{intelligentStore.selectedAgent.scenarioID}</p>
 
-                    <h3>智能体分配信息</h3>
-                    <Table
-                        columns={[
-                        { title: '智能体名称', dataIndex: 'agentName', key: 'agentName' },
-                        { title: '分配实体', dataIndex: 'assignedEntities', key: 'assignedEntities' },
-                        ]}
-                        dataSource={intelligentStore.selectedAgent.entityAssignments.flatMap((assignment) =>
-                        Object.entries(assignment).map(([agentName, entities]) => ({
-                            key: agentName,
-                            agentName: agentName,
-                            assignedEntities: entities.join(', '),
-                        }))
-                        )}
-                        pagination={false}
-                        bordered
-                    />
+                <h3>智能体分配信息</h3>
+                <Table
+                  columns={[
+                    { title: '智能体名称', dataIndex: 'agentName', key: 'agentName' },
+                    { title: '分配实体', dataIndex: 'assignedEntities', key: 'assignedEntities' },
+                  ]}
+                  dataSource={intelligentStore.selectedAgent.entityAssignments.flatMap((assignment) =>
+                    Object.entries(assignment).map(([agentName, entities]) => ({
+                      key: agentName,
+                      agentName: agentName,
+                      assignedEntities: entities.join(', '),
+                    }))
+                  )}
+                  pagination={false}
+                  bordered
+                />
 
-                    <h3>实体状态信息</h3>
-                    <Table
-                        columns={[
-                        { title: '实体名称', dataIndex: 'name', key: 'name' },
-                        ...intelligentStore.selectedAgent.agentModel.flatMap((model) => {
-                            return model.stateVector.map((state) => state[2]);
-                        }).reduce((uniqueColumns, field) => {
-                            if (!uniqueColumns.includes(field)) {
-                            uniqueColumns.push(field);
-                            }
-                            return uniqueColumns;
-                        }, []).map((field) => ({
-                            title: field,
-                            dataIndex: field,
-                            key: field,
-                        }))
-                        ]}
-                        dataSource={intelligentStore.selectedAgent.agentModel.flatMap((model) => {
-                        const entities = [...new Set(model.stateVector.map((state) => state[0]))];
-                        return entities.map((entity) => {
-                            const entityState = {
-                            key: entity,
-                            name: entity,
-                            };
-                            model.stateVector.forEach((state) => {
-                            const [entityName, , fieldName, fieldValue] = state;
-                            if (entityName === entity) {
-                                entityState[fieldName] = fieldValue;
-                            }
-                            });
-                            return entityState;
-                        });
-                        })}
-                        pagination={false}
-                        bordered
-                    />
-                    </div>
-                ) : (
-                    <div style={{ textAlign: 'center', padding: '20px' }}>
-                    <p>没有可用的智能体信息</p>
-                    </div>
-                )}
+                <h3>实体状态信息</h3>
+                <Table
+                  columns={[
+                    { title: '实体名称', dataIndex: 'name', key: 'name' },
+                    ...intelligentStore.selectedAgent.agentModel.flatMap((model) => {
+                      return model.stateVector.map((state) => state[2]);
+                    }).reduce((uniqueColumns, field) => {
+                      if (!uniqueColumns.includes(field)) {
+                        uniqueColumns.push(field);
+                      }
+                      return uniqueColumns;
+                    }, []).map((field) => ({
+                      title: field,
+                      dataIndex: field,
+                      key: field,
+                    }))
+                  ]}
+                  dataSource={intelligentStore.selectedAgent.agentModel.flatMap((model) => {
+                    const entities = [...new Set(model.stateVector.map((state) => state[0]))];
+                    return entities.map((entity) => {
+                      const entityState = {
+                        key: entity,
+                        name: entity,
+                      };
+                      model.stateVector.forEach((state) => {
+                        const [entityName, , fieldName, fieldValue] = state;
+                        if (entityName === entity) {
+                          entityState[fieldName] = fieldValue;
+                        }
+                      });
+                      return entityState;
+                    });
+                  })}
+                  pagination={false}
+                  bordered
+                />
+              </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '20px' }}>
+                <p>没有可用的智能体信息</p>
+              </div>
+            )}
+          </div>
+
+          <div style={{ 
+            flex: 1, 
+            padding: '16px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: '#f5f5f5'
+          }}>
+            {animationUrl ? (
+              <>
+                <h3>训练过程动画</h3>
+                <div style={{ width: '100%', height: '100%' }}>
+                  <img 
+                    src={animationUrl} 
+                    alt="训练过程动画" 
+                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      setAnimationUrl(null);
+                    }}
+                  />
                 </div>
-                
-                {/* 动画展示部分 */}
-                <div style={{ 
-                flex: 1, 
-                padding: '16px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                backgroundColor: '#f5f5f5'
-                }}>
-                {animationUrl ? (
-                    <>
-                    <h3>训练过程动画</h3>
-                    <div style={{ width: '100%', height: '100%' }}>
-                        <img 
-                        src={animationUrl} 
-                        alt="训练过程动画" 
-                        style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                        onError={(e) => {
-                            e.target.onerror = null; // 防止无限循环
-                            setAnimationUrl(null); // 图片加载失败时设置为null
-                        }}
-                        />
-                    </div>
-                    </>
-                ) : (
-                    <div style={{ textAlign: 'center' }}>
-                    <h3>Sorry</h3>
-                    <p>没有载入智能体的动画显示</p>
-                    </div>
-                )}
-                </div>
-            </div>
-            </Modal>
+              </>
+            ) : (
+              <div style={{ textAlign: 'center' }}>
+                <h3>Sorry</h3>
+                <p>没有载入智能体的动画显示</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 });
