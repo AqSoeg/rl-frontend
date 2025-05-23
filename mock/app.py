@@ -17,7 +17,6 @@ SCENARIO_FILE_PATH = 'mock/db.json'
 DECISION_FILE_PATH = 'mock/dc.json'
 EVALUATE_FILE_PATH = 'mock/evaluatetable.json'
 EVALUATION_DATA_PATH = 'mock/dc.json'
-EVALUATION_RESULT_PATH = 'mock/evaluation/result.json'
 training_thread = None
 training_stop_flag = False
 training_status = "idle"
@@ -146,21 +145,74 @@ def start_evaluation():
 def load_evaluation_result():
     try:
         data = request.json
-        model_id = data.get('modelId')
-
-        with open(EVALUATION_RESULT_PATH, 'r', encoding='utf-8') as file:
-            results = json.load(file)
-
-        result = next((item for item in results if item['modelID'] == model_id), None)
-        if not result:
-            return jsonify({'error': 'Evaluation result not found for model ID'}), 404
+        print(data)
 
         return jsonify({
-            'chart_data': result['chart_data'],
-            'event_data': result['event_data'],
-            'radar_chart_data': result['radar_chart_data'],
-            'eval_score': result['eval_score'],
-            'eval_suggestion': result['eval_suggestion']
+            "chart_data": [
+              {
+                "content": "京沪车流量周对比分析",
+                "x_label": "星期",
+                "y_label": "车流量",
+                "data_legend": ["北京", "上海"],
+                "chart_data": [
+                  {"x": "周一", "y": 87, "legend": "北京"},
+                  {"x": "周二", "y": 55, "legend": "北京"},
+                  {"x": "周三", "y": 70, "legend": "北京"},
+                  {"x": "周一", "y": 66, "legend": "上海"},
+                  {"x": "周二", "y": 95, "legend": "上海"},
+                  {"x": "周三", "y": 89, "legend": "上海"}
+                ]
+              },
+              {
+                "content": "高峰时段路网流量分布",
+                "x_label": "时间段",
+                "y_label": "车流量（辆/小时）",
+                "data_legend": ["早高峰", "午高峰", "晚高峰"],
+                "chart_data": [
+                  {"x": "主干道", "y": 3200, "legend": "早高峰"},
+                  {"x": "主干道", "y": 2800, "legend": "午高峰"},
+                  {"x": "主干道", "y": 4100, "legend": "晚高峰"},
+                  {"x": "快速路", "y": 2500, "legend": "早高峰"},
+                  {"x": "快速路", "y": 2100, "legend": "午高峰"},
+                  {"x": "快速路", "y": 3800, "legend": "晚高峰"}
+                ]
+              },
+              {
+                "content": "交通事故同期对比统计",
+                "x_label": "事故类型",
+                "y_label": "发生次数",
+                "data_legend": ["本周", "上周"],
+                "chart_data": [
+                  {"x": "追尾", "y": 15, "legend": "本周"},
+                  {"x": "追尾", "y": 22, "legend": "上周"},
+                  {"x": "侧翻", "y": 8, "legend": "本周"},
+                  {"x": "侧翻", "y": 12, "legend": "上周"},
+                  {"x": "闯红灯", "y": 30, "legend": "本周"},
+                  {"x": "闯红灯", "y": 45, "legend": "上周"}
+                ]
+              }
+            ],
+            "event_data": [
+              "系统初始化完成",
+              "传感器校准成功",
+              "路径规划更新"
+            ],
+            "radar_chart_data": {
+              "indicator": [
+                {"name": "销售", "max": 6500},
+                {"name": "管理", "max": 16000},
+                {"name": "信息技术", "max": 30000}
+              ],
+              "data": {
+                "预算分配": {"销售": 4300, "管理": 10000, "信息技术": 25000},
+                "实际开销": {"销售": 5000, "管理": 14000, "信息技术": 28000}
+              }
+            },
+            "eval_score": 96.5,
+            "eval_suggestion": [
+              "建议调整刹车参数",
+              "优化路径规划算法"
+            ]
         })
     except Exception as e:
         print(f'Error loading evaluation result: {str(e)}')

@@ -16,6 +16,7 @@ npm install
 5. 安装 axios：`npm install axios`。 
 6. 安装 recharts：`npm install echarts`。
 7. 安装 md5：`npm install md5`。
+8. 安装 antd 图标：`npm install @ant-design/icons`。
 
 ## 项目运行
 

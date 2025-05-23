@@ -6,6 +6,7 @@ const appConfig = {
   getModels: "http://localhost:5000/getModels",
   saveModel: "http://localhost:5000/saveModel",
   evaluateDataGenerate: "http://localhost:5000/evaluateDataGenerate",
+  viewEvaluationData: "http://localhost:5000/viewEvaluationData",
   loadEvaluationData: "http://localhost:5000/loadEvaluationData",
   startEvaluation: "http://localhost:5000/startEvaluation",
   loadEvaluationResult: "http://localhost:5000/loadEvaluationResult",
