@@ -12,6 +12,7 @@ const EvaluationOptimization = () => {
     const [evalScore, setEvalScore] = useState();
     const [evalSuggestion, setEvalSuggestion] = useState([]);
     const [sidebarData, setSidebarData] = useState({
+        evaluateDataInfo: {},
         scenarioInfo: {},
         modelInfo: {},
         algorithmInfo: {}
@@ -275,7 +276,21 @@ const EvaluationOptimization = () => {
             if (data.error) {
                 throw new Error(data.error);
             }
-            setSelectedModel(data);
+            setSelectedModel({
+                model_info: data.model,
+                scenario_info: {
+                    name: data.model.scenario_name,
+                    role_name: data.model.role_name,
+                    agent_id: data.model.agentID,
+                    env_params: data.env_param
+                },
+                algorithm_info: {
+                    id: data.algorithm.id,
+                    name: data.algorithm.name,
+                    type: data.algorithm.mode,
+                    hyper_params: data.algorithm['hyper-parameters']
+                }
+            });
             setIsDetailModalVisible(true);
         } catch (error) {
             console.error('获取评估数据失败:', error);
@@ -303,18 +318,25 @@ const EvaluationOptimization = () => {
                 throw new Error(data.error);
             }
             setSidebarData({
-                scenarioInfo: {
-                    name: data.scenario_info.name,
-                    role_name: data.scenario_info.role_name,
-                    agent_id: data.scenario_info.agent_id,
-                    env_params: Object.entries(data.scenario_info.env_params).map(([key, value]) => ({ [key]: value }))
+                evaluateDataInfo: {
+                    id: record.id,
+                    evaluateData_path: record.evaluateData_path,
+                    select_evaluateData: subModelId,
+                    dataFile: dataFile,
+                    time: record.time
                 },
-                modelInfo: data.model_info,
+                scenarioInfo: {
+                    name: data.model.scenario_name,
+                    role_name: data.model.role_name,
+                    agent_id: data.model.agentID,
+                    env_params: Object.entries(data.env_param).map(([key, value]) => ({ [key]: value }))
+                },
+                modelInfo: data.model,
                 algorithmInfo: {
-                    id: data.algorithm_info.id,
-                    name: data.algorithm_info.name,
-                    type: data.algorithm_info.type,
-                    hyperParams: Object.entries(data.algorithm_info.hyper_params).map(([key, value]) => ({ [key]: value }))
+                    id: data.algorithm.id,
+                    name: data.algorithm.name,
+                    type: data.algorithm.mode,
+                    hyperParams: Object.entries(data.algorithm['hyper-parameters']).map(([key, value]) => ({ [key]: value }))
                 }
             });
             setDataLoaded(true);
@@ -333,17 +355,18 @@ const EvaluationOptimization = () => {
         try {
             const evalData = {
                 evaluateData: {
-                    id: sidebarData.modelInfo.id,
+                    id: sidebarData.evaluateDataInfo.id,
                     img_url: sidebarData.modelInfo.img_url,
                     model_path: sidebarData.modelInfo.model_path,
-                    evaluateData_path: sidebarData.modelInfo.evaluateData_path,
+                    evaluateData_path: sidebarData.evaluateDataInfo.evaluateData_path,
+                    select_evaluateData: [sidebarData.evaluateDataInfo.dataFile, sidebarData.evaluateDataInfo.select_evaluateData],
                     name: sidebarData.modelInfo.name,
                     nn_model_type: sidebarData.modelInfo.nn_model_type,
                     role_name: sidebarData.scenarioInfo.role_name,
                     scenario_name: sidebarData.scenarioInfo.name,
                     agentID: sidebarData.scenarioInfo.agent_id,
                     trainID: sidebarData.modelInfo.id,
-                    time: sidebarData.modelInfo.time,
+                    time: sidebarData.evaluateDataInfo.time,
                     version: sidebarData.modelInfo.version
                 }
             };
@@ -615,6 +638,18 @@ const EvaluationOptimization = () => {
         <div className="EO-container">
             <div className="EO-sidebar">
                 <div className="EO-sidebar-section EO-sidebar-scrollable">
+                    <div className="EO-text">评估数据信息</div>
+                    {sidebarData.evaluateDataInfo.id && (
+                        <>
+                            <div className="EO-info-item">评估数据ID: {sidebarData.evaluateDataInfo.id}</div>
+                            <div className="EO-info-item">评估数据路径: {sidebarData.evaluateDataInfo.evaluateData_path}</div>
+                            <div className="EO-info-item">模型子ID: {sidebarData.evaluateDataInfo.select_evaluateData}</div>
+                            <div className="EO-info-item">数据文件名: {sidebarData.evaluateDataInfo.dataFile}</div>
+                            <div className="EO-info-item">创建时间: {formatDate(sidebarData.evaluateDataInfo.time)}</div>
+                        </>
+                    )}
+                </div>
+                <div className="EO-sidebar-section EO-sidebar-scrollable">
                     <div className="EO-text">场景信息</div>
                     {sidebarData.scenarioInfo.name && (
                         <>
@@ -631,7 +666,6 @@ const EvaluationOptimization = () => {
                         </>
                     )}
                 </div>
-
                 <div className="EO-sidebar-section EO-sidebar-scrollable">
                     <div className="EO-text">模型信息</div>
                     {sidebarData.modelInfo.id && (
@@ -646,7 +680,6 @@ const EvaluationOptimization = () => {
                         </>
                     )}
                 </div>
-
                 <div className="EO-sidebar-section EO-sidebar-scrollable">
                     <div className="EO-text">算法信息</div>
                     {sidebarData.algorithmInfo.id && (
@@ -665,7 +698,6 @@ const EvaluationOptimization = () => {
                     )}
                 </div>
             </div>
-
             <div className="EO-gradient-box">
                 <div className="EO-middle-container">
                     <div className="EO-chart-grid">
@@ -713,7 +745,6 @@ const EvaluationOptimization = () => {
                         ))}
                     </div>
                 </div>
-
                 <div className="EO-right-panel">
                     {radarImage && (
                         <div className="EO-radar-chart-container">
@@ -746,7 +777,6 @@ const EvaluationOptimization = () => {
                     </div>
                 </div>
             </div>
-
             <Modal
                 title="请选择需要评估的数据来源"
                 open={isDataModalVisible}
@@ -781,7 +811,6 @@ const EvaluationOptimization = () => {
                     }}
                 />
             </Modal>
-
             <Modal
                 title="数据详细信息"
                 open={isDetailModalVisible}
@@ -803,7 +832,7 @@ const EvaluationOptimization = () => {
                             <div className="EO-info-item">模型效果图路径: {selectedModel.model_info.img_url}</div>
                         </div>
                         <div className="EO-detail-section">
-                        <div className="EO-text">场景信息</div>
+                            <div className="EO-text">场景信息</div>
                             <div className="EO-info-item">场景名称: {selectedModel.scenario_info.name}</div>
                             <div className="EO-info-item">角色名称: {selectedModel.scenario_info.role_name}</div>
                             <div className="EO-info-item">智能体ID: {selectedModel.scenario_info.agent_id}</div>
@@ -831,7 +860,6 @@ const EvaluationOptimization = () => {
                     </div>
                 )}
             </Modal>
-
             <Modal
                 title="模型列表"
                 open={isModelListModalVisible}
@@ -865,7 +893,6 @@ const EvaluationOptimization = () => {
                     }}
                 />
             </Modal>
-
             <Modal
                 title="模型详细信息"
                 open={isModelInfoModalVisible}
@@ -887,7 +914,6 @@ const EvaluationOptimization = () => {
                     </div>
                 )}
             </Modal>
-
             <Modal
                 title="训练效果图片"
                 open={isEffectImageModalVisible}
@@ -897,7 +923,6 @@ const EvaluationOptimization = () => {
             >
                 {effectImageUrl && <img src={effectImageUrl} alt="训练效果图片" style={{ width: '100%' }} />}
             </Modal>
-
             <Modal
                 title="请输入执行次数"
                 open={isEpisodesModalVisible}

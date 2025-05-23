@@ -82,8 +82,7 @@ def evaluate_data_generate():
         data = request.json
         model_data = data.get('model')
 
-        print("Received model information:")
-        print(model_data)
+        print("Received model information:", model_data)
         print("Starting data generation for evaluation...")
 
         new_entry = {
@@ -134,6 +133,7 @@ def load_evaluation_data():
 def view_evaluation_data():
     try:
         data = request.json
+        print("View evaluation data:", data)
         train_id = data.get('trainID')
         if not train_id:
             return jsonify({'error': 'Missing trainID'}), 400
@@ -145,30 +145,7 @@ def view_evaluation_data():
         if not matched_model:
             return jsonify({'error': 'Model not found'}), 404
 
-        response_data = {
-            'model_info': {
-                'id': matched_model['model']['id'],
-                'name': matched_model['model']['name'],
-                'nn_model_type': matched_model['model']['nn_model_type'],
-                'img_url': matched_model['model']['img_url'],
-                'model_path': matched_model['model']['model_path'],
-                'version': matched_model['model']['version'],
-                'time': matched_model['model']['time']
-            },
-            'scenario_info': {
-                'name': matched_model['model']['scenario_name'],
-                'role_name': matched_model['model']['role_name'],
-                'agent_id': matched_model['model']['agentID'],
-                'env_params': matched_model.get('env_param', {})
-            },
-            'algorithm_info': {
-                'id': matched_model['algorithm']['id'],
-                'name': matched_model['algorithm']['name'],
-                'type': matched_model['algorithm']['mode'],
-                'hyper_params': matched_model['algorithm']['hyper-parameters']
-            }
-        }
-        return jsonify(response_data)
+        return jsonify(matched_model)
     except Exception as e:
         print(f'Error fetching evaluation data: {str(e)}')
         return jsonify({'error': 'Failed to fetch evaluation data'}), 500
