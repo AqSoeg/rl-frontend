@@ -268,12 +268,12 @@ def train():
                         "scenario_name": data.get('scenarioEditInfo', {}).get('scenarioName', 'Unknown'),
                         "agentID":data.get('agentInfo', {}).get('agentID', 'Unknown'),
                     },
-                    "env_parm":env_param,
+                    "env_param":env_param,
                     "algorithm": {
                         "id":data.get('algorithmInfo', {}).get('algorithmID', 'Unknown'),
                         "name":data.get('algorithmInfo', {}).get('algorithmName', 'Unknown'),
                         "mode":data.get('algorithmInfo', {}).get('algorithmType', 'Unknown'),
-                        "hyperParams": data.get('algorithmInfo', {}).get('hyperParameters', 'Unknown'),
+                        "hyper-parameters": data.get('algorithmInfo', {}).get('hyperParameters', 'Unknown'),
                     },
                     "reward":reward
                 }

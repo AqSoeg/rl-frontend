@@ -16,7 +16,7 @@
       "role_name": "交警",
       "scenario_name": "城市交通"
     },
-    "env_parm": {
+    "env_param": {
       "间隔时间1": 30,
       "额外时间1": 2,
       "间隔时间2": 35,
@@ -43,7 +43,7 @@
       "id": "PPO",
       "name": "PPO",
       "mode": "单智能体",
-      "hyperParams": {
+      "hyper-parameters": {
         "learning_rate": 0.0003,
         "gamma": 0.9,
         "n_steps": 128,
@@ -73,7 +73,7 @@
       "role_name": "红绿灯",
       "scenario_name": "城市交通"
     },
-    "env_parm": {
+    "env_param": {
       "间隔时间1": 30,
       "额外时间1": 2,
       "间隔时间2": 35,
@@ -99,7 +99,7 @@
       "id": "MADDPG",
       "name": "MADDPG",
       "mode": "分布式多智能体",
-      "hyperParams": {
+      "hyper-parameters": {
         "learning_rate": 0.001,
         "gamma": 0.99,
         "n_steps": 256,
@@ -129,7 +129,7 @@
       "role_name": "红绿灯",
       "scenario_name": "城市交通"
     },
-    "env_parm": {
+    "env_param": {
       "间隔时间1": 30,
       "额外时间1": 2,
       "间隔时间2": 35,
@@ -155,7 +155,7 @@
       "id": "MADDPG",
       "name": "MADDPG",
       "mode": "分布式多智能体",
-      "hyperParams": {
+      "hyper-parameters": {
         "learning_rate": 0.001,
         "gamma": 0.99,
         "n_steps": 256,
@@ -191,7 +191,7 @@
       "role_name": "红绿灯",
       "scenario_name": "城市交通"
     },
-    "env_parm": {
+    "env_param": {
       "间隔时间1": 30,
       "额外时间1": 2,
       "间隔时间2": 35,
@@ -217,7 +217,7 @@
       "id": "MADDPG",
       "name": "MADDPG",
       "mode": "分布式多智能体",
-      "hyperParams": {
+      "hyper-parameters": {
         "learning_rate": 0.001,
         "gamma": 0.99,
         "n_steps": 256,
@@ -252,7 +252,7 @@
       "role_name": "交警",
       "scenario_name": "城市交通"
     },
-    "env_parm": {
+    "env_param": {
       "间隔时间1": 30,
       "额外时间1": 2,
       "间隔时间2": 35,
@@ -278,7 +278,7 @@
       "id": "DDPG",
       "name": "DDPG",
       "mode": "单智能体",
-      "hyperParams": {
+      "hyper-parameters": {
         "actor_learning_rate": 0.0001,
         "critic_learning_rate": 0.001,
         "gamma": 0.9,
@@ -310,7 +310,7 @@
       "role_name": "交警",
       "scenario_name": "城市交通"
     },
-    "env_parm": {
+    "env_param": {
       "间隔时间1": 30,
       "额外时间1": 2,
       "间隔时间2": 35,
@@ -336,7 +336,7 @@
       "id": "DDPG",
       "name": "DDPG",
       "mode": "单智能体",
-      "hyperParams": {
+      "hyper-parameters": {
         "actor_learning_rate": 0.0001,
         "critic_learning_rate": 0.001,
         "gamma": 0.9,
