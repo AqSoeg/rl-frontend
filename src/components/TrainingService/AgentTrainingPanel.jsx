@@ -490,27 +490,37 @@ const AgentTrainingPanel = observer(() => {
     setIsModelInfoModalVisible(true);
   };
 
-  const handleEffectModel = async (record) => {
+  // const handleEffectModel = async (record) => {
+  //   try {
+  //     const response = await fetch(__APP_CONFIG__.get_effect, {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({ decisionModelID: record.model.id }),
+  //     });
+
+  //     if (!response.ok) {
+  //       throw new Error(`Network response was not ok: ${response.statusText}`);
+  //     }
+
+  //     const data = await response.json();
+  //     if (data.status === 'success') {
+  //       setEffectImageUrl(data.img_url);
+  //       setIsEffectImageModalVisible(true);
+  //     } else {
+  //       message.error('获取效果图片失败，请检查日志');
+  //     }
+  //   } catch (error) {
+  //     console.error('获取效果图片失败:', error);
+  //     message.error('获取效果图片失败，请检查网络或联系管理员');
+  //   }
+  // };
+    const handleEffectModel = async (record) => {
     try {
-      const response = await fetch(__APP_CONFIG__.get_effect, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ decisionModelID: record.model.id }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Network response was not ok: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      if (data.status === 'success') {
-        setEffectImageUrl(data.img_url);
+        setEffectImageUrl(record);
+        console.log(record);
         setIsEffectImageModalVisible(true);
-      } else {
-        message.error('获取效果图片失败，请检查日志');
-      }
     } catch (error) {
       console.error('获取效果图片失败:', error);
       message.error('获取效果图片失败，请检查网络或联系管理员');
@@ -694,7 +704,7 @@ const AgentTrainingPanel = observer(() => {
       render: (text, record) => (
         <div style={{ display: 'flex', gap: 8 }}>
           <Button type="primary" onClick={() => handleViewModel(record)}>查看</Button>
-          <Button type="primary" onClick={() => handleEffectModel(record)}>效果</Button>
+          <Button type="primary" onClick={() => handleEffectModel(record.model.img_url)}>效果</Button>
         </div>
       ),
     },

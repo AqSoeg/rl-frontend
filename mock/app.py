@@ -315,21 +315,21 @@ def get_training_status():
         return jsonify({"status": training_status, "result": training_result})
     return jsonify({"status": training_status})
 
-@app.route('/get_effect', methods=['POST'])
-def get_effect_image():
-    data = request.json
-    decision_model_id = data.get('decisionModelID')
-    try:
-        with open(DECISION_FILE_PATH, 'r', encoding='utf-8') as f:
-            decision_models = json.load(f)
-        model = next((m for m in decision_models if m['model']['id'] == decision_model_id), None)
-        if model:
-            return jsonify({"status": "success", "img_url": model['model']['img_url']})
-        else:
-            return jsonify({"status": "error", "message": "Model not found"}), 404
-    except Exception as e:
-        print(f'Error getting effect image: {str(e)}')
-        return jsonify({"status": "error", "message": str(e)}), 500
+# @app.route('/get_effect', methods=['POST'])
+# def get_effect_image():
+#     data = request.json
+#     decision_model_id = data.get('decisionModelID')
+#     try:
+#         with open(DECISION_FILE_PATH, 'r', encoding='utf-8') as f:
+#             decision_models = json.load(f)
+#         model = next((m for m in decision_models if m['model']['id'] == decision_model_id), None)
+#         if model:
+#             return jsonify({"status": "success", "img_url": model['model']['img_url']})
+#         else:
+#             return jsonify({"status": "error", "message": "Model not found"}), 404
+#     except Exception as e:
+#         print(f'Error getting effect image: {str(e)}')
+#         return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/publish_model', methods=['POST'])
 def publish_model():

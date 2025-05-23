@@ -13,7 +13,7 @@ const appConfig = {
   train:"http://localhost:5000/train",
   stop_training: "http://localhost:5000/stop_training",
   training_status:"http://localhost:5000/training_status",
-  get_effect:"http://localhost:5000/get_effect",
+  // get_effect:"http://localhost:5000/get_effect",
   publish_model:"http://localhost:5000/publish_model",
   get_datasets:"http://localhost:5000/get_datasets",
   getDecisionModels:"http://localhost:5000/getDecisionModels",
