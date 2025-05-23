@@ -5,7 +5,7 @@ import { intelligentStore } from './IntelligentStore';
 import { observer } from 'mobx-react';
 const { Option } = Select;
 
-const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
+const AgentTrainingPanel = observer(() => {
   const [entity, setEntity] = useState('');
   const [attribute, setAttribute] = useState('');
   const [value, setValue] = useState('');
@@ -30,7 +30,8 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
   const [isProcessModalVisible, setIsProcessModalVisible] = useState(false);
   const [loadedModel, setLoadedModel] = useState(null);
   const [subModelPublishStatus, setSubModelPublishStatus] = useState({});
-
+  const [modelListData, setModelListData] = useState([]); // 新增状态用于存储模型列表数据
+  const [loadingModelList, setLoadingModelList] = useState(false); // 新增加载状态
   useEffect(() => {
     setEntity('');
     setAttribute('');
@@ -311,7 +312,7 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
           nn_model_type: loadedModel.model.nn_model_type,
           time: loadedModel.model.time,
           model_path: loadedModel.model.model_path,
-          model_list: loadedModel.model.model_list,
+          select_model: loadedModel.model.select_model,
           role_name: loadedModel.model.role_name,
           scenario_name: loadedModel.model.scenario_name,
           version: loadedModel.model.version,
@@ -353,7 +354,7 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
             setTraining(false);
             if (statusData.result.status === "success") {
               message.success('训练完成，模型已保存！');
-              fetchDecisions();
+
             } else if (statusData.result.status === "stopped") {
               message.warning('训练已终止，模型未保存');
             } else {
@@ -422,20 +423,66 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
     message.success("智能体载入成功！");
   };
 
-  const handleViewModelListClick = () => {
+   const handleViewModelListClick = async () => {
+    // 检查必要的选择项
+    if (!intelligentStore.selectedScenario || !intelligentStore.selectedAgentRole || !intelligentStore.selectedAlgorithm|| !intelligentStore.selectedAgent) {
+      message.error("请先选择场景、角色、算法并载入智能体");
+      return;
+    }
 
-    setSubModelPublishStatus(prevStatus => {
-      const updatedStatus = { ...prevStatus };
-      decisionModels.forEach(record => {
-        record.model.model_list.forEach(subModelId => {
-          if (!(subModelId in updatedStatus)) {
-            updatedStatus[subModelId] = false; 
-          }
-        });
+    try {
+      setLoadingModelList(true);
+      
+      // 构建请求参数
+      const requestBody = {
+        scenarioId: intelligentStore.selectedScenario.id,
+        scenarioName: intelligentStore.selectedScenario.name,
+        agentRoleId: intelligentStore.selectedAgentRole.id,
+        agentRoleName: intelligentStore.selectedAgentRole.name,
+        algorithmName: intelligentStore.selectedAlgorithm.name,
+        agentId: intelligentStore.selectedAgent.agentID
+      };
+      console.log(requestBody)
+      // 发送请求到后端获取模型列表
+      const response = await fetch(__APP_CONFIG__.get_model_list, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
       });
-      return updatedStatus;
-    });
-    setIsModelListModalVisible(true);
+
+      if (!response.ok) {
+        throw new Error(`Network response was not ok: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      if (data.status === 'success') {
+        setModelListData(data.models);
+        
+        // 初始化子模型发布状态
+        setSubModelPublishStatus(prevStatus => {
+          const updatedStatus = { ...prevStatus };
+          data.models.forEach(record => {
+            record.model.model_list.forEach(subModelId => {
+              if (!(subModelId in updatedStatus)) {
+                updatedStatus[subModelId] = false; 
+              }
+            });
+          });
+          return updatedStatus;
+        });
+        
+        setIsModelListModalVisible(true);
+      } else {
+        message.error('获取模型列表失败: ' + data.message);
+      }
+    } catch (error) {
+      console.error('获取模型列表失败:', error);
+      message.error('获取模型列表失败，请检查网络或联系管理员');
+    } finally {
+      setLoadingModelList(false);
+    }
   };
 
   const handleViewModel = (model) => {
@@ -491,7 +538,6 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
           ...prev,
           [subModelId]: true
         }));
-        fetchDecisions();
       } else {
         message.error('发布模型失败，请检查日志');
       }
@@ -502,7 +548,7 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
   };
   const handleLoadModel = async (record, subModelId) => {
     try {
-      const modelToLoad = decisionModels.find(
+      const modelToLoad = modelListData.find(
         (model) => model.model.model_list.includes(subModelId)
       );
       if (!modelToLoad) {
@@ -522,7 +568,7 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
         ...modelToLoad,
         model: {
           ...modelToLoad.model,
-          id: subModelId 
+          select_model: subModelId 
         }
       });
 
@@ -610,6 +656,11 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
       title: '决策模型名称', 
       dataIndex: ['model', 'name'], 
       key: 'agentName' 
+    },
+        { 
+      title: '智能体ID', 
+      dataIndex: ['model', 'agentID'], 
+      key: 'agentID' 
     },
     { 
       title: '场景名称', 
@@ -789,7 +840,7 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
           { 
             title: '载入状态(持续训练)', 
             key: 'loadStatus',
-            render: (text, subRecord) => loadedModel && loadedModel.model.id === subRecord.id ? '已载入' : '未载入'  
+            render: (text, subRecord) => loadedModel && loadedModel.model.select_model === subRecord.id ? '已载入' : '未载入'  
           },
           { 
             title: '操作',
@@ -806,7 +857,7 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
                 <Button 
                   type="primary" 
                   onClick={() => handleLoadModel(record, subRecord.id)}
-                  disabled={loadedModel && loadedModel.model.id === subRecord.id}
+                  disabled={loadedModel && loadedModel.model.select_model === subRecord.id}
                 >
                   载入
                 </Button>
@@ -1104,7 +1155,7 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
         )}
       </Modal>
 
-      <Modal
+   <Modal
         title="模型列表"
         open={isModelListModalVisible}
         onOk={() => setIsModelListModalVisible(false)}
@@ -1113,7 +1164,7 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
       >
         <Table
           columns={modelListColumns}
-          dataSource={decisionModels}
+          dataSource={modelListData}  // 使用从后端获取的数据
           pagination={false}
           style={{ width: '100%' }}
           rowKey={(record) => record.model.id}
@@ -1127,8 +1178,10 @@ const AgentTrainingPanel = observer(({ decisionModels, fetchDecisions }) => {
             },
             expandIcon: ({ expanded, onExpand, record }) => null,
           }}
+          loading={loadingModelList}
         />
       </Modal>
+
 
       <Modal
         title="模型详细信息"

@@ -18,6 +18,7 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
         key: decision.model.id || `fallback-${index}`, // Ensure unique key
         AGENT_MODEL_ID: decision.model.id,
         AGENT_NAME: decision.model.name,
+        AGENT_ID:decision.model.agentID,
         SCENARIO_NAME: decision.model.scenario_name,
         ROLE_NAME: decision.model.role_name,
         NN_MODEL_TYPE: decision.model.nn_model_type,
@@ -41,6 +42,7 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
             editForm.setFieldsValue({
                 AGENT_MODEL_ID: currentDecision.AGENT_MODEL_ID,
                 AGENT_NAME: currentDecision.AGENT_NAME,
+                AGENT_ID:currentDecision.AGENT_ID,
                 SCENARIO_NAME: currentDecision.SCENARIO_NAME,
                 ROLE_NAME: currentDecision.ROLE_NAME,
                 NN_MODEL_TYPE: currentDecision.NN_MODEL_TYPE,
@@ -212,7 +214,8 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
 
     const columns = [
         { title: '序号', dataIndex: 'key', key: 'index', render: (text, record, index) => index + 1 },
-        { title: '智能体模型 ID', dataIndex: 'AGENT_MODEL_ID', key: 'AGENT_MODEL_ID' },
+        { title: '决策模型 ID', dataIndex: 'AGENT_MODEL_ID', key: 'AGENT_MODEL_ID' },
+        { title: '智能体ID', dataIndex: 'AGENT_ID', key: 'AGENT_ID' },
         { title: '智能体模型名称', dataIndex: 'AGENT_NAME', key: 'AGENT_NAME' },
         { title: '所属想定场景名称', dataIndex: 'SCENARIO_NAME', key: 'SCENARIO_NAME' },
         { title: '角色名称', dataIndex: 'ROLE_NAME', key: 'ROLE_NAME' },
@@ -237,8 +240,9 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
         <Card title="决策模型库" bordered={true}>
             <span>检索：</span>
             <Select value={searchField} onChange={setSearchField} style={{ width: 120, marginRight: 8 }}>
-                <Select.Option value="model.id">智能体模型 ID</Select.Option>
+                <Select.Option value="model.id">决策模型 ID</Select.Option>
                 <Select.Option value="model.name">智能体模型名称</Select.Option>
+                <Select.Option value="model.agentID">智能体ID</Select.Option>
                 <Select.Option value="scenario.name">所属想定场景名称</Select.Option>
                 <Select.Option value="agent.role">角色名称</Select.Option>
                 <Select.Option value="model.type">神经网络模型类型</Select.Option>
@@ -262,7 +266,10 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
                 onCancel={() => setIsEditModalVisible(false)}
             >
                 <Form form={editForm} initialValues={currentDecision} onFinish={handleFinishEdit}>
-                    <Form.Item label="智能体模型 ID" name="AGENT_MODEL_ID">
+                    <Form.Item label="决策模型 ID" name="AGENT_MODEL_ID">
+                        <Input disabled={!isEditMode} />
+                    </Form.Item>
+                    <Form.Item label="智能体ID" name="AGENT_ID">
                         <Input disabled={!isEditMode} />
                     </Form.Item>
                     <Form.Item label="智能体模型名称" name="AGENT_NAME">
@@ -297,7 +304,10 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
                 onCancel={() => setIsAddModalVisible(false)}
             >
                 <Form form={addForm} onFinish={handleAdd}>
-                    <Form.Item label="智能体模型 ID" name="AGENT_MODEL_ID" rules={[{ required: true, message: '请输入智能体模型 ID' }]}>
+                    <Form.Item label="决策模型 ID" name="AGENT_MODEL_ID" rules={[{ required: true, message: '请输入决策模型 ID' }]}>
+                        <Input />
+                    </Form.Item>
+                    <Form.Item label="智能体ID" name="AGENT_ID" rules={[{ required: true, message: '请输入智能体 ID' }]}>
                         <Input />
                     </Form.Item>
                     <Form.Item label="智能体模型名称" name="AGENT_NAME" rules={[{ required: true, message: '请输入智能体模型名称' }]}>

@@ -266,6 +266,7 @@ def train():
                         "model_list": [f"{model_id}-0", f"{model_id}-20"] ,
                         "role_name": data.get('scenarioEditInfo', {}).get('agentRoleName', 'Unknown'),
                         "scenario_name": data.get('scenarioEditInfo', {}).get('scenarioName', 'Unknown'),
+                        "agentID":data.get('agentInfo', {}).get('agentID', 'Unknown'),
                     },
                     "env_parm":env_param,
                     "algorithm": {
@@ -579,6 +580,59 @@ def load_dataset():
             "success": False,
             "message": f"服务器错误: {str(e)}"
         }), 500
+@app.route('/get_model_list', methods=['POST'])
+def get_model_list():
+    try:
+        # 获取请求参数
+        request_data = request.get_json()
+        scenario_id = request_data.get('scenarioId')
+        scenario_name = request_data.get('scenarioName')
+        agent_role_id = request_data.get('agentRoleId')
+        agent_role_name = request_data.get('agentRoleName')
+        algorithm_name = request_data.get('algorithmName')
+        agent_id = request_data.get('agentId')
+        # 验证必要参数
+        if not scenario_id or not scenario_name or not agent_role_id or not agent_role_name:
+            return jsonify({
+                'status': 'error',
+                'message': 'Missing required parameters: scenarioId, scenarioName, agentRoleId, agentRoleName'
+            }), 400
 
+        # 读取 dc.json 文件
+        with open(DECISION_FILE_PATH, 'r', encoding='utf-8') as f:
+            all_models = json.load(f)
+
+        # 筛选符合条件的模型
+        filtered_models = []
+        for model in all_models:
+            scenario_match = (model['model']['scenario_name'] == scenario_name)
+            role_match = (model['model']['role_name'] == agent_role_name)
+            algorithm_match = (model['algorithm']['name'] == algorithm_name)
+            agent_match = (str(model['model']['agentID']) == str(agent_id))
+            print(algorithm_match,scenario_match,role_match,agent_match)
+            # 如果所有条件都满足，则添加到结果中
+            if scenario_match and role_match and algorithm_match and agent_match:
+                filtered_models.append(model)
+
+        return jsonify({
+            'status': 'success',
+            'models': filtered_models
+        })
+
+    except FileNotFoundError:
+        return jsonify({
+            'status': 'error',
+            'message': 'Model data file not found'
+        }), 500
+    except json.JSONDecodeError:
+        return jsonify({
+            'status': 'error',
+            'message': 'Invalid model data file format'
+        }), 500
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'Internal server error: {str(e)}'
+        }), 500
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
