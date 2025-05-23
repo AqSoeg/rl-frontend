@@ -22,6 +22,7 @@ training_thread = None
 training_stop_flag = False
 training_status = "idle"
 training_result = None
+
 def get_nested_field(item, field):
     try:
         keys = field.split('.')
@@ -31,7 +32,7 @@ def get_nested_field(item, field):
         return value
     except (KeyError, TypeError):
         return None
-        
+
 @app.route('/scenarios', methods=['POST'])
 def get_scenarios():
     try:
@@ -76,25 +77,27 @@ def save_model():
         print(f'Error saving model: {str(e)}')
         return jsonify({'status': 'error', 'message': str(e)})
 
-@app.route('/evaluate_data_generate', methods=['POST'])
+@app.route('/evaluateDataGenerate', methods=['POST'])
 def evaluate_data_generate():
     try:
         data = request.json
-        decision_model = data.get('decisionModel')
+        model_data = data.get('model')
 
-        print("Received decision model information:")
-        print(decision_model)
+        print("Received model information:")
+        print(model_data)
         print("Starting data generation for evaluation...")
 
         new_entry = {
-            "AGENT_MODEL_ID": decision_model['model']['id'],
-            "AGENT_NAME": decision_model['model']['name'],
-            "SCENARIO_NAME": decision_model['scenario']['name'],
-            "ROLE_NAME": decision_model['agent']['role'],
-            "AGENT_MODEL_VERSION": decision_model['model']['version'],
-            "NN_MODEL_TYPE": decision_model['model']['type'],
-            "MODEL_PATH": decision_model['model']['path'],
-            "DATA_FILE": f"./mock/{decision_model['model']['id']}.json",
+            "AGENT_MODEL_ID": model_data['id'],
+            "AGENT_NAME": model_data['name'],
+            "SCENARIO_NAME": model_data['scenario_name'],
+            "ROLE_NAME": model_data['role_name'],
+            "AGENT_MODEL_VERSION": model_data['version'],
+            "NN_MODEL_TYPE": model_data['nn_model_type'],
+            "MODEL_PATH": model_data['model_path'],
+            "SELECT_MODEL": model_data['select_model'],
+            "EPISODES": model_data['episodes'],
+            "DATA_FILE": f"./mock/{model_data['id']}.json",
             "CREAT_TIME": datetime.datetime.now().isoformat()
         }
 
@@ -182,6 +185,7 @@ def get_decision_models():
     except Exception as e:
         print(f'Error reading decision models: {str(e)}')
         return jsonify({'error': 'Failed to read decision models'}), 500
+
 @app.route('/getEvaluateTables', methods=['POST'])
 def get_evaluate_tables():
     try:
@@ -191,6 +195,7 @@ def get_evaluate_tables():
     except Exception as e:
         print(f'Error reading evaluate tables: {str(e)}')
         return jsonify({'error': 'Failed to read evaluate tables'}), 500
+
 @app.route('/get_algorithm', methods=['POST'])
 def get_algorithm():
     try:
@@ -232,53 +237,50 @@ def train():
                 model_path = 'mock/ppo_model.pkl'
                 model.save(model_path)
                 print(f"Model saved to {model_path}")
-                
-                # 创建与dc.json格式一致的模型数据
+
                 model_id = str(int(time.time()))
-                env_params=data.get('scenarioEditInfo', {}).get('env_params', 'Unknown')
-                rewards_list=data.get('agentInfo', {}).get('reward', 'Unknown')
+                env_params = data.get('scenarioEditInfo', {}).get('env_params', 'Unknown')
+                rewards_list = data.get('agentInfo', {}).get('reward', 'Unknown')
                 env_param = {}
                 reward = {}
                 for param in env_params:
                     for p in param.get('params', []):
                         env_param[p.get('label', f'unknown_label_{len(env_param)}')] = p.get('value', None)
-                for i, reward_item in enumerate(rewards_list, 1):  # 从 1 开始计数
-                        reward[f"reward{i}"] = reward_item.get('rewardValue', f"unknown_reward_{i}")
+                for i, reward_item in enumerate(rewards_list, 1):
+                    reward[f"reward{i}"] = reward_item.get('rewardValue', f"unknown_reward_{i}")
                 trained_model = {
                     "model": {
                         "id": model_id,
                         "name": data.get('agentInfo', {}).get('agentName', 'Unknown'),
-                        "version":data.get('agentInfo', {}).get('agentVersion', 'Unknown'),
+                        "version": data.get('agentInfo', {}).get('agentVersion', 'Unknown'),
                         "nn_model_type": data.get('algorithmInfo', {}).get('algorithmType', 'Unknown'),
                         "time": datetime.datetime.now().isoformat(),
                         "img_url": "http://example.com/image",
                         "model_path": model_path,
-                        "model_list": [f"{model_id}-0", f"{model_id}-20"] ,
+                        "model_list": [f"{model_id}-0", f"{model_id}-20"],
                         "role_name": data.get('scenarioEditInfo', {}).get('agentRoleName', 'Unknown'),
                         "scenario_name": data.get('scenarioEditInfo', {}).get('scenarioName', 'Unknown'),
                     },
-                    "env_parm":env_param,
+                    "env_parm": env_param,
                     "algorithm": {
-                        "id":data.get('algorithmInfo', {}).get('algorithmID', 'Unknown'),
-                        "name":data.get('algorithmInfo', {}).get('algorithmName', 'Unknown'),
-                        "mode":data.get('algorithmInfo', {}).get('algorithmType', 'Unknown'),
+                        "id": data.get('algorithmInfo', {}).get('algorithmID', 'Unknown'),
+                        "name": data.get('algorithmInfo', {}).get('algorithmName', 'Unknown'),
+                        "mode": data.get('algorithmInfo', {}).get('algorithmType', 'Unknown'),
                         "hyperParams": data.get('algorithmInfo', {}).get('hyperParameters', 'Unknown'),
                     },
-                    "reward":reward
+                    "reward": reward
                 }
 
-                # 读取现有数据并追加新模型
                 with open(DECISION_FILE_PATH, 'r', encoding='utf-8') as f:
                     existing_data = json.load(f)
                 existing_data.append(trained_model)
-                
-                # 保存更新后的数据
+
                 with open(DECISION_FILE_PATH, 'w', encoding='utf-8') as f:
                     json.dump(existing_data, f, ensure_ascii=False, indent=2)
-                
+
                 training_result = {
-                    "status": "success", 
-                    "message": "Training completed and model saved.", 
+                    "status": "success",
+                    "message": "Training completed and model saved.",
                     "model": trained_model
                 }
         except Exception as e:
@@ -501,6 +503,7 @@ def add_item():
     except Exception as e:
         print(f'Error adding {add_type}: {str(e)}')
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
 @app.route('/updateDbJson', methods=['POST'])
 def update_db_json():
     try:
@@ -534,10 +537,10 @@ def get_deployment_image():
     scenario_id = data.get('scenarioId')
     if not scenario_id:
         return jsonify({"status": "error", "message": "Missing scenarioId"}), 400
-    
+
     return jsonify({
         "status": "success",
-        "img_url": f"mock/scenarios/{scenario_id}.jpeg"  # 或者返回完整的URL
+        "img_url": f"mock/scenarios/{scenario_id}.jpeg"
     })
 
 @app.route('/get_process_data', methods=['POST'])
@@ -545,16 +548,17 @@ def get_process_data():
     data = request.get_json()
     agent_id = data.get('agentId')
     scenario_id = data.get('scenarioId')
-    
+
     if not agent_id or not scenario_id:
         return jsonify({"status": "error", "message": "Missing parameters"}), 400
 
     animation_url = f"mock/process/{scenario_id}_{agent_id}.webp"
-    
+
     return jsonify({
         "status": "success",
         "animationUrl": animation_url
     })
+
 @app.route('/load_dataset', methods=['POST'])
 def load_dataset():
     try:
@@ -563,7 +567,7 @@ def load_dataset():
             "success": True,
             "dataset": data,
         })
-        
+
     except Exception as e:
         return jsonify({
             "success": False,

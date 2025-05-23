@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
-import { Button, Select, Modal, Table, Space } from 'antd';
+import { Button, Select, Modal, Table, Space, InputNumber } from 'antd';
+import { DownOutlined } from '@ant-design/icons';
 import './EvaluationOptimization.css';
 
 const EvaluationOptimization = () => {
@@ -29,11 +30,14 @@ const EvaluationOptimization = () => {
     const [isModelListModalVisible, setIsModelListModalVisible] = useState(false);
     const [isEffectImageModalVisible, setIsEffectImageModalVisible] = useState(false);
     const [isModelInfoModalVisible, setIsModelInfoModalVisible] = useState(false);
+    const [isEpisodesModalVisible, setIsEpisodesModalVisible] = useState(false);
     const [effectImageUrl, setEffectImageUrl] = useState(null);
     const [evaluationData, setEvaluationData] = useState([]);
     const [selectedModel, setSelectedModel] = useState(null);
     const [decisionModels, setDecisionModels] = useState([]);
     const [currentModel, setCurrentModel] = useState(null);
+    const [selectedSubModel, setSelectedSubModel] = useState(null);
+    const [episodes, setEpisodes] = useState(100);
 
     const chartRefs = useRef(Array(4).fill(null));
     const radarChartRef = useRef(null);
@@ -338,14 +342,38 @@ const EvaluationOptimization = () => {
         }
     };
 
-    const handleGenerate = async (record) => {
+    const handleGenerate = async (record, subModelId) => {
+        setSelectedSubModel({ ...record, select_model: subModelId });
+        setEpisodes(100);
+        setIsEpisodesModalVisible(true);
+    };
+
+    const handleEpisodesConfirm = async () => {
+        if (!selectedSubModel || episodes < 1) {
+            alert('请输入有效的执行次数！');
+            return;
+        }
         try {
+            const generateData = {
+                model: {
+                    id: selectedSubModel.model.id,
+                    img_url: selectedSubModel.model.img_url,
+                    select_model: selectedSubModel.select_model,
+                    episodes: episodes,
+                    model_path: selectedSubModel.model.model_path,
+                    name: selectedSubModel.model.name,
+                    nn_model_type: selectedSubModel.model.nn_model_type,
+                    role_name: selectedSubModel.model.role_name,
+                    scenario_name: selectedSubModel.model.scenario_name,
+                    agentID: selectedSubModel.model.agentID,
+                    time: selectedSubModel.model.time,
+                    version: selectedSubModel.model.version
+                }
+            };
             const response = await fetch(__APP_CONFIG__.evaluateDataGenerate, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    decisionModel: record
-                }),
+                body: JSON.stringify(generateData),
             });
             if (!response.ok) {
                 throw new Error('Failed to generate evaluation data');
@@ -353,6 +381,7 @@ const EvaluationOptimization = () => {
             const data = await response.json();
             if (data.status === 'success') {
                 alert('数据生成成功！');
+                setIsEpisodesModalVisible(false);
             } else {
                 alert('数据生成失败！');
             }
@@ -396,9 +425,9 @@ const EvaluationOptimization = () => {
         { title: '评估数据ID', dataIndex: ['model', 'id'], key: 'modelId' },
         { title: '模型名称', dataIndex: ['model', 'name'], key: 'modelName' },
         { title: '模型版本', dataIndex: ['model', 'version'], key: 'modelVersion' },
-        { title: '模型类型', dataIndex: ['model', 'type'], key: 'modelType' },
-        { title: '场景名称', dataIndex: ['scenario', 'name'], key: 'scenarioName' },
-        { title: '智能体角色', dataIndex: ['agent', 'role'], key: 'agentRole' },
+        { title: '模型类型', dataIndex: ['model', 'nn_model_type'], key: 'modelType' },
+        { title: '场景名称', dataIndex: ['model', 'scenario_name'], key: 'scenarioName' },
+        { title: '智能体角色', dataIndex: ['model', 'role_name'], key: 'agentRole' },
         {
             title: '创建时间',
             dataIndex: ['model', 'time'],
@@ -437,10 +466,10 @@ const EvaluationOptimization = () => {
                             ]);
                             setSelectedLegends({});
                             setSidebarData({
-                                scenarioInfo: record.scenario,
-                                agentInfo: record.agent,
+                                scenarioInfo: { name: record.model.scenario_name },
+                                agentInfo: { role: record.model.role_name },
                                 modelInfo: record.model,
-                                trainInfo: record.train
+                                trainInfo: record.algorithm
                             });
                             setDataLoaded(true);
                             setIsDataModalVisible(false);
@@ -454,22 +483,17 @@ const EvaluationOptimization = () => {
     ];
 
     const modelListColumns = [
-        { title: '决策模型ID', dataIndex: ['model', 'id'], key: 'modelId' },
+        { title: '模型ID', dataIndex: ['model', 'id'], key: 'modelId' },
         { title: '决策模型名称', dataIndex: ['model', 'name'], key: 'modelName' },
-        { title: '场景名称', dataIndex: ['scenario', 'name'], key: 'scenarioName' },
-        { title: '角色名称', dataIndex: ['agent', 'role'], key: 'roleName' },
+        { title: '场景名称', dataIndex: ['model', 'scenario_name'], key: 'scenarioName' },
+        { title: '角色名称', dataIndex: ['model', 'role_name'], key: 'roleName' },
+        { title: '模型类型', dataIndex: ['model', 'nn_model_type'], key: 'modelType' },
         { title: '模型版本', dataIndex: ['model', 'version'], key: 'modelVersion' },
-        { title: '模型类型', dataIndex: ['model', 'type'], key: 'modelType' },
         {
             title: '创建时间',
             dataIndex: ['model', 'time'],
             key: 'createTime',
-            render: time => new Date(time).toLocaleString()
-        },
-        {
-            title: '发布状态',
-            dataIndex: ['model', 'state'],
-            key: 'state',
+            render: time => formatDate(time)
         },
         {
             title: '操作',
@@ -488,13 +512,27 @@ const EvaluationOptimization = () => {
                     >
                         效果
                     </Button>
-                    <Button
-                        className="EO-modal-button"
-                        onClick={() => handleGenerate(record)}
-                    >
-                        生成
-                    </Button>
                 </Space>
+            ),
+        },
+    ];
+
+    const subTableColumns = [
+        {
+            title: '模型子ID',
+            dataIndex: 'subModelId',
+            key: 'subModelId',
+        },
+        {
+            title: '操作',
+            key: 'action',
+            render: (_, record) => (
+                <Button
+                    className="EO-modal-button"
+                    onClick={() => handleGenerate(record.parentRecord, record.subModelId)}
+                >
+                    生成
+                </Button>
             ),
         },
     ];
@@ -596,7 +634,7 @@ const EvaluationOptimization = () => {
                             <div className="EO-info-item">模型ID: {sidebarData.modelInfo.id}</div>
                             <div className="EO-info-item">模型名称: {sidebarData.modelInfo.name}</div>
                             <div className="EO-info-item">模型版本: {sidebarData.modelInfo.version}</div>
-                            <div className="EO-info-item">模型类型: {sidebarData.modelInfo.type}</div>
+                            <div className="EO-info-item">模型类型: {sidebarData.modelInfo.nn_model_type}</div>
                             <div className="EO-info-item">创建时间: {formatDate(sidebarData.modelInfo.time)}</div>
                         </>
                     )}
@@ -728,46 +766,15 @@ const EvaluationOptimization = () => {
                         <div className="EO-detail-section">
                             <div className="EO-text">决策模型信息</div>
                             <div className="EO-info-item">模型ID: {selectedModel.model.id}</div>
-                            <div className="EO-info-item">模型名称: {selectedModel.model.name}</div>
+                            <div className="EO-info-item">决策模型名称: {selectedModel.model.name}</div>
                             <div className="EO-info-item">模型版本: {selectedModel.model.version}</div>
-                            <div className="EO-info-item">模型类型: {selectedModel.model.type}</div>
+                            <div className="EO-info-item">模型类型: {selectedModel.model.nn_model_type}</div>
+                            <div className="EO-info-item">场景名称: {selectedModel.model.scenario_name}</div>
+                            <div className="EO-info-item">角色名称: {selectedModel.model.role_name}</div>
+                            <div className="EO-info-item">智能体ID: {selectedModel.model.agentID}</div>
                             <div className="EO-info-item">创建时间: {formatDate(selectedModel.model.time)}</div>
-                        </div>
-                        <div className="EO-detail-section">
-                            <div className="EO-text">场景信息</div>
-                            <div className="EO-info-item">名称: {selectedModel.scenario.name}</div>
-                            <div className="EO-info-item">描述: {selectedModel.scenario.description}</div>
-                            <Table
-                                columns={envParamsColumns}
-                                dataSource={selectedModel.scenario.envParams}
-                                pagination={false}
-                                size="small"
-                                rowKey={(record) => Object.keys(record)[0]}
-                            />
-                        </div>
-                        <div className="EO-detail-section">
-                            <div className="EO-text">智能体信息</div>
-                            <div className="EO-info-item">角色: {selectedModel.agent.role}</div>
-                            <div className="EO-info-item">类型: {selectedModel.agent.type}</div>
-                            <div className="EO-info-item">数量: {selectedModel.agent.count}</div>
-                            <Table
-                                columns={entityAssignmentsColumns}
-                                dataSource={selectedModel.agent.entityAssignments}
-                                pagination={false}
-                                size="small"
-                                rowKey={(record) => Object.keys(record)[0]}
-                            />
-                        </div>
-                        <div className="EO-detail-section">
-                            <div className="EO-text">训练信息</div>
-                            <div className="EO-info-item">训练算法: {selectedModel.train.algorithm}</div>
-                            <Table
-                                columns={hyperParamsColumns}
-                                dataSource={selectedModel.train.hyperParams}
-                                pagination={false}
-                                size="small"
-                                rowKey={(record) => Object.keys(record)[0]}
-                            />
+                            <div className="EO-info-item">模型存放路径: {selectedModel.model.model_path}</div>
+                            <div className="EO-info-item">模型效果图路径: {selectedModel.model.img_url}</div>
                         </div>
                     </div>
                 )}
@@ -785,6 +792,25 @@ const EvaluationOptimization = () => {
                     dataSource={decisionModels}
                     pagination={false}
                     rowKey={(record) => record.model.id}
+                    expandable={{
+                        expandedRowRender: (record) => (
+                            <Table
+                                columns={subTableColumns}
+                                dataSource={record.model.model_list.map(subModelId => ({
+                                    subModelId,
+                                    parentRecord: record
+                                }))}
+                                pagination={false}
+                                rowKey="subModelId"
+                            />
+                        ),
+                        expandIcon: ({ expanded, onExpand, record }) => (
+                            <DownOutlined
+                                onClick={(e) => onExpand(record, e)}
+                                rotate={expanded ? 180 : 0}
+                            />
+                        )
+                    }}
                 />
             </Modal>
 
@@ -796,14 +822,15 @@ const EvaluationOptimization = () => {
             >
                 {currentModel && (
                     <div>
-                        <p><strong>决策模型ID：</strong>{currentModel.model.id}</p>
-                        <p><strong>智能体名称：</strong>{currentModel.model.name}</p>
-                        <p><strong>场景名称：</strong>{currentModel.scenario.name}</p>
-                        <p><strong>角色名称：</strong>{currentModel.agent.role}</p>
+                        <p><strong>模型ID：</strong>{currentModel.model.id}</p>
+                        <p><strong>决策模型名称：</strong>{currentModel.model.name}</p>
                         <p><strong>模型版本：</strong>{currentModel.model.version}</p>
-                        <p><strong>模型类型：</strong>{currentModel.model.type}</p>
-                        <p><strong>创建时间：</strong>{new Date(currentModel.model.time).toLocaleString()}</p>
-                        <p><strong>模型存放路径：</strong>{currentModel.model.path || '未提供'}</p>
+                        <p><strong>模型类型：</strong>{currentModel.model.nn_model_type}</p>
+                        <p><strong>场景名称：</strong>{currentModel.model.scenario_name}</p>
+                        <p><strong>角色名称：</strong>{currentModel.model.role_name}</p>
+                        <p><strong>智能体ID：</strong>{currentModel.model.agentID}</p>
+                        <p><strong>创建时间：</strong>{formatDate(currentModel.model.time)}</p>
+                        <p><strong>模型存放路径：</strong>{currentModel.model.model_path || '未提供'}</p>
                         <p><strong>模型效果图路径：</strong>{currentModel.model.img_url || '未提供'}</p>
                     </div>
                 )}
@@ -816,6 +843,22 @@ const EvaluationOptimization = () => {
                 footer={null}
             >
                 {effectImageUrl && <img src={effectImageUrl} alt="训练效果图片" style={{ width: '100%' }} />}
+            </Modal>
+
+            <Modal
+                title="请输入执行次数"
+                open={isEpisodesModalVisible}
+                onOk={handleEpisodesConfirm}
+                onCancel={() => setIsEpisodesModalVisible(false)}
+                okText="确认"
+                cancelText="取消"
+            >
+                <InputNumber
+                    min={1}
+                    value={episodes}
+                    onChange={(value) => setEpisodes(value)}
+                    style={{ width: '100%' }}
+                />
             </Modal>
         </div>
     );

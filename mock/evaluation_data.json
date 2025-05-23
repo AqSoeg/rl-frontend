@@ -1,0 +1,62 @@
+[
+  {
+    "evaluateData": {
+      "id": "ecb74ee5f7a1301",
+      "img_url": "http://example.com/image2",
+      "model_path": "/path/to/model2.pt",
+      "evaluateData_path": "/path/to/data2",
+      "evaluateData_list": [
+        ["actor_0_0.json", "actor_0_0.pt"],
+        ["actor_0_20.json", "actor_0_20.pt"]
+      ],
+      "name": "同构多智能体模型",
+      "nn_model_type": "共享多智能体",
+      "role_name": "红绿灯",
+      "scenario_name": "城市交通",
+      "agentID": "407cb54f5528f7e",
+      "trainID": "c4ca4238a0b923820dcc509a6f75849b",
+      "time": "2025-05-11T13:16:48.449Z",
+      "version": "1.0"
+    }
+  },
+  {
+    "evaluateData": {
+      "id": "aa11c3eab13189e",
+      "img_url": "http://example.com/image1",
+      "model_path": "/path/to/model1.pt",
+      "evaluateData_path": "/path/to/data1.json",
+      "evaluateData_list": [
+        ["actor_1_0.json", "actor_1_0.pt"],
+        ["actor_1_20.json", "actor_1_20.pt"]
+      ],
+      "name": "异构多智能体模型",
+      "nn_model_type": "分布多智能体",
+      "role_name": "红绿灯",
+      "scenario_name": "城市交通",
+      "agentID": "4c4fa8d4f591fc6",
+      "trainID": "c81e728d9d4c2f636f067f89cc14862c",
+      "time": "2025-05-11T13:08:13.225Z",
+      "version": "2.0"
+    }
+  },
+  {
+    "evaluateData": {
+      "id": "b2c45d6e8f90123",
+      "img_url": "http://example.com/image3",
+      "model_path": "/path/to/model3.pt",
+      "evaluateData_path": "/path/to/data3.json",
+      "evaluateData_list": [
+        ["actor_2_0.json", "actor_2_0.pt"],
+        ["actor_2_20.json", "actor_2_20.pt"]
+      ],
+      "name": "单智能体模型",
+      "nn_model_type": "单智能体",
+      "role_name": "机器人",
+      "scenario_name": "工业生产线",
+      "agentID": "d6c1afac8b5b3d7",
+      "trainID": "eccbc87e4b5ce2fe28308fd9f2a7baf3",
+      "time": "2025-05-02T10:30:45.789Z",
+      "version": "3"
+    }
+  }
+]

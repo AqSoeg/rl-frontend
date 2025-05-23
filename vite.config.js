@@ -5,7 +5,7 @@ const appConfig = {
   scenarios: "http://localhost:5000/scenarios",
   getModels: "http://localhost:5000/getModels",
   saveModel: "http://localhost:5000/saveModel",
-  evaluateDataGenerate: "http://localhost:5000/evaluate_data_generate",
+  evaluateDataGenerate: "http://localhost:5000/evaluateDataGenerate",
   loadEvaluationData: "http://localhost:5000/loadEvaluationData",
   startEvaluation: "http://localhost:5000/startEvaluation",
   loadEvaluationResult: "http://localhost:5000/loadEvaluationResult",
