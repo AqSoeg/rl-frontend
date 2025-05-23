@@ -97,7 +97,6 @@ const Left = observer(({ scenarios, algorithms, datasets }) => {
       if (result.success) {
         message.success(`数据集加载成功！`);
         const dataset = result.dataset.dataset;
-        console.log(dataset)
         setSelectedDataset(dataset); // 更新本地状态
         intelligentStore.setSelectedDataset(dataset); // 保存到 store
         setVisible(false);

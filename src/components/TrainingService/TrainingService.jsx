@@ -70,29 +70,11 @@ const TrainingService = observer(() => {
       console.error('Error fetching datasets:', error);
     }
   };
-  const fetchDecisions = async () => {
-    try {
-      const response = await fetch(__APP_CONFIG__.getDecisionModels, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({})
-      });
-      if (!response.ok) {
-        throw new Error('Network response was not ok ' + response.statusText);
-      }
-      const data = await response.json();
-      setDecisionModels(data);
-    } catch (error) {
-      console.error('Error fetching decision models:', error);
-    }
-  };
+ 
   useEffect(() => {
     fetchScenarios();
     fetchAlgorithms();
     fetchDatasets();
-    fetchDecisions();
   }, []);
 
 
@@ -105,9 +87,6 @@ const TrainingService = observer(() => {
       />
       <div className='right'>
       <AgentTrainingPanel 
-        decisionModels={decisionModels} 
-        fetchDecisions={fetchDecisions}
-        refreshData={fetchScenarios}
       />
       </div>
 

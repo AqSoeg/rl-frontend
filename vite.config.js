@@ -14,7 +14,6 @@ const appConfig = {
   train:"http://localhost:5000/train",
   stop_training: "http://localhost:5000/stop_training",
   training_status:"http://localhost:5000/training_status",
-  get_effect:"http://localhost:5000/get_effect",
   publish_model:"http://localhost:5000/publish_model",
   get_datasets:"http://localhost:5000/get_datasets",
   getDecisionModels:"http://localhost:5000/getDecisionModels",
@@ -27,6 +26,7 @@ const appConfig = {
   get_deployment_image:"http://localhost:5000/get_deployment_image",
   get_process_data:"http://localhost:5000/get_process_data",
   load_dataset:"http://localhost:5000/load_dataset",
+  get_model_list:"http://localhost:5000/get_model_list",
 };
 
 export default defineConfig({

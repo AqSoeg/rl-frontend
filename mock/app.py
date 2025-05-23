@@ -16,7 +16,7 @@ DATASET_FILE_PATH = 'mock/dataset.json'
 SCENARIO_FILE_PATH = 'mock/db.json'
 DECISION_FILE_PATH = 'mock/dc.json'
 EVALUATE_FILE_PATH = 'mock/evaluatetable.json'
-EVALUATION_DATA_PATH = 'mock/evaluation_data.json'  # Updated to use evaluation_data.json
+EVALUATION_DATA_PATH = 'mock/evaluation_data.json'
 training_thread = None
 training_stop_flag = False
 training_status = "idle"
@@ -184,7 +184,6 @@ def start_evaluation():
         if not evaluate_data:
             return jsonify({'error': 'Missing evaluateData'}), 400
 
-        # Simulate evaluation process (existing logic retained for chart data)
         return jsonify({
             "chart_data": [
               {
@@ -427,13 +426,14 @@ def train():
                         "model_list": [f"{model_id}-0", f"{model_id}-20"],
                         "role_name": data.get('scenarioEditInfo', {}).get('agentRoleName', 'Unknown'),
                         "scenario_name": data.get('scenarioEditInfo', {}).get('scenarioName', 'Unknown'),
+                        "agentID":data.get('agentInfo', {}).get('agentID', 'Unknown'),
                     },
-                    "env_param": env_param,
+                    "env_param":env_param,
                     "algorithm": {
-                        "id": data.get('algorithmInfo', {}).get('algorithmID', 'Unknown'),
-                        "name": data.get('algorithmInfo', {}).get('algorithmName', 'Unknown'),
-                        "mode": data.get('algorithmInfo', {}).get('algorithmType', 'Unknown'),
-                        "hyperParams": data.get('algorithmInfo', {}).get('hyperParameters', 'Unknown'),
+                        "id":data.get('algorithmInfo', {}).get('algorithmID', 'Unknown'),
+                        "name":data.get('algorithmInfo', {}).get('algorithmName', 'Unknown'),
+                        "mode":data.get('algorithmInfo', {}).get('algorithmType', 'Unknown'),
+                        "hyper-parameters": data.get('algorithmInfo', {}).get('hyperParameters', 'Unknown'),
                     },
                     "reward": reward
                 }
@@ -472,22 +472,6 @@ def get_training_status():
     if training_status == "completed":
         return jsonify({"status": training_status, "result": training_result})
     return jsonify({"status": training_status})
-
-@app.route('/get_effect', methods=['POST'])
-def get_effect_image():
-    data = request.json
-    decision_model_id = data.get('decisionModelID')
-    try:
-        with open(DECISION_FILE_PATH, 'r', encoding='utf-8') as f:
-            decision_models = json.load(f)
-        model = next((m for m in decision_models if m['model']['id'] == decision_model_id), None)
-        if model:
-            return jsonify({"status": "success", "img_url": model['model']['img_url']})
-        else:
-            return jsonify({"status": "error", "message": "Model not found"}), 404
-    except Exception as e:
-        print(f'Error getting effect image: {str(e)}')
-        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/publish_model', methods=['POST'])
 def publish_model():
@@ -670,7 +654,6 @@ def add_item():
     except Exception as e:
         print(f'Error adding {add_type}: {str(e)}')
         return jsonify({'status': 'error', 'message': str(e)}), 500
-
 @app.route('/updateDbJson', methods=['POST'])
 def update_db_json():
     try:
@@ -740,6 +723,59 @@ def load_dataset():
             "success": False,
             "message": f"服务器错误: {str(e)}"
         }), 500
+@app.route('/get_model_list', methods=['POST'])
+def get_model_list():
+    try:
+        # 获取请求参数
+        request_data = request.get_json()
+        scenario_id = request_data.get('scenarioId')
+        scenario_name = request_data.get('scenarioName')
+        agent_role_id = request_data.get('agentRoleId')
+        agent_role_name = request_data.get('agentRoleName')
+        algorithm_name = request_data.get('algorithmName')
+        agent_id = request_data.get('agentId')
+        # 验证必要参数
+        if not scenario_id or not scenario_name or not agent_role_id or not agent_role_name:
+            return jsonify({
+                'status': 'error',
+                'message': 'Missing required parameters: scenarioId, scenarioName, agentRoleId, agentRoleName'
+            }), 400
 
+        # 读取 dc.json 文件
+        with open(DECISION_FILE_PATH, 'r', encoding='utf-8') as f:
+            all_models = json.load(f)
+
+        # 筛选符合条件的模型
+        filtered_models = []
+        for model in all_models:
+            scenario_match = (model['model']['scenario_name'] == scenario_name)
+            role_match = (model['model']['role_name'] == agent_role_name)
+            algorithm_match = (model['algorithm']['name'] == algorithm_name)
+            agent_match = (str(model['model']['agentID']) == str(agent_id))
+            print(algorithm_match,scenario_match,role_match,agent_match)
+            # 如果所有条件都满足，则添加到结果中
+            if scenario_match and role_match and algorithm_match and agent_match:
+                filtered_models.append(model)
+
+        return jsonify({
+            'status': 'success',
+            'models': filtered_models
+        })
+
+    except FileNotFoundError:
+        return jsonify({
+            'status': 'error',
+            'message': 'Model data file not found'
+        }), 500
+    except json.JSONDecodeError:
+        return jsonify({
+            'status': 'error',
+            'message': 'Invalid model data file format'
+        }), 500
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f'Internal server error: {str(e)}'
+        }), 500
 if __name__ == '__main__':
     app.run(port=5000, debug=True)
