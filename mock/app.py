@@ -141,12 +141,10 @@ def view_evaluation_data():
         with open(DECISION_FILE_PATH, 'r', encoding='utf-8') as file:
             dc_data = json.load(file)
 
-        # Find the matching model in dc.json where model.id == trainID
         matched_model = next((item for item in dc_data if item['model']['id'] == train_id), None)
         if not matched_model:
             return jsonify({'error': 'Model not found'}), 404
 
-        # Construct response with required information
         response_data = {
             'model_info': {
                 'id': matched_model['model']['id'],
@@ -254,83 +252,6 @@ def start_evaluation():
     except Exception as e:
         print(f'Error during evaluation: {str(e)}')
         return jsonify({'error': 'Failed to evaluate'}), 500
-
-@app.route('/loadEvaluationResult', methods=['POST'])
-def load_evaluation_result():
-    try:
-        data = request.json
-        print(data)
-
-        return jsonify({
-            "chart_data": [
-              {
-                "content": "京沪车流量周对比分析",
-                "x_label": "星期",
-                "y_label": "车流量",
-                "data_legend": ["北京", "上海"],
-                "chart_data": [
-                  {"x": "周一", "y": 87, "legend": "北京"},
-                  {"x": "周二", "y": 55, "legend": "北京"},
-                  {"x": "周三", "y": 70, "legend": "北京"},
-                  {"x": "周一", "y": 66, "legend": "上海"},
-                  {"x": "周二", "y": 95, "legend": "上海"},
-                  {"x": "周三", "y": 89, "legend": "上海"}
-                ]
-              },
-              {
-                "content": "高峰时段路网流量分布",
-                "x_label": "时间段",
-                "y_label": "车流量（辆/小时）",
-                "data_legend": ["早高峰", "午高峰", "晚高峰"],
-                "chart_data": [
-                  {"x": "主干道", "y": 3200, "legend": "早高峰"},
-                  {"x": "主干道", "y": 2800, "legend": "午高峰"},
-                  {"x": "主干道", "y": 4100, "legend": "晚高峰"},
-                  {"x": "快速路", "y": 2500, "legend": "早高峰"},
-                  {"x": "快速路", "y": 2100, "legend": "午高峰"},
-                  {"x": "快速路", "y": 3800, "legend": "晚高峰"}
-                ]
-              },
-              {
-                "content": "交通事故同期对比统计",
-                "x_label": "事故类型",
-                "y_label": "发生次数",
-                "data_legend": ["本周", "上周"],
-                "chart_data": [
-                  {"x": "追尾", "y": 15, "legend": "本周"},
-                  {"x": "追尾", "y": 22, "legend": "上周"},
-                  {"x": "侧翻", "y": 8, "legend": "本周"},
-                  {"x": "侧翻", "y": 12, "legend": "上周"},
-                  {"x": "闯红灯", "y": 30, "legend": "本周"},
-                  {"x": "闯红灯", "y": 45, "legend": "上周"}
-                ]
-              }
-            ],
-            "event_data": [
-              "系统初始化完成",
-              "传感器校准成功",
-              "路径规划更新"
-            ],
-            "radar_chart_data": {
-              "indicator": [
-                {"name": "销售", "max": 6500},
-                {"name": "管理", "max": 16000},
-                {"name": "信息技术", "max": 30000}
-              ],
-              "data": {
-                "预算分配": {"销售": 4300, "管理": 10000, "信息技术": 25000},
-                "实际开销": {"销售": 5000, "管理": 14000, "信息技术": 28000}
-              }
-            },
-            "eval_score": 96.5,
-            "eval_suggestion": [
-              "建议调整刹车参数",
-              "优化路径规划算法"
-            ]
-        })
-    except Exception as e:
-        print(f'Error loading evaluation result: {str(e)}')
-        return jsonify({'error': 'Failed to load evaluation result'}), 500
 
 @app.route('/get_datasets', methods=['POST'])
 def get_offline_datasets():
@@ -654,6 +575,7 @@ def add_item():
     except Exception as e:
         print(f'Error adding {add_type}: {str(e)}')
         return jsonify({'status': 'error', 'message': str(e)}), 500
+
 @app.route('/updateDbJson', methods=['POST'])
 def update_db_json():
     try:
@@ -734,18 +656,15 @@ def get_model_list():
         agent_role_name = request_data.get('agentRoleName')
         algorithm_name = request_data.get('algorithmName')
         agent_id = request_data.get('agentId')
-        # 验证必要参数
         if not scenario_id or not scenario_name or not agent_role_id or not agent_role_name:
             return jsonify({
                 'status': 'error',
                 'message': 'Missing required parameters: scenarioId, scenarioName, agentRoleId, agentRoleName'
             }), 400
 
-        # 读取 dc.json 文件
         with open(DECISION_FILE_PATH, 'r', encoding='utf-8') as f:
             all_models = json.load(f)
 
-        # 筛选符合条件的模型
         filtered_models = []
         for model in all_models:
             scenario_match = (model['model']['scenario_name'] == scenario_name)
@@ -753,7 +672,6 @@ def get_model_list():
             algorithm_match = (model['algorithm']['name'] == algorithm_name)
             agent_match = (str(model['model']['agentID']) == str(agent_id))
             print(algorithm_match,scenario_match,role_match,agent_match)
-            # 如果所有条件都满足，则添加到结果中
             if scenario_match and role_match and algorithm_match and agent_match:
                 filtered_models.append(model)
 
@@ -777,5 +695,6 @@ def get_model_list():
             'status': 'error',
             'message': f'Internal server error: {str(e)}'
         }), 500
+
 if __name__ == '__main__':
     app.run(port=5000, debug=True)

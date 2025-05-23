@@ -9,7 +9,6 @@ const appConfig = {
   viewEvaluationData: "http://localhost:5000/viewEvaluationData",
   loadEvaluationData: "http://localhost:5000/loadEvaluationData",
   startEvaluation: "http://localhost:5000/startEvaluation",
-  loadEvaluationResult: "http://localhost:5000/loadEvaluationResult",
   get_algorithm:"http://localhost:5000/get_algorithm",
   train:"http://localhost:5000/train",
   stop_training: "http://localhost:5000/stop_training",

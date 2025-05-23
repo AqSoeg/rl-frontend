@@ -356,7 +356,7 @@ const EvaluationOptimization = () => {
                 const errorData = await response.json();
                 throw new Error(errorData.error || '评估请求失败');
             }
-
+            alert("数据发送成功，后台正在评估中•••");
             const result = await response.json();
             setChartOptions(result.chart_data);
             setCharts(Array(4).fill({ img: null }));
@@ -638,11 +638,11 @@ const EvaluationOptimization = () => {
                         <>
                             <div className="EO-info-item">模型ID: {sidebarData.modelInfo.id}</div>
                             <div className="EO-info-item">模型名称: {sidebarData.modelInfo.name}</div>
-                            <div className="EO-info-item">模型类型: {sidebarData.modelInfo.nn_model_type}</div>
-                            <div className="EO-info-item">模型效果图路径: {sidebarData.modelInfo.img_url}</div>
-                            <div className="EO-info-item">模型存放路径: {sidebarData.modelInfo.model_path}</div>
                             <div className="EO-info-item">模型版本: {sidebarData.modelInfo.version}</div>
+                            <div className="EO-info-item">模型类型: {sidebarData.modelInfo.nn_model_type}</div>
                             <div className="EO-info-item">创建时间: {formatDate(sidebarData.modelInfo.time)}</div>
+                            <div className="EO-info-item">模型存放路径: {sidebarData.modelInfo.model_path}</div>
+                            <div className="EO-info-item">模型效果图路径: {sidebarData.modelInfo.img_url}</div>
                         </>
                     )}
                 </div>
@@ -796,14 +796,14 @@ const EvaluationOptimization = () => {
                             <div className="EO-text">模型信息</div>
                             <div className="EO-info-item">模型ID: {selectedModel.model_info.id}</div>
                             <div className="EO-info-item">模型名称: {selectedModel.model_info.name}</div>
-                            <div className="EO-info-item">模型类型: {selectedModel.model_info.nn_model_type}</div>
-                            <div className="EO-info-item">模型效果图路径: {selectedModel.model_info.img_url}</div>
-                            <div className="EO-info-item">模型存放路径: {selectedModel.model_info.model_path}</div>
                             <div className="EO-info-item">模型版本: {selectedModel.model_info.version}</div>
+                            <div className="EO-info-item">模型类型: {selectedModel.model_info.nn_model_type}</div>
                             <div className="EO-info-item">创建时间: {formatDate(selectedModel.model_info.time)}</div>
+                            <div className="EO-info-item">模型存放路径: {selectedModel.model_info.model_path}</div>
+                            <div className="EO-info-item">模型效果图路径: {selectedModel.model_info.img_url}</div>
                         </div>
                         <div className="EO-detail-section">
-                            <div className="EO-text">场景信息</div>
+                        <div className="EO-text">场景信息</div>
                             <div className="EO-info-item">场景名称: {selectedModel.scenario_info.name}</div>
                             <div className="EO-info-item">角色名称: {selectedModel.scenario_info.role_name}</div>
                             <div className="EO-info-item">智能体ID: {selectedModel.scenario_info.agent_id}</div>
