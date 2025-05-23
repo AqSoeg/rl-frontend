@@ -16,7 +16,7 @@ DATASET_FILE_PATH = 'mock/dataset.json'
 SCENARIO_FILE_PATH = 'mock/db.json'
 DECISION_FILE_PATH = 'mock/dc.json'
 EVALUATE_FILE_PATH = 'mock/evaluatetable.json'
-EVALUATION_DATA_PATH = 'mock/dc.json'
+EVALUATION_DATA_PATH = 'mock/evaluation_data.json'  # Updated to use evaluation_data.json
 training_thread = None
 training_stop_flag = False
 training_status = "idle"
@@ -130,16 +130,131 @@ def load_evaluation_data():
         print(f'Error reading evaluation data: {str(e)}')
         return jsonify({'error': 'Failed to read evaluation data'}), 500
 
+@app.route('/viewEvaluationData', methods=['POST'])
+def view_evaluation_data():
+    try:
+        data = request.json
+        train_id = data.get('trainID')
+        if not train_id:
+            return jsonify({'error': 'Missing trainID'}), 400
+
+        with open(DECISION_FILE_PATH, 'r', encoding='utf-8') as file:
+            dc_data = json.load(file)
+
+        # Find the matching model in dc.json where model.id == trainID
+        matched_model = next((item for item in dc_data if item['model']['id'] == train_id), None)
+        if not matched_model:
+            return jsonify({'error': 'Model not found'}), 404
+
+        # Construct response with required information
+        response_data = {
+            'model_info': {
+                'id': matched_model['model']['id'],
+                'name': matched_model['model']['name'],
+                'nn_model_type': matched_model['model']['nn_model_type'],
+                'img_url': matched_model['model']['img_url'],
+                'model_path': matched_model['model']['model_path'],
+                'version': matched_model['model']['version'],
+                'time': matched_model['model']['time']
+            },
+            'scenario_info': {
+                'name': matched_model['model']['scenario_name'],
+                'role_name': matched_model['model']['role_name'],
+                'agent_id': matched_model['model']['agentID'],
+                'env_params': matched_model.get('env_param', {})
+            },
+            'algorithm_info': {
+                'id': matched_model['algorithm']['id'],
+                'name': matched_model['algorithm']['name'],
+                'type': matched_model['algorithm']['mode'],
+                'hyper_params': matched_model['algorithm']['hyper-parameters']
+            }
+        }
+        return jsonify(response_data)
+    except Exception as e:
+        print(f'Error fetching evaluation data: {str(e)}')
+        return jsonify({'error': 'Failed to fetch evaluation data'}), 500
+
 @app.route('/startEvaluation', methods=['POST'])
 def start_evaluation():
     try:
         data = request.json
-        print("开始评估:", data)
-        return '数据发送成功，后台正在评估中•••'
+        print("Starting evaluation:", data)
+        evaluate_data = data.get('evaluateData')
+        if not evaluate_data:
+            return jsonify({'error': 'Missing evaluateData'}), 400
 
+        # Simulate evaluation process (existing logic retained for chart data)
+        return jsonify({
+            "chart_data": [
+              {
+                "content": "京沪车流量周对比分析",
+                "x_label": "星期",
+                "y_label": "车流量",
+                "data_legend": ["北京", "上海"],
+                "chart_data": [
+                  {"x": "周一", "y": 87, "legend": "北京"},
+                  {"x": "周二", "y": 55, "legend": "北京"},
+                  {"x": "周三", "y": 70, "legend": "北京"},
+                  {"x": "周一", "y": 66, "legend": "上海"},
+                  {"x": "周二", "y": 95, "legend": "上海"},
+                  {"x": "周三", "y": 89, "legend": "上海"}
+                ]
+              },
+              {
+                "content": "高峰时段路网流量分布",
+                "x_label": "时间段",
+                "y_label": "车流量（辆/小时）",
+                "data_legend": ["早高峰", "午高峰", "晚高峰"],
+                "chart_data": [
+                  {"x": "主干道", "y": 3200, "legend": "早高峰"},
+                  {"x": "主干道", "y": 2800, "legend": "午高峰"},
+                  {"x": "主干道", "y": 4100, "legend": "晚高峰"},
+                  {"x": "快速路", "y": 2500, "legend": "早高峰"},
+                  {"x": "快速路", "y": 2100, "legend": "午高峰"},
+                  {"x": "快速路", "y": 3800, "legend": "晚高峰"}
+                ]
+              },
+              {
+                "content": "交通事故同期对比统计",
+                "x_label": "事故类型",
+                "y_label": "发生次数",
+                "data_legend": ["本周", "上周"],
+                "chart_data": [
+                  {"x": "追尾", "y": 15, "legend": "本周"},
+                  {"x": "追尾", "y": 22, "legend": "上周"},
+                  {"x": "侧翻", "y": 8, "legend": "本周"},
+                  {"x": "侧翻", "y": 12, "legend": "上周"},
+                  {"x": "闯红灯", "y": 30, "legend": "本周"},
+                  {"x": "闯红灯", "y": 45, "legend": "上周"}
+                ]
+              }
+            ],
+            "event_data": [
+              "系统初始化完成",
+              "传感器校准成功",
+              "路径规划更新"
+            ],
+            "radar_chart_data": {
+              "indicator": [
+                {"name": "销售", "max": 6500},
+                {"name": "管理", "max": 16000},
+                {"name": "信息技术", "max": 30000}
+              ],
+              "data": {
+                "预算分配": {"销售": 4300, "管理": 10000, "信息技术": 25000},
+                "实际开销": {"销售": 5000, "管理": 14000, "信息技术": 28000}
+              }
+            },
+            "eval_score": 96.5,
+            "eval_suggestion": [
+              "建议调整刹车参数",
+              "优化路径规划算法"
+            ]
+        })
     except Exception as e:
         print(f'Error during evaluation: {str(e)}')
-        return '数据发送失败，请检查网络连接！'
+        return jsonify({'error': 'Failed to evaluate'}), 500
 
 @app.route('/loadEvaluationResult', methods=['POST'])
 def load_evaluation_result():
@@ -313,7 +428,7 @@ def train():
                         "role_name": data.get('scenarioEditInfo', {}).get('agentRoleName', 'Unknown'),
                         "scenario_name": data.get('scenarioEditInfo', {}).get('scenarioName', 'Unknown'),
                     },
-                    "env_parm": env_param,
+                    "env_param": env_param,
                     "algorithm": {
                         "id": data.get('algorithmInfo', {}).get('algorithmID', 'Unknown'),
                         "name": data.get('algorithmInfo', {}).get('algorithmName', 'Unknown'),
