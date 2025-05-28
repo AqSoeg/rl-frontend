@@ -8,7 +8,7 @@ import actionSpaceStore from './ActionSpaceStore';
 
 const { Option } = Select;
 
-const ActionSpace = ({ entities, actionTypes, selectedParams }) => {
+const ActionSpace = ({ entities, selectedParams }) => {
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedEntity, setSelectedEntity] = useState('');
     const [selectedActionType, setSelectedActionType] = useState('');
@@ -33,20 +33,23 @@ const ActionSpace = ({ entities, actionTypes, selectedParams }) => {
     }, [currentModelID]);
 
     const getActionUnit = () => {
-        if (!selectedActionType) return '';
-        const action = actionTypes.find(type => type[0] === selectedActionType);
+        if (!selectedEntity || !selectedActionType) return '';
+        const entity = entities.find(e => e.name === selectedEntity);
+        const action = entity?.actionTypes?.find(type => type[0] === selectedActionType);
         return action ? action[1] : '';
     };
 
     const getActionRange = () => {
-        if (!selectedActionType) return [];
-        const action = actionTypes.find(type => type[0] === selectedActionType);
+        if (!selectedEntity || !selectedActionType) return [];
+        const entity = entities.find(e => e.name === selectedEntity);
+        const action = entity?.actionTypes?.find(type => type[0] === selectedActionType);
         return action ? action[2] : [];
     };
 
     const getActionDiscreteValues = () => {
-        if (!selectedActionType) return [];
-        const action = actionTypes.find(type => type[0] === selectedActionType);
+        if (!selectedEntity || !selectedActionType) return [];
+        const entity = entities.find(e => e.name === selectedEntity);
+        const action = entity?.actionTypes?.find(type => type[0] === selectedActionType);
         return action ? action[3] : [];
     };
 
@@ -222,7 +225,6 @@ const ActionSpace = ({ entities, actionTypes, selectedParams }) => {
                 onCancel={() => setModalOpen(false)}
                 onConfirm={handleModalConfirm}
                 entities={entities}
-                actionTypes={actionTypes}
                 selectedEntity={selectedEntity}
                 setSelectedEntity={setSelectedEntity}
                 selectedActionType={selectedActionType}
@@ -699,7 +701,6 @@ const ActionModal = ({
                          onCancel,
                          onConfirm,
                          entities,
-                         actionTypes,
                          selectedEntity,
                          setSelectedEntity,
                          selectedActionType,
@@ -806,6 +807,12 @@ const ActionModal = ({
         onConfirm();
     };
 
+    const getAvailableActionTypes = () => {
+        if (!selectedEntity) return [];
+        const entity = entities.find(e => e.name === selectedEntity);
+        return entity?.actionTypes || [];
+    };
+
     return (
         <Modal
             title="动作编辑"
@@ -837,7 +844,7 @@ const ActionModal = ({
                         style={{ width: '300px' }}
                         disabled={!selectedEntity}
                     >
-                        {actionTypes.map(type => (
+                        {getAvailableActionTypes().map(type => (
                             <Option key={type[0]} value={type[0]}>{type[0]}</Option>
                         ))}
                     </Select>

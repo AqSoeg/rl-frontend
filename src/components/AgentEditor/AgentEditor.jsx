@@ -10,7 +10,6 @@ import './AgentEditor.css';
 const AgentEditor = () => {
     const [scenarios, setScenarios] = useState([]);
     const [selectedEntities, setSelectedEntities] = useState([]);
-    const [selectedActionTypes, setSelectedActionTypes] = useState([]);
     const [selectedParams, setSelectedParams] = useState([]);
 
     useEffect(() => {
@@ -50,11 +49,9 @@ const AgentEditor = () => {
                 const selectedRole = scenarios
                     .flatMap(scenario => scenario.roles)
                     .find(role => role.entities.some(entity => assignedEntities.includes(entity.name)));
-                setSelectedActionTypes(selectedRole ? selectedRole.actionTypes : []);
                 setSelectedParams(selectedRole ? selectedRole.RewardParams : []);
             } else {
                 setSelectedEntities([]);
-                setSelectedActionTypes([]);
                 setSelectedParams([]);
             }
         };
@@ -69,7 +66,7 @@ const AgentEditor = () => {
             <Sidebar scenarios={scenarios} />
             <div className="gradient-box">
                 <StateVector entities={selectedEntities} />
-                <ActionSpace entities={selectedEntities} actionTypes={selectedActionTypes} selectedParams={selectedParams} />
+                <ActionSpace entities={selectedEntities} selectedParams={selectedParams} />
                 <RewardFunction selectedParams={selectedParams} />
                 <ModelFunction scenarios={scenarios} />
             </div>
