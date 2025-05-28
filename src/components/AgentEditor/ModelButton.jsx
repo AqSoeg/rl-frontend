@@ -352,10 +352,12 @@ const ModelFunction = ({scenarios}) => {
                 onCancel={handleModelCancel}
                 okText="确认"
                 cancelText="取消"
+                width={1000}
             >
                 <Table
                     columns={columns}
                     dataSource={tableData}
+                    scroll={{ y: 500 }}
                     rowSelection={{
                         type: 'radio',
                         selectedRowKeys: selectedModel ? [tableData.findIndex(item => item.agentID === selectedModel.agentID)] : [],

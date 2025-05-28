@@ -782,11 +782,12 @@ const EvaluationOptimization = () => {
                 open={isDataModalVisible}
                 onCancel={() => setIsDataModalVisible(false)}
                 footer={null}
-                width={1000}
+                width={1500}
             >
                 <Table
                     columns={dataColumns}
                     dataSource={evaluationData}
+                    scroll={{ y: 500 }}
                     pagination={false}
                     rowKey={(record) => record.id}
                     expandable={{
@@ -865,11 +866,12 @@ const EvaluationOptimization = () => {
                 open={isModelListModalVisible}
                 onCancel={() => setIsModelListModalVisible(false)}
                 footer={null}
-                width={1000}
+                width={1500}
             >
                 <Table
                     columns={modelListColumns}
                     dataSource={decisionModels}
+                    scroll={{ y: 500 }}
                     pagination={false}
                     rowKey={(record) => record.model.id}
                     expandable={{
