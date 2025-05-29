@@ -1,6 +1,6 @@
 [
   {
-    "agentID": "407cb54f5528f7e",
+    "agentID": "0778ef6316ea96a",
     "scenarioID": "traffic",
     "agentRoleID": "traffic_light",
     "agentType": "同构多智能体",
@@ -287,10 +287,10 @@
         ]
       }
     ],
-    "updateTime": "2025-05-11T08:30:44.861Z"
+    "updateTime": "2025-05-29T01:58:14.871Z"
   },
   {
-    "agentID": "4c4fa8d4f591fc6",
+    "agentID": "50ab52464fcf703",
     "scenarioID": "traffic",
     "agentRoleID": "traffic_light",
     "agentType": "异构多智能体",
@@ -435,8 +435,27 @@
               ]
             ],
             "rules": [
-              ["IF ELSE", "R×α", ["10", "30"], ["35", "50"]],
-              ["FOR", "R̄÷b_u", ["10", "40"], []]
+              [
+                "IF ELSE",
+                "R×α",
+                [
+                  "10",
+                  "30"
+                ],
+                [
+                  "35",
+                  "50"
+                ]
+              ],
+              [
+                "FOR",
+                "R̄÷b_u",
+                [
+                  "10",
+                  "40"
+                ],
+                []
+              ]
             ]
           }
         ],
@@ -452,6 +471,6 @@
         ]
       }
     ],
-    "updateTime": "2025-05-11T08:37:24.640Z"
+    "updateTime": "2025-05-29T02:02:50.349Z"
   }
 ]
