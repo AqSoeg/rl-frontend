@@ -157,7 +157,8 @@ const EvaluationOptimization = observer(() => {
                 type: 'scroll',
                 orient: 'vertical',
                 right: 10,
-                top: 20
+                top: 20,
+                selected: evaluationOptimizationStore.selectedLegends[index] || {},
             };
             option.tooltip = {
                 trigger: 'item',
@@ -169,10 +170,12 @@ const EvaluationOptimization = observer(() => {
                     type: 'pie',
                     radius: '55%',
                     label: { show: false },
-                    data: chartData.chart_data.map((d) => ({
-                        name: `${d.x} - ${d.legend}`,
-                        value: d.y
-                    })),
+                    data: chartData.chart_data
+                        .filter((d) => evaluationOptimizationStore.selectedLegends[index]?.[d.legend] !== false)
+                        .map((d) => ({
+                            name: `${d.x} - ${d.legend}`,
+                            value: d.y,
+                        })),
                 },
             ];
         }
@@ -183,7 +186,7 @@ const EvaluationOptimization = observer(() => {
     const handleLegendSelect = (index, selected) => {
         evaluationOptimizationStore.setSelectedLegends({
             ...evaluationOptimizationStore.selectedLegends,
-            [index]: selected,
+            [index]: { ...evaluationOptimizationStore.selectedLegends[index], ...selected },
         });
     };
 
@@ -268,6 +271,8 @@ const EvaluationOptimization = observer(() => {
 
     const handleLoadEvaluationData = async (record, subModelId, dataFile) => {
         try {
+            evaluationOptimizationStore.resetRightPanel();
+
             const response = await fetch(__APP_CONFIG__.viewEvaluationData, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -321,6 +326,8 @@ const EvaluationOptimization = observer(() => {
             return;
         }
         try {
+            evaluationOptimizationStore.resetRightPanel();
+
             const evalData = {
                 evaluateData: {
                     id: evaluationOptimizationStore.sidebarData.evaluateDataInfo.id,

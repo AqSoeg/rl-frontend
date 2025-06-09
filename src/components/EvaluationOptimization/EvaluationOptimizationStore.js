@@ -130,6 +130,22 @@ class EvaluationOptimizationStore {
   setEpisodes(episodes) {
     this.episodes = episodes;
   }
+
+  resetRightPanel() {
+    this.charts = [];
+    this.events = [];
+    this.radarImage = null;
+    this.evalScore = undefined;
+    this.evalSuggestion = [];
+    this.chartSelections = [
+      { content: '', shape: '' },
+      { content: '', shape: '' },
+      { content: '', shape: '' },
+      { content: '', shape: '' },
+    ];
+    this.chartOptions = [];
+    this.selectedLegends = {};
+  }
 }
 
 export default new EvaluationOptimizationStore();
