@@ -39,6 +39,18 @@ class EvaluationOptimizationStore {
     makeAutoObservable(this);
   }
 
+  handleContentChange(index, value) {
+    const newSelections = [...this.chartSelections];
+    newSelections[index] = { content: value, shape: '' };
+    this.setChartSelections(newSelections);
+  }
+
+  handleShapeChange(index, value) {
+    const newSelections = [...this.chartSelections];
+    newSelections[index].shape = value;
+    this.setChartSelections(newSelections);
+  }
+
   setCharts(charts) {
     this.charts = charts;
   }

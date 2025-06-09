@@ -1,4 +1,4 @@
-import { observer } from 'mobx-react-lite';
+import { observer } from 'mobx-react';
 import { useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
 import { Button, Select, Modal, Table, Space, InputNumber } from 'antd';
@@ -369,17 +369,13 @@ const EvaluationOptimization = observer(() => {
     };
 
     const handleContentChange = (index, value) => {
-        const newSelections = [...evaluationOptimizationStore.chartSelections];
-        newSelections[index] = { content: value, shape: '' };
-        evaluationOptimizationStore.setChartSelections(newSelections);
+        evaluationOptimizationStore.handleContentChange(index, value);
         updateChart(index, value, '');
     };
 
     const handleShapeChange = (index, value) => {
-        const newSelections = [...evaluationOptimizationStore.chartSelections];
-        newSelections[index].shape = value;
-        evaluationOptimizationStore.setChartSelections(newSelections);
-        updateChart(index, newSelections[index].content, value);
+        evaluationOptimizationStore.handleShapeChange(index, value);
+        updateChart(index, evaluationOptimizationStore.chartSelections[index].content, value);
     };
 
     const getShapeOptions = (content) => {
