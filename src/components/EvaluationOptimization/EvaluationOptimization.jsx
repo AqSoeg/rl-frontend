@@ -1,44 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import { observer } from 'mobx-react-lite';
+import { useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
 import { Button, Select, Modal, Table, Space, InputNumber } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
+import evaluationOptimizationStore from './EvaluationOptimizationStore';
 import './EvaluationOptimization.css';
 
-const EvaluationOptimization = () => {
-    const [charts, setCharts] = useState([]);
-    const [events, setEvents] = useState([]);
-    const [radarImage, setRadarImage] = useState(null);
-    const [dataLoaded, setDataLoaded] = useState(false);
-    const [evalScore, setEvalScore] = useState();
-    const [evalSuggestion, setEvalSuggestion] = useState([]);
-    const [sidebarData, setSidebarData] = useState({
-        evaluateDataInfo: {},
-        scenarioInfo: {},
-        modelInfo: {},
-        algorithmInfo: {}
-    });
-    const [chartSelections, setChartSelections] = useState([
-        { content: '', shape: '' },
-        { content: '', shape: '' },
-        { content: '', shape: '' },
-        { content: '', shape: '' },
-    ]);
-    const [chartOptions, setChartOptions] = useState([]);
-    const [selectedLegends, setSelectedLegends] = useState({});
-    const [isDataModalVisible, setIsDataModalVisible] = useState(false);
-    const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
-    const [isModelListModalVisible, setIsModelListModalVisible] = useState(false);
-    const [isEffectImageModalVisible, setIsEffectImageModalVisible] = useState(false);
-    const [isModelInfoModalVisible, setIsModelInfoModalVisible] = useState(false);
-    const [isEpisodesModalVisible, setIsEpisodesModalVisible] = useState(false);
-    const [effectImageUrl, setEffectImageUrl] = useState(null);
-    const [evaluationData, setEvaluationData] = useState([]);
-    const [selectedModel, setSelectedModel] = useState(null);
-    const [decisionModels, setDecisionModels] = useState([]);
-    const [currentModel, setCurrentModel] = useState(null);
-    const [selectedSubModel, setSelectedSubModel] = useState(null);
-    const [episodes, setEpisodes] = useState(100);
-
+const EvaluationOptimization = observer(() => {
     const chartRefs = useRef(Array(4).fill(null));
     const radarChartRef = useRef(null);
 
@@ -69,22 +37,22 @@ const EvaluationOptimization = () => {
         const radarDom = radarChartRef.current;
         if (radarDom) {
             const radarChart = echarts.getInstanceByDom(radarDom) || echarts.init(radarDom);
-            if (radarImage) {
+            if (evaluationOptimizationStore.radarImage) {
                 const radarOption = {
                     tooltip: {
                         trigger: 'item',
                         formatter: (params) => {
                             return params.value.map((v, i) =>
-                                `${radarImage.indicator[i].name}：${v}`
+                                `${evaluationOptimizationStore.radarImage.indicator[i].name}：${v}`
                             ).join('<br>');
                         }
                     },
                     legend: {
-                        data: Object.keys(radarImage.data),
+                        data: Object.keys(evaluationOptimizationStore.radarImage.data),
                         bottom: 10
                     },
                     radar: {
-                        indicator: radarImage.indicator,
+                        indicator: evaluationOptimizationStore.radarImage.indicator,
                         shape: 'circle',
                         axisName: {
                             formatter: (name, indicator) =>
@@ -98,9 +66,9 @@ const EvaluationOptimization = () => {
                                 width: 4
                             }
                         },
-                        data: Object.entries(radarImage.data).map(([name, values]) => ({
+                        data: Object.entries(evaluationOptimizationStore.radarImage.data).map(([name, values]) => ({
                             name,
-                            value: radarImage.indicator.map(ind => values[ind.name]),
+                            value: evaluationOptimizationStore.radarImage.indicator.map(ind => values[ind.name]),
                             lineStyle: {
                                 type: 'dashed'
                             },
@@ -115,22 +83,22 @@ const EvaluationOptimization = () => {
                 radarChart.clear();
             }
         }
-    }, [radarImage]);
+    }, [evaluationOptimizationStore.radarImage]);
 
     useEffect(() => {
         chartRefs.current.forEach((chart, index) => {
             if (!chart) return;
-            const { content, shape } = chartSelections[index];
+            const { content, shape } = evaluationOptimizationStore.chartSelections[index];
             if (content && shape) {
                 updateChart(index, content, shape);
             } else {
                 chart.clear();
             }
         });
-    }, [chartSelections, chartOptions, selectedLegends]);
+    }, [evaluationOptimizationStore.chartSelections, evaluationOptimizationStore.chartOptions, evaluationOptimizationStore.selectedLegends]);
 
     const updateChart = (index, content, shape) => {
-        const chartData = chartOptions.find((item) => item.content === content);
+        const chartData = evaluationOptimizationStore.chartOptions.find((item) => item.content === content);
         if (!chartData || !shape) return;
 
         const chart = chartRefs.current[index];
@@ -142,7 +110,7 @@ const EvaluationOptimization = () => {
                 type: 'scroll',
                 orient: 'horizontal',
                 bottom: 0,
-                selected: selectedLegends[index] || {},
+                selected: evaluationOptimizationStore.selectedLegends[index] || {},
                 data: chartData.data_legend,
             },
             xAxis: {
@@ -170,7 +138,7 @@ const EvaluationOptimization = () => {
                 data: chartData.chart_data
                     .filter((d) => d.legend === legend)
                     .map((d) => d.y),
-                show: selectedLegends[index]?.[legend] !== false,
+                show: evaluationOptimizationStore.selectedLegends[index]?.[legend] !== false,
             }));
         } else if (shape === '折线图') {
             option.series = chartData.data_legend.map((legend) => ({
@@ -179,7 +147,7 @@ const EvaluationOptimization = () => {
                 data: chartData.chart_data
                     .filter((d) => d.legend === legend)
                     .map((d) => d.y),
-                show: selectedLegends[index]?.[legend] !== false,
+                show: evaluationOptimizationStore.selectedLegends[index]?.[legend] !== false,
             }));
         } else if (shape === '饼图') {
             option.xAxis.show = false;
@@ -213,10 +181,10 @@ const EvaluationOptimization = () => {
     };
 
     const handleLegendSelect = (index, selected) => {
-        setSelectedLegends((prev) => ({
-            ...prev,
+        evaluationOptimizationStore.setSelectedLegends({
+            ...evaluationOptimizationStore.selectedLegends,
             [index]: selected,
-        }));
+        });
     };
 
     useEffect(() => {
@@ -224,7 +192,7 @@ const EvaluationOptimization = () => {
             if (!chart) return;
             chart.on('legendselectchanged', (params) => {
                 handleLegendSelect(index, {
-                    ...selectedLegends[index],
+                    ...evaluationOptimizationStore.selectedLegends[index],
                     [params.name]: params.selected[params.name],
                 });
             });
@@ -234,7 +202,7 @@ const EvaluationOptimization = () => {
                 chart?.off('legendselectchanged');
             });
         };
-    }, [selectedLegends]);
+    }, [evaluationOptimizationStore.selectedLegends]);
 
     const formatDate = (isoString) => {
         const date = new Date(isoString);
@@ -242,15 +210,15 @@ const EvaluationOptimization = () => {
     };
 
     const handleLoadData = async () => {
-        setEvaluationData([]);
+        evaluationOptimizationStore.setEvaluationData([]);
         try {
             const response = await fetch(__APP_CONFIG__.loadEvaluationData, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
             });
             const data = await response.json();
-            setEvaluationData(Array.isArray(data) ? data.map(item => item.evaluateData) : [data.evaluateData]);
-            setIsDataModalVisible(true);
+            evaluationOptimizationStore.setEvaluationData(Array.isArray(data) ? data.map(item => item.evaluateData) : [data.evaluateData]);
+            evaluationOptimizationStore.setIsDataModalVisible(true);
         } catch (error) {
             console.error('数据载入失败:', error);
             alert(`数据载入失败：${error.message}`);
@@ -276,7 +244,7 @@ const EvaluationOptimization = () => {
             if (data.error) {
                 throw new Error(data.error);
             }
-            setSelectedModel({
+            evaluationOptimizationStore.setSelectedModel({
                 model_info: data.model,
                 scenario_info: {
                     name: data.model.scenario_name,
@@ -291,7 +259,7 @@ const EvaluationOptimization = () => {
                     hyper_params: data.algorithm['hyper-parameters']
                 }
             });
-            setIsDetailModalVisible(true);
+            evaluationOptimizationStore.setIsDetailModalVisible(true);
         } catch (error) {
             console.error('获取评估数据失败:', error);
             alert('获取评估数据失败！');
@@ -317,7 +285,7 @@ const EvaluationOptimization = () => {
             if (data.error) {
                 throw new Error(data.error);
             }
-            setSidebarData({
+            evaluationOptimizationStore.setSidebarData({
                 evaluateDataInfo: {
                     id: record.id,
                     evaluateData_path: record.evaluateData_path,
@@ -339,8 +307,8 @@ const EvaluationOptimization = () => {
                     hyperParams: Object.entries(data.algorithm['hyper-parameters']).map(([key, value]) => ({ [key]: value }))
                 }
             });
-            setDataLoaded(true);
-            setIsDataModalVisible(false);
+            evaluationOptimizationStore.setDataLoaded(true);
+            evaluationOptimizationStore.setIsDataModalVisible(false);
         } catch (error) {
             console.error('载入评估数据失败:', error);
             alert('载入评估数据失败！');
@@ -348,26 +316,26 @@ const EvaluationOptimization = () => {
     };
 
     const handleStartEvaluation = async () => {
-        if (!dataLoaded) {
+        if (!evaluationOptimizationStore.dataLoaded) {
             alert('请先载入数据！');
             return;
         }
         try {
             const evalData = {
                 evaluateData: {
-                    id: sidebarData.evaluateDataInfo.id,
-                    img_url: sidebarData.modelInfo.img_url,
-                    model_path: sidebarData.modelInfo.model_path,
-                    evaluateData_path: sidebarData.evaluateDataInfo.evaluateData_path,
-                    select_evaluateData: [sidebarData.evaluateDataInfo.dataFile, sidebarData.evaluateDataInfo.select_evaluateData],
-                    name: sidebarData.modelInfo.name,
-                    nn_model_type: sidebarData.modelInfo.nn_model_type,
-                    role_name: sidebarData.scenarioInfo.role_name,
-                    scenario_name: sidebarData.scenarioInfo.name,
-                    agentID: sidebarData.scenarioInfo.agent_id,
-                    trainID: sidebarData.modelInfo.id,
-                    time: sidebarData.evaluateDataInfo.time,
-                    version: sidebarData.modelInfo.version
+                    id: evaluationOptimizationStore.sidebarData.evaluateDataInfo.id,
+                    img_url: evaluationOptimizationStore.sidebarData.modelInfo.img_url,
+                    model_path: evaluationOptimizationStore.sidebarData.modelInfo.model_path,
+                    evaluateData_path: evaluationOptimizationStore.sidebarData.evaluateDataInfo.evaluateData_path,
+                    select_evaluateData: [evaluationOptimizationStore.sidebarData.evaluateDataInfo.dataFile, evaluationOptimizationStore.sidebarData.evaluateDataInfo.select_evaluateData],
+                    name: evaluationOptimizationStore.sidebarData.modelInfo.name,
+                    nn_model_type: evaluationOptimizationStore.sidebarData.modelInfo.nn_model_type,
+                    role_name: evaluationOptimizationStore.sidebarData.scenarioInfo.role_name,
+                    scenario_name: evaluationOptimizationStore.sidebarData.scenarioInfo.name,
+                    agentID: evaluationOptimizationStore.sidebarData.scenarioInfo.agent_id,
+                    trainID: evaluationOptimizationStore.sidebarData.modelInfo.id,
+                    time: evaluationOptimizationStore.sidebarData.evaluateDataInfo.time,
+                    version: evaluationOptimizationStore.sidebarData.modelInfo.version
                 }
             };
             const response = await fetch(__APP_CONFIG__.startEvaluation, {
@@ -381,12 +349,12 @@ const EvaluationOptimization = () => {
             }
             alert("数据发送成功，后台正在评估中•••");
             const result = await response.json();
-            setChartOptions(result.chart_data);
-            setCharts(Array(4).fill({ img: null }));
-            setEvents(result.event_data.map((content) => ({ content })));
-            setRadarImage(result.radar_chart_data);
-            setEvalScore(result.eval_score);
-            setEvalSuggestion(result.eval_suggestion);
+            evaluationOptimizationStore.setChartOptions(result.chart_data);
+            evaluationOptimizationStore.setCharts(Array(4).fill({ img: null }));
+            evaluationOptimizationStore.setEvents(result.event_data.map((content) => ({ content })));
+            evaluationOptimizationStore.setRadarImage(result.radar_chart_data);
+            evaluationOptimizationStore.setEvalScore(result.eval_score);
+            evaluationOptimizationStore.setEvalSuggestion(result.eval_suggestion);
         } catch (error) {
             console.error('评估失败:', error);
             alert(`评估失败：${error.message}`);
@@ -394,21 +362,21 @@ const EvaluationOptimization = () => {
     };
 
     const handleContentChange = (index, value) => {
-        const newSelections = [...chartSelections];
+        const newSelections = [...evaluationOptimizationStore.chartSelections];
         newSelections[index] = { content: value, shape: '' };
-        setChartSelections(newSelections);
+        evaluationOptimizationStore.setChartSelections(newSelections);
         updateChart(index, value, '');
     };
 
     const handleShapeChange = (index, value) => {
-        const newSelections = [...chartSelections];
+        const newSelections = [...evaluationOptimizationStore.chartSelections];
         newSelections[index].shape = value;
-        setChartSelections(newSelections);
+        evaluationOptimizationStore.setChartSelections(newSelections);
         updateChart(index, newSelections[index].content, value);
     };
 
     const getShapeOptions = (content) => {
-        const target = chartOptions.find((item) => item.content === content);
+        const target = evaluationOptimizationStore.chartOptions.find((item) => item.content === content);
         return target ? ['柱状图', '折线图', '饼图'] : [];
     };
 
@@ -422,8 +390,8 @@ const EvaluationOptimization = () => {
                 throw new Error('Failed to fetch decision models');
             }
             const data = await response.json();
-            setDecisionModels(data);
-            setIsModelListModalVisible(true);
+            evaluationOptimizationStore.setDecisionModels(data);
+            evaluationOptimizationStore.setIsModelListModalVisible(true);
         } catch (error) {
             console.error('Error fetching decision models:', error);
             alert('获取决策模型列表失败！');
@@ -431,31 +399,31 @@ const EvaluationOptimization = () => {
     };
 
     const handleGenerate = async (record, subModelId) => {
-        setSelectedSubModel({ ...record, select_model: subModelId });
-        setEpisodes(100);
-        setIsEpisodesModalVisible(true);
+        evaluationOptimizationStore.setSelectedSubModel({ ...record, select_model: subModelId });
+        evaluationOptimizationStore.setEpisodes(100);
+        evaluationOptimizationStore.setIsEpisodesModalVisible(true);
     };
 
     const handleEpisodesConfirm = async () => {
-        if (!selectedSubModel || episodes < 1) {
+        if (!evaluationOptimizationStore.selectedSubModel || evaluationOptimizationStore.episodes < 1) {
             alert('请输入有效的执行次数！');
             return;
         }
         try {
             const generateData = {
                 model: {
-                    id: selectedSubModel.model.id,
-                    img_url: selectedSubModel.model.img_url,
-                    select_model: selectedSubModel.select_model,
-                    episodes: episodes,
-                    model_path: selectedSubModel.model.model_path,
-                    name: selectedSubModel.model.name,
-                    nn_model_type: selectedSubModel.model.nn_model_type,
-                    role_name: selectedSubModel.model.role_name,
-                    scenario_name: selectedSubModel.model.scenario_name,
-                    agentID: selectedSubModel.model.agentID,
-                    time: selectedSubModel.model.time,
-                    version: selectedSubModel.model.version
+                    id: evaluationOptimizationStore.selectedSubModel.model.id,
+                    img_url: evaluationOptimizationStore.selectedSubModel.model.img_url,
+                    select_model: evaluationOptimizationStore.selectedSubModel.select_model,
+                    episodes: evaluationOptimizationStore.episodes,
+                    model_path: evaluationOptimizationStore.selectedSubModel.model.model_path,
+                    name: evaluationOptimizationStore.selectedSubModel.model.name,
+                    nn_model_type: evaluationOptimizationStore.selectedSubModel.model.nn_model_type,
+                    role_name: evaluationOptimizationStore.selectedSubModel.model.role_name,
+                    scenario_name: evaluationOptimizationStore.selectedSubModel.model.scenario_name,
+                    agentID: evaluationOptimizationStore.selectedSubModel.model.agentID,
+                    time: evaluationOptimizationStore.selectedSubModel.model.time,
+                    version: evaluationOptimizationStore.selectedSubModel.model.version
                 }
             };
             const response = await fetch(__APP_CONFIG__.evaluateDataGenerate, {
@@ -469,7 +437,7 @@ const EvaluationOptimization = () => {
             const data = await response.json();
             if (data.status === 'success') {
                 alert('数据生成成功！');
-                setIsEpisodesModalVisible(false);
+                evaluationOptimizationStore.setIsEpisodesModalVisible(false);
             } else {
                 alert('数据生成失败！');
             }
@@ -481,8 +449,8 @@ const EvaluationOptimization = () => {
 
     const handleEffectModel = async (url) => {
         try {
-            setEffectImageUrl(url);
-            setIsEffectImageModalVisible(true);
+            evaluationOptimizationStore.setEffectImageUrl(url);
+            evaluationOptimizationStore.setIsEffectImageModalVisible(true);
         } catch (error) {
             console.error('获取效果图片失败:', error);
             alert('获取效果图片失败，请检查网络或联系管理员！');
@@ -490,8 +458,8 @@ const EvaluationOptimization = () => {
     };
 
     const handleViewModel = (model) => {
-        setCurrentModel(model);
-        setIsModelInfoModalVisible(true);
+        evaluationOptimizationStore.setCurrentModel(model);
+        evaluationOptimizationStore.setIsModelInfoModalVisible(true);
     };
 
     const dataColumns = [
@@ -639,26 +607,26 @@ const EvaluationOptimization = () => {
             <div className="EO-sidebar">
                 <div className="EO-sidebar-section EO-sidebar-scrollable">
                     <div className="EO-text">评估数据信息</div>
-                    {sidebarData.evaluateDataInfo.id && (
+                    {evaluationOptimizationStore.sidebarData.evaluateDataInfo.id && (
                         <>
-                            <div className="EO-info-item">评估数据ID: {sidebarData.evaluateDataInfo.id}</div>
-                            <div className="EO-info-item">评估数据路径: {sidebarData.evaluateDataInfo.evaluateData_path}</div>
-                            <div className="EO-info-item">模型子ID: {sidebarData.evaluateDataInfo.select_evaluateData}</div>
-                            <div className="EO-info-item">数据文件名: {sidebarData.evaluateDataInfo.dataFile}</div>
-                            <div className="EO-info-item">创建时间: {formatDate(sidebarData.evaluateDataInfo.time)}</div>
+                            <div className="EO-info-item">评估数据ID: {evaluationOptimizationStore.sidebarData.evaluateDataInfo.id}</div>
+                            <div className="EO-info-item">评估数据路径: {evaluationOptimizationStore.sidebarData.evaluateDataInfo.evaluateData_path}</div>
+                            <div className="EO-info-item">模型子ID: {evaluationOptimizationStore.sidebarData.evaluateDataInfo.select_evaluateData}</div>
+                            <div className="EO-info-item">数据文件名: {evaluationOptimizationStore.sidebarData.evaluateDataInfo.dataFile}</div>
+                            <div className="EO-info-item">创建时间: {formatDate(evaluationOptimizationStore.sidebarData.evaluateDataInfo.time)}</div>
                         </>
                     )}
                 </div>
                 <div className="EO-sidebar-section EO-sidebar-scrollable">
                     <div className="EO-text">场景信息</div>
-                    {sidebarData.scenarioInfo.name && (
+                    {evaluationOptimizationStore.sidebarData.scenarioInfo.name && (
                         <>
-                            <div className="EO-info-item">名称: {sidebarData.scenarioInfo.name}</div>
-                            <div className="EO-info-item">角色名称: {sidebarData.scenarioInfo.role_name}</div>
-                            <div className="EO-info-item">智能体ID: {sidebarData.scenarioInfo.agent_id}</div>
+                            <div className="EO-info-item">名称: {evaluationOptimizationStore.sidebarData.scenarioInfo.name}</div>
+                            <div className="EO-info-item">角色名称: {evaluationOptimizationStore.sidebarData.scenarioInfo.role_name}</div>
+                            <div className="EO-info-item">智能体ID: {evaluationOptimizationStore.sidebarData.scenarioInfo.agent_id}</div>
                             <Table
                                 columns={envParamsColumns}
-                                dataSource={sidebarData.scenarioInfo.env_params}
+                                dataSource={evaluationOptimizationStore.sidebarData.scenarioInfo.env_params}
                                 pagination={false}
                                 size="small"
                                 rowKey={(record) => Object.keys(record)[0]}
@@ -668,28 +636,28 @@ const EvaluationOptimization = () => {
                 </div>
                 <div className="EO-sidebar-section EO-sidebar-scrollable">
                     <div className="EO-text">模型信息</div>
-                    {sidebarData.modelInfo.id && (
+                    {evaluationOptimizationStore.sidebarData.modelInfo.id && (
                         <>
-                            <div className="EO-info-item">模型ID: {sidebarData.modelInfo.id}</div>
-                            <div className="EO-info-item">模型名称: {sidebarData.modelInfo.name}</div>
-                            <div className="EO-info-item">模型版本: {sidebarData.modelInfo.version}</div>
-                            <div className="EO-info-item">模型类型: {sidebarData.modelInfo.nn_model_type}</div>
-                            <div className="EO-info-item">创建时间: {formatDate(sidebarData.modelInfo.time)}</div>
-                            <div className="EO-info-item">模型存放路径: {sidebarData.modelInfo.model_path}</div>
-                            <div className="EO-info-item">模型效果图路径: {sidebarData.modelInfo.img_url}</div>
+                            <div className="EO-info-item">模型ID: {evaluationOptimizationStore.sidebarData.modelInfo.id}</div>
+                            <div className="EO-info-item">模型名称: {evaluationOptimizationStore.sidebarData.modelInfo.name}</div>
+                            <div className="EO-info-item">模型版本: {evaluationOptimizationStore.sidebarData.modelInfo.version}</div>
+                            <div className="EO-info-item">模型类型: {evaluationOptimizationStore.sidebarData.modelInfo.nn_model_type}</div>
+                            <div className="EO-info-item">创建时间: {formatDate(evaluationOptimizationStore.sidebarData.modelInfo.time)}</div>
+                            <div className="EO-info-item">模型存放路径: {evaluationOptimizationStore.sidebarData.modelInfo.model_path}</div>
+                            <div className="EO-info-item">模型效果图路径: {evaluationOptimizationStore.sidebarData.modelInfo.img_url}</div>
                         </>
                     )}
                 </div>
                 <div className="EO-sidebar-section EO-sidebar-scrollable">
                     <div className="EO-text">算法信息</div>
-                    {sidebarData.algorithmInfo.id && (
+                    {evaluationOptimizationStore.sidebarData.algorithmInfo.id && (
                         <>
-                            <div className="EO-info-item">算法ID: {sidebarData.algorithmInfo.id}</div>
-                            <div className="EO-info-item">算法名称: {sidebarData.algorithmInfo.name}</div>
-                            <div className="EO-info-item">算法类型: {sidebarData.algorithmInfo.type}</div>
+                            <div className="EO-info-item">算法ID: {evaluationOptimizationStore.sidebarData.algorithmInfo.id}</div>
+                            <div className="EO-info-item">算法名称: {evaluationOptimizationStore.sidebarData.algorithmInfo.name}</div>
+                            <div className="EO-info-item">算法类型: {evaluationOptimizationStore.sidebarData.algorithmInfo.type}</div>
                             <Table
                                 columns={hyperParamsColumns}
-                                dataSource={sidebarData.algorithmInfo.hyperParams}
+                                dataSource={evaluationOptimizationStore.sidebarData.algorithmInfo.hyperParams}
                                 pagination={false}
                                 size="small"
                                 rowKey={(record) => Object.keys(record)[0]}
@@ -707,9 +675,9 @@ const EvaluationOptimization = () => {
                                 <div className="EO-evaluation">
                                     <p className="EO-text">内容：</p>
                                     <Select
-                                        value={chartSelections[index].content}
+                                        value={evaluationOptimizationStore.chartSelections[index].content}
                                         onChange={(value) => handleContentChange(index, value)}
-                                        options={chartOptions.map((item) => ({
+                                        options={evaluationOptimizationStore.chartOptions.map((item) => ({
                                             label: item.content,
                                             value: item.content,
                                         }))}
@@ -719,14 +687,14 @@ const EvaluationOptimization = () => {
                                 <div className="EO-evaluation">
                                     <p className="EO-text">形状：</p>
                                     <Select
-                                        value={chartSelections[index].shape}
+                                        value={evaluationOptimizationStore.chartSelections[index].shape}
                                         onChange={(value) => handleShapeChange(index, value)}
-                                        options={getShapeOptions(chartSelections[index].content).map((shape) => ({
+                                        options={getShapeOptions(evaluationOptimizationStore.chartSelections[index].content).map((shape) => ({
                                             label: shape,
                                             value: shape,
                                         }))}
                                         placeholder="选择形状"
-                                        disabled={!chartSelections[index].content}
+                                        disabled={!evaluationOptimizationStore.chartSelections[index].content}
                                     />
                                 </div>
                                 <div
@@ -738,7 +706,7 @@ const EvaluationOptimization = () => {
                     </div>
                     <div className="EO-text">事件：</div>
                     <div className="EO-event-log">
-                        {events.map((event, i) => (
+                        {evaluationOptimizationStore.events.map((event, i) => (
                             <div key={i} className="EO-event-item">
                                 <span>事件{i + 1}：{event.content}</span>
                             </div>
@@ -746,7 +714,7 @@ const EvaluationOptimization = () => {
                     </div>
                 </div>
                 <div className="EO-right-panel">
-                    {radarImage && (
+                    {evaluationOptimizationStore.radarImage && (
                         <div className="EO-radar-chart-container">
                             <div
                                 ref={radarChartRef}
@@ -757,13 +725,13 @@ const EvaluationOptimization = () => {
                     <div className="EO-evaluation-module">
                         <div className="EO-evaluation">
                             <div className="EO-text">分数评估：</div>
-                            {evalScore && <div className="EO-score">{evalScore}</div>}
+                            {evaluationOptimizationStore.evalScore && <div className="EO-score">{evaluationOptimizationStore.evalScore}</div>}
                         </div>
                         <div>
                             <div className="EO-text">优化评估：</div>
-                            {evalSuggestion && (
+                            {evaluationOptimizationStore.evalSuggestion && (
                                 <div className="EO-optimization-suggestion">
-                                    {evalSuggestion.map((suggestion, index) => (
+                                    {evaluationOptimizationStore.evalSuggestion.map((suggestion, index) => (
                                         <div key={index} className="EO-suggestion-item">{suggestion}</div>
                                     ))}
                                 </div>
@@ -779,14 +747,14 @@ const EvaluationOptimization = () => {
             </div>
             <Modal
                 title="请选择需要评估的数据来源"
-                open={isDataModalVisible}
-                onCancel={() => setIsDataModalVisible(false)}
+                open={evaluationOptimizationStore.isDataModalVisible}
+                onCancel={() => evaluationOptimizationStore.setIsDataModalVisible(false)}
                 footer={null}
                 width={1500}
             >
                 <Table
                     columns={dataColumns}
-                    dataSource={evaluationData}
+                    dataSource={evaluationOptimizationStore.evaluationData}
                     scroll={{ y: 500 }}
                     pagination={false}
                     rowKey={(record) => record.id}
@@ -814,32 +782,32 @@ const EvaluationOptimization = () => {
             </Modal>
             <Modal
                 title="数据详细信息"
-                open={isDetailModalVisible}
-                onCancel={() => setIsDetailModalVisible(false)}
+                open={evaluationOptimizationStore.isDetailModalVisible}
+                onCancel={() => evaluationOptimizationStore.setIsDetailModalVisible(false)}
                 footer={null}
                 width={800}
                 className="EO-detail-modal"
             >
-                {selectedModel && (
+                {evaluationOptimizationStore.selectedModel && (
                     <div className="EO-detail-content">
                         <div className="EO-detail-section">
                             <div className="EO-text">模型信息</div>
-                            <div className="EO-info-item">模型ID: {selectedModel.model_info.id}</div>
-                            <div className="EO-info-item">模型名称: {selectedModel.model_info.name}</div>
-                            <div className="EO-info-item">模型版本: {selectedModel.model_info.version}</div>
-                            <div className="EO-info-item">模型类型: {selectedModel.model_info.nn_model_type}</div>
-                            <div className="EO-info-item">创建时间: {formatDate(selectedModel.model_info.time)}</div>
-                            <div className="EO-info-item">模型存放路径: {selectedModel.model_info.model_path}</div>
-                            <div className="EO-info-item">模型效果图路径: {selectedModel.model_info.img_url}</div>
+                            <div className="EO-info-item">模型ID: {evaluationOptimizationStore.selectedModel.model_info.id}</div>
+                            <div className="EO-info-item">模型名称: {evaluationOptimizationStore.selectedModel.model_info.name}</div>
+                            <div className="EO-info-item">模型版本: {evaluationOptimizationStore.selectedModel.model_info.version}</div>
+                            <div className="EO-info-item">模型类型: {evaluationOptimizationStore.selectedModel.model_info.nn_model_type}</div>
+                            <div className="EO-info-item">创建时间: {formatDate(evaluationOptimizationStore.selectedModel.model_info.time)}</div>
+                            <div className="EO-info-item">模型存放路径: {evaluationOptimizationStore.selectedModel.model_info.model_path}</div>
+                            <div className="EO-info-item">模型效果图路径: {evaluationOptimizationStore.selectedModel.model_info.img_url}</div>
                         </div>
                         <div className="EO-detail-section">
                             <div className="EO-text">场景信息</div>
-                            <div className="EO-info-item">场景名称: {selectedModel.scenario_info.name}</div>
-                            <div className="EO-info-item">角色名称: {selectedModel.scenario_info.role_name}</div>
-                            <div className="EO-info-item">智能体ID: {selectedModel.scenario_info.agent_id}</div>
+                            <div className="EO-info-item">场景名称: {evaluationOptimizationStore.selectedModel.scenario_info.name}</div>
+                            <div className="EO-info-item">角色名称: {evaluationOptimizationStore.selectedModel.scenario_info.role_name}</div>
+                            <div className="EO-info-item">智能体ID: {evaluationOptimizationStore.selectedModel.scenario_info.agent_id}</div>
                             <Table
                                 columns={envParamsColumns}
-                                dataSource={Object.entries(selectedModel.scenario_info.env_params).map(([key, value]) => ({ [key]: value }))}
+                                dataSource={Object.entries(evaluationOptimizationStore.selectedModel.scenario_info.env_params).map(([key, value]) => ({ [key]: value }))}
                                 pagination={false}
                                 size="small"
                                 rowKey={(record) => Object.keys(record)[0]}
@@ -847,12 +815,12 @@ const EvaluationOptimization = () => {
                         </div>
                         <div className="EO-detail-section">
                             <div className="EO-text">算法信息</div>
-                            <div className="EO-info-item">算法ID: {selectedModel.algorithm_info.id}</div>
-                            <div className="EO-info-item">算法名称: {selectedModel.algorithm_info.name}</div>
-                            <div className="EO-info-item">算法类型: {selectedModel.algorithm_info.type}</div>
+                            <div className="EO-info-item">算法ID: {evaluationOptimizationStore.selectedModel.algorithm_info.id}</div>
+                            <div className="EO-info-item">算法名称: {evaluationOptimizationStore.selectedModel.algorithm_info.name}</div>
+                            <div className="EO-info-item">算法类型: {evaluationOptimizationStore.selectedModel.algorithm_info.type}</div>
                             <Table
                                 columns={hyperParamsColumns}
-                                dataSource={Object.entries(selectedModel.algorithm_info.hyper_params).map(([key, value]) => ({ [key]: value }))}
+                                dataSource={Object.entries(evaluationOptimizationStore.selectedModel.algorithm_info.hyper_params).map(([key, value]) => ({ [key]: value }))}
                                 pagination={false}
                                 size="small"
                                 rowKey={(record) => Object.keys(record)[0]}
@@ -863,14 +831,14 @@ const EvaluationOptimization = () => {
             </Modal>
             <Modal
                 title="模型列表"
-                open={isModelListModalVisible}
-                onCancel={() => setIsModelListModalVisible(false)}
+                open={evaluationOptimizationStore.isModelListModalVisible}
+                onCancel={() => evaluationOptimizationStore.setIsModelListModalVisible(false)}
                 footer={null}
                 width={1500}
             >
                 <Table
                     columns={modelListColumns}
-                    dataSource={decisionModels}
+                    dataSource={evaluationOptimizationStore.decisionModels}
                     scroll={{ y: 500 }}
                     pagination={false}
                     rowKey={(record) => record.model.id}
@@ -897,51 +865,51 @@ const EvaluationOptimization = () => {
             </Modal>
             <Modal
                 title="模型详细信息"
-                open={isModelInfoModalVisible}
-                onCancel={() => setIsModelInfoModalVisible(false)}
+                open={evaluationOptimizationStore.isModelInfoModalVisible}
+                onCancel={() => evaluationOptimizationStore.setIsModelInfoModalVisible(false)}
                 footer={null}
             >
-                {currentModel && (
+                {evaluationOptimizationStore.currentModel && (
                     <div>
-                        <p><strong>模型ID：</strong>{currentModel.model.id}</p>
-                        <p><strong>决策模型名称：</strong>{currentModel.model.name}</p>
-                        <p><strong>模型版本：</strong>{currentModel.model.version}</p>
-                        <p><strong>模型类型：</strong>{currentModel.model.nn_model_type}</p>
-                        <p><strong>场景名称：</strong>{currentModel.model.scenario_name}</p>
-                        <p><strong>角色名称：</strong>{currentModel.model.role_name}</p>
-                        <p><strong>智能体ID：</strong>{currentModel.model.agentID}</p>
-                        <p><strong>创建时间：</strong>{formatDate(currentModel.model.time)}</p>
-                        <p><strong>模型存放路径：</strong>{currentModel.model.model_path || '未提供'}</p>
-                        <p><strong>模型效果图路径：</strong>{currentModel.model.img_url || '未提供'}</p>
+                        <p><strong>模型ID：</strong>{evaluationOptimizationStore.currentModel.model.id}</p>
+                        <p><strong>决策模型名称：</strong>{evaluationOptimizationStore.currentModel.model.name}</p>
+                        <p><strong>模型版本：</strong>{evaluationOptimizationStore.currentModel.model.version}</p>
+                        <p><strong>模型类型：</strong>{evaluationOptimizationStore.currentModel.model.nn_model_type}</p>
+                        <p><strong>场景名称：</strong>{evaluationOptimizationStore.currentModel.model.scenario_name}</p>
+                        <p><strong>角色名称：</strong>{evaluationOptimizationStore.currentModel.model.role_name}</p>
+                        <p><strong>智能体ID：</strong>{evaluationOptimizationStore.currentModel.model.agentID}</p>
+                        <p><strong>创建时间：</strong>{formatDate(evaluationOptimizationStore.currentModel.model.time)}</p>
+                        <p><strong>模型存放路径：</strong>{evaluationOptimizationStore.currentModel.model.model_path || '未提供'}</p>
+                        <p><strong>模型效果图路径：</strong>{evaluationOptimizationStore.currentModel.model.img_url || '未提供'}</p>
                     </div>
                 )}
             </Modal>
             <Modal
                 title="训练效果图片"
-                open={isEffectImageModalVisible}
-                onCancel={() => setIsEffectImageModalVisible(false)}
+                open={evaluationOptimizationStore.isEffectImageModalVisible}
+                onCancel={() => evaluationOptimizationStore.setIsEffectImageModalVisible(false)}
                 footer={null}
                 zIndex={2000}
             >
-                {effectImageUrl && <img src={effectImageUrl} alt="训练效果图片" style={{ width: '100%' }} />}
+                {evaluationOptimizationStore.effectImageUrl && <img src={evaluationOptimizationStore.effectImageUrl} alt="训练效果图片" style={{ width: '100%' }} />}
             </Modal>
             <Modal
                 title="请输入执行次数"
-                open={isEpisodesModalVisible}
+                open={evaluationOptimizationStore.isEpisodesModalVisible}
                 onOk={handleEpisodesConfirm}
-                onCancel={() => setIsEpisodesModalVisible(false)}
+                onCancel={() => evaluationOptimizationStore.setIsEpisodesModalVisible(false)}
                 okText="确认"
                 cancelText="取消"
             >
                 <InputNumber
                     min={1}
-                    value={episodes}
-                    onChange={(value) => setEpisodes(value)}
+                    value={evaluationOptimizationStore.episodes}
+                    onChange={(value) => evaluationOptimizationStore.setEpisodes(value)}
                     style={{ width: '100%' }}
                 />
             </Modal>
         </div>
     );
-};
+});
 
 export default EvaluationOptimization;
