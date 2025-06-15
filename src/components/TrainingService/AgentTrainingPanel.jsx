@@ -3,6 +3,7 @@ import { DownOutlined } from '@ant-design/icons';
 import { Card, Select, Row, Col, Space, Button, Modal, Table, message, Input } from 'antd';
 import { intelligentStore } from './IntelligentStore';
 import { observer } from 'mobx-react';
+import DeploymentCanvas from './DeploymentCanvas'; // Import the new canvas component
 const { Option } = Select;
 
 const AgentTrainingPanel = observer(() => {
@@ -25,13 +26,14 @@ const AgentTrainingPanel = observer(() => {
   const [effectImageUrl, setEffectImageUrl] = useState(null);
   const [isEffectImageModalVisible, setIsEffectImageModalVisible] = useState(false);
   const [isScenarioModalVisible, setIsScenarioModalVisible] = useState(false);
-  const [deploymentImageUrl, setDeploymentImageUrl] = useState(null);
+  const [deploymentData, setDeploymentData] = useState(null); // Changed from deploymentImageUrl
   const [animationUrl, setAnimationUrl] = useState(null);
   const [isProcessModalVisible, setIsProcessModalVisible] = useState(false);
   const [loadedModel, setLoadedModel] = useState(null);
   const [subModelPublishStatus, setSubModelPublishStatus] = useState({});
-  const [modelListData, setModelListData] = useState([]); // 新增状态用于存储模型列表数据
-  const [loadingModelList, setLoadingModelList] = useState(false); // 新增加载状态
+  const [modelListData, setModelListData] = useState([]);
+  const [loadingModelList, setLoadingModelList] = useState(false);
+
   useEffect(() => {
     setEntity('');
     setAttribute('');
@@ -354,7 +356,6 @@ const AgentTrainingPanel = observer(() => {
             setTraining(false);
             if (statusData.result.status === "success") {
               message.success('训练完成，模型已保存！');
-
             } else if (statusData.result.status === "stopped") {
               message.warning('训练已终止，模型未保存');
             } else {
@@ -423,9 +424,8 @@ const AgentTrainingPanel = observer(() => {
     message.success("智能体载入成功！");
   };
 
-   const handleViewModelListClick = async () => {
-    // 检查必要的选择项
-    if (!intelligentStore.selectedScenario || !intelligentStore.selectedAgentRole || !intelligentStore.selectedAlgorithm|| !intelligentStore.selectedAgent) {
+  const handleViewModelListClick = async () => {
+    if (!intelligentStore.selectedScenario || !intelligentStore.selectedAgentRole || !intelligentStore.selectedAlgorithm || !intelligentStore.selectedAgent) {
       message.error("请先选择场景、角色、算法并载入智能体");
       return;
     }
@@ -433,7 +433,6 @@ const AgentTrainingPanel = observer(() => {
     try {
       setLoadingModelList(true);
       
-      // 构建请求参数
       const requestBody = {
         scenarioId: intelligentStore.selectedScenario.id,
         scenarioName: intelligentStore.selectedScenario.name,
@@ -442,8 +441,6 @@ const AgentTrainingPanel = observer(() => {
         algorithmName: intelligentStore.selectedAlgorithm.name,
         agentId: intelligentStore.selectedAgent.agentID
       };
-      console.log(requestBody)
-      // 发送请求到后端获取模型列表
       const response = await fetch(__APP_CONFIG__.get_model_list, {
         method: 'POST',
         headers: {
@@ -460,7 +457,6 @@ const AgentTrainingPanel = observer(() => {
       if (data.status === 'success') {
         setModelListData(data.models);
         
-        // 初始化子模型发布状态
         setSubModelPublishStatus(prevStatus => {
           const updatedStatus = { ...prevStatus };
           data.models.forEach(record => {
@@ -490,37 +486,10 @@ const AgentTrainingPanel = observer(() => {
     setIsModelInfoModalVisible(true);
   };
 
-  // const handleEffectModel = async (record) => {
-  //   try {
-  //     const response = await fetch(__APP_CONFIG__.get_effect, {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({ decisionModelID: record.model.id }),
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error(`Network response was not ok: ${response.statusText}`);
-  //     }
-
-  //     const data = await response.json();
-  //     if (data.status === 'success') {
-  //       setEffectImageUrl(data.img_url);
-  //       setIsEffectImageModalVisible(true);
-  //     } else {
-  //       message.error('获取效果图片失败，请检查日志');
-  //     }
-  //   } catch (error) {
-  //     console.error('获取效果图片失败:', error);
-  //     message.error('获取效果图片失败，请检查网络或联系管理员');
-  //   }
-  // };
-    const handleEffectModel = async (record) => {
+  const handleEffectModel = async (record) => {
     try {
-        setEffectImageUrl(record);
-        console.log(record);
-        setIsEffectImageModalVisible(true);
+      setEffectImageUrl(record);
+      setIsEffectImageModalVisible(true);
     } catch (error) {
       console.error('获取效果图片失败:', error);
       message.error('获取效果图片失败，请检查网络或联系管理员');
@@ -529,64 +498,76 @@ const AgentTrainingPanel = observer(() => {
 
   const handlePublish = async (record, subModelId) => {
     try {
-      const response = await fetch(__APP_CONFIG__.publish_model, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ decisionModelID: subModelId }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Network response was not ok: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      if (data.status === 'success') {
-        message.success("模型发布成功");
+      if (subModelPublishStatus[subModelId]) {
         setSubModelPublishStatus(prev => ({
           ...prev,
-          [subModelId]: true
+          [subModelId]: false
         }));
+        message.success("模型已取消发布");
       } else {
-        message.error('发布模型失败，请检查日志');
+        const response = await fetch(__APP_CONFIG__.publish_model, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ decisionModelID: subModelId }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Network response was not ok: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        if (data.status === 'success') {
+          message.success("模型发布成功");
+          setSubModelPublishStatus(prev => ({
+            ...prev,
+            [subModelId]: true
+          }));
+        } else {
+          message.error('发布模型失败，请检查日志');
+        }
       }
     } catch (error) {
-      console.error('发布模型失败:', error);
-      message.error('发布模型失败，请检查网络或联系管理员');
+      console.error('发布/取消发布模型失败:', error);
+      message.error('操作失败，请检查网络或联系管理员');
     }
   };
+
   const handleLoadModel = async (record, subModelId) => {
     try {
-      const modelToLoad = modelListData.find(
-        (model) => model.model.model_list.includes(subModelId)
-      );
-      if (!modelToLoad) {
-        message.error("未找到对应的模型");
-        return;
-      }
-      const selectedAlgorithm = intelligentStore.selectedAlgorithm;
-      if (!selectedAlgorithm) {
-        message.error("请先选择算法！");
-        return;
-      }
-      if (modelToLoad.algorithm.id !== selectedAlgorithm.algorithm_id) {
-        message.error("模型与当前选择的算法不匹配，无法载入！");
-        return;
-      }
-      setLoadedModel({
-        ...modelToLoad,
-        model: {
-          ...modelToLoad.model,
-          select_model: subModelId 
+      if (loadedModel && loadedModel.model.select_model === subModelId) {
+        setLoadedModel(null);
+        message.success("模型已取消载入！");
+      } else {
+        const modelToLoad = modelListData.find(
+          (model) => model.model.model_list.includes(subModelId)
+        );
+        if (!modelToLoad) {
+          message.error("未找到对应的模型");
+          return;
         }
-      });
-
-      // Only update the load status, not publish status
-      message.success("模型载入成功！");
+        const selectedAlgorithm = intelligentStore.selectedAlgorithm;
+        if (!selectedAlgorithm) {
+          message.error("请先选择算法！");
+          return;
+        }
+        if (modelToLoad.algorithm.id !== selectedAlgorithm.algorithm_id) {
+          message.error("模型与当前选择的算法不匹配，无法载入！");
+          return;
+        }
+        setLoadedModel({
+          ...modelToLoad,
+          model: {
+            ...modelToLoad.model,
+            select_model: subModelId 
+          }
+        });
+        message.success("模型载入成功！");
+      }
     } catch (error) {
-      console.error('模型载入失败:', error);
-      message.error('模型载入失败，请检查网络或联系管理员');
+      console.error('模型载入/取消载入失败:', error);
+      message.error('操作失败，请检查网络或联系管理员');
     }
   };
 
@@ -667,7 +648,7 @@ const AgentTrainingPanel = observer(() => {
       dataIndex: ['model', 'name'], 
       key: 'agentName' 
     },
-        { 
+    { 
       title: '智能体ID', 
       dataIndex: ['model', 'agentID'], 
       key: 'agentID' 
@@ -778,7 +759,7 @@ const AgentTrainingPanel = observer(() => {
 
       const data = await response.json();
       if (data.status === 'success') {
-        setDeploymentImageUrl(data.img_url);
+        setDeploymentData(data.deployment_data); // Store deployment data instead of image URL
         setIsScenarioModalVisible(true);
       } else {
         message.error('获取部署图失败');
@@ -860,16 +841,14 @@ const AgentTrainingPanel = observer(() => {
                 <Button 
                   type="primary" 
                   onClick={() => handlePublish(record, subRecord.id)}
-                  disabled={subModelPublishStatus[subRecord.id]}
                 >
-                  发布
+                  {subModelPublishStatus[subRecord.id] ? '取消发布' : '发布'}
                 </Button>
                 <Button 
                   type="primary" 
                   onClick={() => handleLoadModel(record, subRecord.id)}
-                  disabled={loadedModel && loadedModel.model.select_model === subRecord.id}
                 >
-                  载入
+                  {loadedModel && loadedModel.model.select_model === subRecord.id ? '取消载入' : '载入'}
                 </Button>
               </div>
             ),
@@ -883,6 +862,98 @@ const AgentTrainingPanel = observer(() => {
         rowKey="id"
       />
     );
+  };
+
+  const renderAgentDetails = (agent) => {
+    return agent.agentModel.map((model, modelIndex) => {
+      const assignedEntities = agent.entityAssignments.find(assignment => 
+        Object.keys(assignment)[0] === model.name)?.[model.name] || [];
+
+      return (
+        <div key={modelIndex} style={{ marginBottom: 24 }}>
+          <h3 style={{ color: '#1890ff', fontSize: 18 }}>{model.name}</h3>
+          
+          <h4>实体状态信息</h4>
+          {[...new Set(model.stateVector.map(state => state[0]))].map((entity) => {
+            const stateInfo = model.stateVector
+              .filter((state) => state[0] === entity)
+              .map((state) => ({
+                fieldName: state[2],
+                fieldValue: state[3]
+              }));
+
+            return (
+              <div key={entity} style={{ 
+                marginBottom: 16,
+                border: '1px solid #d9d9d9',
+                borderRadius: 4,
+                padding: 12
+              }}>
+                <div style={{ 
+                  fontWeight: 'bold', 
+                  fontSize: 16,
+                  marginBottom: 8,
+                  color: '#1890ff'
+                }}>
+                  {entity}
+                </div>
+                {stateInfo.map((state, index) => (
+                  <div key={index} style={{ 
+                    display: 'flex',
+                    marginBottom: 4,
+                    paddingLeft: 12
+                  }}>
+                    <div style={{ 
+                      flex: '0 0 180px',
+                      color: '#666'
+                    }}>
+                      {state.fieldName}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      {state.fieldValue || '-'}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            );
+          })}
+
+          <h4>模型动作信息</h4>
+          <Table
+            columns={[
+              { title: '实体名称', dataIndex: 'name', key: 'name' },
+              { title: '动作名称', dataIndex: 'actionName', key: 'actionName' },
+              { title: '动作类型', dataIndex: 'actionType', key: 'actionType' },
+              { title: '动作值', dataIndex: 'actionValue', key: 'actionValue' },
+              { title: '最大动作取值', dataIndex: 'maxActionValue', key: 'maxActionValue' },
+              { title: '规则', dataIndex: 'rule', key: 'rule' },
+            ]}
+            dataSource={assignedEntities.map((entity) => {
+              const action = model.actionSpace.find((action) => action.entity === entity);
+              return {
+                key: entity,
+                name: entity,
+                actionName: action ? action.name : '无',
+                actionType: action ? action.type : '无',
+                actionValue: action ? (
+                  Array.isArray(action.action[0]) ? action.action[0].join(', ') : action.action[0]
+                ) : '无',
+                maxActionValue: action ? (
+                  action.type === '离散型' ? 
+                    (Array.isArray(action.action[1]) ? action.action[1].join(', ') : action.action[1]) :
+                    (Array.isArray(action.action[2]) ? action.action[2].join('-') : action.action[2])
+                ) : '无',
+                rule: action ? (
+                  action.rules.map(rule => rule.join(', ')).join('; ')
+                ) : '无',
+              };
+            })}
+            pagination={false}
+            bordered
+          />
+        </div>
+      );
+    });
   };
 
   return (
@@ -1024,7 +1095,7 @@ const AgentTrainingPanel = observer(() => {
         onOk={() => setIsDetailModalVisible(false)}
         onCancel={() => setIsDetailModalVisible(false)}
         footer={null}
-        width={800}
+        width={1000}
         zIndex={1001}
       >
         {selectedAgent && (
@@ -1053,87 +1124,8 @@ const AgentTrainingPanel = observer(() => {
               bordered
             />
 
-            <h3>实体状态信息</h3>
-            {selectedAgent.agentModel.flatMap((model) => {
-              const entities = [...new Set(model.stateVector.map((state) => state[0]))];
-
-              return entities.map((entity) => {
-                const stateInfo = model.stateVector
-                  .filter((state) => state[0] === entity)
-                  .map((state) => ({
-                    fieldName: state[2],
-                    fieldValue: state[3]
-                  }));
-
-                return (
-                  <div key={entity} style={{ 
-                    marginBottom: 16,
-                    border: '1px solid #d9d9d9',
-                    borderRadius: 4,
-                    padding: 12
-                  }}>
-                    <div style={{ 
-                      fontWeight: 'bold', 
-                      fontSize: 16,
-                      marginBottom: 8,
-                      color: '#1890ff'
-                    }}>
-                      {entity}
-                    </div>
-                    {stateInfo.map((state, index) => (
-                      <div key={index} style={{ 
-                        display: 'flex',
-                        marginBottom: 4,
-                        paddingLeft: 12
-                      }}>
-                        <div style={{ 
-                          flex: '0 0 180px',
-                          color: '#666'
-                        }}>
-                          {state.fieldName}
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          {state.fieldValue || '-'}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                );
-              });
-            })}
-
-            <h3>模型动作信息</h3>
-            <Table
-              columns={[
-                { title: '实体名称', dataIndex: 'name', key: 'name' },
-                { title: '动作名称', dataIndex: 'actionName', key: 'actionName' },
-                { title: '动作类型', dataIndex: 'actionType', key: 'actionType' },
-                { title: '动作值', dataIndex: 'actionValue', key: 'actionValue' },
-                { title: '最大动作取值', dataIndex: 'maxActionValue', key: 'maxActionValue' },
-                { title: '规则', dataIndex: 'rule', key: 'rule' },
-              ]}
-              dataSource={selectedAgent.agentModel.flatMap((model) => {
-                const entities = [...new Set(model.stateVector.map((state) => state[0]))];
-                return entities.map((entity) => {
-                  const action = model.actionSpace.find((action) => action.entity === entity);
-                  return {
-                    key: entity,
-                    name: entity,
-                    actionName: action ? action.name : '无',
-                    actionType: action ? action.type : '无',
-                    actionValue: action ? (Array.isArray(action.action[0]) ? action.action[0].join(', ') : '无') : '无',
-                    maxActionValue: action ? (
-                      action.type === '离散型' ? 
-                        (Array.isArray(action.action[1]) ? action.action[1].join(', ') : '无') :
-                        (Array.isArray(action.action[2]) ? action.action[2].join('-') : '无')
-                    ) : '无',
-                    rule: action ? (Array.isArray(action.rule) ? action.rule.join(', ') : '无') : '无',
-                  };
-                });
-              })}
-              pagination={false}
-              bordered
-            />
+            <h3>实体状态与动作信息</h3>
+            {renderAgentDetails(selectedAgent)}
 
             <h3>奖励信息</h3>
             <Table
@@ -1165,7 +1157,7 @@ const AgentTrainingPanel = observer(() => {
         )}
       </Modal>
 
-   <Modal
+      <Modal
         title="模型列表"
         open={isModelListModalVisible}
         onOk={() => setIsModelListModalVisible(false)}
@@ -1174,7 +1166,7 @@ const AgentTrainingPanel = observer(() => {
       >
         <Table
           columns={modelListColumns}
-          dataSource={modelListData}  // 使用从后端获取的数据
+          dataSource={modelListData}
           pagination={false}
           style={{ width: '100%' }}
           rowKey={(record) => record.model.id}
@@ -1191,7 +1183,6 @@ const AgentTrainingPanel = observer(() => {
           loading={loadingModelList}
         />
       </Modal>
-
 
       <Modal
         title="模型详细信息"
@@ -1241,6 +1232,7 @@ const AgentTrainingPanel = observer(() => {
       >
         {effectImageUrl && <img src={effectImageUrl} alt="训练效果图片" style={{ width: '100%' }} />}
       </Modal>
+
       <Modal
         title="场景查看"
         open={isScenarioModalVisible}
@@ -1249,15 +1241,23 @@ const AgentTrainingPanel = observer(() => {
         width={1800} 
         footer={null}
       >
-        <Row gutter={10}>
-          <Col span={8}>
-            <Card title="部署图" bordered={false}>
-              {deploymentImageUrl ? (
-                <img 
-                  src={deploymentImageUrl} 
-                  alt="部署图" 
-                  style={{ width: '100%', maxHeight: '60vh', objectFit: 'contain' }}
-                />
+        <Row gutter={16}>
+          <Col span={12}>
+            <Card title="部署图" bordered={false} style={{ height: '100%' }}>
+              {deploymentData ? (
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'center', 
+                  alignItems: 'center', 
+                  height: '60vh',
+                  backgroundColor: '#fff'
+                }}>
+                  <DeploymentCanvas 
+                    deploymentData={deploymentData} 
+                    width={800} 
+                    height={600} 
+                  />
+                </div>
               ) : (
                 <div style={{ padding: 16, textAlign: 'center', color: 'rgba(0, 0, 0, 0.25)' }}>
                   加载部署图中...
@@ -1265,7 +1265,7 @@ const AgentTrainingPanel = observer(() => {
               )}
             </Card>
           </Col>
-          <Col span={16}>
+          <Col span={12}>
             <Card 
               title="场景信息" 
               bordered={false}
@@ -1292,6 +1292,7 @@ const AgentTrainingPanel = observer(() => {
           </Col>
         </Row>
       </Modal>
+
       <Modal
         title="过程展示"
         open={isProcessModalVisible}
@@ -1334,42 +1335,8 @@ const AgentTrainingPanel = observer(() => {
                   bordered
                 />
 
-                <h3>实体状态信息</h3>
-                <Table
-                  columns={[
-                    { title: '实体名称', dataIndex: 'name', key: 'name' },
-                    ...intelligentStore.selectedAgent.agentModel.flatMap((model) => {
-                      return model.stateVector.map((state) => state[2]);
-                    }).reduce((uniqueColumns, field) => {
-                      if (!uniqueColumns.includes(field)) {
-                        uniqueColumns.push(field);
-                      }
-                      return uniqueColumns;
-                    }, []).map((field) => ({
-                      title: field,
-                      dataIndex: field,
-                      key: field,
-                    }))
-                  ]}
-                  dataSource={intelligentStore.selectedAgent.agentModel.flatMap((model) => {
-                    const entities = [...new Set(model.stateVector.map((state) => state[0]))];
-                    return entities.map((entity) => {
-                      const entityState = {
-                        key: entity,
-                        name: entity,
-                      };
-                      model.stateVector.forEach((state) => {
-                        const [entityName, , fieldName, fieldValue] = state;
-                        if (entityName === entity) {
-                          entityState[fieldName] = fieldValue;
-                        }
-                      });
-                      return entityState;
-                    });
-                  })}
-                  pagination={false}
-                  bordered
-                />
+                <h3>实体状态与动作信息</h3>
+                {renderAgentDetails(intelligentStore.selectedAgent)}
               </div>
             ) : (
               <div style={{ textAlign: 'center', padding: '20px' }}>

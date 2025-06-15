@@ -587,9 +587,62 @@ def get_deployment_image():
     if not scenario_id:
         return jsonify({"status": "error", "message": "Missing scenarioId"}), 400
 
+    # 构造绘图数据，类似于你提供的JSON
+    deployment_data = {
+        "screen": {"width": 800, "height": 600},
+        "entities": [
+            {
+                "name": "DH1",
+                "type": {
+                    "type": "circle",
+                    "radius": 3,
+                    "center": [0, 0],
+                    "fill": True,
+                    "color": [255, 0, 0],
+                    "opacity": 1.0
+                }
+            },
+            {
+                "name": "Line1",
+                "type":{
+                    "type": "line",
+                    "start": [0, 0],
+                    "end": [10, 10],
+                    "color": [255, 0, 0],
+                    "width": 1.0
+                }
+            },
+            {   
+                "name": "Fan1",
+                "type":{
+                    "type": "fan",
+                    "center": [0.9, 1],
+                    "startAngle": 1.1,
+                    "endAngle":1.3,
+                    "color": [255, 9, 0]
+                }
+            },
+            {
+                "name": "DH2",
+                "type":{
+                    "type": "circle",
+                    "radius": 2,
+                    "center": [10, 10],
+                    "fill": True,
+                    "color": [255, 255, 0],
+                    "opacity": 0.5
+                }
+            }
+        ],
+        "info": [
+            {"key": "场景编号", "value": scenario_id, "datetime": datetime.datetime.now().isoformat()},
+            {"key": "创建时间", "value": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+        ]
+    }
+
     return jsonify({
         "status": "success",
-        "img_url": f"mock/scenarios/{scenario_id}.jpeg"
+        "deployment_data": deployment_data
     })
 
 @app.route('/get_process_data', methods=['POST'])

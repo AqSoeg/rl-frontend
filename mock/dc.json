@@ -19,7 +19,10 @@
     "env_param": {
       "time1": 0.2,
       "time2": 0.9,
-      "position": [300, 150]
+      "position": [
+        300,
+        150
+      ]
     },
     "model": {
       "id": "ecb74ee5f7a1301",
@@ -58,7 +61,10 @@
     "env_param": {
       "time1": 0.3,
       "time2": 0.7,
-      "position": [320, 150]
+      "position": [
+        320,
+        150
+      ]
     },
     "model": {
       "id": "aa11c3eab13189e",
@@ -97,7 +103,10 @@
     "env_param": {
       "time1": 0.4,
       "time2": 0.6,
-      "position": [300, 180]
+      "position": [
+        300,
+        180
+      ]
     },
     "model": {
       "id": "b2c45d6e8f90123",
@@ -114,6 +123,65 @@
       "agentID": "d6c1afac8b5b3d7",
       "time": "2025-05-02T10:30:45.789Z",
       "version": "3.0"
+    }
+  },
+  {
+    "model": {
+      "id": "1749895458",
+      "name": "agent",
+      "version": "1",
+      "nn_model_type": "共享多智能体",
+      "time": "2025-06-14T18:04:18.537028",
+      "img_url": "http://example.com/image",
+      "model_path": "mock/ppo_model.pkl",
+      "model_list": [
+        "1749895458-0",
+        "1749895458-20"
+      ],
+      "role_name": "红绿灯",
+      "scenario_name": "城市交通",
+      "agentID": "0778ef6316ea96a"
+    },
+    "env_param": {
+      "间隔时间1": 30,
+      "额外时间1": 2,
+      "间隔时间2": 35,
+      "额外时间2": 1,
+      "间隔时间3": 23,
+      "额外时间3": 1,
+      "间隔时间4": 24,
+      "额外时间4": 1,
+      "行驶速度1": 201,
+      "行驶速度2": 202,
+      "行驶速度3": 203,
+      "行驶速度4": 204,
+      "行驶速度5": 105,
+      "行驶速度6": 206,
+      "行驶速度7": 207,
+      "行驶速度8": 108,
+      "行驶速度9": 209,
+      "行驶速度10": 200,
+      "身高1": 170,
+      "体重1": 70
+    },
+    "algorithm": {
+      "id": "MAPPO",
+      "name": "MAPPO",
+      "mode": "共享多智能体",
+      "hyper-parameters": {
+        "learning_rate": 0.001,
+        "gamma": 0.99,
+        "n_steps": 256,
+        "batch_size": 32,
+        "n_epochs": 4,
+        "lambda_": 0.95,
+        "clip_range": 0.3,
+        "ent_coef": 0.01,
+        "total_timesteps": 1000000
+      }
+    },
+    "reward": {
+      "reward1": "x'+b'"
     }
   }
 ]
