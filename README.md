@@ -10,17 +10,15 @@ npm install
 ## 工具安装（可以直接 `npm install`）
 
 1. 安装路由管理：`npm install react-router-dom`。
-2. 安装 [Ant Design](https://ant.design/docs/react/use-with-vite-cn)：`npm install antd --save`。
-3. 安装 moment：`npm install moment`。
-4. 安装 mobx 和 mobx-react：`npm install mobx mobx-react`。
-5. 安装 axios：`npm install axios`。 
-6. 安装 recharts：`npm install echarts`。
-7. 安装 md5：`npm install md5`。
-8. 安装 antd 图标：`npm install @ant-design/icons`。
+2. 安装 [Ant Design](https://ant.design/docs/react/use-with-vite-cn) 和图标：`npm install antd @ant-design/icons`。
+3. 安装状态管理：`npm install mobx mobx-react`。
+4. 安装图表：`npm install echarts`。
+5. 安装随机码：`npm install md5`。
+6. 安装 Websocket：`npm install socket.io-client`。
 
 ## 项目运行
 
-1. 运行后端：`python mock/app.py # pip install flask flask_cors stable_baselines3`。
+1. 运行后端：`python mock/app.py # pip install flask flask_cors flask_socketio stable_baselines3`。
 2. 运行网页：`npm run dev`。
 
 ## 项目结构

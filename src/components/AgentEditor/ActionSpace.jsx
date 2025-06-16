@@ -368,7 +368,7 @@ const DropdownContainer = ({ uniqueKey, action, onEdit, onDelete, modelID, selec
     };
 
     const handleRuleCancel = () => {
-        if (window.confirm('是否取消该行为规则？')) {
+        if (window.confirm('是否删除该行为规则？')) {
             actionSpaceStore.setRuleForModel(modelID, uniqueKey, null, selectedRuleNumber);
 
             const remainingRules = savedRules
@@ -653,8 +653,8 @@ const DropdownContainer = ({ uniqueKey, action, onEdit, onDelete, modelID, selec
                                     </div>
 
                                     <div className="rule-buttons">
-                                        <Button type="primary" onClick={handleRuleConfirm}>确定</Button>
-                                        <Button onClick={handleRuleCancel}>取消</Button>
+                                        <Button type="primary" onClick={handleRuleConfirm}>保存</Button>
+                                        <Button onClick={handleRuleCancel}>删除</Button>
                                     </div>
                                 </>
                             )}
