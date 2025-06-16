@@ -1,176 +1,201 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
-import { Card, Row, Col, Table } from 'antd';
 
-const ProcessAnimation = ({ agentId, scenarioId, onClose }) => {
+const ProcessAnimation = ({ agentId, scenarioId }) => {
     const canvasRef = useRef(null);
-    const socketRef = useRef(null);
-    const [frameData, setFrameData] = useState(null);
-    const [connectionStatus, setConnectionStatus] = useState('connecting');
+    const [processData, setProcessData] = useState(null);
+    const [connectionStatus, setConnectionStatus] = useState('正在连接...');
     
-    // Initialize canvas and WebSocket connection
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
-        
-        // Set up WebSocket connection
-        socketRef.current = io('http://localhost:5000');
-        
-        socketRef.current.on('connect', () => {
-            setConnectionStatus('connected');
-            console.log('WebSocket connected');
-            
-            // Start the data stream
-            fetch('http://localhost:5000/get_process_data', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    agentId: agentId,
-                    scenarioId: scenarioId
-                })
-            }).catch(err => console.error('Error starting data stream:', err));
-        });
-        
-        socketRef.current.on('disconnect', () => {
-            setConnectionStatus('disconnected');
-            console.log('WebSocket disconnected');
-        });
-        
-        socketRef.current.on('process_update', (data) => {
-            setFrameData(data);
-            drawAnimation(ctx, data);
-        });
-        
-        socketRef.current.on('error', (err) => {
-            console.error('WebSocket error:', err);
-            setConnectionStatus('error');
-        });
+    // --- New: State and refs for calculating FPS ---
+    const [fps, setFps] = useState(0); // For displaying FPS on the UI
+    const frameCountRef = useRef(0); // For accumulating frame count between calculations
+    const lastUpdateTimeRef = useRef(Date.now()); // For recording the last time FPS was calculated
 
+    // WebSocket lifecycle management (no changes needed)
+    useEffect(() => {
+        const socket = io('http://localhost:5000');
+        socket.on('connect', () => {
+            setConnectionStatus('连接成功！正在启动数据流...');
+            // Reset FPS counter
+            lastUpdateTimeRef.current = Date.now();
+            frameCountRef.current = 0;
+            socket.emit('start_process', { agentId, scenarioId });
+        });
+        socket.on('process_data', (data) => {
+            setProcessData(data);
+        });
+        socket.on('disconnect', () => {
+            setConnectionStatus('已断开连接。');
+        });
         return () => {
-            if (socketRef.current) {
-                socketRef.current.disconnect();
-            }
+            socket.disconnect();
         };
     }, [agentId, scenarioId]);
 
-    // Drawing functions
-    const drawAnimation = (ctx, data) => {
-        if (!data || !data.entities) return;
+    // Canvas dynamic drawing (added FPS calculation logic)
+    useEffect(() => {
+        if (!canvasRef.current || !processData) return;
+
+        // --- New: FPS calculation logic ---
+        // Each time this effect runs, it means a frame has been rendered
+        frameCountRef.current += 1;
+        const now = Date.now();
+        const elapsed = now - lastUpdateTimeRef.current; // How many milliseconds passed since last update
+
+        // Update FPS display every second (1000 milliseconds)
+        if (elapsed > 1000) {
+            const calculatedFps = (frameCountRef.current * 1000) / elapsed;
+            setFps(calculatedFps);
+
+            // Reset counter and timestamp for the next calculation
+            lastUpdateTimeRef.current = now;
+            frameCountRef.current = 0;
+        }
+
+        // --- Core drawing logic (no changes needed) ---
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        const { width, height } = canvas;
+        ctx.clearRect(0, 0, width, height);
         
-        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+        const entities = processData.entities;
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        entities.forEach(entity => {
+            if (entity.type.type === 'circle' || entity.type.type === 'fan') {
+                const [x, y] = entity.type.center || [0, 0];
+                const radius = entity.type.radius || 0;
+                minX = Math.min(minX, x - radius);
+                minY = Math.min(minY, y - radius);
+                maxX = Math.max(maxX, x + radius);
+                maxY = Math.max(maxY, y + radius);
+            } else if (entity.type.type === 'line') {
+                const [x1, y1] = entity.type.start || [0, 0];
+                const [x2, y2] = entity.type.end || [0, 0];
+                minX = Math.min(minX, x1, x2);
+                minY = Math.min(minY, y1, y2);
+                maxX = Math.max(maxX, x1, x2);
+                maxY = Math.max(maxY, y1, y2);
+            }
+        });
+
+        if (!isFinite(minX) || !isFinite(minY) || !isFinite(maxX) || !isFinite(maxY)) {
+            minX = 0; minY = 0; maxX = 10; maxY = 10;
+        }
         
-        // Draw all entities
-        data.entities.forEach(entity => {
-            switch(entity.type.type) {
+        const contentWidth = maxX - minX;
+        const contentHeight = maxY - minY;
+        const scaleX = width / (contentWidth || 1);
+        const scaleY = height / (contentHeight || 1);
+        const scale = Math.min(scaleX, scaleY) * 0.9;
+        const offsetX = (width - contentWidth * scale) / 2 - minX * scale;
+        const offsetY = (height - contentHeight * scale) / 2 - minY * scale;
+
+        ctx.save();
+        ctx.translate(offsetX, offsetY);
+        ctx.scale(scale, scale);
+
+        entities.forEach(entity => {
+            const color = entity.type.color || [0, 0, 0];
+            const opacity = entity.type.opacity !== undefined ? entity.type.opacity : 1.0;
+            ctx.strokeStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${opacity})`;
+            ctx.fillStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${opacity})`;
+            ctx.lineWidth = (entity.type.width || 1) / scale;
+
+            switch (entity.type.type) {
                 case 'circle':
-                    drawCircle(ctx, entity);
+                    ctx.beginPath();
+                    ctx.arc(entity.type.center[0], entity.type.center[1], entity.type.radius, 0, Math.PI * 2);
+                    if (entity.type.fill) ctx.fill(); else ctx.stroke();
+                    // Draw entity name near the circle center
+                    ctx.fillStyle = `rgba(0, 0, 0, 1)`; // Black color for text
+                    ctx.font = `${12 / scale}px Arial`; // Adjust font size based on scale
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(entity.name, entity.type.center[0], entity.type.center[1] - entity.type.radius - (10 / scale)); // Position above the circle
                     break;
                 case 'line':
-                    drawLine(ctx, entity);
+                    ctx.beginPath();
+                    ctx.moveTo(entity.type.start[0], entity.type.start[1]);
+                    ctx.lineTo(entity.type.end[0], entity.type.end[1]);
+                    ctx.stroke();
+                    // Draw entity name near the middle of the line
+                    const midX = (entity.type.start[0] + entity.type.end[0]) / 2;
+                    const midY = (entity.type.start[1] + entity.type.end[1]) / 2;
+                    ctx.fillStyle = `rgba(0, 0, 0, 1)`; // Black color for text
+                    ctx.font = `${12 / scale}px Arial`; // Adjust font size based on scale
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'bottom';
+                    ctx.fillText(entity.name, midX, midY - (5 / scale)); // Position above the line
                     break;
                 case 'fan':
-                    drawFan(ctx, entity);
+                    ctx.beginPath();
+                    ctx.moveTo(entity.type.center[0], entity.type.center[1]);
+                    ctx.arc(entity.type.center[0], entity.type.center[1], entity.type.radius || 10, entity.type.startAngle, entity.type.endAngle);
+                    ctx.closePath();
+                    ctx.fill();
+                    // Draw entity name near the fan center
+                    ctx.fillStyle = `rgba(0, 0, 0, 1)`; // Black color for text
+                    ctx.font = `${12 / scale}px Arial`; // Adjust font size based on scale
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(entity.name, entity.type.center[0], entity.type.center[1] - (20 / scale)); // Position above the fan
+                    break;
+                default:
                     break;
             }
         });
-    };
+        ctx.restore();
 
-    const drawCircle = (ctx, entity) => {
-        const { center, radius, color, opacity } = entity.type;
-        ctx.beginPath();
-        ctx.arc(center[0] * 40, center[1] * 40, radius * 10, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(${color.join(',')}, ${opacity})`;
-        ctx.fill();
-        
-        // Draw entity name
-        ctx.fillStyle = '#000';
-        ctx.font = '12px Arial';
-        ctx.fillText(entity.name, center[0] * 40 - 10, center[1] * 40 - radius * 10 - 5);
-    };
+    }, [processData]);
 
-    const drawLine = (ctx, entity) => {
-        const { start, end, color, width } = entity.type;
-        ctx.beginPath();
-        ctx.moveTo(start[0] * 40, start[1] * 40);
-        ctx.lineTo(end[0] * 40, end[1] * 40);
-        ctx.strokeStyle = `rgb(${color.join(',')})`;
-        ctx.lineWidth = width;
-        ctx.stroke();
-    };
-
-    const drawFan = (ctx, entity) => {
-        const { center, startAngle, endAngle, color } = entity.type;
-        ctx.beginPath();
-        ctx.moveTo(center[0] * 40, center[1] * 40);
-        ctx.arc(
-            center[0] * 40, 
-            center[1] * 40, 
-            50, 
-            startAngle, 
-            endAngle
-        );
-        ctx.closePath();
-        ctx.fillStyle = `rgba(${color.join(',')}, 0.3)`;
-        ctx.fill();
-    };
-
+    // --- JSX Render (added FPS display) ---
     return (
-        <div style={{ display: 'flex', height: '100%' }}>
-            <div style={{ 
-                width: '300px', 
-                padding: '16px',
-                borderRight: '1px solid #f0f0f0',
-                overflowY: 'auto'
-            }}>
-                <Card title="帧信息" size="small">
-                    {frameData ? (
+        <div>
+            <p>连接状态: {connectionStatus}</p>
+            <div style={{ display: 'flex', flexDirection: 'row', gap: '20px' }}>
+                <div className="canvas-container">
+                    <canvas ref={canvasRef} width={800} height={600} style={{ border: '1px solid #ccc', backgroundColor: '#f0f0f0' }} />
+                </div>
+                <div className="info-panel" style={{ width: '300px', borderLeft: '1px solid #eee', paddingLeft: '20px', fontFamily: 'sans-serif', fontSize: '14px', height: '602px', overflowY: 'auto' }}>
+                    <h4>当前帧详细信息</h4>
+                    {processData ? (
                         <div>
-                            <p><strong>帧数:</strong> {frameData.info.find(i => i.key === '帧数')?.value || 'N/A'}</p>
-                            <p><strong>更新时间:</strong> {frameData.info.find(i => i.key === '更新时间')?.value || 'N/A'}</p>
-                            <p><strong>连接状态:</strong> {connectionStatus}</p>
-                            
-                            <Table
-                                columns={[
-                                    { title: '实体', dataIndex: 'name', key: 'name' },
-                                    { 
-                                        title: '位置', 
-                                        key: 'position',
-                                        render: (_, entity) => {
-                                            if (entity.type.type === 'circle' || entity.type.type === 'fan') {
-                                                return `${entity.type.center[0].toFixed(2)}, ${entity.type.center[1].toFixed(2)}`;
-                                            } else if (entity.type.type === 'line') {
-                                                return `起点: ${entity.type.start[0].toFixed(2)}, ${entity.type.start[1].toFixed(2)} | 终点: ${entity.type.end[0].toFixed(2)}, ${entity.type.end[1].toFixed(2)}`;
-                                            }
-                                            return 'N/A';
-                                        }
-                                    }
-                                ]}
-                                dataSource={frameData?.entities || []}
-                                size="small"
-                                pagination={false}
-                                rowKey="name"
-                            />
+                            <div style={{ marginBottom: '15px', paddingBottom: '10px', borderBottom: '1px solid #eee' }}>
+                                {/* New: Display FPS information here */}
+                                <p style={{ margin: '4px 0', color: '#28a745', fontWeight: 'bold' }}>
+                                    <strong>渲染帧率 (FPS):</strong> {fps.toFixed(1)}
+                                </p>
+                                {processData.info.map(item => (
+                                    <p key={item.key} style={{ margin: '4px 0' }}>
+                                        <strong>{item.key}:</strong> {item.value}
+                                    </p>
+                                ))}
+                            </div>
+                            <h5>实体数据:</h5>
+                            {processData.entities.map((entity, index) => (
+                                <div key={index} style={{ marginBottom: '15px' }}>
+                                    <strong style={{ color: '#0056b3' }}>实体: {entity.name} (类型: {entity.type.type})</strong>
+                                    <ul style={{ listStyleType: 'none', paddingLeft: '10px', margin: '5px 0' }}>
+                                        {entity.type.type === 'circle' && (
+                                            <>
+                                                <li>中心点: [{entity.type.center.map(c => c.toFixed(2)).join(', ')}]</li>
+                                                <li>半径: {entity.type.radius.toFixed(2)}</li>
+                                            </>
+                                        )}
+                                        {entity.type.type === 'line' && (
+                                            <>
+                                                <li>起点: [{entity.type.start.map(c => c.toFixed(2)).join(', ')}]</li>
+                                                <li>终点: [{entity.type.end.map(c => c.toFixed(2)).join(', ')}]</li>
+                                            </>
+                                        )}
+                                    </ul>
+                                </div>
+                            ))}
                         </div>
                     ) : (
-                        <p>等待数据...</p>
+                        <p>正在等待第一帧数据...</p>
                     )}
-                </Card>
-            </div>
-            
-            <div style={{ flex: 1, padding: '16px', display: 'flex', justifyContent: 'center' }}>
-                <canvas
-                    ref={canvasRef}
-                    width={800}
-                    height={600}
-                    style={{ 
-                        backgroundColor: '#fff', 
-                        border: '1px solid #ddd',
-                        maxWidth: '100%',
-                        maxHeight: '100%'
-                    }}
-                />
+                </div>
             </div>
         </div>
     );

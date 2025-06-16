@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
+from flask_socketio import SocketIO, emit
 import json
 import os
 from stable_baselines3 import PPO
@@ -7,9 +8,10 @@ from stable_baselines3.common.env_util import make_vec_env
 import threading
 import time
 import datetime
-
+import math
 app = Flask(__name__)
 CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
 MODEL_FILE_PATH = 'mock/model.json'
 ALGORITHM_FILE_PATH = 'mock/train.json'
 DATASET_FILE_PATH = 'mock/dataset.json'
@@ -21,7 +23,88 @@ training_thread = None
 training_stop_flag = False
 training_status = "idle"
 training_result = None
+client_threads = {}
+@socketio.on('connect')
+def handle_connect():
+    print(f'客户端连接成功: {request.sid}')
+    emit('connection_response', {'data': '已连接到 WebSocket'})
 
+@socketio.on('disconnect')
+def handle_disconnect():
+    sid = request.sid
+    print(f'客户端断开连接: {sid}')
+    stop_event = client_threads.pop(sid, None)
+    if stop_event:
+        stop_event.set()
+        print(f"已停止为客户端 {sid} 的后台任务")
+
+@socketio.on('start_process')
+def handle_start_process(data):
+    sid = request.sid
+    print(f"为客户端 {sid} 启动过程，Agent: {data['agentId']}, Scenario: {data['scenarioId']}")
+    stop_event = threading.Event()
+    client_threads[sid] = stop_event
+
+    def generate_process_data(agent_id, scenario_id, stop_flag):
+        frame = 0
+        while not stop_flag.is_set():
+            dynamic_data = {
+                "screen": {"width": 800, "height": 600},
+                "entities": [
+                    {
+                        "name": f"Agent_{data['agentId']}",  # 使用 data 中的 agentId
+                        "type": {
+                            "type": "circle",
+                            "radius": 3 + math.sin(frame * 0.1) * 0.5,
+                            "center": [
+                                5 + 5 * math.sin(frame * 0.05),
+                                5 + 5 * math.cos(frame * 0.07)
+                            ],
+                            "fill": True,
+                            "color": [255, 0, 0],
+                            "opacity": 1.0
+                        }
+                    },
+                    {
+                        "name": "line",
+                        "type": {
+                            "type": "line",
+                            "start": [0, 0],
+                            "end": [
+                                10 + 3 * math.sin(frame * 0.1),
+                                10 + 3 * math.cos(frame * 0.1)
+                            ],
+                            "color": [0, 0, 255],
+                            "width": 2.0
+                        }
+                    }
+                ],
+                "info": [
+                    {"key": "场景编号", "value": data['scenarioId']},  # 使用 data 中的 scenarioId
+                    {"key": "帧数", "value": frame},
+                    {"key": "更新时间", "value": datetime.datetime.now().strftime("%H:%M:%S")}
+                ]
+            }
+            socketio.emit('process_data', dynamic_data, room=sid)
+            frame += 1
+            socketio.sleep(0.1)
+        print(f"为客户端 {sid} 的数据生成循环已停止。")
+
+    socketio.start_background_task(
+        target=generate_process_data,
+        agent_id=data['agentId'],
+        scenario_id=data['scenarioId'],
+        stop_flag=stop_event
+    )
+
+    emit('process_response', { "status": "success", "message": "动态数据流已启动" })
+
+    emit('process_response', {
+        "status": "success",
+        "message": "Dynamic data stream started",
+        "scenarioId": data['scenarioId'],
+        "agentId": data['agentId']
+    })
 def get_nested_field(item, field):
     try:
         keys = field.split('.')
@@ -618,7 +701,7 @@ def get_deployment_image():
                     "type": "fan",
                     "center": [0.9, 1],
                     "startAngle": 1.1,
-                    "endAngle":1.3,
+                    "endAngle":5,
                     "color": [255, 9, 0]
                 }
             },
@@ -648,17 +731,15 @@ def get_deployment_image():
 @app.route('/get_process_data', methods=['POST'])
 def get_process_data():
     data = request.get_json()
-    agent_id = data.get('agentId')
-    scenario_id = data.get('scenarioId')
-
-    if not agent_id or not scenario_id:
-        return jsonify({"status": "error", "message": "Missing parameters"}), 400
-
-    animation_url = f"mock/process/{scenario_id}_{agent_id}.webp"
-
+    scenario_id = data.get('scenarioId', "default")
+    agent_id = data.get('agentId', "default")
+    
+    # 直接返回成功响应，实际数据将通过socket.io发送
     return jsonify({
         "status": "success",
-        "animationUrl": animation_url
+        "message": "Dynamic data stream started",
+        "scenarioId": scenario_id,
+        "agentId": agent_id
     })
 
 @app.route('/load_dataset', methods=['POST'])
@@ -727,4 +808,4 @@ def get_model_list():
         }), 500
 
 if __name__ == '__main__':
-    app.run(port=5000, debug=True)
+    socketio.run(app, port=5000, debug=True)

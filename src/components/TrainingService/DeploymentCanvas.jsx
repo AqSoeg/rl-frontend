@@ -10,10 +10,10 @@ const DeploymentCanvas = ({ deploymentData, width, height }) => {
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, width, height);
 
-    // 计算缩放比例和偏移量，使图像居中并适应画布
+    // Calculate scaling and offset to center the image and fit the canvas
     const entities = deploymentData.entities || [];
     
-    // 计算所有实体的边界
+    // Calculate bounds of all entities
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
     
     entities.forEach(entity => {
@@ -34,7 +34,7 @@ const DeploymentCanvas = ({ deploymentData, width, height }) => {
       }
     });
 
-    // 如果所有坐标都是无限大或无限小，设置默认边界
+    // If all coordinates are infinite, set default bounds
     if (!isFinite(minX) || !isFinite(minY) || !isFinite(maxX) || !isFinite(maxY)) {
       minX = 0;
       minY = 0;
@@ -42,20 +42,20 @@ const DeploymentCanvas = ({ deploymentData, width, height }) => {
       maxY = height;
     }
 
-    // 计算内容尺寸
+    // Calculate content dimensions
     const contentWidth = maxX - minX;
     const contentHeight = maxY - minY;
 
-    // 计算缩放比例
+    // Calculate scaling factor
     const scaleX = width / (contentWidth || 1);
     const scaleY = height / (contentHeight || 1);
-    const scale = Math.min(scaleX, scaleY) * 0.9; // 90% 缩放以留出边距
+    const scale = Math.min(scaleX, scaleY) * 0.9; // 90% scaling to leave margin
 
-    // 计算偏移量以使内容居中
+    // Calculate offset to center the content
     const offsetX = (width - contentWidth * scale) / 2 - minX * scale;
     const offsetY = (height - contentHeight * scale) / 2 - minY * scale;
 
-    // 绘制所有实体
+    // Draw all entities
     entities.forEach(entity => {
       ctx.save();
       ctx.translate(offsetX, offsetY);
@@ -82,6 +82,12 @@ const DeploymentCanvas = ({ deploymentData, width, height }) => {
           } else {
             ctx.stroke();
           }
+          // Draw entity name near the circle center
+          ctx.fillStyle = `rgba(0, 0, 0, 1)`; // Black color for text
+          ctx.font = `${12 / scale}px Arial`; // Adjust font size based on scale
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(entity.name, entity.type.center[0], entity.type.center[1] - entity.type.radius - (10 / scale)); // Position above the circle
           break;
 
         case 'line':
@@ -89,6 +95,14 @@ const DeploymentCanvas = ({ deploymentData, width, height }) => {
           ctx.moveTo(entity.type.start[0], entity.type.start[1]);
           ctx.lineTo(entity.type.end[0], entity.type.end[1]);
           ctx.stroke();
+          // Draw entity name near the middle of the line
+          const midX = (entity.type.start[0] + entity.type.end[0]) / 2;
+          const midY = (entity.type.start[1] + entity.type.end[1]) / 2;
+          ctx.fillStyle = `rgba(0, 0, 0, 1)`; // Black color for text
+          ctx.font = `${12 / scale}px Arial`; // Adjust font size based on scale
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+          ctx.fillText(entity.name, midX, midY - (5 / scale)); // Position above the line
           break;
 
         case 'fan':
@@ -97,12 +111,18 @@ const DeploymentCanvas = ({ deploymentData, width, height }) => {
           ctx.arc(
             entity.type.center[0],
             entity.type.center[1],
-            10, // 默认半径
+            entity.type.radius || 10, // Use entity's radius or default to 10
             entity.type.startAngle,
             entity.type.endAngle
           );
           ctx.closePath();
           ctx.fill();
+          // Draw entity name near the fan center
+          ctx.fillStyle = `rgba(0, 0, 0, 1)`; // Black color for text
+          ctx.font = `${12 / scale}px Arial`; // Adjust font size based on scale
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(entity.name, entity.type.center[0], entity.type.center[1] - (20 / scale)); // Position above the fan
           break;
 
         default:

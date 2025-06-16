@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,useRef } from 'react';
 import { DownOutlined } from '@ant-design/icons';
 import { Card, Select, Row, Col, Space, Button, Modal, Table, message, Input } from 'antd';
 import { intelligentStore } from './IntelligentStore';
 import { observer } from 'mobx-react';
 import DeploymentCanvas from './DeploymentCanvas'; // Import the new canvas component
+import ProcessAnimation from './ProcessAnimation';
 const { Option } = Select;
 
 const AgentTrainingPanel = observer(() => {
@@ -27,13 +28,12 @@ const AgentTrainingPanel = observer(() => {
   const [isEffectImageModalVisible, setIsEffectImageModalVisible] = useState(false);
   const [isScenarioModalVisible, setIsScenarioModalVisible] = useState(false);
   const [deploymentData, setDeploymentData] = useState(null); // Changed from deploymentImageUrl
-  const [animationUrl, setAnimationUrl] = useState(null);
   const [isProcessModalVisible, setIsProcessModalVisible] = useState(false);
   const [loadedModel, setLoadedModel] = useState(null);
   const [subModelPublishStatus, setSubModelPublishStatus] = useState({});
   const [modelListData, setModelListData] = useState([]);
   const [loadingModelList, setLoadingModelList] = useState(false);
-
+  
   useEffect(() => {
     setEntity('');
     setAttribute('');
@@ -770,45 +770,17 @@ const AgentTrainingPanel = observer(() => {
     }
   };
 
-  const handleprocess = async () => {
+const handleprocess = async () => {
     if (!intelligentStore.selectedAgent) {
-      message.error("请先载入智能体");
-      return;
+        message.error("请先载入智能体");
+
+        return;
     }
+    console.log('Selected Agent:', intelligentStore.selectedAgent);
+    console.log('Selected Scenario:', intelligentStore.selectedScenario);
+    setIsProcessModalVisible(true);
+};
 
-    try {
-      setIsProcessModalVisible(true);
-      setAnimationUrl(null);
-
-      const selectedAgent = intelligentStore.selectedAgent;
-
-      const response = await fetch(__APP_CONFIG__.get_process_data, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          agentId: selectedAgent.agentID,
-          scenarioId: intelligentStore.selectedScenario.id
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      if (data.status === 'success') {
-        setAnimationUrl(data.animationUrl);
-      } else {
-        setAnimationUrl(null);
-      }
-    } catch (error) {
-      console.error('获取过程数据失败:', error);
-      setAnimationUrl(null);
-      message.error('获取过程数据失败');
-    }
-  };
 
   const [expandedRowKeys, setExpandedRowKeys] = useState([]);
 
@@ -1296,88 +1268,19 @@ const AgentTrainingPanel = observer(() => {
       <Modal
         title="过程展示"
         open={isProcessModalVisible}
-        onOk={() => setIsProcessModalVisible(false)}
         onCancel={() => setIsProcessModalVisible(false)}
-        width={1800}
+        destroyOnClose 
         footer={null}
+        width={1200} 
       >
-        <div style={{ display: 'flex', height: '600px' }}>
-          <div style={{ 
-            flex: 1, 
-            borderRight: '1px solid #f0f0f0',
-            padding: '16px',
-            overflowY: 'auto'
-          }}>
-            {intelligentStore.selectedAgent ? (
-              <div>
-                <h3>智能体详细信息</h3>
-                <p><strong>智能体名称：</strong>{intelligentStore.selectedAgent.agentName}</p>
-                <p><strong>智能体ID：</strong>{intelligentStore.selectedAgent.agentID}</p>
-                <p><strong>版本：</strong>{intelligentStore.selectedAgent.agentVersion}</p>
-                <p><strong>智能体类型：</strong>{intelligentStore.selectedAgent.agentType}</p>
-                <p><strong>更新时间：</strong>{new Date(intelligentStore.selectedAgent.updateTime).toLocaleString()}</p>
-                <p><strong>想定场景：</strong>{intelligentStore.selectedAgent.scenarioID}</p>
-
-                <h3>智能体分配信息</h3>
-                <Table
-                  columns={[
-                    { title: '智能体名称', dataIndex: 'agentName', key: 'agentName' },
-                    { title: '分配实体', dataIndex: 'assignedEntities', key: 'assignedEntities' },
-                  ]}
-                  dataSource={intelligentStore.selectedAgent.entityAssignments.flatMap((assignment) =>
-                    Object.entries(assignment).map(([agentName, entities]) => ({
-                      key: agentName,
-                      agentName: agentName,
-                      assignedEntities: entities.join(', '),
-                    }))
-                  )}
-                  pagination={false}
-                  bordered
-                />
-
-                <h3>实体状态与动作信息</h3>
-                {renderAgentDetails(intelligentStore.selectedAgent)}
-              </div>
-            ) : (
-              <div style={{ textAlign: 'center', padding: '20px' }}>
-                <p>没有可用的智能体信息</p>
-              </div>
-            )}
-          </div>
-
-          <div style={{ 
-            flex: 1, 
-            padding: '16px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: '#f5f5f5'
-          }}>
-            {animationUrl ? (
-              <>
-                <h3>训练过程动画</h3>
-                <div style={{ width: '100%', height: '100%' }}>
-                  <img 
-                    src={animationUrl} 
-                    alt="训练过程动画" 
-                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      setAnimationUrl(null);
-                    }}
-                  />
-                </div>
-              </>
-            ) : (
-              <div style={{ textAlign: 'center' }}>
-                <h3>Sorry</h3>
-                <p>没有载入智能体的动画显示</p>
-              </div>
-            )}
-          </div>
-        </div>
+        {isProcessModalVisible && (
+          <ProcessAnimation 
+            agentId={intelligentStore.selectedAgent?.agentID} 
+            scenarioId={intelligentStore.selectedScenario?.id}
+          />
+        )}
       </Modal>
+
     </div>
   );
 });
