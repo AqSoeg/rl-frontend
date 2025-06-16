@@ -9,7 +9,7 @@ const ProcessAnimation = ({ agentId, scenarioId }) => {
     const frameCountRef = useRef(0); 
     const lastUpdateTimeRef = useRef(Date.now()); 
     useEffect(() => {
-        const socket = io('http://localhost:5000');
+        const socket = io(__APP_CONFIG__.socketiourl);
         socket.on('connect', () => {
             setConnectionStatus('连接成功！正在启动数据流...');
             lastUpdateTimeRef.current = Date.now();

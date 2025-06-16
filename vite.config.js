@@ -26,6 +26,7 @@ const appConfig = {
   get_process_data:"http://localhost:5000/get_process_data",
   load_dataset:"http://localhost:5000/load_dataset",
   get_model_list:"http://localhost:5000/get_model_list",
+  socketiourl: "http://localhost:5000",
 };
 
 export default defineConfig({
