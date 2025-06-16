@@ -41,7 +41,9 @@ def handle_disconnect():
 @socketio.on('start_process')
 def handle_start_process(data):
     sid = request.sid
-    print(f"为客户端 {sid} 启动过程，Agent: {data['agentId']}, Scenario: {data['scenarioId']}")
+    agent_id = data.get('agentId', 'unknown_agent')
+    scenario_id = data.get('scenarioId', 'unknown_scenario')
+    print(f"为客户端 {sid} 启动过程,Agent: {data['agentId']}, Scenario: {data['scenarioId']}")
     stop_event = threading.Event()
     client_threads[sid] = stop_event
 
@@ -701,7 +703,7 @@ def get_deployment_image():
                     "type": "fan",
                     "center": [0.9, 1],
                     "startAngle": 1.1,
-                    "endAngle":5,
+                    "endAngle":2,
                     "color": [255, 9, 0]
                 }
             },

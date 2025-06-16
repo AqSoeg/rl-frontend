@@ -27,7 +27,7 @@ const AgentTrainingPanel = observer(() => {
   const [effectImageUrl, setEffectImageUrl] = useState(null);
   const [isEffectImageModalVisible, setIsEffectImageModalVisible] = useState(false);
   const [isScenarioModalVisible, setIsScenarioModalVisible] = useState(false);
-  const [deploymentData, setDeploymentData] = useState(null); // Changed from deploymentImageUrl
+  const [deploymentData, setDeploymentData] = useState(null); 
   const [isProcessModalVisible, setIsProcessModalVisible] = useState(false);
   const [loadedModel, setLoadedModel] = useState(null);
   const [subModelPublishStatus, setSubModelPublishStatus] = useState({});
@@ -759,7 +759,7 @@ const AgentTrainingPanel = observer(() => {
 
       const data = await response.json();
       if (data.status === 'success') {
-        setDeploymentData(data.deployment_data); // Store deployment data instead of image URL
+        setDeploymentData(data.deployment_data); 
         setIsScenarioModalVisible(true);
       } else {
         message.error('获取部署图失败');
@@ -776,8 +776,6 @@ const handleprocess = async () => {
 
         return;
     }
-    console.log('Selected Agent:', intelligentStore.selectedAgent);
-    console.log('Selected Scenario:', intelligentStore.selectedScenario);
     setIsProcessModalVisible(true);
 };
 

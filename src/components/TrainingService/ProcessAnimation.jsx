@@ -5,18 +5,13 @@ const ProcessAnimation = ({ agentId, scenarioId }) => {
     const canvasRef = useRef(null);
     const [processData, setProcessData] = useState(null);
     const [connectionStatus, setConnectionStatus] = useState('正在连接...');
-    
-    // --- New: State and refs for calculating FPS ---
-    const [fps, setFps] = useState(0); // For displaying FPS on the UI
-    const frameCountRef = useRef(0); // For accumulating frame count between calculations
-    const lastUpdateTimeRef = useRef(Date.now()); // For recording the last time FPS was calculated
-
-    // WebSocket lifecycle management (no changes needed)
+    const [fps, setFps] = useState(0); 
+    const frameCountRef = useRef(0); 
+    const lastUpdateTimeRef = useRef(Date.now()); 
     useEffect(() => {
         const socket = io('http://localhost:5000');
         socket.on('connect', () => {
             setConnectionStatus('连接成功！正在启动数据流...');
-            // Reset FPS counter
             lastUpdateTimeRef.current = Date.now();
             frameCountRef.current = 0;
             socket.emit('start_process', { agentId, scenarioId });
@@ -31,28 +26,18 @@ const ProcessAnimation = ({ agentId, scenarioId }) => {
             socket.disconnect();
         };
     }, [agentId, scenarioId]);
-
-    // Canvas dynamic drawing (added FPS calculation logic)
     useEffect(() => {
         if (!canvasRef.current || !processData) return;
-
-        // --- New: FPS calculation logic ---
-        // Each time this effect runs, it means a frame has been rendered
         frameCountRef.current += 1;
         const now = Date.now();
-        const elapsed = now - lastUpdateTimeRef.current; // How many milliseconds passed since last update
-
-        // Update FPS display every second (1000 milliseconds)
+        const elapsed = now - lastUpdateTimeRef.current; 
         if (elapsed > 1000) {
             const calculatedFps = (frameCountRef.current * 1000) / elapsed;
             setFps(calculatedFps);
 
-            // Reset counter and timestamp for the next calculation
             lastUpdateTimeRef.current = now;
             frameCountRef.current = 0;
         }
-
-        // --- Core drawing logic (no changes needed) ---
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         const { width, height } = canvas;
@@ -106,9 +91,8 @@ const ProcessAnimation = ({ agentId, scenarioId }) => {
                     ctx.beginPath();
                     ctx.arc(entity.type.center[0], entity.type.center[1], entity.type.radius, 0, Math.PI * 2);
                     if (entity.type.fill) ctx.fill(); else ctx.stroke();
-                    // Draw entity name near the circle center
-                    ctx.fillStyle = `rgba(0, 0, 0, 1)`; // Black color for text
-                    ctx.font = `${12 / scale}px Arial`; // Adjust font size based on scale
+                    ctx.fillStyle = `rgba(0, 0, 0, 1)`; 
+                    ctx.font = `${12 / scale}px Arial`; 
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(entity.name, entity.type.center[0], entity.type.center[1] - entity.type.radius - (10 / scale)); // Position above the circle
@@ -118,14 +102,14 @@ const ProcessAnimation = ({ agentId, scenarioId }) => {
                     ctx.moveTo(entity.type.start[0], entity.type.start[1]);
                     ctx.lineTo(entity.type.end[0], entity.type.end[1]);
                     ctx.stroke();
-                    // Draw entity name near the middle of the line
+                    
                     const midX = (entity.type.start[0] + entity.type.end[0]) / 2;
                     const midY = (entity.type.start[1] + entity.type.end[1]) / 2;
-                    ctx.fillStyle = `rgba(0, 0, 0, 1)`; // Black color for text
-                    ctx.font = `${12 / scale}px Arial`; // Adjust font size based on scale
+                    ctx.fillStyle = `rgba(0, 0, 0, 1)`; 
+                    ctx.font = `${12 / scale}px Arial`; 
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
-                    ctx.fillText(entity.name, midX, midY - (5 / scale)); // Position above the line
+                    ctx.fillText(entity.name, midX, midY - (5 / scale)); 
                     break;
                 case 'fan':
                     ctx.beginPath();
@@ -133,9 +117,9 @@ const ProcessAnimation = ({ agentId, scenarioId }) => {
                     ctx.arc(entity.type.center[0], entity.type.center[1], entity.type.radius || 10, entity.type.startAngle, entity.type.endAngle);
                     ctx.closePath();
                     ctx.fill();
-                    // Draw entity name near the fan center
-                    ctx.fillStyle = `rgba(0, 0, 0, 1)`; // Black color for text
-                    ctx.font = `${12 / scale}px Arial`; // Adjust font size based on scale
+                    
+                    ctx.fillStyle = `rgba(0, 0, 0, 1)`; 
+                    ctx.font = `${12 / scale}px Arial`; 
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
                     ctx.fillText(entity.name, entity.type.center[0], entity.type.center[1] - (20 / scale)); // Position above the fan
@@ -147,8 +131,6 @@ const ProcessAnimation = ({ agentId, scenarioId }) => {
         ctx.restore();
 
     }, [processData]);
-
-    // --- JSX Render (added FPS display) ---
     return (
         <div>
             <p>连接状态: {connectionStatus}</p>
@@ -161,7 +143,6 @@ const ProcessAnimation = ({ agentId, scenarioId }) => {
                     {processData ? (
                         <div>
                             <div style={{ marginBottom: '15px', paddingBottom: '10px', borderBottom: '1px solid #eee' }}>
-                                {/* New: Display FPS information here */}
                                 <p style={{ margin: '4px 0', color: '#28a745', fontWeight: 'bold' }}>
                                     <strong>渲染帧率 (FPS):</strong> {fps.toFixed(1)}
                                 </p>
