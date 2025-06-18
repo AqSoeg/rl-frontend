@@ -1,0 +1,29 @@
+[
+  {
+    "algorithm id": "c81e728d9d4c2f636f067f89cc14862c",
+    "algorithm_name": "predictor",
+    "algorithm type": "M",
+    "description": "Predictive analysis for user behavior",
+    "algorithm_image": "../../mock/ML.jpg",
+    "model_path": "xx/xx/predictor.pt",
+    "create_time": "2021-06-15 14:30:00"
+  },
+  {
+    "algorithm id": "eccbc87e4b5ce2fe28308fd9f2a7baf3",
+    "algorithm_name": "classifier",
+    "algorithm type": "DL",
+    "description": "Deep learning classifier for image recognition",
+    "algorithm_image": "xx/xx/classifier.png",
+    "model_path": "xx/xx/classifier.pt",
+    "create_time": "2021-07-10 09:00:00"
+  },
+  {
+    "algorithm id": "a87ff679a2f3e71d9181a67b7542122c",
+    "algorithm_name": "recommender",
+    "algorithm type": "ML",
+    "description": "Recommendation system for content",
+    "algorithm_image": "xx/xx/recommender.png",
+    "model_path": "xx/xx/recommender.pt",
+    "create_time": "2021-08-20 16:45:00"
+  }
+]

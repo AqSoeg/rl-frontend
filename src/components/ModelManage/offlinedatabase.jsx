@@ -153,7 +153,7 @@ const OfflineDatabase = ({ datasets, fetchDatasets }) => {
                         setIsEditMode(true);
                         setIsEditModalVisible(true);
                         editForm.setFieldsValue(record);
-                    }}>编辑</Button>
+                    }}>更新</Button>
                     <Button type="link" onClick={() => handleDelete(record.OFFLINE_DATA_ID)}>删除</Button>
                 </div>
             ),

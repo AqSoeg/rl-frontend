@@ -19,6 +19,7 @@ SCENARIO_FILE_PATH = 'mock/db.json'
 DECISION_FILE_PATH = 'mock/dc.json'
 EVALUATE_FILE_PATH = 'mock/evaluatetable.json'
 EVALUATION_DATA_PATH = 'mock/evaluation_data.json'
+EXTRA_DECISION_FILE_PATH = 'mock/extradc.json'
 training_thread = None
 training_stop_flag = False
 training_status = "idle"
@@ -334,7 +335,15 @@ def get_decision_models():
     except Exception as e:
         print(f'Error reading decision models: {str(e)}')
         return jsonify({'error': 'Failed to read decision models'}), 500
-
+@app.route('/getExtraDecisionModels', methods=['POST']) # 新增的后端接口
+def get_extra_decision_models():
+    try:
+        with open(EXTRA_DECISION_FILE_PATH, 'r', encoding='utf-8') as f:
+            extra_decision_models = json.load(f)
+        return jsonify(extra_decision_models)
+    except Exception as e:
+        print(f'Error reading extra decision models: {str(e)}')
+        return jsonify({'error': 'Failed to read extra decision models'}), 500
 @app.route('/getEvaluateTables', methods=['POST'])
 def get_evaluate_tables():
     try:
@@ -489,6 +498,8 @@ def search_all():
             file_path = MODEL_FILE_PATH
         elif search_type == 'evaluate':
             file_path = EVALUATE_FILE_PATH
+        elif search_type == 'extraDecision': # 新增的搜索类型
+            file_path = EXTRA_DECISION_FILE_PATH
         else:
             return jsonify({'status': 'error', 'message': 'Invalid search type'}), 400
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -521,6 +532,8 @@ def delete_item():
             file_path = MODEL_FILE_PATH
         elif delete_type == 'evaluate':
             file_path = EVALUATE_FILE_PATH
+        elif delete_type == 'extraDecision': # 新增的删除类型
+            file_path = EXTRA_DECISION_FILE_PATH
         else:
             return jsonify({'status': 'error', 'message': 'Invalid delete type'}), 400
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -537,6 +550,8 @@ def delete_item():
             existing_data = [item for item in existing_data if item.get('agentID') != item_id]
         elif delete_type == 'evaluate':
             existing_data = [item for item in existing_data if item.get('AGENT_MODEL_ID') != item_id]
+        elif delete_type == 'extraDecision': # 新增的删除逻辑
+            existing_data = [item for item in existing_data if item.get('algorithm id') != item_id]
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(existing_data, f, ensure_ascii=False, indent=2)
         return jsonify({'status': 'success', 'message': f'{delete_type.capitalize()} deleted successfully'})
@@ -563,6 +578,8 @@ def update_item():
             file_path = MODEL_FILE_PATH
         elif update_type == 'evaluate':
             file_path = EVALUATE_FILE_PATH
+        elif update_type == 'extraDecision': # 新增的更新类型
+            file_path = EXTRA_DECISION_FILE_PATH
         else:
             return jsonify({'status': 'error', 'message': 'Invalid update type'}), 400
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -585,6 +602,9 @@ def update_item():
                 item.update(updated_data)
                 updated = True
             elif update_type == 'evaluate' and item.get('AGENT_MODEL_ID') == item_id:
+                item.update(updated_data)
+                updated = True
+            elif update_type == 'extraDecision' and item.get('algorithm id') == item_id: # 新增的更新逻辑
                 item.update(updated_data)
                 updated = True
         if not updated:
@@ -620,6 +640,9 @@ def add_item():
         elif add_type == 'evaluate':
             file_path = EVALUATE_FILE_PATH
             id_field = 'AGENT_MODEL_ID'
+        elif add_type == 'extraDecision': # 新增的添加类型
+            file_path = EXTRA_DECISION_FILE_PATH
+            id_field = 'algorithm id'
         else:
             return jsonify({'status': 'error', 'message': 'Invalid add type'}), 400
         with open(file_path, 'r', encoding='utf-8') as f:

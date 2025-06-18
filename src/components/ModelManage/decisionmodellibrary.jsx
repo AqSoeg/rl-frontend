@@ -229,7 +229,7 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
             render: (text, record) => (
                 <div>
                     <Button type="link" onClick={() => { setCurrentDecision(record); setIsEditMode(false); setIsEditModalVisible(true); }}>查看</Button>
-                    <Button type="link" onClick={() => { setCurrentDecision(record); setIsEditMode(true); setIsEditModalVisible(true); editForm.setFieldsValue(record); }}>编辑</Button>
+                    <Button type="link" onClick={() => { setCurrentDecision(record); setIsEditMode(true); setIsEditModalVisible(true); editForm.setFieldsValue(record); }}>更新</Button>
                     <Button type="link" onClick={() => handleDelete(record.AGENT_MODEL_ID)}>删除</Button>
                 </div>
             ),

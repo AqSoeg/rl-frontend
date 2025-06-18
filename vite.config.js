@@ -27,6 +27,7 @@ const appConfig = {
   load_dataset:"http://localhost:5000/load_dataset",
   get_model_list:"http://localhost:5000/get_model_list",
   socketiourl: "http://localhost:5000",
+  getExtraDecisionModels:"http://localhost:5000/getExtraDecisionModels",
 };
 
 export default defineConfig({

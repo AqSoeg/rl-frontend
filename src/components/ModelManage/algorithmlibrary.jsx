@@ -148,7 +148,7 @@ const AlgorithmLibrary = ({ algorithms, fetchAlgorithms }) => {
       render: (text, record) => (
         <>
           <Button type="link" onClick={() => { setCurrentAlgorithm(record); setIsEditing(false); setIsViewEditModalVisible(true); }}>查看</Button>
-          <Button type="link" onClick={() => { setCurrentAlgorithm(record); setIsEditing(true); setIsViewEditModalVisible(true); }}>编辑</Button>
+          <Button type="link" onClick={() => { setCurrentAlgorithm(record); setIsEditing(true); setIsViewEditModalVisible(true); }}>更新</Button>
           <Button type="link" onClick={() => handleDelete(record.algorithm_id)}>删除</Button>
         </>
       ),

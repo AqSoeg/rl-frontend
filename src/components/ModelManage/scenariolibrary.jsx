@@ -180,7 +180,7 @@ const ScenarioLibrary = ({ scenarios, fetchScenarios }) => {
                         setIsEditMode(true);
                         setIsEditModalVisible(true);
                         editForm.setFieldsValue(record);
-                    }}>编辑</Button>
+                    }}>更新</Button>
                     <Button type="link" onClick={() => handleDelete(record.id)}>删除</Button>
                 </div>
             ),
