@@ -832,32 +832,26 @@ def get_model_list():
             'message': f'Internal server error: {str(e)}'
         }), 500
 
-@app.route('/startTraining', methods=['POST'])
-def start_training_and_get_result():
-    try:
-        training_data = request.json
-        print(training_data)
-        print(f"--- 开始为模型 {training_data.get('ALGORITHM_ID')} 进行训练 ---")
-        time.sleep(5) 
-        print(f"--- 模型 {training_data.get('ALGORITHM_ID')} 训练完成 ---")
-        final_status = "训练完成"
-        completion_time = datetime.datetime.now().isoformat()
+@app.route('/start_training', methods=['POST'])
+def start_training():
+    data = request.json
+    if not data:
+        return jsonify({"status": "error", "message": "No JSON data received"}), 400
 
-        return jsonify({
-            "status": "success",
-            "message": "训练已成功完成。",
-            "training_status": final_status,
-            "last_updated_time": completion_time
-        })
-        
-    except Exception as e:
-        print(f"训练过程中发生错误: {str(e)}")
-        return jsonify({
-            "status": "error", 
-            "message": str(e),
-            "training_status": "训练失败",
-            "last_updated_time": datetime.datetime.now().isoformat()
-        }), 500
+    algorithm_id = data.get('ALGORITHM_ID', 'unknown')
+    algorithm_name = data.get('ALGORITHM_NAME', 'unknown')
+
+    print(f"Helper received training request for ALGORITHM_ID: {algorithm_id}, ALGORITHM_NAME: {algorithm_name}")
+    time.sleep(5)
+    current_time = datetime.datetime.now().isoformat()
+    response = {
+        "status": "训练完成",
+        "ALGORITHM_ID": algorithm_id,
+        "ALGORITHM_NAME": algorithm_name,
+        "time": current_time,
+        "message": f"模型 {algorithm_name} 在助手端训练成功！"
+    }
+    return jsonify(response)
 
 @app.route('/uploadFile', methods=['POST'])
 def upload_file():
@@ -871,7 +865,6 @@ def upload_file():
 
         # 保存到当前工作目录
         file_path = os.path.join(os.getcwd(), file.filename)
-        file.save(file_path)
 
         return jsonify({'status': 'success', 'file_path': os.path.abspath(file_path)})
     except Exception as e:

@@ -20,7 +20,7 @@ npm install
 
 1. 运行后端：`python mock/app.py # pip install flask flask_cors flask_socketio stable_baselines3`。
 2. 运行网页：`npm run dev`。
-
+3. 运行websocket服务器`node mock/server.js`
 ## 项目结构
 
 ```

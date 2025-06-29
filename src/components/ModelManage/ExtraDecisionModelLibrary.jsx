@@ -15,7 +15,6 @@ const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
     const addForm = Form.useForm()[0];
     const fileInputRef = useRef(null);
 
-    // Format date to "YYYY-MM-DD HH:mm:ss"
     const formatDate = (isoDate) => {
         if (!isoDate) return '';
         const date = new Date(isoDate);
@@ -63,6 +62,7 @@ const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
             editForm.resetFields();
         }
     }, [currentDecision, editForm]);
+
 
     const handleDelete = async (id) => {
         try {
@@ -148,42 +148,42 @@ const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
         fileInputRef.current.click();
     };
 
- const onFileSelected = async (event) => {
-    const file = event.target.files[0];
-    if (file && currentDecision) {
-        const formData = new FormData();
-        formData.append('file', file);
+    const onFileSelected = async (event) => {
+        const file = event.target.files[0];
+        if (file && currentDecision) {
+            const formData = new FormData();
+            formData.append('file', file);
 
-        try {
-            const response = await fetch(__APP_CONFIG__.uploadFile, {
-                method: 'POST',
-                body: formData
-            });
-            const result = await response.json();
-            if (result.status === 'success') {
-                const filePath = result.file_path;
-                setFilteredDecisions((prev) =>
-                    prev.map((item) =>
-                        item.ALGORITHM_ID === currentDecision.ALGORITHM_ID
-                            ? {
-                                  ...item,
-                                  TRAINING_DATA_PATH: filePath,
-                                  TRAINING_STATUS: '未训练',
-                                  LAST_UPDATED_TIME: ''
-                              }
-                            : item
-                    )
-                );
-                message.success(`文件 "${filePath}" 已导入，训练状态已重置`);
-            } else {
-                message.error(`文件上传失败: ${result.message}`);
+            try {
+                const response = await fetch(__APP_CONFIG__.uploadFile, {
+                    method: 'POST',
+                    body: formData
+                });
+                const result = await response.json();
+                if (result.status === 'success') {
+                    const filePath = result.file_path;
+                    setFilteredDecisions((prev) =>
+                        prev.map((item) =>
+                            item.ALGORITHM_ID === currentDecision.ALGORITHM_ID
+                                ? {
+                                      ...item,
+                                      TRAINING_DATA_PATH: filePath,
+                                      TRAINING_STATUS: '未训练',
+                                      LAST_UPDATED_TIME: ''
+                                  }
+                                : item
+                        )
+                    );
+                    message.success(`文件 "${filePath}" 已导入，训练状态已重置`);
+                } else {
+                    message.error(`文件上传失败: ${result.message}`);
+                }
+            } catch (error) {
+                console.error('Error uploading file:', error);
+                message.error('文件上传失败');
             }
-        } catch (error) {
-            console.error('Error uploading file:', error);
-            message.error('文件上传失败');
         }
-    }
-};
+    };
 
     const handleStartTraining = async (record) => {
         if (record.TRAINING_DATA_PATH === '未选择') {
@@ -192,12 +192,14 @@ const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
         }
 
         setTrainingLoading((prev) => ({ ...prev, [record.ALGORITHM_ID]: true }));
+        message.info(`正在发送训练请求给模型 ${record.ALGORITHM_NAME}...`);
 
-        try {
-            const response = await fetch(__APP_CONFIG__.startTraining, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
+        return new Promise((resolve) => {
+            const ws = new WebSocket('ws://localhost:8080');
+
+            ws.onopen = () => {
+                const dataToSend = {
+                    action: 'start_training',
                     ALGORITHM_ID: record.ALGORITHM_ID,
                     ALGORITHM_NAME: record.ALGORITHM_NAME,
                     ALGORITHM_TYPE: record.ALGORITHM_TYPE,
@@ -206,32 +208,54 @@ const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
                     MODEL_PATH: record.MODEL_PATH,
                     CREATE_TIME: record.CREATE_TIME,
                     TRAINING_DATA_PATH: record.TRAINING_DATA_PATH,
-                })
-            });
+                };
+                ws.send(JSON.stringify(dataToSend));
+            };
 
-            const result = await response.json();
-            if (result.status === 'success') {
-                setFilteredDecisions((prev) =>
-                    prev.map((item) =>
-                        item.ALGORITHM_ID === record.ALGORITHM_ID
-                            ? {
-                                  ...item,
-                                  TRAINING_STATUS: result.training_status,
-                                  LAST_UPDATED_TIME: formatDate(result.last_updated_time)
-                              }
-                            : item
-                    )
-                );
-                message.success(`模型 ${record.ALGORITHM_NAME} 训练完成`);
-            } else {
-                message.error(`训练失败: ${result.message}`);
-            }
-        } catch (error) {
-            console.error('Error starting training:', error);
-            message.error('训练过程中发生错误');
-        } finally {
-            setTrainingLoading((prev) => ({ ...prev, [record.ALGORITHM_ID]: false }));
-        }
+            ws.onmessage = (event) => {
+                try {
+                    const messageData = JSON.parse(event.data);
+                    console.log(messageData)
+                    if (messageData.status === '训练完成' && messageData.ALGORITHM_ID && messageData.time) {
+                        setFilteredDecisions((prev) =>
+                            prev.map((item) =>
+                                item.ALGORITHM_ID === messageData.ALGORITHM_ID
+                                    ? {
+                                          ...item,
+                                          TRAINING_STATUS: messageData.status,
+                                          LAST_UPDATED_TIME: formatDate(messageData.time)
+                                      }
+                                    : item
+                            )
+                        );
+                        message.success(`模型 ${messageData.ALGORITHM_ID} 训练完成`);
+                    } else if (messageData.status === '训练失败' && messageData.ALGORITHM_ID) {
+                        message.error(`模型 ${messageData.ALGORITHM_ID} 训练失败: ${messageData.message}`);
+                    }
+                    ws.close(); // Close the connection after receiving the message
+                    setTrainingLoading((prev) => ({ ...prev, [record.ALGORITHM_ID]: false }));
+                    resolve(); // Resolve the promise to indicate completion
+                } catch (error) {
+                    console.error('Error parsing WebSocket message:', error);
+                    message.error('解析训练结果失败');
+                    ws.close();
+                    setTrainingLoading((prev) => ({ ...prev, [record.ALGORITHM_ID]: false }));
+                    resolve();
+                }
+            };
+
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+                message.error('WebSocket 连接错误');
+                ws.close();
+                setTrainingLoading((prev) => ({ ...prev, [record.ALGORITHM_ID]: false }));
+                resolve();
+            };
+
+            ws.onclose = () => {
+                console.log('WebSocket connection closed.');
+            };
+        });
     };
 
     const columns = [
