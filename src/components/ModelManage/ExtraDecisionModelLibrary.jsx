@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, Input, Card, Select, message } from 'antd';
+import React, { useState, useEffect, useRef } from 'react';
+import { Table, Button, Modal, Form, Input, Card, Select, message, Spin } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 
 const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
@@ -8,22 +8,33 @@ const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
     const [currentDecision, setCurrentDecision] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
     const [searchText, setSearchText] = useState('');
-    const [searchField, setSearchField] = useState('algorithm id'); 
+    const [searchField, setSearchField] = useState('algorithm id');
     const [filteredDecisions, setFilteredDecisions] = useState([]);
+    const [trainingLoading, setTrainingLoading] = useState({}); // Track loading state per record
     const editForm = Form.useForm()[0];
     const addForm = Form.useForm()[0];
+    const fileInputRef = useRef(null);
 
-  
+    // Format date to "YYYY-MM-DD HH:mm:ss"
+    const formatDate = (isoDate) => {
+        if (!isoDate) return '';
+        const date = new Date(isoDate);
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+    };
+
     const mapExtraDecisionData = (decision, index) => ({
-        key: decision['algorithm id'] || `fallback-${index}`, 
+        key: decision['algorithm id'] || `fallback-${index}`,
         ALGORITHM_ID: decision['algorithm id'],
         ALGORITHM_NAME: decision.algorithm_name,
         ALGORITHM_TYPE: decision['algorithm type'],
         DESCRIPTION: decision.description,
         ALGORITHM_IMAGE: decision.algorithm_image,
         MODEL_PATH: decision.model_path,
-        CREATE_TIME: decision.create_time,
-        rawData: decision 
+        CREATE_TIME: formatDate(decision.create_time),
+        TRAINING_DATA_PATH: decision.training_data_path || '未选择',
+        TRAINING_STATUS: decision.training_status || '未训练',
+        LAST_UPDATED_TIME: formatDate(decision.last_updated_time),
+        rawData: decision
     });
 
     useEffect(() => {
@@ -43,7 +54,10 @@ const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
                 DESCRIPTION: currentDecision.DESCRIPTION,
                 ALGORITHM_IMAGE: currentDecision.ALGORITHM_IMAGE,
                 MODEL_PATH: currentDecision.MODEL_PATH,
-                CREATE_TIME: currentDecision.CREATE_TIME
+                CREATE_TIME: currentDecision.CREATE_TIME,
+                TRAINING_DATA_PATH: currentDecision.TRAINING_DATA_PATH,
+                TRAINING_STATUS: currentDecision.TRAINING_STATUS,
+                LAST_UPDATED_TIME: currentDecision.LAST_UPDATED_TIME
             });
         } else {
             editForm.resetFields();
@@ -55,7 +69,7 @@ const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
             const response = await fetch(__APP_CONFIG__.deleteAll, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type: 'extraDecision', id }), 
+                body: JSON.stringify({ type: 'extraDecision', id }),
             });
             const result = await response.json();
             if (result.status === 'success') {
@@ -68,51 +82,17 @@ const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
         }
     };
 
-    const handleUpdate = async (id, values) => {
-        try {
-            const updatedData = {
-                "algorithm id": values.ALGORITHM_ID,
-                "algorithm_name": values.ALGORITHM_NAME,
-                "algorithm type": values.ALGORITHM_TYPE,
-                "description": values.DESCRIPTION,
-                "algorithm_image": values.ALGORITHM_IMAGE,
-                "model_path": values.MODEL_PATH,
-                "create_time": values.CREATE_TIME
-            };
-
-            const response = await fetch(__APP_CONFIG__.updateAll, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'extraDecision', 
-                    id,
-                    data: updatedData
-                }),
-            });
-            const result = await response.json();
-            if (result.status === 'success') {
-                message.success('额外决策模型更新成功');
-                fetchDecisions();
-                setIsEditModalVisible(false);
-            }
-        } catch (error) {
-            console.error('Error updating extra decision model:', error);
-            message.error('额外决策模型更新失败');
-        }
-    };
-
     const handleSearch = async () => {
         try {
             const response = await fetch(__APP_CONFIG__.searchAll, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    type: 'extraDecision', 
+                    type: 'extraDecision',
                     field: searchField,
                     value: searchText
                 })
             });
-
             const result = await response.json();
             if (Array.isArray(result)) {
                 setFilteredDecisions(result.map((decision, index) => mapExtraDecisionData(decision, index)));
@@ -127,15 +107,7 @@ const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
     };
 
     const handleOkEdit = () => {
-        if (isEditMode) {
-            editForm.submit();
-        } else {
-            setIsEditModalVisible(false);
-        }
-    };
-
-    const handleFinishEdit = async (values) => {
-        await handleUpdate(currentDecision.ALGORITHM_ID, values);
+        setIsEditModalVisible(false);
     };
 
     const handleAdd = async (values) => {
@@ -147,14 +119,14 @@ const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
                 "description": values.DESCRIPTION,
                 "algorithm_image": values.ALGORITHM_IMAGE,
                 "model_path": values.MODEL_PATH,
-                "create_time": values.CREATE_TIME || new Date().toISOString()
+                "create_time": new Date().toISOString(),
             };
 
             const response = await fetch(__APP_CONFIG__.addAll, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    type: 'extraDecision', 
+                    type: 'extraDecision',
                     data: newData
                 }),
             });
@@ -170,6 +142,98 @@ const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
         }
     };
 
+    const handleImportData = (record) => {
+        setCurrentDecision(record);
+        fileInputRef.current.value = '';
+        fileInputRef.current.click();
+    };
+
+ const onFileSelected = async (event) => {
+    const file = event.target.files[0];
+    if (file && currentDecision) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch(__APP_CONFIG__.uploadFile, {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            if (result.status === 'success') {
+                const filePath = result.file_path;
+                setFilteredDecisions((prev) =>
+                    prev.map((item) =>
+                        item.ALGORITHM_ID === currentDecision.ALGORITHM_ID
+                            ? {
+                                  ...item,
+                                  TRAINING_DATA_PATH: filePath,
+                                  TRAINING_STATUS: '未训练',
+                                  LAST_UPDATED_TIME: ''
+                              }
+                            : item
+                    )
+                );
+                message.success(`文件 "${filePath}" 已导入，训练状态已重置`);
+            } else {
+                message.error(`文件上传失败: ${result.message}`);
+            }
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            message.error('文件上传失败');
+        }
+    }
+};
+
+    const handleStartTraining = async (record) => {
+        if (record.TRAINING_DATA_PATH === '未选择') {
+            message.error('请先导入训练数据');
+            return;
+        }
+
+        setTrainingLoading((prev) => ({ ...prev, [record.ALGORITHM_ID]: true }));
+
+        try {
+            const response = await fetch(__APP_CONFIG__.startTraining, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ALGORITHM_ID: record.ALGORITHM_ID,
+                    ALGORITHM_NAME: record.ALGORITHM_NAME,
+                    ALGORITHM_TYPE: record.ALGORITHM_TYPE,
+                    DESCRIPTION: record.DESCRIPTION,
+                    ALGORITHM_IMAGE: record.ALGORITHM_IMAGE,
+                    MODEL_PATH: record.MODEL_PATH,
+                    CREATE_TIME: record.CREATE_TIME,
+                    TRAINING_DATA_PATH: record.TRAINING_DATA_PATH,
+                })
+            });
+
+            const result = await response.json();
+            if (result.status === 'success') {
+                setFilteredDecisions((prev) =>
+                    prev.map((item) =>
+                        item.ALGORITHM_ID === record.ALGORITHM_ID
+                            ? {
+                                  ...item,
+                                  TRAINING_STATUS: result.training_status,
+                                  LAST_UPDATED_TIME: formatDate(result.last_updated_time)
+                              }
+                            : item
+                    )
+                );
+                message.success(`模型 ${record.ALGORITHM_NAME} 训练完成`);
+            } else {
+                message.error(`训练失败: ${result.message}`);
+            }
+        } catch (error) {
+            console.error('Error starting training:', error);
+            message.error('训练过程中发生错误');
+        } finally {
+            setTrainingLoading((prev) => ({ ...prev, [record.ALGORITHM_ID]: false }));
+        }
+    };
+
     const columns = [
         { title: '序号', dataIndex: 'key', key: 'index', render: (text, record, index) => index + 1 },
         { title: '算法 ID', dataIndex: 'ALGORITHM_ID', key: 'ALGORITHM_ID' },
@@ -179,14 +243,25 @@ const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
         { title: '算法图片', dataIndex: 'ALGORITHM_IMAGE', key: 'ALGORITHM_IMAGE' },
         { title: '模型路径', dataIndex: 'MODEL_PATH', key: 'MODEL_PATH' },
         { title: '创建时间', dataIndex: 'CREATE_TIME', key: 'CREATE_TIME' },
+        { title: '训练数据路径', dataIndex: 'TRAINING_DATA_PATH', key: 'TRAINING_DATA_PATH' },
+        { title: '训练状态', dataIndex: 'TRAINING_STATUS', key: 'TRAINING_STATUS' },
+        { title: '最后更新时间', dataIndex: 'LAST_UPDATED_TIME', key: 'LAST_UPDATED_TIME' },
         {
             title: '操作',
             key: 'action',
             render: (text, record) => (
                 <div>
                     <Button type="link" onClick={() => { setCurrentDecision(record); setIsEditMode(false); setIsEditModalVisible(true); }}>查看</Button>
-                    <Button type="link" onClick={() => { setCurrentDecision(record); setIsEditMode(true); setIsEditModalVisible(true); editForm.setFieldsValue(record); }}>更新</Button>
                     <Button type="link" onClick={() => handleDelete(record.ALGORITHM_ID)}>删除</Button>
+                    <Button type="link" onClick={() => handleImportData(record)}>数据导入</Button>
+                    <Button
+                        type="link"
+                        onClick={() => handleStartTraining(record)}
+                        disabled={trainingLoading[record.ALGORITHM_ID]}
+                        loading={trainingLoading[record.ALGORITHM_ID]}
+                    >
+                        {trainingLoading[record.ALGORITHM_ID] ? '训练中' : '开始训练'}
+                    </Button>
                 </div>
             ),
         },
@@ -203,25 +278,33 @@ const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
                 <Select.Option value="algorithm_image">算法图片</Select.Option>
                 <Select.Option value="model_path">模型路径</Select.Option>
                 <Select.Option value="create_time">创建时间</Select.Option>
+                <Select.Option value="training_data_path">训练数据路径</Select.Option>
+                <Select.Option value="training_status">训练状态</Select.Option>
+                <Select.Option value="last_updated_time">最后更新时间</Select.Option>
             </Select>
             <Input placeholder="单行输入" value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ width: 200, marginRight: 8 }} />
             <Button type="primary" onClick={handleSearch}>搜索</Button>
             <Table
                 dataSource={filteredDecisions}
                 columns={columns}
-                rowKey="key" 
+                rowKey="key"
             />
-
-            {/* 编辑和查看的模态框 */}
+            <input
+                type="file"
+                ref={fileInputRef}
+                onChange={onFileSelected}
+                style={{ display: 'none' }}
+            />
             <Modal
                 title={isEditMode ? '编辑额外决策模型' : '查看额外决策模型'}
                 open={isEditModalVisible}
                 onOk={handleOkEdit}
                 onCancel={() => setIsEditModalVisible(false)}
+                footer={isEditMode ? undefined : [<Button key="back" onClick={() => setIsEditModalVisible(false)}>关闭</Button>]}
             >
-                <Form form={editForm} initialValues={currentDecision} onFinish={handleFinishEdit}>
+                <Form form={editForm} initialValues={currentDecision}>
                     <Form.Item label="算法 ID" name="ALGORITHM_ID">
-                        <Input disabled={!isEditMode} />
+                        <Input disabled={true} />
                     </Form.Item>
                     <Form.Item label="算法名称" name="ALGORITHM_NAME">
                         <Input disabled={!isEditMode} />
@@ -236,14 +319,14 @@ const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
                         <Input disabled={!isEditMode} />
                     </Form.Item>
                     {!isEditMode && currentDecision?.ALGORITHM_IMAGE && (
-                        <Form.Item wrapperCol={{ offset: 6, span: 16 }}> {/* Adjust offset/span as needed for alignment */}
+                        <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
                             <img
                                 src={currentDecision.ALGORITHM_IMAGE}
                                 alt="算法图片"
                                 style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px', marginTop: '10px' }}
                                 onError={(e) => {
-                                    e.target.onerror = null; 
-                                    e.target.src = "https://placehold.co/150x100/CCCCCC/FFFFFF?text=图片加载失败"; // Placeholder image
+                                    e.target.onerror = null;
+                                    e.target.src = "https://placehold.co/150x100/CCCCCC/FFFFFF?text=图片加载失败";
                                     message.error('图片加载失败');
                                 }}
                             />
@@ -255,10 +338,17 @@ const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
                     <Form.Item label="创建时间" name="CREATE_TIME">
                         <Input disabled={true} />
                     </Form.Item>
+                    <Form.Item label="训练数据路径" name="TRAINING_DATA_PATH">
+                        <Input disabled={true} />
+                    </Form.Item>
+                    <Form.Item label="训练状态" name="TRAINING_STATUS">
+                        <Input disabled={true} />
+                    </Form.Item>
+                    <Form.Item label="最后更新时间" name="LAST_UPDATED_TIME">
+                        <Input disabled={true} />
+                    </Form.Item>
                 </Form>
             </Modal>
-
-            {/* 新增额外决策模型的模态框 */}
             <Modal
                 title="新增额外决策模型"
                 open={isAddModalVisible}
@@ -285,11 +375,10 @@ const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
                         <Input />
                     </Form.Item>
                     <Form.Item label="创建时间" name="CREATE_TIME">
-                        <Input disabled={true} value={new Date().toISOString()} />
+                        <Input disabled={true} value={formatDate(new Date().toISOString())} />
                     </Form.Item>
                 </Form>
             </Modal>
-
             <Button
                 type="primary"
                 icon={<PlusOutlined />}

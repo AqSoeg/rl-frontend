@@ -1,0 +1,425 @@
+[
+  {
+    "algorithm_id": "MAPPO",
+    "type": "shared_multi_agent",
+    "type_name": "共享多智能体",
+    "name": "MAPPO",
+    "train_mode": "online",
+    "hyper-parameters": [
+      {
+        "id": "learning_rate",
+        "name": "学习率",
+        "value": [
+          0.0003,
+          0.0001,
+          0.0003,
+          0.001
+        ],
+        "default": 0.001
+      },
+      {
+        "id": "gamma",
+        "name": "折扣因子",
+        "value": [
+          0.9,
+          0.8,
+          0.9,
+          0.95,
+          0.99
+        ],
+        "default": 0.99
+      },
+      {
+        "id": "n_steps",
+        "name": "采样步数",
+        "value": [
+          128,
+          64,
+          128,
+          256
+        ],
+        "default": 256
+      },
+      {
+        "id": "batch_size",
+        "name": "批量大小",
+        "value": [
+          32,
+          64,
+          128
+        ],
+        "default": 32
+      },
+      {
+        "id": "n_epochs",
+        "name": "更新步数",
+        "value": [
+          4,
+          3,
+          4,
+          8
+        ],
+        "default": 4
+      },
+      {
+        "id": "lambda_",
+        "name": "GAE参数",
+        "value": [
+          0.95,
+          0.9,
+          0.95,
+          0.99
+        ],
+        "default": 0.95
+      },
+      {
+        "id": "clip_range",
+        "name": "裁剪范围",
+        "value": [
+          0.1,
+          0.2,
+          0.3
+        ],
+        "default": 0.3
+      },
+      {
+        "id": "ent_coef",
+        "name": "策略熵系数",
+        "value": [
+          0.01,
+          0.001,
+          0.01
+        ],
+        "default": 0.01
+      },
+      {
+        "id": "total_timesteps",
+        "name": "MAPPO总步数",
+        "value": [
+          1000000,
+          5000000,
+          10000000
+        ],
+        "default": 1000000
+      }
+    ],
+    "time": "2025-03-12T10:04:08.523Z",
+    "hyper-parameters.learning_rate": 0.001,
+    "hyper-parameters.gamma": 0.99,
+    "hyper-parameters.n_steps": 256,
+    "hyper-parameters.batch_size": 32,
+    "hyper-parameters.n_epochs": 4,
+    "hyper-parameters.lambda_": 0.95,
+    "hyper-parameters.clip_range": 0.3,
+    "hyper-parameters.ent_coef": 0.01,
+    "hyper-parameters.total_timesteps": 1000000,
+    "updateTime": "2025-05-11T12:41:42.737Z"
+  },
+  {
+    "algorithm_id": "MADDPG",
+    "type": "distributed_multi_agent",
+    "type_name": "分布式多智能体",
+    "name": "MADDPG",
+    "train_mode": "online",
+    "hyper-parameters": [
+      {
+        "default": 0.001,
+        "id": "learning_rate",
+        "name": "学习率",
+        "value": [
+          0.0003,
+          0.0001,
+          0.0003,
+          0.001
+        ]
+      },
+      {
+        "default": 0.99,
+        "id": "gamma",
+        "name": "折扣因子",
+        "value": [
+          0.9,
+          0.8,
+          0.9,
+          0.95,
+          0.99
+        ]
+      },
+      {
+        "default": 256,
+        "id": "n_steps",
+        "name": "采样步数",
+        "value": [
+          128,
+          64,
+          128,
+          256
+        ]
+      },
+      {
+        "default": 32,
+        "id": "batch_size",
+        "name": "批量大小",
+        "value": [
+          32,
+          64,
+          128
+        ]
+      },
+      {
+        "default": 4,
+        "id": "n_epochs",
+        "name": "更新步数",
+        "value": [
+          4,
+          3,
+          4,
+          8
+        ]
+      },
+      {
+        "default": 0.95,
+        "id": "lambda_",
+        "name": "GAE参数",
+        "value": [
+          0.95,
+          0.9,
+          0.95,
+          0.99
+        ]
+      },
+      {
+        "default": 0.3,
+        "id": "clip_range",
+        "name": "裁剪范围",
+        "value": [
+          0.1,
+          0.2,
+          0.3
+        ]
+      },
+      {
+        "default": 0.01,
+        "id": "ent_coef",
+        "name": "策略熵系数",
+        "value": [
+          0.01,
+          0.001,
+          0.01
+        ]
+      },
+      {
+        "default": 1000000,
+        "id": "total_timesteps",
+        "name": "MADDPG总步数",
+        "value": [
+          1000000,
+          5000000,
+          10000000
+        ]
+      }
+    ],
+    "time": "2025-05-11T12:42:20.162Z",
+    "hyper-parameters.learning_rate": 0.001,
+    "hyper-parameters.gamma": 0.99,
+    "hyper-parameters.n_steps": 256,
+    "hyper-parameters.batch_size": 32,
+    "hyper-parameters.n_epochs": 4,
+    "hyper-parameters.lambda_": 0.95,
+    "hyper-parameters.clip_range": 0.3,
+    "hyper-parameters.ent_coef": 0.01,
+    "hyper-parameters.total_timesteps": 1000000
+  },
+  {
+    "algorithm_id": "PPO",
+    "type": "single_agent",
+    "type_name": "单智能体",
+    "name": "PPO",
+    "train_mode": "online",
+    "hyper-parameters": [
+      {
+        "id": "learning_rate",
+        "name": "学习率",
+        "value": [
+          0.0003,
+          0.0001,
+          0.0003,
+          0.001
+        ],
+        "default": 0.0003
+      },
+      {
+        "id": "gamma",
+        "name": "折扣因子",
+        "value": [
+          0.9,
+          0.8,
+          0.9,
+          0.95,
+          0.99
+        ],
+        "default": 0.9
+      },
+      {
+        "id": "n_steps",
+        "name": "采样步数",
+        "value": [
+          128,
+          64,
+          128,
+          256
+        ],
+        "default": 128
+      },
+      {
+        "id": "batch_size",
+        "name": "批量大小",
+        "value": [
+          32,
+          64,
+          128
+        ],
+        "default": 32
+      },
+      {
+        "id": "n_epochs",
+        "name": "更新步数",
+        "value": [
+          4,
+          3,
+          4,
+          8
+        ],
+        "default": 4
+      },
+      {
+        "id": "gae_lambda",
+        "name": "GAE参数",
+        "value": [
+          0.95,
+          0.9,
+          0.95,
+          0.99
+        ],
+        "default": 0.95
+      },
+      {
+        "id": "clip_range",
+        "name": "裁剪范围",
+        "value": [
+          0.1,
+          0.2,
+          0.3
+        ],
+        "default": 0.2
+      },
+      {
+        "id": "ent_coef",
+        "name": "策略熵系数",
+        "value": [
+          0.01,
+          0.001,
+          0.01
+        ],
+        "default": 0.01
+      },
+      {
+        "id": "total_timesteps",
+        "name": "PPO总步数",
+        "value": [
+          1000000,
+          5000,
+          10000000
+        ],
+        "default": 5000
+      }
+    ],
+    "time": "2025-01-11T10:45:42.302Z"
+  },
+  {
+    "algorithm_id": "DDPG",
+    "type": "single_agent",
+    "type_name": "单智能体",
+    "train_mode": "offline",
+    "name": "DDPG",
+    "hyper-parameters": [
+      {
+        "id": "actor_learning_rate",
+        "name": "Actor学习率",
+        "value": [
+          0.0001,
+          0.0003
+        ],
+        "default": 0.0001
+      },
+      {
+        "id": "critic_learning_rate",
+        "name": "Critic学习率",
+        "value": [
+          0.001,
+          0.0001
+        ],
+        "default": 0.001
+      },
+      {
+        "id": "gamma",
+        "name": "折扣因子",
+        "value": [
+          0.9,
+          0.99
+        ],
+        "default": 0.9
+      },
+      {
+        "id": "tau",
+        "name": "软更新率",
+        "value": [
+          0.005,
+          0.01,
+          0.05
+        ],
+        "default": 0.005
+      },
+      {
+        "id": "batch_size",
+        "name": "批量大小",
+        "value": [
+          64,
+          32,
+          128
+        ],
+        "default": 64
+      },
+      {
+        "id": "buffer_size",
+        "name": "经验回放缓冲区大小",
+        "value": [
+          10000,
+          50000,
+          100000
+        ],
+        "default": 10000
+      },
+      {
+        "id": "exploration_noise",
+        "name": "探索噪声",
+        "value": [
+          0.1,
+          0.2
+        ],
+        "default": 0.1
+      },
+      {
+        "id": "total_timesteps",
+        "name": "总步数",
+        "value": [
+          1000000,
+          5000000,
+          10000000
+        ],
+        "default": 1000000
+      }
+    ],
+    "time": "2024-03-11T10:45:42.302Z"
+  }
+]

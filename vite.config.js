@@ -28,6 +28,8 @@ const appConfig = {
   get_model_list:"http://localhost:5000/get_model_list",
   socketiourl: "http://localhost:5000",
   getExtraDecisionModels:"http://localhost:5000/getExtraDecisionModels",
+  startTraining: "http://localhost:5000/startTraining",
+  uploadFile: "http://localhost:5000/uploadFile",
 };
 
 export default defineConfig({

@@ -832,5 +832,51 @@ def get_model_list():
             'message': f'Internal server error: {str(e)}'
         }), 500
 
+@app.route('/startTraining', methods=['POST'])
+def start_training_and_get_result():
+    try:
+        training_data = request.json
+        print(training_data)
+        print(f"--- 开始为模型 {training_data.get('ALGORITHM_ID')} 进行训练 ---")
+        time.sleep(5) 
+        print(f"--- 模型 {training_data.get('ALGORITHM_ID')} 训练完成 ---")
+        final_status = "训练完成"
+        completion_time = datetime.datetime.now().isoformat()
+
+        return jsonify({
+            "status": "success",
+            "message": "训练已成功完成。",
+            "training_status": final_status,
+            "last_updated_time": completion_time
+        })
+        
+    except Exception as e:
+        print(f"训练过程中发生错误: {str(e)}")
+        return jsonify({
+            "status": "error", 
+            "message": str(e),
+            "training_status": "训练失败",
+            "last_updated_time": datetime.datetime.now().isoformat()
+        }), 500
+
+@app.route('/uploadFile', methods=['POST'])
+def upload_file():
+    try:
+        if 'file' not in request.files:
+            return jsonify({'status': 'error', 'message': 'No file provided'}), 400
+
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'status': 'error', 'message': 'No file selected'}), 400
+
+        # 保存到当前工作目录
+        file_path = os.path.join(os.getcwd(), file.filename)
+        file.save(file_path)
+
+        return jsonify({'status': 'success', 'file_path': os.path.abspath(file_path)})
+    except Exception as e:
+        print(f'Error uploading file: {str(e)}')
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
 if __name__ == '__main__':
     socketio.run(app, port=5000, debug=True)
