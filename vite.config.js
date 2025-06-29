@@ -30,6 +30,8 @@ const appConfig = {
   getExtraDecisionModels:"http://localhost:5000/getExtraDecisionModels",
   startTraining: "http://localhost:5000/startTraining",
   uploadFile: "http://localhost:5000/uploadFile",
+  websocketUrl: "ws://localhost:8080", // WebSocket 服务器地址
+  
 };
 
 export default defineConfig({

@@ -1,12 +1,14 @@
 import { WebSocketServer } from 'ws';
+const WEBSOCKET_PORT = 8080; 
+const EXTERNAL_HELPER_API_URL = 'http://localhost:5000/start_training'; 
 
-const wss = new WebSocketServer({ port: 8080 });
-console.log('WebSocket server started on port 8080');
+const wss = new WebSocketServer({ port: WEBSOCKET_PORT });
+console.log(`WebSocket server started on port ${WEBSOCKET_PORT}`);
 
 wss.on('connection', ws => {
     console.log('Client connected');
 
-    ws.on('message', async message => { 
+    ws.on('message', async message => {
         console.log(`Received message from client: ${message}`);
 
         try {
@@ -15,19 +17,19 @@ wss.on('connection', ws => {
             if (data.action === 'start_training') {
 
                 try {
-                    const helperResponse = await fetch('http://localhost:5000/start_training', { 
+                    const helperResponse = await fetch(EXTERNAL_HELPER_API_URL, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify(data), 
+                        body: JSON.stringify(data),
                     });
                     const helperResult = await helperResponse.json();
                     console.log('Received response from external helper:', helperResult);
 
                     if (helperResult.status === 'success' || helperResult.status === '训练完成') {
                         const responseToFrontend = {
-                            status: '训练完成', 
+                            status: '训练完成',
                             ALGORITHM_ID: helperResult.ALGORITHM_ID || data.ALGORITHM_ID,
                             time: helperResult.time || new Date().toISOString()
                         };

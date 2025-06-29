@@ -192,10 +192,9 @@ const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
         }
 
         setTrainingLoading((prev) => ({ ...prev, [record.ALGORITHM_ID]: true }));
-        message.info(`正在发送训练请求给模型 ${record.ALGORITHM_NAME}...`);
 
         return new Promise((resolve) => {
-            const ws = new WebSocket('ws://localhost:8080');
+            const ws = new WebSocket(__APP_CONFIG__.websocketUrl);
 
             ws.onopen = () => {
                 const dataToSend = {
@@ -215,7 +214,7 @@ const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
             ws.onmessage = (event) => {
                 try {
                     const messageData = JSON.parse(event.data);
-                    console.log(messageData)
+                    
                     if (messageData.status === '训练完成' && messageData.ALGORITHM_ID && messageData.time) {
                         setFilteredDecisions((prev) =>
                             prev.map((item) =>
@@ -232,9 +231,9 @@ const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
                     } else if (messageData.status === '训练失败' && messageData.ALGORITHM_ID) {
                         message.error(`模型 ${messageData.ALGORITHM_ID} 训练失败: ${messageData.message}`);
                     }
-                    ws.close(); // Close the connection after receiving the message
+                    ws.close(); 
                     setTrainingLoading((prev) => ({ ...prev, [record.ALGORITHM_ID]: false }));
-                    resolve(); // Resolve the promise to indicate completion
+                    resolve(); 
                 } catch (error) {
                     console.error('Error parsing WebSocket message:', error);
                     message.error('解析训练结果失败');
