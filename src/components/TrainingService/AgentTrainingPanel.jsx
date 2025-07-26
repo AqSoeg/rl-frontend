@@ -34,131 +34,7 @@ const AgentTrainingPanel = observer(() => {
   const [modelListData, setModelListData] = useState([]);
   const [loadingModelList, setLoadingModelList] = useState(false);
   
-  useEffect(() => {
-    setEntity('');
-    setAttribute('');
-    setValue('');
-    setEntityParamsInfo('');
-
-    if (intelligentStore.selectedScenario && intelligentStore.selectedScenario.env_params) {
-      const envParamsMap = intelligentStore.selectedScenario.env_params.reduce((acc, param) => {
-        acc[param.name] = param.params.map(p => ({
-          key: p[0],
-          label: p[1],
-          value: p[2],
-          options: p[3]
-        }));
-        return acc;
-      }, {});
-
-      setEnvParamsMap(envParamsMap);
-    }
-  }, [intelligentStore.selectedScenario]);
-
-  const handleEntityChange = (value) => {
-    setEntity(value);
-    setAttribute('');
-    setValue('');
-
-    if (intelligentStore.selectedScenario && intelligentStore.selectedScenario.env_params) {
-      const selectedEntity = intelligentStore.selectedScenario.env_params.find(param => param.name === value);
-      if (selectedEntity) {
-        const paramsInfo = selectedEntity.params.map(param => {
-          const [key, label, defaultValue, options] = param;
-          return `${label}：${defaultValue}`;
-        }).join('，');
-        setEntityParamsInfo(paramsInfo);
-      }
-    }
-  };
-
-  const handleAttributeChange = (value) => {
-    setAttribute(value);
-    const attributeInfo = envParamsMap[entity].find(attr => attr.key === value);
-    setValue(attributeInfo ? attributeInfo.value : '');
-  };
-
-  const handleValueChange = (value) => {
-    setValue(value);
-  };
-
-  const handleUpdate = async () => {
-    const selectedEntityParams = envParamsMap[entity];
-    if (selectedEntityParams) {
-      const selectedAttributeInfo = selectedEntityParams.find(attr => attr.key === attribute);
-      if (selectedAttributeInfo) {
-        try {
-          const response = await fetch(__APP_CONFIG__.updateDbJson, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              scenarioId: intelligentStore.selectedScenario.id,
-              entityName: entity,
-              attributeKey: selectedAttributeInfo.key,
-              newValue: value
-            }),
-          });
-
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-
-          const data = await response.json();
-          
-          setModifiedParams(prevState => ({
-            ...prevState,
-            [entity]: {
-              ...prevState[entity],
-              [selectedAttributeInfo.label]: value,
-            },
-          }));
-
-          const displayText = selectedEntityParams
-            .map(attr => `${attr.label}：${attr.key === attribute ? value : attr.value}`)
-            .join(',');
-
-          setEntityParamsInfo(displayText);
-          message.success('更新成功');
-        } catch (error) {
-          message.error('更新失败');
-          console.error('更新失败:', error);
-        }
-      } else {
-        setEntityParamsInfo('请选择一个属性');
-      }
-    } else {
-      setEntityParamsInfo('请选择一个实体');
-    }
-  };
-
-  const entityOptions = Object.keys(envParamsMap).map(name => (
-    <Option key={name} value={name}>
-      {name}
-    </Option>
-  ));
-
-  const attributeOptions = () => {
-    return envParamsMap[entity] ? envParamsMap[entity].map(param => (
-      <Option key={param.key} value={param.key}>
-        {param.label}
-      </Option>
-    )) : [];
-  };
-
-  const valueOptions = () => {
-    if (!intelligentStore.selectedScenario || !envParamsMap[entity]) return [];
-
-    const currentParam = envParamsMap[entity].find(param => param.key === attribute);
-    if (!currentParam) return [];
-
-    return currentParam.options.map(option => (
-      <Option key={option} value={option}>
-        {option}
-      </Option>
-    ));
-  };
+ 
 
   const fetchAgents = async () => {
     try {
@@ -189,12 +65,7 @@ const AgentTrainingPanel = observer(() => {
       );
 
       setAgents(filteredAgents);
-      const filteredAgents1 = models.filter(
-        (agent) =>
-          agent.scenarioID === intelligentStore.selectedScenario.id
-      );
-
-      setAgents1(filteredAgents1);
+      
     } catch (error) {
       console.error('Error fetching agents:', error);
     }
@@ -691,85 +562,7 @@ const AgentTrainingPanel = observer(() => {
     },
   ];
 
-  const scenarioViewColumns = [
-    {
-      title: '序号',
-      key: 'index',
-      render: (text, record, index) => index + 1,
-    },
-    { title: '想定场景', dataIndex: 'scenarioID', key: 'scenarioID' },
-    { title: '智能体角色', dataIndex: 'agentRoleID', key: 'agentRoleID' },
-    { title: '智能体ID', dataIndex: 'agentID', key: 'agentID' },
-    { title: '智能体名称', dataIndex: 'agentName', key: 'agentName' },
-    { title: '版本', dataIndex: 'agentVersion', key: 'agentVersion' },
-    { title: '智能体类型', dataIndex: 'agentType', key: 'agentType' },
-    { 
-      title: '更新时间', 
-      dataIndex: 'updateTime', 
-      key: 'updateTime', 
-      render: time => new Date(time).toLocaleString() 
-    },
-    {
-      title: '实体分配',
-      dataIndex: 'entityAssignments',
-      key: 'entityAssignments',
-      render: (text, record) => {
-        const assignments = record.entityAssignments.map((assignment, index) => {
-          const agentName = Object.keys(assignment)[0];
-          const entities = assignment[agentName].join(', ');
-          return `${agentName}: ${entities}`;
-        });
-
-        return (
-          <div>
-            {assignments.map((assignment, index) => (
-              <div key={index}>{assignment}</div>
-            ))}
-          </div>
-        );
-      },
-    },
-    {
-      title: '操作',
-      key: 'action',
-      render: (text, record) => (
-        <Button type="primary" onClick={() => handleView(record)}>查看</Button>
-      ),
-    },
-  ];
-
-  const viewscenario = async () => {
-    if (!intelligentStore.selectedScenario) {
-      message.error("请先选择想定场景");
-      return;
-    }
-
-    try {
-      const response = await fetch(__APP_CONFIG__.get_deployment_image, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ scenarioId: intelligentStore.selectedScenario.id }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      if (data.status === 'success') {
-        setDeploymentData(data.deployment_data); 
-        setIsScenarioModalVisible(true);
-      } else {
-        message.error('获取部署图失败');
-      }
-    } catch (error) {
-      console.error('获取部署图失败:', error);
-      message.error('获取部署图失败，请检查网络或联系管理员');
-    }
-  };
-
+ 
 const handleprocess = async () => {
     if (!intelligentStore.selectedAgent) {
         message.error("请先载入智能体");
@@ -951,54 +744,7 @@ const handleprocess = async () => {
           </div>
         )}
       </Card>
-      <div className='edit-container'>
-        <Card 
-          title={<div style={{ textAlign: 'center', backgroundColor: '#e6f7ff', padding: '8px 0' }}>场景编辑</div>} 
-          bordered={false}
-          style={{ marginBottom: 16 }}
-        >
-          <span>实体：</span>
-          <Select
-            className="select-style"
-            placeholder="选择实体"
-            value={entity}
-            onChange={handleEntityChange}
-            style={{ width: 'auto' }}
-            popupMatchSelectWidth={false}
-          >
-            {entityOptions}
-          </Select>
-          <span>属性：</span>
-          <Select
-            className="select-style"
-            placeholder="选择属性"
-            value={attribute}
-            onChange={handleAttributeChange}
-            style={{ width: 'auto' }}
-            popupMatchSelectWidth={false}
-          >
-            {attributeOptions()}
-          </Select>
-          <span>值：</span>
-          <Select
-            className="select-style"
-            placeholder="选择值"
-            value={value}
-            onChange={handleValueChange}
-            style={{ width: 'auto' }}
-            popupMatchSelectWidth={false}
-          >
-            {valueOptions()}
-          </Select>
-          <Button type="primary" className="update-button" onClick={handleUpdate}>
-            更新
-          </Button>
-          <Button type="primary" className="update-button" onClick={viewscenario}>
-            场景查看
-          </Button>
-          <Input.TextArea className='input' rows={4} value={entityParamsInfo} disabled />
-        </Card>
-      </div>
+     
       <Card 
         title={<div style={{ textAlign: 'center', backgroundColor: '#e6f7ff', padding: '8px 0' }}>训练超参数</div>} 
         bordered={true}
@@ -1203,65 +949,7 @@ const handleprocess = async () => {
         {effectImageUrl && <img src={effectImageUrl} alt="训练效果图片" style={{ width: '100%' }} />}
       </Modal>
 
-      <Modal
-        title="场景查看"
-        open={isScenarioModalVisible}
-        onOk={() => setIsScenarioModalVisible(false)}
-        onCancel={() => setIsScenarioModalVisible(false)}
-        width={1800} 
-        footer={null}
-      >
-        <Row gutter={16}>
-          <Col span={12}>
-            <Card title="部署图" bordered={false} style={{ height: '100%' }}>
-              {deploymentData ? (
-                <div style={{ 
-                  display: 'flex', 
-                  justifyContent: 'center', 
-                  alignItems: 'center', 
-                  height: '60vh',
-                  backgroundColor: '#fff'
-                }}>
-                  <DeploymentCanvas 
-                    deploymentData={deploymentData} 
-                    width={800} 
-                    height={600} 
-                  />
-                </div>
-              ) : (
-                <div style={{ padding: 16, textAlign: 'center', color: 'rgba(0, 0, 0, 0.25)' }}>
-                  加载部署图中...
-                </div>
-              )}
-            </Card>
-          </Col>
-          <Col span={12}>
-            <Card 
-              title="场景信息" 
-              bordered={false}
-              style={{ height: '100%' }}
-              styles={{ body: { padding: 0 } }}
-            >
-              <div style={{ height: '60vh', overflowY: 'auto' }}>
-                {agents.length > 0 ? (
-                  <Table
-                    columns={scenarioViewColumns}
-                    dataSource={agents1}
-                    pagination={{ pageSize: 5 }}
-                    bordered
-                    rowKey="agentID"
-                    scroll={{ y: 'calc(60vh - 55px)' }}
-                  />
-                ) : (
-                  <div style={{ padding: 16, textAlign: 'center', color: 'rgba(0, 0, 0, 0.25)' }}>
-                    暂无智能体信息
-                  </div>
-                )}
-              </div>
-            </Card>
-          </Col>
-        </Row>
-      </Modal>
+      
 
       <Modal
         title="过程展示"

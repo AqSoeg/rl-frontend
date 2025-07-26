@@ -6,6 +6,7 @@ import AgentEditor from './components/AgentEditor/AgentEditor.jsx';
 import TrainingService from './components/TrainingService/TrainingService.jsx';
 import ModelManagement from './components/ModelManage/ModelManagement.jsx';
 import EvaluationOptimization from "./components/EvaluationOptimization/EvaluationOptimization.jsx";
+import ScenarioEdit from './components/ScenarioEdit/Scenario.jsx';
 import './App.css';
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
   const tabs = [
     { name: '智能体编辑', path: '/智能体编辑' },
     { name: '训练服务', path: '/训练服务' },
+    { name: '场景编辑', path: '/场景编辑' },
     { name: '评估与优化', path: '/评估与优化' },
     { name: '模型管理', path: '/模型管理' },
   ];
@@ -49,6 +51,7 @@ function App() {
           <Routes>
             <Route path="/智能体编辑" element={<AgentEditor />} />
             <Route path="/训练服务" element={<TrainingService />} />
+            <Route path="/场景编辑" element={<ScenarioEdit />} />
             <Route path="/评估与优化" element={<EvaluationOptimization />} />
             <Route path="/模型管理" element={<ModelManagement />} />
             <Route path="/" element={<HomePage />} />
