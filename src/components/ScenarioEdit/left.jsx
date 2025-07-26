@@ -17,7 +17,6 @@ const Left = observer(({ scenarios }) => {
   useEffect(() => {
     const unsubscribe = sidebarStore.subscribe(() => {
       setSelectedScenario(sidebarStore.scenarioName);
-      setSelectedAgentRole(sidebarStore.roleName);
     });
 
     return () => {
@@ -31,20 +30,10 @@ const Left = observer(({ scenarios }) => {
       const selectedScene = scenarios.find(scenario => scenario.name === selectedScenario);
       if (selectedScene) {
         intelligentStore.selectScenario(selectedScene);
-        setAgentRoles(selectedScene.roles || []);
       }
     }
   }, [scenarios, selectedScenario]);
 
-  // 初始化智能体角色
-  useEffect(() => {
-    if (agentRoles.length > 0 && selectedAgentRole) {
-      const selectedRole = agentRoles.find(role => role.name === selectedAgentRole);
-      if (selectedRole) {
-        intelligentStore.selectAgentRole(selectedRole);
-      }
-    }
-  }, [agentRoles, selectedAgentRole]);
 
  
   const handleScenarioSelectChange = (value) => {
@@ -52,20 +41,9 @@ const Left = observer(({ scenarios }) => {
     if (selectedScene) {
       intelligentStore.selectScenario(selectedScene);
       sidebarStore.setScenario(selectedScene.id, selectedScene.name);
-
-      const agentRoles = selectedScene.roles || [];
-      setAgentRoles(agentRoles);
-      setSelectedAgentRole(''); // 重置智能体角色
     }
   };
 
-  const handleAgentRoleSelectChange = (value) => {
-    const selectedRole = agentRoles.find(role => role.name === value);
-    if (selectedRole) {
-      intelligentStore.selectAgentRole(selectedRole);
-      sidebarStore.setRole(selectedRole.id, selectedRole.name);
-    }
-  };
 
   
   return (
@@ -80,20 +58,6 @@ const Left = observer(({ scenarios }) => {
           {scenarios.map((scenario, index) => (
             <Option key={scenario.name} value={scenario.name}>
               {scenario.name}
-            </Option>
-          ))}
-        </Select>
-      </div>
-      <div className="form-item">
-        <label>智能体角色</label>
-        <Select
-          value={selectedAgentRole}
-          onChange={handleAgentRoleSelectChange}
-          placeholder="请选择"
-        >
-          {agentRoles.map((role, index) => (
-            <Option key={role.name} value={role.name}>
-              {role.name}
             </Option>
           ))}
         </Select>

@@ -418,7 +418,7 @@ const Right = observer(() => {
           <Button type="primary" className="update-button" onClick={viewscenario}>
             场景查看
           </Button>
-          <Input.TextArea className='input' rows={4} value={entityParamsInfo} disabled />
+          <Input.TextArea className='input' rows={8} value={entityParamsInfo} disabled />
         </Card>
       </div>
     
