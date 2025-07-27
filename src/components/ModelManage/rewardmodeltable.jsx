@@ -179,14 +179,14 @@ const RewardModelLibrary = ({ decisions, fetchDecisions }) => {
 
     return (
         <Card title="奖励模型库" bordered={true}>
-            <span>检索：</span>
+            <span style={{color:'white'}}>检索：</span>
             <Select value={searchField} onChange={setSearchField} style={{ width: 200, marginRight: 8 }}>
                 <Select.Option value="id">ID</Select.Option>
                 {/* <Select.Option value="REWARDS_PATH">模型路径</Select.Option>
                 <Select.Option value="data_path">数据路径</Select.Option>
                 <Select.Option value="create_time">创建时间</Select.Option> */}
             </Select>
-            <Input placeholder="单行输入" value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ width: 200, marginRight: 8 }} />
+            <Input placeholder="单行输入" value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ width: 200, marginRight: 8 ,marginBottom: 18}} />
             <Button type="primary" onClick={handleSearch}>搜索</Button>
             <Table
                 dataSource={filteredDecisions}
