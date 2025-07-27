@@ -2,6 +2,7 @@
     display: flex;
     height: 100%;
     padding: 20px;
+    background-color: #001b38;
 }
 
 .EO-sidebar {
@@ -11,19 +12,18 @@
 
 .EO-sidebar-section {
     margin-bottom: 1rem;
-    background-color: #ecf4fc;
+    background-color: #072446;
     padding: 1rem;
     border-radius: 0.5rem;
     max-height: 200px;
     overflow-y: auto;
+    color: white;
+    font-family: serif;
 }
 
 .EO-sidebar-scrollable {
     overflow-y: auto;
-}
-
-.ant-select {
-    width: 100%;
+    scrollbar-color: #063160 #072446;
 }
 
 .EO-text {
@@ -31,7 +31,8 @@
     font-weight: bold;
     margin-top: 0.5rem;
     margin-bottom: 0.5rem;
-    color: #333;
+    color: white;
+    font-family: serif;
 }
 
 .EO-gradient-box {
@@ -40,7 +41,7 @@
     width: calc(100% - 40px);
     height: 77vh;
     padding: 20px;
-    background: linear-gradient(to bottom, #b2dfdb, #b0bec5, #ffffff);
+    background: linear-gradient(to bottom, #002044, #002044, #002044);
     border-radius: 8px;
     margin: 0 20px;
 }
@@ -48,7 +49,7 @@
 .EO-middle-container {
     display: flex;
     flex-direction: column;
-    background: linear-gradient(to bottom, #b2dfdb, #b0bec5, #ffffff);
+    background: linear-gradient(to bottom, #002044, #002044, #002044);
     border-radius: 8px;
     padding-right: 20px;
     padding-bottom: 10px;
@@ -63,10 +64,11 @@
     padding-bottom: 10px;
     padding-right: 40px;
     height: 80%;
+    scrollbar-color: #063160 #072446;
 }
 
 .EO-chart-item {
-    background: white;
+    background: linear-gradient(to bottom, #002044, #002044, #002044);
     border-radius: 8px;
     padding: 15px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -167,6 +169,8 @@
     border: none !important;
     box-shadow: none !important;
     overflow: hidden;
+    color: white;
+    font-family: serif;
 }
 
 .EO-model-button:hover {
@@ -178,10 +182,15 @@
 }
 
 .EO-modal-button {
-    background-color: white;
-    color: black;
-    border: 1px solid #d9d9d9;
-    transition: all 0.3s;
+    background: url(../../assets/button.png) no-repeat center/contain !important;
+    padding: 0 !important;
+    width: 100px !important;
+    height: 30px !important;
+    border: none !important;
+    box-shadow: none !important;
+    overflow: hidden;
+    color: white;
+    font-family: serif;
 }
 
 .EO-modal-button:hover {
@@ -204,6 +213,7 @@
 .EO-detail-content {
     max-height: 500px;
     overflow-y: auto;
+    color: white;
 }
 
 .EO-detail-section {

@@ -3,12 +3,13 @@ from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 import json
 import os
-from stable_baselines3 import PPO
-from stable_baselines3.common.env_util import make_vec_env
+# from stable_baselines3 import PPO
+# from stable_baselines3.common.env_util import make_vec_env
 import threading
 import time
 import datetime
 import math
+import dmPython
 app = Flask(__name__)
 CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -90,7 +91,7 @@ def handle_start_process(data):
             }
             socketio.emit('process_data', dynamic_data, room=sid)
             frame += 1
-            socketio.sleep(0.1)
+            socketio.sleep(1)
         print(f"为客户端 {sid} 的数据生成循环已停止。")
 
     socketio.start_background_task(
@@ -720,7 +721,7 @@ def get_deployment_image():
                     "width": 1.0
                 }
             },
-            {   
+            {
                 "name": "Fan1",
                 "type":{
                     "type": "fan",
@@ -758,7 +759,7 @@ def get_process_data():
     data = request.get_json()
     scenario_id = data.get('scenarioId', "default")
     agent_id = data.get('agentId', "default")
-    
+
     # 直接返回成功响应，实际数据将通过socket.io发送
     return jsonify({
         "status": "success",
@@ -832,44 +833,5 @@ def get_model_list():
             'message': f'Internal server error: {str(e)}'
         }), 500
 
-@app.route('/start_training', methods=['POST'])
-def start_training():
-    data = request.json
-    if not data:
-        return jsonify({"status": "error", "message": "No JSON data received"}), 400
-
-    algorithm_id = data.get('ALGORITHM_ID', 'unknown')
-    algorithm_name = data.get('ALGORITHM_NAME', 'unknown')
-
-    print(f"Helper received training request for ALGORITHM_ID: {algorithm_id}, ALGORITHM_NAME: {algorithm_name}")
-    time.sleep(5)
-    current_time = datetime.datetime.now().isoformat()
-    response = {
-        "status": "训练完成",
-        "ALGORITHM_ID": algorithm_id,
-        "ALGORITHM_NAME": algorithm_name,
-        "time": current_time,
-        "message": f"模型 {algorithm_name} 在助手端训练成功！"
-    }
-    return jsonify(response)
-
-@app.route('/uploadFile', methods=['POST'])
-def upload_file():
-    try:
-        if 'file' not in request.files:
-            return jsonify({'status': 'error', 'message': 'No file provided'}), 400
-
-        file = request.files['file']
-        if file.filename == '':
-            return jsonify({'status': 'error', 'message': 'No file selected'}), 400
-
-        # 保存到当前工作目录
-        file_path = os.path.join(os.getcwd(), file.filename)
-
-        return jsonify({'status': 'success', 'file_path': os.path.abspath(file_path)})
-    except Exception as e:
-        print(f'Error uploading file: {str(e)}')
-        return jsonify({'status': 'error', 'message': str(e)}), 500
-
 if __name__ == '__main__':
-    socketio.run(app, port=5000, debug=True)
+    socketio.run(app, port=5000, debug=True,allow_unsafe_werkzeug=True)

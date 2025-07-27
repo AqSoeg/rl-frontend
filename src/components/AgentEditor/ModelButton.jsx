@@ -355,6 +355,7 @@ const ModelFunction = ({scenarios}) => {
                 width={1000}
             >
                 <Table
+                    bordered={true}
                     columns={columns}
                     dataSource={tableData}
                     scroll={{ y: 500 }}

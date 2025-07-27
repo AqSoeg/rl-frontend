@@ -9,6 +9,7 @@ const appConfig = {
   viewEvaluationData: "http://localhost:5000/viewEvaluationData",
   loadEvaluationData: "http://localhost:5000/loadEvaluationData",
   startEvaluation: "http://localhost:5000/startEvaluation",
+  EvaluationTrain: "http://localhost:5000/EvaluationTrain",
   get_algorithm:"http://localhost:5000/get_algorithm",
   train:"http://localhost:5000/train",
   stop_training: "http://localhost:5000/stop_training",
@@ -28,10 +29,7 @@ const appConfig = {
   get_model_list:"http://localhost:5000/get_model_list",
   socketiourl: "http://localhost:5000",
   getExtraDecisionModels:"http://localhost:5000/getExtraDecisionModels",
-  startTraining: "http://localhost:5000/startTraining",
-  uploadFile: "http://localhost:5000/uploadFile",
-  websocketUrl: "ws://localhost:8080", // WebSocket 服务器地址
-  
+  getRewardModels:"http://localhost:5000/getRewardModels"
 };
 
 export default defineConfig({

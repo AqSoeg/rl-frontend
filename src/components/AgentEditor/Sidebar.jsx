@@ -288,10 +288,9 @@ const Sidebar = ({ scenarios }) => {
                     ))}
                 </Select>
                 <Button
-                    type="primary"
                     onClick={assignEntities}
                     disabled={!agentCount}
-                    className="mt-2"
+                    className="entity-button"
                 >
                     分配实体
                 </Button>

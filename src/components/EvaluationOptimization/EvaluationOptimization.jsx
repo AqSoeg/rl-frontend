@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react';
 import { useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
-import { Button, Select, Modal, Table, Space, InputNumber } from 'antd';
+import { Button, Select, Modal, Table, Space, InputNumber, message } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 import evaluationOptimizationStore from './EvaluationOptimizationStore';
 import './EvaluationOptimization.css';
@@ -104,6 +104,11 @@ const EvaluationOptimization = observer(() => {
         const chart = chartRefs.current[index];
         if (!chart) return;
 
+        const textStyle = {
+            color: 'white',
+            fontFamily: 'serif'
+        }
+
         const option = {
             tooltip: {},
             legend: {
@@ -112,6 +117,7 @@ const EvaluationOptimization = observer(() => {
                 bottom: 0,
                 selected: evaluationOptimizationStore.selectedLegends[index] || {},
                 data: chartData.data_legend,
+                textStyle: textStyle
             },
             xAxis: {
                 show: shape !== '饼图',
@@ -120,6 +126,8 @@ const EvaluationOptimization = observer(() => {
                 nameLocation: 'center',
                 nameGap: 25,
                 data: [...new Set(chartData.chart_data.map((d) => d.x))],
+                axisLabel: { textStyle: textStyle },
+                nameTextStyle: textStyle
             },
             yAxis: {
                 show: shape !== '饼图',
@@ -127,6 +135,8 @@ const EvaluationOptimization = observer(() => {
                 name: chartData.y_label,
                 nameLocation: 'center',
                 nameGap: 25,
+                axisLabel: { textStyle: textStyle },
+                nameTextStyle: textStyle
             },
             series: [],
         };
@@ -159,6 +169,7 @@ const EvaluationOptimization = observer(() => {
                 right: 10,
                 top: 20,
                 selected: evaluationOptimizationStore.selectedLegends[index] || {},
+                textStyle: textStyle
             };
             option.tooltip = {
                 trigger: 'item',
@@ -280,7 +291,9 @@ const EvaluationOptimization = observer(() => {
                     role_name: record.role_name,
                     scenario_name: record.scenario_name,
                     agentID: record.agentID,
-                    trainID: record.trainID
+                    trainID: record.trainID,
+                    subModelId:subModelId,
+                    dataFile:dataFile
                 })
             });
             if (!response.ok) {
@@ -354,7 +367,7 @@ const EvaluationOptimization = observer(() => {
                 const errorData = await response.json();
                 throw new Error(errorData.error || '评估请求失败');
             }
-            alert("数据发送成功，后台正在评估中•••");
+            alert("数据发送成功，后台正在计算中•••");
             const result = await response.json();
             evaluationOptimizationStore.setChartOptions(result.chart_data);
             evaluationOptimizationStore.setCharts(Array(4).fill({ img: null }));
@@ -362,6 +375,52 @@ const EvaluationOptimization = observer(() => {
             evaluationOptimizationStore.setRadarImage(result.radar_chart_data);
             evaluationOptimizationStore.setEvalScore(result.eval_score);
             evaluationOptimizationStore.setEvalSuggestion(result.eval_suggestion);
+        } catch (error) {
+            console.error('图表计算失败:', error);
+            alert(`图标计算失败：${error.message}`);
+        }
+
+        handleEvaluationTrain();
+    };
+
+    const handleEvaluationTrain = async () => {
+        if (!evaluationOptimizationStore.dataLoaded) {
+            alert('请先载入数据！');
+            return;
+        }
+        try {
+            const evalData = {
+                evaluateData: {
+                    id: evaluationOptimizationStore.sidebarData.evaluateDataInfo.id,
+                    img_url: evaluationOptimizationStore.sidebarData.modelInfo.img_url,
+                    model_path: evaluationOptimizationStore.sidebarData.modelInfo.model_path,
+                    evaluateData_path: evaluationOptimizationStore.sidebarData.evaluateDataInfo.evaluateData_path,
+                    select_evaluateData: [evaluationOptimizationStore.sidebarData.evaluateDataInfo.dataFile, evaluationOptimizationStore.sidebarData.evaluateDataInfo.select_evaluateData],
+                    name: evaluationOptimizationStore.sidebarData.modelInfo.name,
+                    nn_model_type: evaluationOptimizationStore.sidebarData.modelInfo.nn_model_type,
+                    role_name: evaluationOptimizationStore.sidebarData.scenarioInfo.role_name,
+                    scenario_name: evaluationOptimizationStore.sidebarData.scenarioInfo.name,
+                    agentID: evaluationOptimizationStore.sidebarData.scenarioInfo.agent_id,
+                    trainID: evaluationOptimizationStore.sidebarData.modelInfo.id,
+                    time: evaluationOptimizationStore.sidebarData.evaluateDataInfo.time,
+                    version: evaluationOptimizationStore.sidebarData.modelInfo.version
+                }
+            };
+            const response = await fetch(__APP_CONFIG__.EvaluationTrain, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(evalData),
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || '评估模型训练请求失败');
+            }
+            alert("数据发送成功，后台正在评估模型训练中•••");
+            const result = await response.json();
+            console.log(result);
+            if (result.status === "success") {
+                message.success('训练完成，评估模型已保存！');
+            }
         } catch (error) {
             console.error('评估失败:', error);
             alert(`评估失败：${error.message}`);
@@ -489,12 +548,12 @@ const EvaluationOptimization = observer(() => {
                     >
                         查看
                     </Button>
-                    <Button
+                    {/* <Button
                         className="EO-modal-button"
                         onClick={() => handleEffectModel(record.img_url)}
                     >
                         效果
-                    </Button>
+                    </Button> */}
                 </Space>
             ),
         },
@@ -628,6 +687,7 @@ const EvaluationOptimization = observer(() => {
                             <div className="EO-info-item">角色名称: {evaluationOptimizationStore.sidebarData.scenarioInfo.role_name}</div>
                             <div className="EO-info-item">智能体ID: {evaluationOptimizationStore.sidebarData.scenarioInfo.agent_id}</div>
                             <Table
+                                bordered
                                 columns={envParamsColumns}
                                 dataSource={evaluationOptimizationStore.sidebarData.scenarioInfo.env_params}
                                 pagination={false}
@@ -659,6 +719,7 @@ const EvaluationOptimization = observer(() => {
                             <div className="EO-info-item">算法名称: {evaluationOptimizationStore.sidebarData.algorithmInfo.name}</div>
                             <div className="EO-info-item">算法类型: {evaluationOptimizationStore.sidebarData.algorithmInfo.type}</div>
                             <Table
+                                bordered
                                 columns={hyperParamsColumns}
                                 dataSource={evaluationOptimizationStore.sidebarData.algorithmInfo.hyperParams}
                                 pagination={false}
@@ -707,25 +768,26 @@ const EvaluationOptimization = observer(() => {
                             </div>
                         ))}
                     </div>
-                    <div className="EO-text">事件：</div>
+                    {/* <div className="EO-text">事件：</div>
                     <div className="EO-event-log">
                         {evaluationOptimizationStore.events.map((event, i) => (
                             <div key={i} className="EO-event-item">
                                 <span>事件{i + 1}：{event.content}</span>
                             </div>
                         ))}
-                    </div>
+                    </div> */}
+
                 </div>
                 <div className="EO-right-panel">
-                    {evaluationOptimizationStore.radarImage && (
+                    {/* {evaluationOptimizationStore.radarImage && (
                         <div className="EO-radar-chart-container">
                             <div
                                 ref={radarChartRef}
                                 style={{ width: '100%', height: '400px' }}
                             ></div>
                         </div>
-                    )}
-                    <div className="EO-evaluation-module">
+                    )} */}
+                    {/* <div className="EO-evaluation-module">
                         <div className="EO-evaluation">
                             <div className="EO-text">分数评估：</div>
                             {evaluationOptimizationStore.evalScore && <div className="EO-score">{evaluationOptimizationStore.evalScore}</div>}
@@ -740,11 +802,12 @@ const EvaluationOptimization = observer(() => {
                                 </div>
                             )}
                         </div>
-                    </div>
+                    </div> */}
                     <div className="EO-model-button-container">
                         <Button className="EO-model-button" onClick={handleViewModelList}>数据生成</Button>
                         <Button className="EO-model-button" onClick={handleLoadData}>数据载入</Button>
                         <Button className="EO-model-button" onClick={handleStartEvaluation}>开始评估</Button>
+                        {/* <Button className="EO-model-button" onClick={handleEvaluationTrain}>评估模型训练</Button> */}
                     </div>
                 </div>
             </div>
@@ -756,6 +819,7 @@ const EvaluationOptimization = observer(() => {
                 width={1500}
             >
                 <Table
+                    bordered
                     columns={dataColumns}
                     dataSource={evaluationOptimizationStore.evaluationData}
                     scroll={{ y: 500 }}
@@ -764,6 +828,7 @@ const EvaluationOptimization = observer(() => {
                     expandable={{
                         expandedRowRender: (record) => (
                             <Table
+                                bordered
                                 columns={subDataColumns}
                                 dataSource={record.evaluateData_list.map(([dataFile, subModelId]) => ({
                                     subModelId,
@@ -809,6 +874,7 @@ const EvaluationOptimization = observer(() => {
                             <div className="EO-info-item">角色名称: {evaluationOptimizationStore.selectedModel.scenario_info.role_name}</div>
                             <div className="EO-info-item">智能体ID: {evaluationOptimizationStore.selectedModel.scenario_info.agent_id}</div>
                             <Table
+                                bordered
                                 columns={envParamsColumns}
                                 dataSource={Object.entries(evaluationOptimizationStore.selectedModel.scenario_info.env_params).map(([key, value]) => ({ [key]: value }))}
                                 pagination={false}
@@ -822,6 +888,7 @@ const EvaluationOptimization = observer(() => {
                             <div className="EO-info-item">算法名称: {evaluationOptimizationStore.selectedModel.algorithm_info.name}</div>
                             <div className="EO-info-item">算法类型: {evaluationOptimizationStore.selectedModel.algorithm_info.type}</div>
                             <Table
+                                bordered
                                 columns={hyperParamsColumns}
                                 dataSource={Object.entries(evaluationOptimizationStore.selectedModel.algorithm_info.hyper_params).map(([key, value]) => ({ [key]: value }))}
                                 pagination={false}
@@ -837,9 +904,10 @@ const EvaluationOptimization = observer(() => {
                 open={evaluationOptimizationStore.isModelListModalVisible}
                 onCancel={() => evaluationOptimizationStore.setIsModelListModalVisible(false)}
                 footer={null}
-                width={1500}
+                width={2000}
             >
                 <Table
+                    bordered
                     columns={modelListColumns}
                     dataSource={evaluationOptimizationStore.decisionModels}
                     scroll={{ y: 500 }}
@@ -848,6 +916,7 @@ const EvaluationOptimization = observer(() => {
                     expandable={{
                         expandedRowRender: (record) => (
                             <Table
+                                bordered
                                 columns={subTableColumns}
                                 dataSource={record.model.model_list.map(subModelId => ({
                                     subModelId,

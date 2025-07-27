@@ -1,7 +1,8 @@
 body {
     margin: 0;
     padding: 0;
-    font-family: Arial, sans-serif;
+    color: white;
+    font-family: serif;
 }
 
 .app-container {
@@ -17,7 +18,8 @@ body {
     background-image: url('./assets/header.png');
     background-size: cover;
     background-repeat: no-repeat;
-    color: white;
+    color: #001b38;
+    background-color: #001b38;
     padding: 10px 20px;
     width: 100vw;
     box-sizing: border-box;
@@ -32,8 +34,8 @@ body {
     margin-right: 0.5rem;
     font-weight: bold;
     font-size: 1.25rem;
-    color: black;
-    filter: invert(0.2);
+    color: white;
+    font-family: serif;
 }
 
 .settings-button {
@@ -47,13 +49,13 @@ body {
 
 .settings-icon {
     height: 2rem;
-    filter: invert(0.2);
+    filter: invert(1);
 }
 
 .app-nav {
     display: flex;
     justify-content: space-around;
-    background-color: #f8f9fa;
+    background-color: #001b38;
     min-height: 60px;
     width: 100%;
     box-sizing: border-box;
@@ -68,7 +70,8 @@ body {
 
 .nav-link {
     text-decoration: none;
-    color: black;
+    color: white;
+    font-family: serif;
     padding: 15px 25px;
     border-radius: 5px;
     transition: background-color 0.3s, color 0.3s;
@@ -115,6 +118,8 @@ body {
 .logo-text {
     display: flex;
     align-items: baseline;
+    color: white;
+    font-family: serif;
 }
 
 .main-title {
@@ -127,4 +132,117 @@ body {
     font-size: 1.25rem;
     font-weight: bold;
     margin: 0 0 0 0.5rem;
+}
+
+.ant-select {
+    width: 100%;
+}
+
+.ant-select-arrow {
+    color: white !important;
+}
+
+.ant-select-selection-placeholder {
+    color: rgba(255, 255, 255, 0.7) !important;
+    font-family: serif;
+}
+
+.ant-select-selector {
+    width: 100%;
+    background: #063160 !important;
+    color: white !important;;
+    font-family: serif;
+}
+
+.ant-select-dropdown,
+.ant-select-item-option-content {
+    background: #063160;
+    color: white;
+    font-family: serif;
+}
+
+.ant-select-item-option-active:not(.ant-select-item-option-disabled),
+.ant-select-item-option-active:not(.ant-select-item-option-disabled) .ant-select-item-option-content,
+.ant-select-item-option-selected:not(.ant-select-item-option-disabled),
+.ant-select-item-option-selected:not(.ant-select-item-option-disabled) .ant-select-item-option-content {
+    background: #0a4a8a !important;
+}
+
+.ant-input {
+    background: #063160 !important;
+    color: white !important;;
+    font-family: serif;
+}
+
+.ant-input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+    font-family: serif;
+}
+
+.ant-table-thead > tr > th {
+    background-color: #01284d !important;
+    color: white !important;
+    font-family: serif;
+}
+
+.ant-table-tbody > tr > td {
+    background-color: #01284d !important;
+    color: white;
+    font-family: serif;
+}
+
+.ant-table-body {
+    scrollbar-color: #063160 #072446;
+}
+
+.ant-card {
+    background-color: #001a35;
+    border: 1px solid #e6eaee;
+}
+
+.ant-card-head {
+    background-color: #022d55;
+    text-align: center;
+}
+
+.ant-card-head-title {
+    color: rgb(255, 255, 255) !important;
+    font-size: 1.2rem;
+}
+
+.ant-modal {
+    background-color: #001b38;
+    scrollbar-color: #063160 #072446;
+
+    .ant-modal-content {
+        background-color: #001b38;
+        color: white;
+        font-family: serif;
+
+        .ant-modal-header {
+            background-color: #001b38;
+        }
+
+        .ant-modal-title {
+            color: white;
+            font-family: serif;
+        }
+
+        .ant-modal-close-x {
+            color: white;
+        }
+    }
+
+    .ant-modal-footer .ant-btn {
+        background: url(assets/button.png) no-repeat center/contain !important;
+        padding: 0 !important;
+        width: 100px !important;
+        height: 30px !important;
+        border: none !important;
+        box-shadow: none !important;
+        overflow: hidden;
+        margin-right: 8px;
+        color: white;
+        font-family: serif;
+    }
 }
