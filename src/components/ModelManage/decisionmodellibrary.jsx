@@ -8,7 +8,7 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
     const [currentDecision, setCurrentDecision] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
     const [searchText, setSearchText] = useState('');
-    const [searchField, setSearchField] = useState('model.id');
+    const [searchField, setSearchField] = useState('');
     const [filteredDecisions, setFilteredDecisions] = useState([]);
     const editForm = Form.useForm()[0];
     const addForm = Form.useForm()[0];
@@ -18,7 +18,7 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
         key: decision.model.id || `fallback-${index}`, // Ensure unique key
         AGENT_MODEL_ID: decision.model.id,
         AGENT_NAME: decision.model.name,
-        AGENT_ID: decision.model.agentID,
+        AGENT_ID:decision.model.agentID,
         SCENARIO_NAME: decision.model.scenario_name,
         ROLE_NAME: decision.model.role_name,
         NN_MODEL_TYPE: decision.model.nn_model_type,
@@ -42,7 +42,7 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
             editForm.setFieldsValue({
                 AGENT_MODEL_ID: currentDecision.AGENT_MODEL_ID,
                 AGENT_NAME: currentDecision.AGENT_NAME,
-                AGENT_ID: currentDecision.AGENT_ID,
+                AGENT_ID:currentDecision.AGENT_ID,
                 SCENARIO_NAME: currentDecision.SCENARIO_NAME,
                 ROLE_NAME: currentDecision.ROLE_NAME,
                 NN_MODEL_TYPE: currentDecision.NN_MODEL_TYPE,
@@ -76,6 +76,7 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
     const handleUpdate = async (id, values) => {
         try {
             // Construct nested structure for update
+            console.log(currentDecision)
             const updatedData = {
                 model: {
                     id: values.AGENT_MODEL_ID,
@@ -90,16 +91,16 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
                 },
                 scenario: {
                     name: values.SCENARIO_NAME,
-                    description: currentDecision.rawData.scenario.description,
+                    // description: currentDecision.rawData.scenario.description,
                     envParams: currentDecision.rawData.scenario.envParams
                 },
                 agent: {
                     role: values.ROLE_NAME,
-                    type: currentDecision.rawData.agent.type,
-                    count: currentDecision.rawData.agent.count,
-                    entityAssignments: currentDecision.rawData.agent.entityAssignments
+                    // type: currentDecision.rawData.agent.type,
+                    // count: currentDecision.rawData.agent.count,
+                    // entityAssignments: currentDecision.rawData.agent.entityAssignments
                 },
-                train: currentDecision.rawData.train
+                // train: currentDecision.rawData.train
             };
 
             const response = await fetch(__APP_CONFIG__.updateAll, {
@@ -166,6 +167,7 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
             const newData = {
                 model: {
                     id: values.AGENT_MODEL_ID,
+
                     name: values.AGENT_NAME,
                     version: '1',
                     type: values.NN_MODEL_TYPE,
@@ -253,16 +255,16 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
         bordered={true}
         >
             <span style={{color:'white'}}>检索：</span>
-            <Select value={searchField} onChange={setSearchField} style={{ width: 120, marginRight: 8 }}>
+            <Select value={searchField} onChange={setSearchField} style={{ width: 200, marginRight: 8 }}>
                 <Select.Option value="model.id">决策模型 ID</Select.Option>
                 <Select.Option value="model.name">智能体模型名称</Select.Option>
                 <Select.Option value="model.agentID">智能体ID</Select.Option>
                 <Select.Option value="scenario.name">所属想定场景名称</Select.Option>
                 <Select.Option value="agent.role">角色名称</Select.Option>
                 <Select.Option value="model.type">神经网络模型类型</Select.Option>
-                <Select.Option value="model.path">模型路径</Select.Option>
+                {/* <Select.Option value="model.path">模型路径</Select.Option>
                 <Select.Option value="model.img_url">图片链接</Select.Option>
-                <Select.Option value="model.time">创建时间</Select.Option>
+                <Select.Option value="model.time">创建时间</Select.Option> */}
             </Select>
             <Input placeholder="单行输入" value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ width: 200, marginRight: 8,marginBottom:18 }} />
             <Button type="primary" onClick={handleSearch}>搜索</Button>
@@ -280,11 +282,11 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
                 onCancel={() => setIsEditModalVisible(false)}
             >
                 <Form form={editForm} initialValues={currentDecision} onFinish={handleFinishEdit}>
-                    <Form.Item label="决策模型 ID" name="AGENT_MODEL_ID">
-                        <Input disabled={!isEditMode} />
+                    <Form.Item label="决策模型训练 ID" name="AGENT_MODEL_ID">
+                        <Input disabled={true} />
                     </Form.Item>
                     <Form.Item label="智能体ID" name="AGENT_ID">
-                        <Input disabled={!isEditMode} />
+                        <Input disabled={true} />
                     </Form.Item>
                     <Form.Item label="智能体模型名称" name="AGENT_NAME">
                         <Input disabled={!isEditMode} />
@@ -298,11 +300,11 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
                     <Form.Item label="神经网络模型类型" name="NN_MODEL_TYPE">
                         <Input disabled={!isEditMode} />
                     </Form.Item>
-                    <Form.Item label="模型路径" name="MODEL_PATH">
-                        <Input disabled={!isEditMode} />
+                    <Form.Item label="模型" name="MODEL_PATH">
+                        <Input disabled={true} />
                     </Form.Item>
                     <Form.Item label="图片链接" name="IMG_URL">
-                        <Input disabled={!isEditMode} />
+                        <Input disabled={true} />
                     </Form.Item>
                     <Form.Item label="创建时间" name="CREAT_TIME">
                         <Input disabled={true} />

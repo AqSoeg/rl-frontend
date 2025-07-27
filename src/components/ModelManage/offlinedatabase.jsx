@@ -178,15 +178,15 @@ const OfflineDatabase = ({ datasets, fetchDatasets }) => {
         bordered={true}
         >
             <span style={{color:'white'}}>检索：</span>
-            <Select value={searchField} onChange={setSearchField} style={{ width: 120, marginRight: 8 }}>
+            <Select value={searchField} onChange={setSearchField} style={{ width: 200, marginRight: 8 }}>
                 <Select.Option value="OFFLINE_DATA_ID">离线数据集 ID</Select.Option>
                 <Select.Option value="DATASET_NAME">数据集名称</Select.Option>
                 <Select.Option value="SCENARIO_NAME">所属想定场景</Select.Option>
                 <Select.Option value="AGENT_ROLE">数据所属智能体角色</Select.Option>
-                <Select.Option value="DATA_STATE">状态信息</Select.Option>
+                {/* <Select.Option value="DATA_STATE">状态信息</Select.Option>
                 <Select.Option value="DATA_ACTION">动作信息描述</Select.Option>
                 <Select.Option value="DATASET_PATH">数据库文件路径</Select.Option>
-                <Select.Option value="CREAT_TIME">创建时间</Select.Option>
+                <Select.Option value="CREAT_TIME">创建时间</Select.Option> */}
             </Select>
             <Input placeholder="单行输入" value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ width: 200, marginRight: 8,marginBottom:18 }} />
             <Button type="primary" onClick={handleSearch}>搜索</Button>
@@ -201,7 +201,7 @@ const OfflineDatabase = ({ datasets, fetchDatasets }) => {
             >
                 <Form form={editForm} initialValues={currentDataset} onFinish={handleFinishEdit}>
                     <Form.Item label="离线数据集 ID" name="OFFLINE_DATA_ID">
-                        <Input disabled={!isEditMode} />
+                        <Input disabled={true} />
                     </Form.Item>
                     <Form.Item label="数据集名称" name="DATASET_NAME">
                         <Input disabled={!isEditMode} />

@@ -209,11 +209,11 @@ const ScenarioLibrary = ({ scenarios, fetchScenarios }) => {
         bordered={true}
         >
             <span style={{color:'white'}}>检索：</span>
-            <Select value={searchField} onChange={setSearchField} style={{ width: 120, marginRight: 8 }}>
+            <Select value={searchField} onChange={setSearchField} style={{ width: 200, marginRight: 8 }}>
                 <Select.Option value="id">想定场景 ID</Select.Option>
                 <Select.Option value="name">想定场景名称</Select.Option>
-                <Select.Option value="description">描述</Select.Option>
-                <Select.Option value="createTime">创建时间</Select.Option>
+                {/* <Select.Option value="description">描述</Select.Option>
+                <Select.Option value="createTime">创建时间</Select.Option> */}
             </Select>
             <Input placeholder="单行输入" value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ width: 200, marginRight: 8 ,marginBottom:18}} />
             <Button type="primary" onClick={handleSearch}>搜索</Button>
@@ -228,7 +228,7 @@ const ScenarioLibrary = ({ scenarios, fetchScenarios }) => {
             >
                 <Form form={editForm} initialValues={currentScenario} onFinish={handleFinishEdit}>
                     <Form.Item label="想定场景 ID" name="id">
-                        <Input disabled={!isEditMode} />
+                        <Input disabled={true} />
                     </Form.Item>
                     <Form.Item label="想定场景名称" name="name">
                         <Input disabled={!isEditMode} />

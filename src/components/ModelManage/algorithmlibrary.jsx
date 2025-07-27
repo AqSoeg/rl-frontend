@@ -240,7 +240,7 @@ const AlgorithmLibrary = ({ algorithms, fetchAlgorithms }) => {
     bordered={true}
     >
       <span style={{color:'white'}}>检索：</span>
-      <Select value={searchField} onChange={setSearchField} style={{ width: 120, marginRight: 8 }}>
+      <Select value={searchField} onChange={setSearchField} style={{ width: 200, marginRight: 8 }}>
         <Select.Option value="type_name">类型</Select.Option>
         <Select.Option value="name">名称</Select.Option>
       </Select>
@@ -252,7 +252,7 @@ const AlgorithmLibrary = ({ algorithms, fetchAlgorithms }) => {
       />
       <Button type="primary" onClick={handleSearch}>搜索</Button>
 
-      <Table pagination={{ pageSize: 2 }} dataSource={filteredAlgorithms} columns={columns} rowKey='algorithm_id' />
+      <Table pagination={{pageSize:2}} dataSource={filteredAlgorithms} columns={columns} rowKey='algorithm_id' />
 
       {/* 查看和编辑算法的弹窗 */}
       <Modal
@@ -271,10 +271,10 @@ const AlgorithmLibrary = ({ algorithms, fetchAlgorithms }) => {
           <Form.Item label="名称" name="name">
             <Input disabled={!isEditing} />
           </Form.Item>
-          <Form.Item label="时间" name="time">
+          {/* <Form.Item label="时间" name="time">
             <Input disabled={true} />
           </Form.Item>
-          {renderHyperParametersForm()}
+          {renderHyperParametersForm()} */}
         </Form>
       </Modal>
 
@@ -332,16 +332,16 @@ const AlgorithmLibrary = ({ algorithms, fetchAlgorithms }) => {
         </Form>
       </Modal>
 
-      <Button
-        type="primary"
-        icon={<PlusOutlined />}
-        onClick={() => {
-          addForm.resetFields();
-          setIsAddModalVisible(true);
-        }}
-      >
-        新增算法
-      </Button>
+      {/*<Button*/}
+      {/*  type="primary"*/}
+      {/*  icon={<PlusOutlined />}*/}
+      {/*  onClick={() => {*/}
+      {/*    addForm.resetFields();*/}
+      {/*    setIsAddModalVisible(true);*/}
+      {/*  }}*/}
+      {/*>*/}
+      {/*  新增算法*/}
+      {/*</Button>*/}
     </Card>
   );
 };

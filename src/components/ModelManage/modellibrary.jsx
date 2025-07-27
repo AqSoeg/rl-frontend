@@ -14,9 +14,9 @@ const ModelLibrary = ({ data, fetchModels }) => {
 
   useEffect(() => {
     if (Array.isArray(data)) {
-      const modelsWithKeys = data.map((item, index) => ({ ...item, key: index }));
+      const modelsWithKeys = data.map((item, index) => ({...item, key: index }));
       setModels(modelsWithKeys);
-    } else if (data !== null && typeof data === 'object') {
+    } else if (data!== null && typeof data === 'object') {
       setModels([data]);
     } else {
       console.error('Data is not an array:', data);
@@ -206,13 +206,13 @@ const ModelLibrary = ({ data, fetchModels }) => {
         <Select.Option value="agentName">智能体名称</Select.Option>
         <Select.Option value="agentType">智能体类型</Select.Option>
         <Select.Option value="agentRoleID">智能体角色</Select.Option>
-        <Select.Option value="updateTime">更新时间</Select.Option>
+        {/* <Select.Option value="updateTime">更新时间</Select.Option> */}
       </Select>
       <Input
         placeholder="单行输入"
         value={searchText}
         onChange={(e) => setSearchText(e.target.value)}
-        style={{ width: 200, marginRight: 8 }} //文本输入框样式，宽度以及和右侧组件的距离
+        style={{ width: 200, marginRight: 8 }} 
       />
       <Button type="primary" onClick={handleSearch} >
         搜索
@@ -224,7 +224,7 @@ const ModelLibrary = ({ data, fetchModels }) => {
         rowKey={'agentID'}
       />
       <Modal
-        title={isEditing ? '更新模型' : '模型详情'}
+        title={isEditing? '更新模型' : '模型详情'}
         open={isModalVisible}
         onOk={handleOk}
         onCancel={handleCancel}
@@ -233,7 +233,7 @@ const ModelLibrary = ({ data, fetchModels }) => {
           {currentModel && (
             <>
               <Form.Item label="模型ID" name="agentID">
-                <Input disabled={!isEditing} />
+                <Input disabled={true} />
               </Form.Item>
               <Form.Item label="模型名称" name="agentName">
                 <Input disabled={!isEditing} />
@@ -245,7 +245,7 @@ const ModelLibrary = ({ data, fetchModels }) => {
                 <Input disabled={!isEditing} />
               </Form.Item>
               <Form.Item label="智能体角色" name="agentRoleID">
-                <Input disabled={!isEditing} />
+                <Input disabled={true} />
               </Form.Item>
               {!isEditing && (
                 <Form.Item label="更新时间" name="updateTime">
@@ -256,8 +256,8 @@ const ModelLibrary = ({ data, fetchModels }) => {
           )}
         </Form>
       </Modal>
-      <Link to="/智能体编辑">
-        <Button type="primary" icon={<PlusOutlined />} > 
+      <Link to="/智能体编辑" style={{ marginBottom: 20 }}>
+        <Button type="primary" icon={<PlusOutlined />} style={{ marginBottom: 20 }}> 
           新增模型 
         </Button>
       </Link>
