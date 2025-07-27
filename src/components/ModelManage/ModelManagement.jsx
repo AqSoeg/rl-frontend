@@ -168,13 +168,48 @@ const ModelManagement = () => {
   return (
     <div className='model'>
       <div className='modelleft'>
-        <button className='button' onClick={() => handleButtonClick('ModelLibrary')}>智能体模型库</button>
-        <button className='button' onClick={() => handleButtonClick('AlgorithmLibrary')}>算法库</button>
-        <button className='button' onClick={() => handleButtonClick('OfflineDatabase')}>离线数据集库</button>
-        <button className='button' onClick={() => handleButtonClick('ScenarioLibrary')}>想定场景库</button>
-        <button className='button' onClick={() => handleButtonClick('DecisionModelLibrary')}>决策模型库</button>
-        <button className='button' onClick={() => handleButtonClick('EvaluateTable')}>评估数据表</button>
-        <button className='button' onClick={() => handleButtonClick('ExtraDecisionModelLibrary')}>额外决策模型库</button> 
+        <button
+          className={`button ${activeComponent === 'ModelLibrary' ? 'active' : ''}`}
+          onClick={() => handleButtonClick('ModelLibrary')}
+        >
+          智能体模型库
+        </button>
+        <button
+          className={`button ${activeComponent === 'AlgorithmLibrary' ? 'active' : ''}`}
+          onClick={() => handleButtonClick('AlgorithmLibrary')}
+        >
+          算法库
+        </button>
+        <button
+          className={`button ${activeComponent === 'OfflineDatabase' ? 'active' : ''}`}
+          onClick={() => handleButtonClick('OfflineDatabase')}
+        >
+          离线数据集库
+        </button>
+        <button
+          className={`button ${activeComponent === 'ScenarioLibrary' ? 'active' : ''}`}
+          onClick={() => handleButtonClick('ScenarioLibrary')}
+        >
+          想定场景库
+        </button>
+        <button
+          className={`button ${activeComponent === 'DecisionModelLibrary' ? 'active' : ''}`}
+          onClick={() => handleButtonClick('DecisionModelLibrary')}
+        >
+          决策模型库
+        </button>
+        <button
+          className={`button ${activeComponent === 'EvaluateTable' ? 'active' : ''}`}
+          onClick={() => handleButtonClick('EvaluateTable')}
+        >
+          评估数据表
+        </button>
+        <button
+          className={`button ${activeComponent === 'ExtraDecisionModelLibrary' ? 'active' : ''}`}
+          onClick={() => handleButtonClick('ExtraDecisionModelLibrary')}
+        >
+          额外决策模型库
+        </button>
       </div>
       <div className='modelright'>
         {activeComponent === 'ModelLibrary' && <ModelLibrary data={models} fetchModels={fetchModels} />}

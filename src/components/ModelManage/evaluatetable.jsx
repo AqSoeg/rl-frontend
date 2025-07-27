@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, Input, Card, Select, message } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { Table, Button, Modal, Form, Input, Card, Select, message, Tooltip } from 'antd';
+import { SettingOutlined,PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 
 const EvaluateTable = ({ decisions, fetchDecisions }) => {
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
@@ -72,31 +72,31 @@ const EvaluateTable = ({ decisions, fetchDecisions }) => {
     };
 
     const handleSearch = async () => {
-      try {
-          const response = await fetch(__APP_CONFIG__.searchAll, {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                  type: 'evaluate', // 根据页面类型传入不同的 type
-                  field: searchField,
-                  value: searchText
-              })
-          });
-  
-          const result = await response.json();
-          if (Array.isArray(result)) {
-              setFilteredDecisions(result); // 假设你使用 setFilteredDecisions 来更新状态
-          } else {
-              console.error('Expected an array but got:', result);
-              setFilteredDecisions([]); // 如果返回的不是数组，设置为空数组
-          }
-      } catch (error) {
-          console.error('Error searching decision models:', error);
-          message.error('评估数据搜索失败');
-      }
-  };
+        try {
+            const response = await fetch(__APP_CONFIG__.searchAll, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    type: 'evaluate', // 根据页面类型传入不同的 type
+                    field: searchField,
+                    value: searchText
+                })
+            });
+
+            const result = await response.json();
+            if (Array.isArray(result)) {
+                setFilteredDecisions(result); // 假设你使用 setFilteredDecisions 来更新状态
+            } else {
+                console.error('Expected an array but got:', result);
+                setFilteredDecisions([]); // 如果返回的不是数组，设置为空数组
+            }
+        } catch (error) {
+            console.error('Error searching decision models:', error);
+            message.error('评估数据搜索失败');
+        }
+    };
 
     const handleOkEdit = () => {
         if (isEditMode) {
@@ -133,30 +133,51 @@ const EvaluateTable = ({ decisions, fetchDecisions }) => {
     };
 
     const columns = [
-        { title: '序号', dataIndex: 'key', key: 'key', render: (text, record, index) => index + 1 },
-        { title: '智能体模型 ID', dataIndex: 'AGENT_MODEL_ID', key: 'AGENT_MODEL_ID' },
-        { title: '智能体模型名称', dataIndex: 'AGENT_NAME', key: 'AGENT_NAME' },
-        { title: '所属想定场景名称', dataIndex: 'SCENARIO_NAME', key: 'SCENARIO_NAME' },
-        { title: '角色名称', dataIndex: 'ROLE_NAME', key: 'ROLE_NAME' },
-        { title: '神经网络模型类型', dataIndex: 'NN_MODEL_TYPE', key: 'NN_MODEL_TYPE' },
-        { title: '模型路径', dataIndex: 'MODEL_PATH', key: 'MODEL_PATH' },
-        { title: '文件位置', dataIndex: 'DATA_FILE', key: 'DATA_FILE' },
-        { title: '创建时间', dataIndex: 'CREAT_TIME', key: 'CREAT_TIME' ,render: time => new Date(time).toLocaleString()},
+        { title: '序号', dataIndex: 'key', key: 'key', render: (text, record, index) => index + 1, onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '智能体模型 ID', dataIndex: 'AGENT_MODEL_ID', key: 'AGENT_MODEL_ID', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '智能体模型名称', dataIndex: 'AGENT_NAME', key: 'AGENT_NAME', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '所属想定场景名称', dataIndex: 'SCENARIO_NAME', key: 'SCENARIO_NAME', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '角色名称', dataIndex: 'ROLE_NAME', key: 'ROLE_NAME', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '神经网络模型类型', dataIndex: 'NN_MODEL_TYPE', key: 'NN_MODEL_TYPE', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '模型路径', dataIndex: 'MODEL_PATH', key: 'MODEL_PATH', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '文件位置', dataIndex: 'DATA_FILE', key: 'DATA_FILE', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '创建时间', dataIndex: 'CREAT_TIME', key: 'CREAT_TIME', render: time => new Date(time).toLocaleString(), onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
         {
             title: '操作',
             key: 'action',
+            width:150,
+            onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }),
             render: (text, record) => (
                 <div>
-                    <Button type="link" onClick={() => { setCurrentDecision(record); setIsEditMode(false); setIsEditModalVisible(true); }}>查看</Button>
-                    <Button type="link" onClick={() => { setCurrentDecision(record); setIsEditMode(true); setIsEditModalVisible(true); editForm.setFieldsValue(record); }}>更新</Button>
-                    <Button type="link" onClick={() => handleDelete(record.AGENT_MODEL_ID)}>删除</Button>
+                    <Tooltip title="查看">
+                        <Button type="link" icon={<EyeOutlined />} onClick={() => { setCurrentDecision(record); setIsEditMode(false); setIsEditModalVisible(true); }} />
+                    </Tooltip>
+                    <Tooltip title="更新">
+                        <Button type="link" icon={<EditOutlined />} onClick={() => { setCurrentDecision(record); setIsEditMode(true); setIsEditModalVisible(true); editForm.setFieldsValue(record); }} />
+                    </Tooltip>
+                    <Tooltip title="删除">
+                        <Button type="link" icon={<DeleteOutlined />} onClick={() => handleDelete(record.AGENT_MODEL_ID)} />
+                    </Tooltip>
                 </div>
             ),
         },
     ];
 
     return (
-        <Card title="评估数据表" bordered={true}>
+        <Card title={
+            <div
+            style={{
+                backgroundColor: '#f0f0f0',
+                fontSize: '40px',
+                textAlign: 'center',
+            }}
+            >
+            评估数据库
+            <SettingOutlined style={{ marginLeft: 8 }} />
+            </div>
+        }
+        bordered={true}
+        >
             <span>检索：</span>
             <Select value={searchField} onChange={setSearchField} style={{ width: 120, marginRight: 8 }}>
                 <Select.Option value="AGENT_MODEL_ID">智能体模型 ID</Select.Option>

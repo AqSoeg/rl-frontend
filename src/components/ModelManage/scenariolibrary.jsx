@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, Input, Card, Select, message, Typography } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { Table, Button, Modal, Form, Input, Card, Select, message, Typography, Tooltip } from 'antd';
+import { SettingOutlined,PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
 
@@ -131,14 +131,16 @@ const ScenarioLibrary = ({ scenarios, fetchScenarios }) => {
     };
 
     const columns = [
-        { title: '想定场景 ID', dataIndex: 'id', key: 'id' },
-        { title: '想定场景名称', dataIndex: 'name', key: 'name' },
-        { title: '描述', dataIndex: 'description', key: 'description' },
-        { title: '创建时间', dataIndex: 'createTime', key: 'createTime',render: time => new Date(time).toLocaleString() },
+        { title: '序号', dataIndex: 'key', key: 'key', render: (text, record, index) => index + 1, onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '想定场景 ID', dataIndex: 'id', key: 'id', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '想定场景名称', dataIndex: 'name', key: 'name', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '描述', dataIndex: 'description', key: 'description', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '创建时间', dataIndex: 'createTime', key: 'createTime', render: time => new Date(time).toLocaleString(), onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
         {
             title: '角色列表',
             dataIndex: 'roles',
             key: 'roles',
+            onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }),
             render: (roles) => (
                 <Text>
                     {roles?.map((role) => role.name).join('\n')}
@@ -149,6 +151,7 @@ const ScenarioLibrary = ({ scenarios, fetchScenarios }) => {
             title: '环境参数',
             dataIndex: 'env_params',
             key: 'env_params',
+            onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }),
             render: (env_params) => (
                 <Text>
                     {env_params?.map((param) => `${param.name}: ${param.params.map(p => p[1]).join(', ')}`).join('\n')}
@@ -159,6 +162,7 @@ const ScenarioLibrary = ({ scenarios, fetchScenarios }) => {
             title: '奖励函数',
             dataIndex: 'roles',
             key: 'rewardParams',
+            onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }),
             render: (roles) => (
                 <Text>
                     {roles?.map((role) => `${role.name}: ${role.RewardParams.map(rp => rp[0]).join(', ')}`).join('\n')}
@@ -168,27 +172,48 @@ const ScenarioLibrary = ({ scenarios, fetchScenarios }) => {
         {
             title: '操作',
             key: 'action',
+            width:150,
+            onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }),
             render: (text, record) => (
                 <div>
-                    <Button type="link" onClick={() => {
-                        setCurrentScenario(record);
-                        setIsEditMode(false);
-                        setIsEditModalVisible(true);
-                    }}>查看</Button>
-                    <Button type="link" onClick={() => {
-                        setCurrentScenario(record);
-                        setIsEditMode(true);
-                        setIsEditModalVisible(true);
-                        editForm.setFieldsValue(record);
-                    }}>更新</Button>
-                    <Button type="link" onClick={() => handleDelete(record.id)}>删除</Button>
+                    <Tooltip title="查看">
+                        <Button type="link" icon={<EyeOutlined />} onClick={() => {
+                            setCurrentScenario(record);
+                            setIsEditMode(false);
+                            setIsEditModalVisible(true);
+                        }} />
+                    </Tooltip>
+                    <Tooltip title="更新">
+                        <Button type="link" icon={<EditOutlined />} onClick={() => {
+                            setCurrentScenario(record);
+                            setIsEditMode(true);
+                            setIsEditModalVisible(true);
+                            editForm.setFieldsValue(record);
+                        }} />
+                    </Tooltip>
+                    <Tooltip title="删除">
+                        <Button type="link" icon={<DeleteOutlined />} onClick={() => handleDelete(record.id)} />
+                    </Tooltip>
                 </div>
             ),
         },
     ];
 
     return (
-        <Card title="想定场景库" bordered={true}>
+        <Card title={
+            <div
+            style={{
+                backgroundColor: '#f0f0f0',
+                fontSize: '40px',
+                textAlign: 'center',
+            }}
+            >
+            想定场景库
+            <SettingOutlined style={{ marginLeft: 8 }} />
+            </div>
+        }
+        bordered={true}
+        >
             <span>检索：</span>
             <Select value={searchField} onChange={setSearchField} style={{ width: 120, marginRight: 8 }}>
                 <Select.Option value="id">想定场景 ID</Select.Option>

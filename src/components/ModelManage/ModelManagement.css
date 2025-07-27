@@ -1,47 +1,57 @@
 .model {
-    display: flex;
-    height: 100%;
-    padding: 20px;
+    display: flex; /* 使用 flexbox 布局，使其子元素（modelleft, modelright）可以灵活排列。 */
+    height: 100%; /* 设置容器高度为其父元素高度的100%。 */
+    padding: 20px; /* 在容器内部设置20像素的内边距。 */
 }
 
 .modelleft {
-    flex: 0 0 10%;
-    padding: 1rem;
+    flex: 0 0 10%; /* 设置 flex 属性：不放大（flex-grow: 0），不缩小（flex-shrink: 0），基础宽度为父容器的10%（flex-basis: 10%）。 */
+    padding: 1rem; /* 设置1rem的内边距。 */
 }
+
 
 .button {
-    display: block;
-    margin-bottom: 1rem;
-    border: none;
-    border-radius: 10px;
-    background-color: #ecf4fc;
-    color: #333;
-    text-align: center;
-    text-decoration: none;
-    cursor: pointer;
-    transition: background-color 0.3s, color 0.3s;
-    width: 100%;
-    height: 5vh;
-    font-size: large;
-    align-items: center;
+    display: block; /* 将按钮设置为块级元素，使其占据一整行。 */
+    margin-bottom: 1rem; /* 在每个按钮下方添加1rem的外边距，用于分隔按钮。 */
+    border: none; /* 移除按钮的默认边框。 */
+    border-radius: 10px; /* 设置按钮的边角为10像素的圆角。 */
+    background-color: #ecf4fc; /* 设置按钮的默认背景颜色。 */
+    color: #333; /* 设置按钮的默认文字颜色。 */
+    text-align: center; /* 使按钮内的文字水平居中。 */
+    text-decoration: none; /* 移除文字的下划线。 */
+    cursor: pointer; /* 当鼠标悬停在按钮上时，显示为手形指针。 */
+    transition: background-color 0.3s, color 0.3s; /* 为背景颜色和文字颜色的变化添加0.3秒的平滑过渡效果。 */
+    width: 100%; /* 设置按钮宽度为其父容器（.modelleft）的100%。 */
+    height: 5vh; /* 设置按钮高度为视口（viewport）高度的5%。 */
+    font-size: large; /* 设置按钮的字体大小为 'large'。 */
+    align-items: center; /* (在flex容器中) 垂直居中对齐项目。 */
 }
 
+/*
+  定义了鼠标悬停在按钮上时的样式。
+*/
 .button:hover {
-    background-color: #d9dfff;
-    color: #000;
+    background-color: #d9dfff; /* 鼠标悬停时，按钮的背景颜色变为 #d9dfff。 */
+    color: #000; /* 鼠标悬停时，按钮的文字颜色变为黑色。 */
 }
 
+/*
+  定义了按钮处于“活动”状态（被选中时）的样式。
+*/
 .button.active {
-    background-color: #c0c6ff;
-    color: #fff;
+    background-color: #e4a00d; /* 活动状态下，按钮的背景颜色变为 #c0c6ff。 */
+    color: #fff; /* 活动状态下，按钮的文字颜色变为白色。 */
 }
 
+/*
+  .modelright 定义了右侧主内容区域的样式。
+*/
 .modelright {
-    position: relative;
-    width: calc(100% - 40px);
-    height: 75vh;
-    padding: 20px;
-    background: linear-gradient(to bottom, #b2dfdb, #b0bec5, #ffffff);
-    border-radius: 8px;
-    margin: 0 20px;
+    position: relative; /* 设置为相对定位，可作为其内部绝对定位元素的参照物。 */
+    width: calc(100% - 40px); /* 计算宽度：父容器宽度的100%减去40像素。 */
+    height: 75vh; /* 设置高度为视口高度的75%。 */
+    padding: 20px; /* 设置20像素的内边距。 */
+    background: linear-gradient(to bottom, #b2dfdb, #b0bec5, #ffffff); /* 设置一个从上到下的线性渐变背景。 */
+    border-radius: 8px; /* 设置边角为8像素的圆角。 */
+    margin: 0 20px; /* 设置上下外边距为0，左右外边距为20像素。 */
 }
