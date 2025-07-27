@@ -165,20 +165,14 @@ const EvaluateTable = ({ decisions, fetchDecisions }) => {
 
     return (
         <Card title={
-            <div
-            style={{
-                backgroundColor: '#f0f0f0',
-                fontSize: '40px',
-                textAlign: 'center',
-            }}
-            >
+            <div>
             评估数据库
             <SettingOutlined style={{ marginLeft: 8 }} />
             </div>
         }
         bordered={true}
         >
-            <span>检索：</span>
+            <span style={{color:'white'}}>检索：</span>
             <Select value={searchField} onChange={setSearchField} style={{ width: 120, marginRight: 8 }}>
                 <Select.Option value="AGENT_MODEL_ID">智能体模型 ID</Select.Option>
                 <Select.Option value="AGENT_NAME">智能体模型名称</Select.Option>
@@ -189,7 +183,7 @@ const EvaluateTable = ({ decisions, fetchDecisions }) => {
                 <Select.Option value="DATA_FILE">文件位置</Select.Option>
                 <Select.Option value="CREAT_TIME">创建时间</Select.Option>
             </Select>
-            <Input placeholder="单行输入" value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ width: 200, marginRight: 8 }} />
+            <Input placeholder="单行输入" value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ width: 200, marginRight: 8,marginBottom:18 }} />
             <Button type="primary" onClick={handleSearch}>搜索</Button>
             <Table dataSource={filteredDecisions} columns={columns} rowKey="AGENT_MODEL_ID" />
 

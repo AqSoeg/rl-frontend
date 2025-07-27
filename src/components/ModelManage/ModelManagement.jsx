@@ -169,43 +169,43 @@ const ModelManagement = () => {
     <div className='model'>
       <div className='modelleft'>
         <button
-          className={`button ${activeComponent === 'ModelLibrary' ? 'active' : ''}`}
+          className={`model_button ${activeComponent === 'ModelLibrary' ? 'active' : ''}`}
           onClick={() => handleButtonClick('ModelLibrary')}
         >
           智能体模型库
         </button>
         <button
-          className={`button ${activeComponent === 'AlgorithmLibrary' ? 'active' : ''}`}
+          className={`model_button ${activeComponent === 'AlgorithmLibrary' ? 'active' : ''}`}
           onClick={() => handleButtonClick('AlgorithmLibrary')}
         >
           算法库
         </button>
         <button
-          className={`button ${activeComponent === 'OfflineDatabase' ? 'active' : ''}`}
+          className={`model_button ${activeComponent === 'OfflineDatabase' ? 'active' : ''}`}
           onClick={() => handleButtonClick('OfflineDatabase')}
         >
           离线数据集库
         </button>
         <button
-          className={`button ${activeComponent === 'ScenarioLibrary' ? 'active' : ''}`}
+          className={`model_button ${activeComponent === 'ScenarioLibrary' ? 'active' : ''}`}
           onClick={() => handleButtonClick('ScenarioLibrary')}
         >
           想定场景库
         </button>
         <button
-          className={`button ${activeComponent === 'DecisionModelLibrary' ? 'active' : ''}`}
+          className={`model_button ${activeComponent === 'DecisionModelLibrary' ? 'active' : ''}`}
           onClick={() => handleButtonClick('DecisionModelLibrary')}
         >
           决策模型库
         </button>
         <button
-          className={`button ${activeComponent === 'EvaluateTable' ? 'active' : ''}`}
+          className={`model_button ${activeComponent === 'EvaluateTable' ? 'active' : ''}`}
           onClick={() => handleButtonClick('EvaluateTable')}
         >
           评估数据表
         </button>
         <button
-          className={`button ${activeComponent === 'ExtraDecisionModelLibrary' ? 'active' : ''}`}
+          className={`model_button ${activeComponent === 'ExtraDecisionModelLibrary' ? 'active' : ''}`}
           onClick={() => handleButtonClick('ExtraDecisionModelLibrary')}
         >
           额外决策模型库

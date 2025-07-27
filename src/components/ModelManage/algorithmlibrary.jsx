@@ -232,20 +232,14 @@ const AlgorithmLibrary = ({ algorithms, fetchAlgorithms }) => {
 
   return (
     <Card title={
-        <div
-        style={{
-            backgroundColor: '#f0f0f0',
-            fontSize: '40px',
-            textAlign: 'center',
-        }}
-        >
+        <div>
         算法数据库
         <SettingOutlined style={{ marginLeft: 8 }} />
         </div>
     }
     bordered={true}
     >
-      <span>检索：</span>
+      <span style={{color:'white'}}>检索：</span>
       <Select value={searchField} onChange={setSearchField} style={{ width: 120, marginRight: 8 }}>
         <Select.Option value="type_name">类型</Select.Option>
         <Select.Option value="name">名称</Select.Option>
@@ -254,7 +248,7 @@ const AlgorithmLibrary = ({ algorithms, fetchAlgorithms }) => {
         placeholder="单行输入"
         value={searchText}
         onChange={(e) => setSearchText(e.target.value)}
-        style={{ width: 200, marginRight: 8 }}
+        style={{ width: 200, marginRight: 8,marginBottom:18 }}
       />
       <Button type="primary" onClick={handleSearch}>搜索</Button>
 

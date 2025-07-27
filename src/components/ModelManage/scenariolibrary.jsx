@@ -142,7 +142,7 @@ const ScenarioLibrary = ({ scenarios, fetchScenarios }) => {
             key: 'roles',
             onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }),
             render: (roles) => (
-                <Text>
+                <Text style={{ color: 'white' }}>
                     {roles?.map((role) => role.name).join('\n')}
                 </Text>
             )
@@ -153,7 +153,7 @@ const ScenarioLibrary = ({ scenarios, fetchScenarios }) => {
             key: 'env_params',
             onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }),
             render: (env_params) => (
-                <Text>
+                <Text style={{ color: 'white' }}>
                     {env_params?.map((param) => `${param.name}: ${param.params.map(p => p[1]).join(', ')}`).join('\n')}
                 </Text>
             )
@@ -164,7 +164,7 @@ const ScenarioLibrary = ({ scenarios, fetchScenarios }) => {
             key: 'rewardParams',
             onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }),
             render: (roles) => (
-                <Text>
+                <Text style={{ color: 'white' }}>
                     {roles?.map((role) => `${role.name}: ${role.RewardParams.map(rp => rp[0]).join(', ')}`).join('\n')}
                 </Text>
             )
@@ -201,27 +201,21 @@ const ScenarioLibrary = ({ scenarios, fetchScenarios }) => {
 
     return (
         <Card title={
-            <div
-            style={{
-                backgroundColor: '#f0f0f0',
-                fontSize: '40px',
-                textAlign: 'center',
-            }}
-            >
+            <div>
             想定场景库
             <SettingOutlined style={{ marginLeft: 8 }} />
             </div>
         }
         bordered={true}
         >
-            <span>检索：</span>
+            <span style={{color:'white'}}>检索：</span>
             <Select value={searchField} onChange={setSearchField} style={{ width: 120, marginRight: 8 }}>
                 <Select.Option value="id">想定场景 ID</Select.Option>
                 <Select.Option value="name">想定场景名称</Select.Option>
                 <Select.Option value="description">描述</Select.Option>
                 <Select.Option value="createTime">创建时间</Select.Option>
             </Select>
-            <Input placeholder="单行输入" value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ width: 200, marginRight: 8 }} />
+            <Input placeholder="单行输入" value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ width: 200, marginRight: 8 ,marginBottom:18}} />
             <Button type="primary" onClick={handleSearch}>搜索</Button>
             <Table dataSource={filteredScenarios} columns={columns} rowKey="id" />
 

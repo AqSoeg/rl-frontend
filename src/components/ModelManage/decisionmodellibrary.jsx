@@ -246,20 +246,13 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
 
     return (
         <Card title={
-            <div
-            style={{
-                backgroundColor: '#f0f0f0',
-                fontSize: '40px',
-                textAlign: 'center',
-            }}
-            >
-            决策模型库
+            <div>决策模型库
             <SettingOutlined style={{ marginLeft: 8 }} />
             </div>
         }
         bordered={true}
         >
-            <span>检索：</span>
+            <span style={{color:'white'}}>检索：</span>
             <Select value={searchField} onChange={setSearchField} style={{ width: 120, marginRight: 8 }}>
                 <Select.Option value="model.id">决策模型 ID</Select.Option>
                 <Select.Option value="model.name">智能体模型名称</Select.Option>
@@ -271,7 +264,7 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
                 <Select.Option value="model.img_url">图片链接</Select.Option>
                 <Select.Option value="model.time">创建时间</Select.Option>
             </Select>
-            <Input placeholder="单行输入" value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ width: 200, marginRight: 8 }} />
+            <Input placeholder="单行输入" value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ width: 200, marginRight: 8,marginBottom:18 }} />
             <Button type="primary" onClick={handleSearch}>搜索</Button>
             <Table
                 dataSource={filteredDecisions}

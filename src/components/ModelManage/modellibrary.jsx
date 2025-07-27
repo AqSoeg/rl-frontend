@@ -188,25 +188,18 @@ const ModelLibrary = ({ data, fetchModels }) => {
   return (
     <Card
       title={
-        <div
-          style={{
-            backgroundColor: '#f0f0f0',
-            fontSize: '40px',
-            textAlign: 'center',
-          }}
-        >
+        <div>
           智能体模型管理
           <SettingOutlined style={{ marginLeft: 8 }} /> {/* 图标离文字的距离*/ }
         </div>
       }
       bordered={true}
     > 
-    {/* card框中的标题的样式设置，background为背景颜色，fontsize为字体大小，textalign为居中显示 */}
-      <span>检索：</span>
+      <span style={{color:'white'}}>检索：</span>
       <Select
         value={searchField}
         onChange={setSearchField}
-        style={{ width: 120, marginRight: 8 }} //选项框的样式，大小以及和右侧组件的距离
+        style={{ width: 120, marginRight: 8 ,marginBottom:18}} //选项框的样式，大小以及和右侧组件的距离
       >
         <Select.Option value="scenarioID">想定场景</Select.Option>
         <Select.Option value="agentID">智能体ID</Select.Option>
@@ -221,7 +214,7 @@ const ModelLibrary = ({ data, fetchModels }) => {
         onChange={(e) => setSearchText(e.target.value)}
         style={{ width: 200, marginRight: 8 }} //文本输入框样式，宽度以及和右侧组件的距离
       />
-      <Button type="primary" onClick={handleSearch} style={{background:'#4751e0ff'}}>{/* 按钮背景颜色 */}
+      <Button type="primary" onClick={handleSearch} >
         搜索
       </Button>
       <Table
@@ -264,8 +257,8 @@ const ModelLibrary = ({ data, fetchModels }) => {
         </Form>
       </Modal>
       <Link to="/智能体编辑">
-        <Button type="primary" icon={<PlusOutlined />} style={{ marginBottom: 20, background:' #4751e0ff' }}> 
-          新增模型 {/* 新增按钮的背景颜色 */ }
+        <Button type="primary" icon={<PlusOutlined />} > 
+          新增模型 
         </Button>
       </Link>
     </Card>

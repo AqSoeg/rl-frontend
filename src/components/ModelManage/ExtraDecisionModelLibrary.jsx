@@ -302,20 +302,14 @@ const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
     return (
         <Card 
         title={
-            <div
-            style={{
-                backgroundColor: '#f0f0f0',
-                fontSize: '40px',
-                textAlign: 'center',
-            }}
-            >
+            <div>
             额外决策模型库
             <SettingOutlined style={{ marginLeft: 8 }} />
             </div>
         }
         bordered={true}
         >
-            <span>检索：</span>
+            <span style={{color:'white'}}>检索：</span>
             <Select value={searchField} onChange={setSearchField} style={{ width: 120, marginRight: 8 }}>
                 <Select.Option value="algorithm id">算法 ID</Select.Option>
                 <Select.Option value="algorithm_name">算法名称</Select.Option>
@@ -328,7 +322,7 @@ const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
                 <Select.Option value="training_status">训练状态</Select.Option>
                 <Select.Option value="last_updated_time">最后更新时间</Select.Option>
             </Select>
-            <Input placeholder="单行输入" value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ width: 200, marginRight: 8 }} />
+            <Input placeholder="单行输入" value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ width: 200, marginRight: 8,marginBottom:18 }} />
             <Button type="primary" onClick={handleSearch}>搜索</Button>
             <Table
                 dataSource={filteredDecisions}

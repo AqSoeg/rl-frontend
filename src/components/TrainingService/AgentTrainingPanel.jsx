@@ -702,7 +702,7 @@ const handleprocess = async () => {
             columns={scenarioColumns}
             dataSource={agents}
             pagination={{ pageSize: 2, showQuickJumper: true }}
-            bordered
+           
             rowKey="agentID"
           />
         ) : (

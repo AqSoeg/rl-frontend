@@ -170,20 +170,14 @@ const OfflineDatabase = ({ datasets, fetchDatasets }) => {
 
     return (
         <Card title={
-            <div
-            style={{
-                backgroundColor: '#f0f0f0',
-                fontSize: '40px',
-                textAlign: 'center',
-            }}
-            >
+            <div>
             离线数据集库
             <SettingOutlined style={{ marginLeft: 8 }} />
             </div>
         }
         bordered={true}
         >
-            <span>检索：</span>
+            <span style={{color:'white'}}>检索：</span>
             <Select value={searchField} onChange={setSearchField} style={{ width: 120, marginRight: 8 }}>
                 <Select.Option value="OFFLINE_DATA_ID">离线数据集 ID</Select.Option>
                 <Select.Option value="DATASET_NAME">数据集名称</Select.Option>
@@ -194,7 +188,7 @@ const OfflineDatabase = ({ datasets, fetchDatasets }) => {
                 <Select.Option value="DATASET_PATH">数据库文件路径</Select.Option>
                 <Select.Option value="CREAT_TIME">创建时间</Select.Option>
             </Select>
-            <Input placeholder="单行输入" value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ width: 200, marginRight: 8 }} />
+            <Input placeholder="单行输入" value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ width: 200, marginRight: 8,marginBottom:18 }} />
             <Button type="primary" onClick={handleSearch}>搜索</Button>
             <Table dataSource={filteredDatasets} columns={columns} rowKey="OFFLINE_DATA_ID" />
 

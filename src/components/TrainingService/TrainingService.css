@@ -15,41 +15,17 @@
     background-color: #072446;
     padding: 1rem;
     border-radius: 0.5rem;
+    scrollbar-color: #063160 #072446;
 }
-
+.modal-view .ant-table-tbody .ant-btn .anticon {
+  color: white !important;
+}
 .select-text {
     font-weight: bold;
     margin-top: 0.5rem;
     margin-bottom: 0.5rem;
     color: white;
     font-family: serif;
-}
-
-.form-item .ant-select-selector,
-.form-item .ant-input {
-    width: 100%;
-    background: #063160 !important;
-    color: white;
-    font-family: serif;
-}
-
-.ant-select-dropdown,
-.ant-select-item-option-content {
-    background: #063160;
-    color: white;
-    font-family: serif;
-}
-
-.ant-select-item-option-active:not(.ant-select-item-option-disabled),
-.ant-select-item-option-active:not(.ant-select-item-option-disabled) .ant-select-item-option-content,
-.ant-select-item-option-selected:not(.ant-select-item-option-disabled),
-.ant-select-item-option-selected:not(.ant-select-item-option-disabled) .ant-select-item-option-content {
-    background: #0a4a8a !important;
-}
-
-
-.form-item .ant-select-arrow {
-    color: white !important;
 }
 
 
@@ -94,10 +70,6 @@
 .right1 .ant-select-selector {
   background: #063160 !important;
   border-color: #fcfcfd !important;/*参数选项框的背景颜色、以及边界颜色*/
-}
-
-.right1 .ant-select-arrow {
-  color: white !important;/*选项框下拉箭头颜色*/
 }
 
 
@@ -237,7 +209,7 @@
 
 /* 用于设置卡片内部提示信息的样式 */
 .card-text {
-  color: #ffffff;       /* 设置文字颜色 */
+  color: #ececec;       /* 设置文字颜色 */
   text-align: center;   /* 文字水平居中显示 */
   padding: 20px 0;      /* 增加一些垂直内边距，使其在卡片内上下也基本居中 */
   font-size: 1rem;      /* 设置合适的字体大小 */

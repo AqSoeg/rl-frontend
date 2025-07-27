@@ -34,6 +34,7 @@ body {
     font-weight: bold;
     font-size: 1.25rem;
     color: white;
+    font-family: serif;
 }
 
 .settings-button {
@@ -69,6 +70,7 @@ body {
 .nav-link {
     text-decoration: none;
     color: white;
+    font-family: serif;
     padding: 15px 25px;
     border-radius: 5px;
     transition: background-color 0.3s, color 0.3s;
@@ -116,6 +118,7 @@ body {
     display: flex;
     align-items: baseline;
     color: white;
+    font-family: serif;
 }
 
 .main-title {
@@ -128,4 +131,110 @@ body {
     font-size: 1.25rem;
     font-weight: bold;
     margin: 0 0 0 0.5rem;
+}
+
+/* 公共组件 */
+
+.ant-select-selector {
+    width: 100%;
+    background: #063160 !important;
+    color: white !important;;
+    font-family: serif;
+}
+
+.ant-select-dropdown,
+.ant-select-item-option-content {
+    background: #063160;
+    color: white;
+    font-family: serif;
+}
+
+.ant-select-item-option-active:not(.ant-select-item-option-disabled),
+.ant-select-item-option-active:not(.ant-select-item-option-disabled) .ant-select-item-option-content,
+.ant-select-item-option-selected:not(.ant-select-item-option-disabled),
+.ant-select-item-option-selected:not(.ant-select-item-option-disabled) .ant-select-item-option-content {
+    background: #0a4a8a !important;
+}
+.ant-select-arrow {
+    color: white !important;
+}
+.ant-input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+    font-family: serif;
+}
+.ant-table-body {
+    scrollbar-color: #063160 #072446;
+
+}
+.ant-table-thead > tr > th {
+    background-color: #01284d !important;
+    color: white !important;
+    font-family: serif;
+}
+
+.ant-table-tbody > tr > td {
+    background-color: #01284d !important;
+    color: white;
+    font-family: serif;
+}
+
+.ant-table-body {
+    scrollbar-color: #063160 #072446;
+}
+
+.ant-select {
+    width: 100%;
+}
+.ant-select-arrow {
+    color: white !important;
+}
+
+ .ant-card {
+  background-color: #001a35; /*右侧card框的背景颜色*/
+  border: 1px solid #e6eaee;/*card框边界的颜色*/
+}
+
+.ant-card-head {
+  background-color: #022d55; /* card框表头颜色 */
+  text-align: center;/*居中显示标题文字*/
+}
+
+.ant-card-head-title {
+  color: rgb(255, 255, 255) !important;/*card标题文字的颜色、大小*/
+  font-size: 1.2rem;
+}
+.ant-modal {
+    background-color: #001b38;
+    color: white;
+    font-family: serif;
+
+    .ant-modal-content {
+        background-color: #001b38;
+
+        .ant-modal-header {
+            background-color: #001b38;
+        }
+
+        .ant-modal-title {
+            color: white;
+            font-family: serif;
+        }
+
+        .ant-modal-close-x {
+            color: white;
+        }
+    }
+
+    .ant-modal-footer .ant-btn {
+        background: url(assets/button.png) no-repeat center/contain !important;
+        padding: 0 !important;
+        width: 100px !important;
+        height: 30px !important;
+        border: none !important;
+        box-shadow: none !important;
+        overflow: hidden;
+        margin-right: 8px;
+        color: white;
+        font-family: serif;
+    }
 }
