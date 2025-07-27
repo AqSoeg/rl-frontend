@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import Left from './left';
-import Right from './right.jsx'
+import Right from './right.jsx';
 import { observer } from 'mobx-react';
+import './Scenario.css'; // 引入新的样式文件
 
 const ScenarioEdit = observer(() => {
   const [scenarios, setScenarios] = useState([]);
@@ -29,22 +30,19 @@ const ScenarioEdit = observer(() => {
     }
   };
 
- 
   useEffect(() => {
     fetchScenarios();
   }, []);
 
-
   return (
-    <div className='trainingservice'>
-      <Left
-          scenarios={scenarios}
-      />
-      <div className='right'>
-      <Right 
-      />
+    // 使用新的布局类
+    <div className='scenario-edit-container'>
+      <div className='scenario-left-panel'>
+        <Left scenarios={scenarios} />
       </div>
-
+      <div className='scenario-right-panel'>
+        <Right />
+      </div>
     </div>
   );
 });

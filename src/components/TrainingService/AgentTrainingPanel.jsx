@@ -3,21 +3,13 @@ import { DownOutlined } from '@ant-design/icons';
 import { Card, Select, Row, Col, Space, Button, Modal, Table, message, Input } from 'antd';
 import { intelligentStore } from './IntelligentStore';
 import { observer } from 'mobx-react';
-import DeploymentCanvas from './DeploymentCanvas'; // Import the new canvas component
 import ProcessAnimation from './ProcessAnimation';
 const { Option } = Select;
 
 const AgentTrainingPanel = observer(() => {
-  const [entity, setEntity] = useState('');
-  const [attribute, setAttribute] = useState('');
-  const [value, setValue] = useState('');
-  const [envParamsMap, setEnvParamsMap] = useState({});
-  const [entityParamsInfo, setEntityParamsInfo] = useState('');
-  const [modifiedParams, setModifiedParams] = useState({});
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [agents, setAgents] = useState([]);
-  const [agents1, setAgents1] = useState([]);
   const [isModelListModalVisible, setIsModelListModalVisible] = useState(false);
   const [isModelInfoModalVisible, setIsModelInfoModalVisible] = useState(false);
   const [currentModel, setCurrentModel] = useState(null);
@@ -25,9 +17,7 @@ const AgentTrainingPanel = observer(() => {
   const [isSuccessModalVisible, setIsSuccessModalVisible] = useState(false);
   const [hyperParametersValues, setHyperParametersValues] = useState({});
   const [effectImageUrl, setEffectImageUrl] = useState(null);
-  const [isEffectImageModalVisible, setIsEffectImageModalVisible] = useState(false);
-  const [isScenarioModalVisible, setIsScenarioModalVisible] = useState(false);
-  const [deploymentData, setDeploymentData] = useState(null); 
+  const [isEffectImageModalVisible, setIsEffectImageModalVisible] = useState(false);; 
   const [isProcessModalVisible, setIsProcessModalVisible] = useState(false);
   const [loadedModel, setLoadedModel] = useState(null);
   const [subModelPublishStatus, setSubModelPublishStatus] = useState({});

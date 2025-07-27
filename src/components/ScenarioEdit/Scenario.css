@@ -1,0 +1,20 @@
+.scenario-edit-container {
+  display: flex;
+  height: calc(100vh - 100px); /* 根据您应用的实际页头高度进行调整 */
+  width: 100%;
+}
+
+.scenario-left-panel {
+  border-right: 100px solid #ffffff;
+  overflow-y: auto;
+  background-color: #ffffff;
+  flex: 1; 
+  padding: 16px;
+}
+
+.scenario-right-panel {
+  flex: 1;
+
+  padding: 16px;
+  overflow-y: auto;
+}
