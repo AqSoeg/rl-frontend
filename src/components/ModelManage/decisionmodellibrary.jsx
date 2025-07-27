@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, Input, Card, Select, message } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { Table, Button, Modal, Form, Input, Card, Select, message, Tooltip } from 'antd';
+import { SettingOutlined,PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 
 const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
@@ -8,7 +8,7 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
     const [currentDecision, setCurrentDecision] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
     const [searchText, setSearchText] = useState('');
-    const [searchField, setSearchField] = useState('model.id');
+    const [searchField, setSearchField] = useState('');
     const [filteredDecisions, setFilteredDecisions] = useState([]);
     const editForm = Form.useForm()[0];
     const addForm = Form.useForm()[0];
@@ -76,6 +76,7 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
     const handleUpdate = async (id, values) => {
         try {
             // Construct nested structure for update
+            console.log(currentDecision)
             const updatedData = {
                 model: {
                     id: values.AGENT_MODEL_ID,
@@ -90,16 +91,16 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
                 },
                 scenario: {
                     name: values.SCENARIO_NAME,
-                    description: currentDecision.rawData.scenario.description,
+                    // description: currentDecision.rawData.scenario.description,
                     envParams: currentDecision.rawData.scenario.envParams
                 },
                 agent: {
                     role: values.ROLE_NAME,
-                    type: currentDecision.rawData.agent.type,
-                    count: currentDecision.rawData.agent.count,
-                    entityAssignments: currentDecision.rawData.agent.entityAssignments
+                    // type: currentDecision.rawData.agent.type,
+                    // count: currentDecision.rawData.agent.count,
+                    // entityAssignments: currentDecision.rawData.agent.entityAssignments
                 },
-                train: currentDecision.rawData.train
+                // train: currentDecision.rawData.train
             };
 
             const response = await fetch(__APP_CONFIG__.updateAll, {
@@ -166,6 +167,7 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
             const newData = {
                 model: {
                     id: values.AGENT_MODEL_ID,
+
                     name: values.AGENT_NAME,
                     version: '1',
                     type: values.NN_MODEL_TYPE,
@@ -213,44 +215,58 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
     };
 
     const columns = [
-        { title: '序号', dataIndex: 'key', key: 'index', render: (text, record, index) => index + 1 },
-        { title: '决策模型 ID', dataIndex: 'AGENT_MODEL_ID', key: 'AGENT_MODEL_ID' },
-        { title: '智能体ID', dataIndex: 'AGENT_ID', key: 'AGENT_ID' },
-        { title: '智能体模型名称', dataIndex: 'AGENT_NAME', key: 'AGENT_NAME' },
-        { title: '所属想定场景名称', dataIndex: 'SCENARIO_NAME', key: 'SCENARIO_NAME' },
-        { title: '角色名称', dataIndex: 'ROLE_NAME', key: 'ROLE_NAME' },
-        { title: '神经网络模型类型', dataIndex: 'NN_MODEL_TYPE', key: 'NN_MODEL_TYPE' },
-        { title: '模型路径', dataIndex: 'MODEL_PATH', key: 'MODEL_PATH' },
-        { title: '图片链接', dataIndex: 'IMG_URL', key: 'IMG_URL' },
-        { title: '创建时间', dataIndex: 'CREAT_TIME', key: 'CREAT_TIME' ,render: time => new Date(time).toLocaleString()},
+        { title: '序号', dataIndex: 'key', key: 'index', render: (text, record, index) => index + 1, onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '决策模型 ID', dataIndex: 'AGENT_MODEL_ID', key: 'AGENT_MODEL_ID', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '智能体ID', dataIndex: 'AGENT_ID', key: 'AGENT_ID', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '智能体模型名称', dataIndex: 'AGENT_NAME', key: 'AGENT_NAME', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '所属想定场景名称', dataIndex: 'SCENARIO_NAME', key: 'SCENARIO_NAME', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '角色名称', dataIndex: 'ROLE_NAME', key: 'ROLE_NAME', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '神经网络模型类型', dataIndex: 'NN_MODEL_TYPE', key: 'NN_MODEL_TYPE', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '模型路径', dataIndex: 'MODEL_PATH', key: 'MODEL_PATH', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '图片链接', dataIndex: 'IMG_URL', key: 'IMG_URL', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '创建时间', dataIndex: 'CREAT_TIME', key: 'CREAT_TIME', render: time => new Date(time).toLocaleString(), onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
         {
             title: '操作',
             key: 'action',
+            width:150,
+            onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }),
             render: (text, record) => (
                 <div>
-                    <Button type="link" onClick={() => { setCurrentDecision(record); setIsEditMode(false); setIsEditModalVisible(true); }}>查看</Button>
-                    <Button type="link" onClick={() => { setCurrentDecision(record); setIsEditMode(true); setIsEditModalVisible(true); editForm.setFieldsValue(record); }}>更新</Button>
-                    <Button type="link" onClick={() => handleDelete(record.AGENT_MODEL_ID)}>删除</Button>
+                    <Tooltip title="查看">
+                        <Button type="link" icon={<EyeOutlined />} onClick={() => { setCurrentDecision(record); setIsEditMode(false); setIsEditModalVisible(true); }} />
+                    </Tooltip>
+                    <Tooltip title="更新">
+                        <Button type="link" icon={<EditOutlined />} onClick={() => { setCurrentDecision(record); setIsEditMode(true); setIsEditModalVisible(true); editForm.setFieldsValue(record); }} />
+                    </Tooltip>
+                    <Tooltip title="删除">
+                        <Button type="link" icon={<DeleteOutlined />} onClick={() => handleDelete(record.AGENT_MODEL_ID)} />
+                    </Tooltip>
                 </div>
             ),
         },
     ];
 
     return (
-        <Card title="决策模型库" bordered={true}>
-            <span>检索：</span>
-            <Select value={searchField} onChange={setSearchField} style={{ width: 120, marginRight: 8 }}>
+        <Card title={
+            <div>决策模型库
+            <SettingOutlined style={{ marginLeft: 8 }} />
+            </div>
+        }
+        bordered={true}
+        >
+            <span style={{color:'white'}}>检索：</span>
+            <Select value={searchField} onChange={setSearchField} style={{ width: 200, marginRight: 8 }}>
                 <Select.Option value="model.id">决策模型 ID</Select.Option>
                 <Select.Option value="model.name">智能体模型名称</Select.Option>
                 <Select.Option value="model.agentID">智能体ID</Select.Option>
                 <Select.Option value="scenario.name">所属想定场景名称</Select.Option>
                 <Select.Option value="agent.role">角色名称</Select.Option>
                 <Select.Option value="model.type">神经网络模型类型</Select.Option>
-                <Select.Option value="model.path">模型路径</Select.Option>
+                {/* <Select.Option value="model.path">模型路径</Select.Option>
                 <Select.Option value="model.img_url">图片链接</Select.Option>
-                <Select.Option value="model.time">创建时间</Select.Option>
+                <Select.Option value="model.time">创建时间</Select.Option> */}
             </Select>
-            <Input placeholder="单行输入" value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ width: 200, marginRight: 8 }} />
+            <Input placeholder="单行输入" value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ width: 200, marginRight: 8,marginBottom:18 }} />
             <Button type="primary" onClick={handleSearch}>搜索</Button>
             <Table
                 dataSource={filteredDecisions}
@@ -266,11 +282,11 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
                 onCancel={() => setIsEditModalVisible(false)}
             >
                 <Form form={editForm} initialValues={currentDecision} onFinish={handleFinishEdit}>
-                    <Form.Item label="决策模型 ID" name="AGENT_MODEL_ID">
-                        <Input disabled={!isEditMode} />
+                    <Form.Item label="决策模型训练 ID" name="AGENT_MODEL_ID">
+                        <Input disabled={true} />
                     </Form.Item>
                     <Form.Item label="智能体ID" name="AGENT_ID">
-                        <Input disabled={!isEditMode} />
+                        <Input disabled={true} />
                     </Form.Item>
                     <Form.Item label="智能体模型名称" name="AGENT_NAME">
                         <Input disabled={!isEditMode} />
@@ -284,11 +300,11 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
                     <Form.Item label="神经网络模型类型" name="NN_MODEL_TYPE">
                         <Input disabled={!isEditMode} />
                     </Form.Item>
-                    <Form.Item label="模型路径" name="MODEL_PATH">
-                        <Input disabled={!isEditMode} />
+                    <Form.Item label="模型" name="MODEL_PATH">
+                        <Input disabled={true} />
                     </Form.Item>
                     <Form.Item label="图片链接" name="IMG_URL">
-                        <Input disabled={!isEditMode} />
+                        <Input disabled={true} />
                     </Form.Item>
                     <Form.Item label="创建时间" name="CREAT_TIME">
                         <Input disabled={true} />

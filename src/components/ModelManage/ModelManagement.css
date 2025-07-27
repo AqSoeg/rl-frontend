@@ -1,47 +1,108 @@
+/* --- 整体页面布局 --- */
 .model {
     display: flex;
     height: 100%;
     padding: 20px;
+    background-color: #001b38;
 }
 
+/* --- 左侧侧边栏 --- */
 .modelleft {
     flex: 0 0 10%;
     padding: 1rem;
 }
 
-.button {
-    display: block;
-    margin-bottom: 1rem;
-    border: none;
-    border-radius: 10px;
-    background-color: #ecf4fc;
-    color: #333;
-    text-align: center;
-    text-decoration: none;
-    cursor: pointer;
-    transition: background-color 0.3s, color 0.3s;
-    width: 100%;
-    height: 5vh;
-    font-size: large;
-    align-items: center;
-}
-
-.button:hover {
-    background-color: #d9dfff;
-    color: #000;
-}
-
-.button.active {
-    background-color: #c0c6ff;
-    color: #fff;
-}
-
+/* --- 右侧主内容区域 --- */
 .modelright {
     position: relative;
     width: calc(100% - 40px);
-    height: 75vh;
+    height: 85vh;
     padding: 20px;
-    background: linear-gradient(to bottom, #b2dfdb, #b0bec5, #ffffff);
+    background: linear-gradient(to bottom, #002044, #002044, #002044);
     border-radius: 8px;
     margin: 0 20px;
+    overflow-y: auto;
+}
+
+.model_button {
+    background: url(../../assets/button.png) no-repeat center/contain !important;
+    padding: 0 !important;
+    width: 180px !important;
+    height: 70px !important;
+    border: none !important;
+    box-shadow: none !important;
+    overflow: hidden;
+    color:#ffffff
+}
+
+.model_button:hover {
+    filter: brightness(0.9);
+}
+
+.model_button:active {
+    transform: translateY(1px);
+}
+
+
+/* --- 统一输入框样式 --- */
+.modelright .ant-input,
+.modelright .ant-input-affix-wrapper,
+.modelright .ant-select-selector {
+    background-color: #0a2548 !important;
+    border: 1px solid #126dc2 !important;
+    color: #ffffff !important;
+}
+
+.modelright .ant-input::placeholder,
+.modelright .ant-select-selection-placeholder {
+    color: #fff9f9 !important;
+}
+
+.modelright .ant-input-disabled {
+    background-color: #0a2548 !important;
+    color: #a0a0a0 !important;
+}
+
+.modelright .ant-select-dropdown {
+    background-color: #001a35 !important;
+    border: 1px solid #126dc2 !important;
+}
+
+.modelright .ant-select-item {
+    color: #ffffff !important;
+}
+
+.modelright .ant-select-item-option-active,
+.modelright .ant-select-item-option-selected {
+    background-color: #126dc2 !important;
+}
+
+
+
+
+/* 弹窗中表单标签的样式 */
+.ant-modal .ant-form-item-label > label {
+    color: #ffffff !important;
+}
+
+/* 弹窗中输入框、选择框的样式 */
+.ant-modal .ant-input,
+.ant-modal .ant-input-affix-wrapper,
+.ant-modal .ant-select-selector,
+.ant-modal .ant-input-number {
+    background-color: #0a2548 !important;
+    border: 1px solid #126dc2 !important;
+    color: #ffffff !important;
+}
+
+/* 弹窗中输入框、选择框的占位符样式 */
+.ant-modal .ant-input::placeholder,
+.ant-modal .ant-select-selection-placeholder {
+    color: #bfbfbf !important;
+}
+
+/* 弹窗中禁用的输入框样式 */
+.ant-modal .ant-input-disabled {
+    background-color: #0a2548 !important;
+    color: #a0a0a0 !important;
 }

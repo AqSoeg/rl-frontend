@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Table, Button, Modal, Form, Input, Card, Select, message, Spin } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { Table, Button, Modal, Form, Input, Card, Select, message, Spin, Tooltip } from 'antd';
+import { SettingOutlined,PlusOutlined, EyeOutlined, DeleteOutlined, UploadOutlined, PlayCircleOutlined } from '@ant-design/icons';
 
 const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
@@ -166,11 +166,11 @@ const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
                         prev.map((item) =>
                             item.ALGORITHM_ID === currentDecision.ALGORITHM_ID
                                 ? {
-                                      ...item,
-                                      TRAINING_DATA_PATH: filePath,
-                                      TRAINING_STATUS: '未训练',
-                                      LAST_UPDATED_TIME: ''
-                                  }
+                                    ...item,
+                                    TRAINING_DATA_PATH: filePath,
+                                    TRAINING_STATUS: '未训练',
+                                    LAST_UPDATED_TIME: ''
+                                }
                                 : item
                         )
                     );
@@ -214,16 +214,16 @@ const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
             ws.onmessage = (event) => {
                 try {
                     const messageData = JSON.parse(event.data);
-                    
+
                     if (messageData.status === '训练完成' && messageData.ALGORITHM_ID && messageData.time) {
                         setFilteredDecisions((prev) =>
                             prev.map((item) =>
                                 item.ALGORITHM_ID === messageData.ALGORITHM_ID
                                     ? {
-                                          ...item,
-                                          TRAINING_STATUS: messageData.status,
-                                          LAST_UPDATED_TIME: formatDate(messageData.time)
-                                      }
+                                        ...item,
+                                        TRAINING_STATUS: messageData.status,
+                                        LAST_UPDATED_TIME: formatDate(messageData.time)
+                                    }
                                     : item
                             )
                         );
@@ -231,9 +231,9 @@ const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
                     } else if (messageData.status === '训练失败' && messageData.ALGORITHM_ID) {
                         message.error(`模型 ${messageData.ALGORITHM_ID} 训练失败: ${messageData.message}`);
                     }
-                    ws.close(); 
+                    ws.close();
                     setTrainingLoading((prev) => ({ ...prev, [record.ALGORITHM_ID]: false }));
-                    resolve(); 
+                    resolve();
                 } catch (error) {
                     console.error('Error parsing WebSocket message:', error);
                     message.error('解析训练结果失败');
@@ -258,41 +258,58 @@ const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
     };
 
     const columns = [
-        { title: '序号', dataIndex: 'key', key: 'index', render: (text, record, index) => index + 1 },
-        { title: '算法 ID', dataIndex: 'ALGORITHM_ID', key: 'ALGORITHM_ID' },
-        { title: '算法名称', dataIndex: 'ALGORITHM_NAME', key: 'ALGORITHM_NAME' },
-        { title: '算法类型', dataIndex: 'ALGORITHM_TYPE', key: 'ALGORITHM_TYPE' },
-        { title: '描述', dataIndex: 'DESCRIPTION', key: 'DESCRIPTION' },
-        { title: '算法图片', dataIndex: 'ALGORITHM_IMAGE', key: 'ALGORITHM_IMAGE' },
-        { title: '模型路径', dataIndex: 'MODEL_PATH', key: 'MODEL_PATH' },
-        { title: '创建时间', dataIndex: 'CREATE_TIME', key: 'CREATE_TIME' },
-        { title: '训练数据路径', dataIndex: 'TRAINING_DATA_PATH', key: 'TRAINING_DATA_PATH' },
-        { title: '训练状态', dataIndex: 'TRAINING_STATUS', key: 'TRAINING_STATUS' },
-        { title: '最后更新时间', dataIndex: 'LAST_UPDATED_TIME', key: 'LAST_UPDATED_TIME' },
+        { title: '序号', dataIndex: 'key', key: 'index', render: (text, record, index) => index + 1, onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '算法 ID', dataIndex: 'ALGORITHM_ID', key: 'ALGORITHM_ID', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '算法名称', dataIndex: 'ALGORITHM_NAME', key: 'ALGORITHM_NAME', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '算法类型', dataIndex: 'ALGORITHM_TYPE', key: 'ALGORITHM_TYPE', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '描述', dataIndex: 'DESCRIPTION', key: 'DESCRIPTION', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '算法图片', dataIndex: 'ALGORITHM_IMAGE', key: 'ALGORITHM_IMAGE', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '模型路径', dataIndex: 'MODEL_PATH', key: 'MODEL_PATH', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '创建时间', dataIndex: 'CREATE_TIME', key: 'CREATE_TIME', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '训练数据路径', dataIndex: 'TRAINING_DATA_PATH', key: 'TRAINING_DATA_PATH', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '训练状态', dataIndex: 'TRAINING_STATUS', key: 'TRAINING_STATUS', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '最后更新时间', dataIndex: 'LAST_UPDATED_TIME', key: 'LAST_UPDATED_TIME', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
         {
             title: '操作',
             key: 'action',
+            width:200,
+            onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }),
             render: (text, record) => (
                 <div>
-                    <Button type="link" onClick={() => { setCurrentDecision(record); setIsEditMode(false); setIsEditModalVisible(true); }}>查看</Button>
-                    <Button type="link" onClick={() => handleDelete(record.ALGORITHM_ID)}>删除</Button>
-                    <Button type="link" onClick={() => handleImportData(record)}>数据导入</Button>
-                    <Button
-                        type="link"
-                        onClick={() => handleStartTraining(record)}
-                        disabled={trainingLoading[record.ALGORITHM_ID]}
-                        loading={trainingLoading[record.ALGORITHM_ID]}
-                    >
-                        {trainingLoading[record.ALGORITHM_ID] ? '训练中' : '开始训练'}
-                    </Button>
+                    <Tooltip title="查看">
+                        <Button type="link" icon={<EyeOutlined />} onClick={() => { setCurrentDecision(record); setIsEditMode(false); setIsEditModalVisible(true); }} />
+                    </Tooltip>
+                    <Tooltip title="删除">
+                        <Button type="link" icon={<DeleteOutlined />} onClick={() => handleDelete(record.ALGORITHM_ID)} />
+                    </Tooltip>
+                    <Tooltip title="数据导入">
+                        <Button type="link" icon={<UploadOutlined />} onClick={() => handleImportData(record)} />
+                    </Tooltip>
+                    <Tooltip title={trainingLoading[record.ALGORITHM_ID] ? '训练中' : '开始训练'}>
+                        <Button
+                            type="link"
+                            icon={<PlayCircleOutlined />}
+                            onClick={() => handleStartTraining(record)}
+                            disabled={trainingLoading[record.ALGORITHM_ID]}
+                            loading={trainingLoading[record.ALGORITHM_ID]}
+                        />
+                    </Tooltip>
                 </div>
             ),
         },
     ];
 
     return (
-        <Card title="额外决策模型库" bordered={true}>
-            <span>检索：</span>
+        <Card 
+        title={
+            <div>
+            额外决策模型库
+            <SettingOutlined style={{ marginLeft: 8 }} />
+            </div>
+        }
+        bordered={true}
+        >
+            <span style={{color:'white'}}>检索：</span>
             <Select value={searchField} onChange={setSearchField} style={{ width: 120, marginRight: 8 }}>
                 <Select.Option value="algorithm id">算法 ID</Select.Option>
                 <Select.Option value="algorithm_name">算法名称</Select.Option>
@@ -305,7 +322,7 @@ const ExtraDecisionModelLibrary = ({ decisions, fetchDecisions }) => {
                 <Select.Option value="training_status">训练状态</Select.Option>
                 <Select.Option value="last_updated_time">最后更新时间</Select.Option>
             </Select>
-            <Input placeholder="单行输入" value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ width: 200, marginRight: 8 }} />
+            <Input placeholder="单行输入" value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ width: 200, marginRight: 8,marginBottom:18 }} />
             <Button type="primary" onClick={handleSearch}>搜索</Button>
             <Table
                 dataSource={filteredDecisions}

@@ -3,21 +3,13 @@ import { DownOutlined } from '@ant-design/icons';
 import { Card, Select, Row, Col, Space, Button, Modal, Table, message, Input } from 'antd';
 import { intelligentStore } from './IntelligentStore';
 import { observer } from 'mobx-react';
-import DeploymentCanvas from './DeploymentCanvas'; // Import the new canvas component
 import ProcessAnimation from './ProcessAnimation';
 const { Option } = Select;
 
 const AgentTrainingPanel = observer(() => {
-  const [entity, setEntity] = useState('');
-  const [attribute, setAttribute] = useState('');
-  const [value, setValue] = useState('');
-  const [envParamsMap, setEnvParamsMap] = useState({});
-  const [entityParamsInfo, setEntityParamsInfo] = useState('');
-  const [modifiedParams, setModifiedParams] = useState({});
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [agents, setAgents] = useState([]);
-  const [agents1, setAgents1] = useState([]);
   const [isModelListModalVisible, setIsModelListModalVisible] = useState(false);
   const [isModelInfoModalVisible, setIsModelInfoModalVisible] = useState(false);
   const [currentModel, setCurrentModel] = useState(null);
@@ -26,8 +18,6 @@ const AgentTrainingPanel = observer(() => {
   const [hyperParametersValues, setHyperParametersValues] = useState({});
   const [effectImageUrl, setEffectImageUrl] = useState(null);
   const [isEffectImageModalVisible, setIsEffectImageModalVisible] = useState(false);
-  const [isScenarioModalVisible, setIsScenarioModalVisible] = useState(false);
-  const [deploymentData, setDeploymentData] = useState(null); 
   const [isProcessModalVisible, setIsProcessModalVisible] = useState(false);
   const [loadedModel, setLoadedModel] = useState(null);
   const [subModelPublishStatus, setSubModelPublishStatus] = useState({});
@@ -592,7 +582,7 @@ const handleprocess = async () => {
             render: (text, subRecord) => subModelPublishStatus[subRecord.id] ? '已发布' : '未发布'
           },
           { 
-            title: '载入状态(持续训练)', 
+            title: '载入状态(接续训练)', 
             key: 'loadStatus',
             render: (text, subRecord) => loadedModel && loadedModel.model.select_model === subRecord.id ? '已载入' : '未载入'  
           },
@@ -634,7 +624,7 @@ const handleprocess = async () => {
 
       return (
         <div key={modelIndex} style={{ marginBottom: 24 }}>
-          <h3 style={{ color: '#1890ff', fontSize: 18 }}>{model.name}</h3>
+          <h3 style={{ color: '#ffffffff', fontSize: 18 }}>{model.name}</h3>
           
           <h4>实体状态信息</h4>
           {[...new Set(model.stateVector.map(state => state[0]))].map((entity) => {
@@ -646,33 +636,16 @@ const handleprocess = async () => {
               }));
 
             return (
-              <div key={entity} style={{ 
-                marginBottom: 16,
-                border: '1px solid #d9d9d9',
-                borderRadius: 4,
-                padding: 12
-              }}>
-                <div style={{ 
-                  fontWeight: 'bold', 
-                  fontSize: 16,
-                  marginBottom: 8,
-                  color: '#1890ff'
-                }}>
+              <div key={entity} className="entity-state-container">
+                <div className="entity-state-title">
                   {entity}
                 </div>
                 {stateInfo.map((state, index) => (
-                  <div key={index} style={{ 
-                    display: 'flex',
-                    marginBottom: 4,
-                    paddingLeft: 12
-                  }}>
-                    <div style={{ 
-                      flex: '0 0 180px',
-                      color: '#666'
-                    }}>
+                  <div key={index} className="entity-state-row">
+                    <div className="entity-state-label">
                       {state.fieldName}
                     </div>
-                    <div style={{ flex: 1 }}>
+                    <div className="entity-state-value">
                       {state.fieldValue || '-'}
                     </div>
                   </div>
@@ -720,22 +693,20 @@ const handleprocess = async () => {
   };
 
   return (
-    <div className='right1' style={{ height: '80vh', width:'95%',margin: '0 auto' }}>
+    <div className='right1' style={{ height: '85vh', width:'95%',margin: '0 auto' }}>
       <Card 
-        title={<div style={{ textAlign: 'center', backgroundColor: '#e6f7ff', padding: '8px 0' }}>智能体载入</div>} 
-        bordered={true}
-        style={{ marginBottom: 16 }}
+        title={<div >智能体载入</div>} 
       >
         {intelligentStore.selectedScenario && intelligentStore.selectedAgentRole ? (
           <Table
             columns={scenarioColumns}
             dataSource={agents}
-            pagination={{ pageSize: 4, showQuickJumper: true }}
-            bordered
+            pagination={{ pageSize: 2, showQuickJumper: true }}
+           
             rowKey="agentID"
           />
         ) : (
-          <div style={{ padding: 16, textAlign: 'center', color: 'rgba(0, 0, 0, 0.25)' }}>
+          <div className='card-text'>
             {!intelligentStore.selectedScenario && !intelligentStore.selectedAgentRole 
               ? '请先选择想定场景和智能体角色' 
               : !intelligentStore.selectedScenario 
@@ -746,9 +717,7 @@ const handleprocess = async () => {
       </Card>
      
       <Card 
-        title={<div style={{ textAlign: 'center', backgroundColor: '#e6f7ff', padding: '8px 0' }}>训练超参数</div>} 
-        bordered={true}
-        style={{ marginBottom: 16 }}
+        title={<div >训练超参数</div>} 
       >
         {intelligentStore.selectedAlgorithm && intelligentStore.selectedAlgorithm['hyper-parameters'] ? (
           <Row>
@@ -769,7 +738,6 @@ const handleprocess = async () => {
                           [param.id]: value
                         }));
                       }}
-                      style={{ width: '100%' }}
                     >
                       {uniqueValues.map((value, idx) => (
                         <Option key={`${param.id}-${idx}`} value={value}>
@@ -783,18 +751,13 @@ const handleprocess = async () => {
             })}
           </Row>
         ) : (
-          <div style={{ padding: 16, textAlign: 'center', color: 'rgba(0, 0, 0, 0.25)' }}>
+          <div className='card-text'>
             请先选择算法以显示超参数
           </div>
         )}
       </Card>
 
-      <div className="button-container" style={{ 
-        display: 'flex', 
-        gap: '16px',
-        justifyContent: 'center',
-        marginTop: '16px'
-      }}>
+      <div className="button-container" >
         <Button onClick={trainAlgorithm} disabled={training}>
           {training ? '训练中...' : '开始训练'}
         </Button>
@@ -806,6 +769,7 @@ const handleprocess = async () => {
       </div>
 
       <Modal
+        className='modal-view'
         title="智能体详情"
         open={isDetailModalVisible}
         onOk={() => setIsDetailModalVisible(false)}
@@ -874,6 +838,7 @@ const handleprocess = async () => {
       </Modal>
 
       <Modal
+        className='modal-view'
         title="模型列表"
         open={isModelListModalVisible}
         onOk={() => setIsModelListModalVisible(false)}
@@ -901,6 +866,7 @@ const handleprocess = async () => {
       </Modal>
 
       <Modal
+        className='modal-view'
         title="模型详细信息"
         open={isModelInfoModalVisible}
         onOk={() => setIsModelInfoModalVisible(false)}
@@ -914,7 +880,7 @@ const handleprocess = async () => {
             <p><strong>角色名称：</strong>{currentModel.model.role_name}</p>
             <p><strong>模型版本：</strong>{currentModel.model.version}</p>
             <p><strong>模型类型：</strong>{currentModel.model.nn_model_type}</p>
-            <p><strong>创建时间：</strong>{currentModel.model.time}</p>
+            <p><strong>创建时间：</strong>{Date(currentModel.model.time).toLocaleString() }</p>
             <p><strong>模型存放路径：</strong>{currentModel.model.model_path}</p>
             <p><strong>模型效果图路径：</strong>{currentModel.model.img_url}</p>
           </div>
@@ -922,6 +888,7 @@ const handleprocess = async () => {
       </Modal>
 
       <Modal
+        className='modal-view'
         title="训练状态"
         open={isSuccessModalVisible}
         onOk={() => setIsSuccessModalVisible(false)}
@@ -936,6 +903,7 @@ const handleprocess = async () => {
       </Modal>
 
       <Modal
+        className='modal-view'
         title="训练效果图片"
         open={isEffectImageModalVisible}
         onOk={() => setIsEffectImageModalVisible(false)}
@@ -952,6 +920,7 @@ const handleprocess = async () => {
       
 
       <Modal
+        className='modal-view'
         title="过程展示"
         open={isProcessModalVisible}
         onCancel={() => setIsProcessModalVisible(false)}
