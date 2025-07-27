@@ -210,7 +210,7 @@ const handleTrainingModeChange = (value) => {
       key: 'action',
       render: (_, record) => (
         <Button 
-          onClick={() => handleLoadDataset(record)}
+          onClick={() => handleLoadDataset(record)} style={{background:'#415bceff',color:'#ffffff'}}/*按钮的背景颜色和文字颜色*/
         >
           载入
         </Button>
@@ -220,7 +220,7 @@ const handleTrainingModeChange = (value) => {
   return (
     <div className='left'>
       <div className="form-item">
-        <label>想定场景</label>
+        <label className='select-text'>想定场景</label>
         <Select 
           value={selectedScenario} 
           onChange={handleScenarioSelectChange}
@@ -234,7 +234,7 @@ const handleTrainingModeChange = (value) => {
         </Select>
       </div>
       <div className="form-item">
-        <label>智能体角色</label>
+        <label className='select-text'>智能体角色</label>
         <Select
           value={selectedAgentRole}
           onChange={handleAgentRoleSelectChange}
@@ -248,19 +248,19 @@ const handleTrainingModeChange = (value) => {
         </Select>
       </div>
       <div className="form-item">
-        <label>训练方式</label>
+        <label className='select-text'>训练方式</label>
         <Select value={trainingMode} onChange={handleTrainingModeChange}>
           <Option value="online">在线交互</Option>
           <Option value="offline">离线数据</Option>
         </Select>
         {trainingMode === 'offline' && (
-          <Button type="default" onClick={showDataLoadModal}>
+          <Button type="default" onClick={showDataLoadModal} style={{background:'#3558b8ff',color:'#ffffff'}}>
             离线数据载入
           </Button>
         )}
       </div>
       <div className="form-item">
-        <label>算法类型</label>
+        <label className='select-text'>算法类型</label>
         <Select
           value={intelligentStore.algorithmType}
           onChange={handleAlgorithmTypeChange}
@@ -274,7 +274,7 @@ const handleTrainingModeChange = (value) => {
         </Select>
       </div>
       <div className="form-item">
-        <label>算法选择</label>
+        <label className='select-text'>算法选择</label>
         <Select
           value={intelligentStore.selectedAlgorithm ? intelligentStore.selectedAlgorithm.name : ''}
           onChange={handleAlgorithmSelectChange}
@@ -288,11 +288,21 @@ const handleTrainingModeChange = (value) => {
           {!intelligentStore.algorithmsByType.length && <Option value="">请选择</Option>}
         </Select>
       </div>
-
+      <div className='form-item'>
+        {intelligentStore.selectedAgent ? (
+          <div style={{ maxHeight: '250px', overflowY: 'auto',color:'#ffffff' }}>
+            <h3>已载入算法信息</h3>
+            <p><strong>算法名称：</strong>{intelligentStore.selectedAlgorithm.name}</p>
+            <p><strong>描述：</strong>{intelligentStore.selectedAlgorithm.description}</p>
+          </div>
+        ) : (
+          <div style={{color:'white'}}>请选择一个算法</div>
+        )}
+      </div>
       
       <div className='form-item'>
         {intelligentStore.selectedAgent ? (
-          <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
+          <div style={{ maxHeight: '250px', overflowY: 'auto',color:'#ffffff' }}>
             <h3>已载入智能体信息</h3>
             <p><strong>智能体名称：</strong>{intelligentStore.selectedAgent.agentName}</p>
             <p><strong>智能体ID：</strong>{intelligentStore.selectedAgent.agentID}</p>
@@ -302,11 +312,12 @@ const handleTrainingModeChange = (value) => {
             <p><strong>想定场景：</strong>{intelligentStore.selectedAgent.scenarioID}</p>
           </div>
         ) : (
-          <div>请选择一个智能体</div>
+          <div style={{color:'white'}}>请选择一个智能体</div>
         )}
       </div>
 
       <Modal
+        className='modal-view'
         title="载入离线数据"
         open={visible}
         onOk={handleOk}

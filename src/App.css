@@ -17,7 +17,8 @@ body {
     background-image: url('./assets/header.png');
     background-size: cover;
     background-repeat: no-repeat;
-    color: white;
+    color: #001b38;
+    background-color: #001b38;
     padding: 10px 20px;
     width: 100vw;
     box-sizing: border-box;
@@ -32,8 +33,7 @@ body {
     margin-right: 0.5rem;
     font-weight: bold;
     font-size: 1.25rem;
-    color: black;
-    filter: invert(0.2);
+    color: white;
 }
 
 .settings-button {
@@ -47,13 +47,13 @@ body {
 
 .settings-icon {
     height: 2rem;
-    filter: invert(0.2);
+    filter: invert(1);
 }
 
 .app-nav {
     display: flex;
     justify-content: space-around;
-    background-color: #f8f9fa;
+    background-color: #001b38;
     min-height: 60px;
     width: 100%;
     box-sizing: border-box;
@@ -68,7 +68,7 @@ body {
 
 .nav-link {
     text-decoration: none;
-    color: black;
+    color: white;
     padding: 15px 25px;
     border-radius: 5px;
     transition: background-color 0.3s, color 0.3s;
@@ -115,6 +115,7 @@ body {
 .logo-text {
     display: flex;
     align-items: baseline;
+    color: white;
 }
 
 .main-title {

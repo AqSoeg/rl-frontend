@@ -1,52 +1,245 @@
 .trainingservice {
-  display: flex;
-  height: 100%;
-  padding: 20px;
+    display: flex;
+    height: 100%;
+    padding: 20px;
+    background-color: #001b38;
 }
 
 .left {
-  flex: 0 0 10%;
+  flex: 0 0 15%;
   padding: 1rem;
 }
 
 .form-item {
-  margin-bottom: 1rem;
-  padding: 1rem;
-  background-color: #ecf4fc;
-  border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    background-color: #072446;
+    padding: 1rem;
+    border-radius: 0.5rem;
 }
 
-.form-item .ant-select,
-.form-item .ant-btn {
-  margin-top: 0.5rem;
+.select-text {
+    font-weight: bold;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: white;
+    font-family: serif;
 }
+
+.form-item .ant-select-selector,
+.form-item .ant-input {
+    width: 100%;
+    background: #063160 !important;
+    color: white;
+    font-family: serif;
+}
+
+.ant-select-dropdown,
+.ant-select-item-option-content {
+    background: #063160;
+    color: white;
+    font-family: serif;
+}
+
+.ant-select-item-option-active:not(.ant-select-item-option-disabled),
+.ant-select-item-option-active:not(.ant-select-item-option-disabled) .ant-select-item-option-content,
+.ant-select-item-option-selected:not(.ant-select-item-option-disabled),
+.ant-select-item-option-selected:not(.ant-select-item-option-disabled) .ant-select-item-option-content {
+    background: #0a4a8a !important;
+}
+
+
+.form-item .ant-select-arrow {
+    color: white !important;
+}
+
 
 .right {
-  position: relative;
+    position: relative;
+    display: flex;
+    width: calc(100% - 40px);
+    height: 75vh;
+    padding: 20px;
+    background: linear-gradient(to bottom, #002044, #002044, #002044);
+    border-radius: 8px;
+    margin: 0 20px;
+}
+
+
+.right1 {
   display: flex;
-  width: calc(100% - 40px);
-  height: 75vh;
-  padding: 20px;
-  background: linear-gradient(to bottom, #b2dfdb, #b0bec5, #ffffff);
-  border-radius: 8px;
-  margin: 0 20px;
+  flex-direction: column;
+  gap: 16px; /*多个组件之间的距离*/
 }
 
-.button-container {
-  position: absolute;
-  margin-top: 10px;
-  width: 100%;
-  text-align: center;
+.right1 .ant-card {
+  background-color: #001a35; /*右侧card框的背景颜色*/
+  border: 1px solid #e6eaee;/*card框边界的颜色*/
 }
 
-.select-style {
-  margin-right: 10px;
+.right1 .ant-card-head {
+  background-color: #022d55; /* card框表头颜色 */
+  text-align: center;/*居中显示标题文字*/
 }
 
-.update-button {
-  margin-left: 10px;
+.right1 .ant-card-head-title {
+  color: rgb(255, 255, 255) !important;/*card标题文字的颜色、大小*/
+  font-size: 1.2rem;
 }
 
-.input{
-  margin-top: 10px;
+
+.right1 .ant-space-item span {
+  color: rgb(255, 255, 255); /* 参数选项框对文字的颜色 */
+}
+
+.right1 .ant-select-selector {
+  background: #063160 !important;
+  border-color: #fcfcfd !important;/*参数选项框的背景颜色、以及边界颜色*/
+}
+
+.right1 .ant-select-arrow {
+  color: white !important;/*选项框下拉箭头颜色*/
+}
+
+
+.button-container {/*四个按钮之间的距离、分布方以及和上面组件的距离*/
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.button-container .ant-btn {
+  background: #063160;/*按钮的背景颜色、边界颜色、文字颜色*/
+  border-color: #126dc2;
+  color: white;
+  font-weight: bold;
+}
+
+.button-container .ant-btn:hover,
+.button-container .ant-btn:focus {/*鼠标悬停时的颜色*/
+  background: #126dc2;
+  border-color: #1890ff;
+  color: white;
+}
+
+.button-container .ant-btn:disabled {/*禁止点击按钮的颜色*/
+  background: #072446;
+  border-color: #063160;
+  color: #555;
+  cursor: not-allowed;
+}
+
+
+.ant-table-thead > tr > th {
+  background-color: #01284d !important; /* 表头背景颜色 */
+  color: white !important;/*表格表头文字颜色*/
+}
+.ant-table-tbody > tr > td {/*摆个内容背景颜色、字体颜色和边框颜色*/
+  background-color: #01284d !important;
+  border-bottom: 1px solid #03152b;
+  color: #ffffff;
+}
+
+
+.modal-view .ant-modal-content {
+  background-color: #001a35; /* 设置模态框内容的背景颜色 */
+  color: #ffffff; /* 设置默认文字颜色为白色 */
+  border: 1px solid #022d55; /* 设置边框颜色 */
+}
+
+.modal-view .ant-modal-header {
+  background-color: #022d55; /* 设置头部的背景颜色 */
+  border-bottom: none; /* 移除头部的下边框 */
+}
+
+.modal-view .ant-modal-title {
+  color: #ffffff; /* 设置标题文字为白色 */
+  font-weight: bold; /* 字体加粗 */
+  text-align: center;/*文字居中*/
+}
+
+/* 模态框右上角的关闭（'X'）按钮 */
+.modal-view .ant-modal-close-x {
+  color: #ffffff; /* 设置关闭图标为白色 */
+}
+
+.modal-view .ant-modal-body p {
+  color: #e0e0e0; /* 设置段落文字为灰白色，以提高可读性 */
+}
+
+.modal-view .ant-modal-body strong {
+  color: #ffffff; /* 设置加粗文字为纯白色 */
+}
+
+
+.modal-view .ant-modal-body h3,
+.modal-view .ant-modal-body h4 {
+  color: #1890ff; /* 使用醒目的蓝色作为子标题颜色 */
+  margin-top: 16px; /* 设置上边距 */
+  border-bottom: 1px solid #072446; /* 添加下划线 */
+  padding-bottom: 8px; /* 设置下内边距 */
+}
+
+/* 实体状态信息的容器 */
+.entity-state-container {
+  margin-bottom: 16px; /* 设置下边距 */
+  border: 1px solid #072446; /* 设置一个浅色边框 */
+  border-radius: 4px; /* 设置圆角 */
+  padding: 12px; /* 设置内边距 */
+}
+
+/* 实体状态信息的标题 */
+.entity-state-title {
+  font-weight: bold; /* 字体加粗 */
+  font-size: 16px; /* 设置字体大小 */
+  margin-bottom: 8px; /* 设置下边距 */
+  color: #ffffff; /* 设置文字为白色 */
+}
+
+/* 实体状态信息的每一行 */
+.entity-state-row {
+  display: flex; /* 使用 flex 布局实现左右对齐 */
+  margin-bottom: 4px; /* 设置下边距 */
+  padding-left: 12px; /* 设置左内边距 */
+}
+
+/* 实体状态信息的标签（左侧部分） */
+.entity-state-label {
+  flex: 0 0 180px; /* 固定宽度为 180px */
+  color: #a0a0a0; /* 设置标签文字为灰色 */
+}
+
+/* 实体状态信息的值（右侧部分） */
+.entity-state-value {
+  flex: 1; /* 占据剩余空间 */
+  color: #e0e0e0; /* 设置值的文字为灰白色 */
+}
+
+
+
+.modal-view .ant-modal-footer {
+  border-top: 1px solid #022d55; /* 添加一个上边框 */
+  background-color: transparent; /* 背景透明，与内容区域一致 */
+}
+
+/* 脚部主要按钮的样式 */
+.modal-view .ant-modal-footer .ant-btn-primary {
+  background: #063160; /* 设置按钮背景颜色 */
+  border-color: #126dc2; /* 设置按钮边框颜色 */
+  color: white; /* 设置按钮文字为白色 */
+}
+
+/* 脚部主要按钮在鼠标悬停时的样式 */
+.modal-view .ant-modal-footer .ant-btn-primary:hover {
+  background: #126dc2; /* 改变背景颜色 */
+  border-color: #1890ff; /* 改变边框颜色 */
+}
+
+/* 用于设置卡片内部提示信息的样式 */
+.card-text {
+  color: #ffffff;       /* 设置文字颜色 */
+  text-align: center;   /* 文字水平居中显示 */
+  padding: 20px 0;      /* 增加一些垂直内边距，使其在卡片内上下也基本居中 */
+  font-size: 1rem;      /* 设置合适的字体大小 */
+  font-style: italic;   /* 使用斜体以区别于常规内容 */
 }
