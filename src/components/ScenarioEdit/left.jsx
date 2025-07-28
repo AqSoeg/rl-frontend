@@ -90,7 +90,6 @@ const Left = observer(({ scenarios }) => {
     setValue(val);
   };
 
-  // 恢复了之前的完整更新逻辑
   const handleUpdate = async () => {
     if (!intelligentStore.selectedScenario || !entity || !attribute) {
       message.error('请先通过树形菜单选择一个属性');
@@ -110,7 +109,6 @@ const Left = observer(({ scenarios }) => {
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       await response.json();
       
-      // 更新成功后刷新前端数据状态
       const updatedParamsMap = { ...envParamsMap };
       const attrToUpdate = updatedParamsMap[entity].find(attr => attr.key === attribute);
       if (attrToUpdate) attrToUpdate.value = value;
@@ -131,58 +129,48 @@ const Left = observer(({ scenarios }) => {
 
   return (
     <Card title="场景编辑">
-      <div style={{ marginBottom: 50, marginTop: 16/* -> 设置与下方元素的间距为X像素 */ }}>
-        <label>想定场景：</label>
-        <Select value={selectedScenarioName} onChange={handleScenarioSelectChange} placeholder="请选择想定" style={{ width: '200px' /* -> 选择框宽度占父容器 */ }} >
+      <div className="scenario-header">
+        <label style={{fontSize:20,color:'white'}}>想定场景：</label>
+        <Select value={selectedScenarioName} onChange={handleScenarioSelectChange} placeholder="请选择想定" className="scenario-select">
           {scenarios.map((scenario) => (
             <Option key={scenario.name} value={scenario.name}>{scenario.name}</Option>
           ))}
         </Select>
       </div>
 
-      <div 
-        style={{ 
-          border: '1px solid #ffffffff', // -> 设置1像素宽的实线边框，颜色为灰色
-          borderRadius: '6px',        // -> 设置6像素的圆角
-          padding: '16px',            // -> 设置16像素的内边距
-          marginBottom: '50px'        // -> 设置与底部按钮的间距为24像素
-        }}
-      >
-
+      <div className="config-section">
         <Segmented 
           options={['红方', '蓝方']} 
           value={activeSide} 
           onChange={(value) => setActiveSide(value)} 
           block 
-          style={{ marginBottom: 16 /* -> 设置与下方元素的间距为16像素 */ }}
+          className="side-selector"
         />
 
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 /* -> 使用flex布局让内部元素同行显示, 垂直居中, 并设置下外边距 */ }}>
+        <div className="entity-selector-container">
           <TreeSelect
-            style={{ flex: 1 /* -> 占据所有剩余的横向空间 */ }}
+            className="entity-tree-select"
             value={selectedTreeValue}
-            dropdownStyle={{ maxHeight: 400, overflow: 'auto' /* -> 设置下拉菜单的最大高度和滚动条 */ }}
+            dropdownStyle={{ maxHeight: 400, overflow: 'auto' }}
             treeData={treeData}
             placeholder="请选择实体及其属性"
             treeDefaultExpandAll
             onChange={handleTreeSelectChange}
           />
-          <Button icon={<PlusOutlined />} disabled style={{ marginLeft: 8 /* -> 设置与左边树形选择框的间距为8像素 */ }} />
+          <Button icon={<PlusOutlined />} disabled className="add-button" />
         </div>
-
-        {/* 值的选择 */}
+        
         <div>
           <label>值：</label>
-          <Select placeholder="选择值" value={value} onChange={handleValueChange} style={{ width: '100%' /* -> 选择框宽度占满父容器 */ }} disabled={!attribute}>
+          <Select placeholder="选择值" value={value} onChange={handleValueChange} className="value-select" disabled={!attribute}>
             {valueOptions()}
           </Select>
         </div>
       </div>
 
-      {/* 底部按钮 */}
-      <Space style={{ width: '100%' ,justifyContent: 'space-evenly' /* -> 容器占满整行，内容（按钮）分布 */ }}>
+      <Space className="action-buttons">
         <Button type="primary" onClick={handleUpdate}>更新</Button>
-        <Button onClick={handleSave}>保存</Button>
+        <Button type="primary" onClick={handleSave}>保存</Button>
       </Space>
     </Card>
   );

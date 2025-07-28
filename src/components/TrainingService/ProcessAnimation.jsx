@@ -91,7 +91,7 @@ const ProcessAnimation = ({ agentId, scenarioId }) => {
                     ctx.beginPath();
                     ctx.arc(entity.type.center[0], entity.type.center[1], entity.type.radius, 0, Math.PI * 2);
                     if (entity.type.fill) ctx.fill(); else ctx.stroke();
-                    ctx.fillStyle = `rgba(0, 0, 0, 1)`; 
+                    ctx.fillStyle = `rgba(255, 255, 255, 1)`; 
                     ctx.font = `${12 / scale}px Arial`; 
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
@@ -105,7 +105,7 @@ const ProcessAnimation = ({ agentId, scenarioId }) => {
                     
                     const midX = (entity.type.start[0] + entity.type.end[0]) / 2;
                     const midY = (entity.type.start[1] + entity.type.end[1]) / 2;
-                    ctx.fillStyle = `rgba(0, 0, 0, 1)`; 
+                    ctx.fillStyle = `rgba(255, 255, 255, 1)`; 
                     ctx.font = `${12 / scale}px Arial`; 
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'bottom';
@@ -118,7 +118,7 @@ const ProcessAnimation = ({ agentId, scenarioId }) => {
                     ctx.closePath();
                     ctx.fill();
                     
-                    ctx.fillStyle = `rgba(0, 0, 0, 1)`; 
+                    ctx.fillStyle = `rgba(255, 255, 255, 1)`; 
                     ctx.font = `${12 / scale}px Arial`; 
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
@@ -136,7 +136,7 @@ const ProcessAnimation = ({ agentId, scenarioId }) => {
             <p>连接状态: {connectionStatus}</p>
             <div style={{ display: 'flex', flexDirection: 'row', gap: '20px' }}>
                 <div className="canvas-container">
-                    <canvas ref={canvasRef} width={800} height={600} style={{ border: '1px solid #ccc', backgroundColor: '#f0f0f0' }} />
+                    <canvas ref={canvasRef} width={800} height={600} style={{ border: '1px solid #ccc', backgroundColor: '#063160' }} />
                 </div>
                 <div className="info-panel" style={{ width: '300px', borderLeft: '1px solid #eee', paddingLeft: '20px', fontFamily: 'sans-serif', fontSize: '14px', height: '602px', overflowY: 'auto' }}>
                     <h4>当前帧详细信息</h4>
