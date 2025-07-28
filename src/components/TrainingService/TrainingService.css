@@ -40,38 +40,15 @@
     margin: 0 20px;
 }
 
-
 .right1 {
   display: flex;
   flex-direction: column;
   gap: 16px; /*多个组件之间的距离*/
 }
 
-.right1 .ant-card {
-  background-color: #001a35; /*右侧card框的背景颜色*/
-  border: 1px solid #e6eaee;/*card框边界的颜色*/
-}
-
-.right1 .ant-card-head {
-  background-color: #022d55; /* card框表头颜色 */
-  text-align: center;/*居中显示标题文字*/
-}
-
-.right1 .ant-card-head-title {
-  color: rgb(255, 255, 255) !important;/*card标题文字的颜色、大小*/
-  font-size: 1.2rem;
-}
-
-
 .right1 .ant-space-item span {
   color: rgb(255, 255, 255); /* 参数选项框对文字的颜色 */
 }
-
-.right1 .ant-select-selector {
-  background: #063160 !important;
-  border-color: #fcfcfd !important;/*参数选项框的背景颜色、以及边界颜色*/
-}
-
 
 .button-container {/*四个按钮之间的距离、分布方以及和上面组件的距离*/
   display: flex;
@@ -80,60 +57,7 @@
   margin-top: 16px;
 }
 
-.button-container .ant-btn {
-  background: #063160;/*按钮的背景颜色、边界颜色、文字颜色*/
-  border-color: #126dc2;
-  color: white;
-  font-weight: bold;
-}
 
-.button-container .ant-btn:hover,
-.button-container .ant-btn:focus {/*鼠标悬停时的颜色*/
-  background: #126dc2;
-  border-color: #1890ff;
-  color: white;
-}
-
-.button-container .ant-btn:disabled {/*禁止点击按钮的颜色*/
-  background: #072446;
-  border-color: #063160;
-  color: #555;
-  cursor: not-allowed;
-}
-
-
-.ant-table-thead > tr > th {
-  background-color: #01284d !important; /* 表头背景颜色 */
-  color: white !important;/*表格表头文字颜色*/
-}
-.ant-table-tbody > tr > td {/*摆个内容背景颜色、字体颜色和边框颜色*/
-  background-color: #01284d !important;
-  border-bottom: 1px solid #03152b;
-  color: #ffffff;
-}
-
-
-.modal-view .ant-modal-content {
-  background-color: #001a35; /* 设置模态框内容的背景颜色 */
-  color: #ffffff; /* 设置默认文字颜色为白色 */
-  border: 1px solid #022d55; /* 设置边框颜色 */
-}
-
-.modal-view .ant-modal-header {
-  background-color: #022d55; /* 设置头部的背景颜色 */
-  border-bottom: none; /* 移除头部的下边框 */
-}
-
-.modal-view .ant-modal-title {
-  color: #ffffff; /* 设置标题文字为白色 */
-  font-weight: bold; /* 字体加粗 */
-  text-align: center;/*文字居中*/
-}
-
-/* 模态框右上角的关闭（'X'）按钮 */
-.modal-view .ant-modal-close-x {
-  color: #ffffff; /* 设置关闭图标为白色 */
-}
 
 .modal-view .ant-modal-body p {
   color: #e0e0e0; /* 设置段落文字为灰白色，以提高可读性 */
@@ -187,26 +111,6 @@
   color: #e0e0e0; /* 设置值的文字为灰白色 */
 }
 
-
-
-.modal-view .ant-modal-footer {
-  border-top: 1px solid #022d55; /* 添加一个上边框 */
-  background-color: transparent; /* 背景透明，与内容区域一致 */
-}
-
-/* 脚部主要按钮的样式 */
-.modal-view .ant-modal-footer .ant-btn-primary {
-  background: #063160; /* 设置按钮背景颜色 */
-  border-color: #126dc2; /* 设置按钮边框颜色 */
-  color: white; /* 设置按钮文字为白色 */
-}
-
-/* 脚部主要按钮在鼠标悬停时的样式 */
-.modal-view .ant-modal-footer .ant-btn-primary:hover {
-  background: #126dc2; /* 改变背景颜色 */
-  border-color: #1890ff; /* 改变边框颜色 */
-}
-
 /* 用于设置卡片内部提示信息的样式 */
 .card-text {
   color: #ececec;       /* 设置文字颜色 */
@@ -215,3 +119,41 @@
   font-size: 1rem;      /* 设置合适的字体大小 */
   font-style: italic;   /* 使用斜体以区别于常规内容 */
 }
+
+.right1 .button-container .ant-btn:not(.ant-btn-icon-only),
+.left .form-item .ant-btn:not(.ant-btn-icon-only),
+.right .ant-btn-primary:not(.ant-btn-icon-only),
+.right .ant-btn:not(.ant-btn-primary):not(.ant-btn-icon-only),
+.modal-view .ant-table-tbody .ant-btn:not(.ant-btn-icon-only) {
+  background: url(../../assets/button.png) no-repeat center/contain !important;
+  padding: 0 !important;
+  width: 100px !important;
+  height: 30px !important;
+  border: none !important;
+  box-shadow: none !important;
+  overflow: hidden;
+  margin-right: 8px;
+  color: white;
+  font-family: serif;
+}
+
+
+
+/* 鼠标悬浮和激活状态的统一样式 */
+.right .ant-btn:not(.ant-btn-icon-only):hover,
+.modal-view .ant-table-tbody .ant-btn:not(.ant-btn-icon-only):hover {
+    filter: brightness(1.5);
+    transform: scale(1.05);   /* 轻微放大 */
+    transition: all 0.2s ease-in-out; /* 使过渡更平滑 */
+}
+
+.right .ant-btn:not(.ant-btn-icon-only):active,
+.modal-view .ant-table-tbody .ant-btn:not(.ant-btn-icon-only):active {
+    filter: brightness(0.8); /* 显著变暗 */
+    transform: translateY(2px) scale(1.02); /* 更明显的下沉和缩放 */
+    transition: all 0.1s ease-in-out;
+}
+
+
+
+

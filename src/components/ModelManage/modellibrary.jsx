@@ -214,7 +214,7 @@ const ModelLibrary = ({ data, fetchModels }) => {
         onChange={(e) => setSearchText(e.target.value)}
         style={{ width: 200, marginRight: 8 }} 
       />
-      <Button type="primary" onClick={handleSearch} >
+      <Button onClick={handleSearch} >
         搜索
       </Button>
       <Table

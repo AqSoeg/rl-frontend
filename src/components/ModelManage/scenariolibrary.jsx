@@ -216,7 +216,7 @@ const ScenarioLibrary = ({ scenarios, fetchScenarios }) => {
                 <Select.Option value="createTime">创建时间</Select.Option> */}
             </Select>
             <Input placeholder="单行输入" value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ width: 200, marginRight: 8 ,marginBottom:18}} />
-            <Button type="primary" onClick={handleSearch}>搜索</Button>
+            <Button onClick={handleSearch}>搜索</Button>
             <Table dataSource={filteredScenarios} columns={columns} rowKey="id" />
 
             {/* 编辑和查看的模态框 */}

@@ -184,7 +184,7 @@ const EvaluateTable = ({ decisions, fetchDecisions }) => {
                 <Select.Option value="CREAT_TIME">创建时间</Select.Option> */}
             </Select>
             <Input placeholder="单行输入" value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ width: 200, marginRight: 8,marginBottom:18 }} />
-            <Button type="primary" onClick={handleSearch}>搜索</Button>
+            <Button onClick={handleSearch}>搜索</Button>
             <Table dataSource={filteredDecisions} columns={columns} rowKey="AGENT_MODEL_ID" />
 
             {/* 编辑和查看的模态框 */}

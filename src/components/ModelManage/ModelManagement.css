@@ -35,14 +35,6 @@
     color:#ffffff
 }
 
-.model_button:hover {
-    filter: brightness(0.9);
-}
-
-.model_button:active {
-    transform: translateY(1px);
-}
-
 
 /* --- 统一输入框样式 --- */
 .modelright .ant-input,
@@ -105,4 +97,52 @@
 .ant-modal .ant-input-disabled {
     background-color: #0a2548 !important;
     color: #a0a0a0 !important;
+}
+.modelright .ant-btn-primary:not(.ant-btn-icon-only) {
+  background: url(../../assets/button.png) no-repeat center/contain !important;
+  padding: 0 !important;
+  width: 250px !important;
+  height: 50px !important;
+  border: none !important;
+  box-shadow: none !important;
+  overflow: hidden;
+  margin-right: 8px;
+  color: white;
+  font-family: serif;
+}
+
+.modelright .ant-btn:not(.ant-btn-primary):not(.ant-btn-icon-only) {
+    background: url(../../assets/button.png) no-repeat center/contain !important;
+    padding: 0 !important;
+    width: 100px !important;
+    height: 30px !important;
+    border: none !important;
+    box-shadow: none !important;
+    overflow: hidden;
+    margin-right: 8px;
+    color: white !important; /* 确保文字颜色为白色 */
+    font-family: serif;
+}
+
+/* 鼠标悬浮和激活状态的统一样式 */
+.modelright .ant-btn:not(.ant-btn-icon-only):hover {
+    filter: brightness(1.2);
+    transform: scale(1.05);   /* 轻微放大 */
+    transition: all 0.2s ease-in-out; /* 使过渡更平滑 */
+
+}
+
+.modelright .ant-btn:not(.ant-btn-icon-only):active,
+.model_button:active {
+    filter: brightness(0.8); /* 显著变暗 */
+    transform: translateY(2px) scale(1.02); /* 更明显的下沉和缩放 */
+    transition: all 0.1s ease-in-out;
+}
+
+
+.model_button:hover {
+    filter: brightness(1.5);
+    transform: scale(1.05);   /* 轻微放大 */
+    transition: all 0.2s ease-in-out; /* 使过渡更平滑 */
+
 }
