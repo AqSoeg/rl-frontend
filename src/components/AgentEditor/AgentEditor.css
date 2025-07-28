@@ -1,559 +1,559 @@
 /* AgentEditor */
 
-.container {
-    display: flex;
-    height: 100%;
-    padding: 20px;
-    background-color: #001b38;
+.container { /* 主容器样式 */
+    display: flex; /* 使用 flex 布局 */
+    height: 100%; /* 高度占满父容器 */
+    padding: 20px; /* 内边距 20px */
+    background-color: #001b38; /* 背景颜色，深蓝色 */
 }
 
-.gradient-box {
-    position: relative;
-    display: flex;
-    width: calc(100% - 40px);
-    height: 75vh;
-    padding: 20px;
-    background: linear-gradient(to bottom, #002044, #002044, #002044);
-    border-radius: 8px;
-    margin: 0 20px;
+.gradient-box { /* 渐变色盒子样式 */
+    position: relative; /* 相对定位，用于子元素定位 */
+    display: flex; /* 使用 flex 布局 */
+    width: calc(100% - 40px); /* 宽度计算，100% 减去 40px */
+    height: 75vh; /* 高度为视口高度的 75% */
+    padding: 20px; /* 内边距 20px */
+    background: linear-gradient(to bottom, #002044, #002044, #002044); /* 线性渐变背景（实际上是纯色） */
+    border-radius: 8px; /* 边框圆角 8px */
+    margin: 0 20px; /* 外边距，上下为 0，左右为 20px */
 }
 
-.entity-button {
-    background: url(../../assets/button.png) no-repeat center/contain !important;
-    padding: 0 !important;
-    width: 100px !important;
-    height: 30px !important;
-    border: none !important;
-    box-shadow: none !important;
-    overflow: hidden;
-    margin-right: 8px;
-    color: white;
-    font-family: serif;
+.entity-button { /* 实体按钮样式 */
+    background: url(../../assets/button.png) no-repeat center/contain !important; /* 背景图片，不重复，居中显示，包含整个区域，!important 提高优先级 */
+    padding: 0 !important; /* 内边距为 0，!important 提高优先级 */
+    width: 100px !important; /* 宽度 100px，!important 提高优先级 */
+    height: 30px !important; /* 高度 30px，!important 提高优先级 */
+    border: none !important; /* 无边框，!important 提高优先级 */
+    box-shadow: none !important; /* 无阴影，!important 提高优先级 */
+    overflow: hidden; /* 超出部分隐藏 */
+    margin-right: 8px; /* 右外边距 8px */
+    color: white; /* 字体颜色为白色 */
+    font-family: serif; /* 字体为衬线字体 */
 }
 
-.entity-button[disabled] {
-    color: gray;
+.entity-button[disabled] { /* 实体按钮被禁用时的样式 */
+    color: gray; /* 字体颜色为灰色 */
 }
 
 /* Sidebar */
 
-.sidebar{
-    flex: 0 0 10%;
-    padding: 1rem;
+.sidebar{ /* 侧边栏容器样式 */
+    flex: 0 0 10%; /* flex 布局项目：不增长，不收缩，基础宽度为 10% */
+    padding: 1rem; /* 内边距 1rem */
 }
 
-.sidebar-section {
-    margin-bottom: 1rem;
-    background-color: #072446;
-    padding: 1rem;
-    border-radius: 0.5rem;
+.sidebar-section { /* 侧边栏区域样式 */
+    margin-bottom: 1rem; /* 底部外边距 1rem */
+    background-color: #072446; /* 背景颜色，深蓝色 */
+    padding: 1rem; /* 内边距 1rem */
+    border-radius: 0.5rem; /* 边框圆角 0.5rem */
 }
 
-.text {
-    font-weight: bold;
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
-    color: white;
-    font-family: serif;
+.text { /* 文本样式 */
+    font-weight: bold; /* 字体加粗 */
+    margin-top: 0.5rem; /* 顶部外边距 0.5rem */
+    margin-bottom: 0.5rem; /* 底部外边距 0.5rem */
+    color: white; /* 字体颜色为白色 */
+    font-family: serif; /* 字体为衬线字体 */
 }
 
 /* ModelButton */
 
-.model-button-container {
-    position: absolute;
-    bottom: 20px;
-    right: 20px;
-    display: flex;
-    gap: 10px;
+.model-button-container { /* 模型按钮容器样式 */
+    position: absolute; /* 绝对定位 */
+    bottom: 20px; /* 距离底部 20px */
+    right: 20px; /* 距离右侧 20px */
+    display: flex; /* 使用 flex 布局 */
+    gap: 10px; /* 子元素之间的间距 10px */
 }
 
-.model-button {
-    background: url(../../assets/button.png) no-repeat center/contain !important;
-    padding: 0 !important;
-    width: 180px !important;
-    height: 70px !important;
-    border: none !important;
-    box-shadow: none !important;
-    overflow: hidden;
-    color: white;
-    font-family: serif;
+.model-button { /* 模型按钮样式 */
+    background: url(../../assets/button.png) no-repeat center/contain !important; /* 背景图片，不重复，居中显示，包含整个区域，!important 提高优先级 */
+    padding: 0 !important; /* 内边距为 0，!important 提高优先级 */
+    width: 180px !important; /* 宽度 180px，!important 提高优先级 */
+    height: 70px !important; /* 高度 70px，!important 提高优先级 */
+    border: none !important; /* 无边框，!important 提高优先级 */
+    box-shadow: none !important; /* 无阴影，!important 提高优先级 */
+    overflow: hidden; /* 超出部分隐藏 */
+    color: white; /* 字体颜色为白色 */
+    font-family: serif; /* 字体为衬线字体 */
 }
 
-.model-button:hover {
-    filter: brightness(0.9);
+.model-button:hover { /* 模型按钮悬停时的样式 */
+    filter: brightness(0.9); /* 应用滤镜，降低亮度到 90% */
 }
 
-.model-button:active {
-    transform: translateY(1px);
+.model-button:active { /* 模型按钮被激活（点击）时的样式 */
+    transform: translateY(1px); /* 向下移动 1px，产生点击效果 */
 }
 
 /* StateVector, ActionSpace, RewardFunction */
 
-.sub-component {
-    flex: 1;
-    padding: 0.5rem;
-    background-color: #063160;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    height: 65vh;
-    margin-right: 1rem;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-    position: relative;
+.sub-component { /* 子组件容器样式 */
+    flex: 1; /* flex 布局项目：占据剩余空间 */
+    padding: 0.5rem; /* 内边距 0.5rem */
+    background-color: #063160; /* 背景颜色，较深的蓝色 */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 盒子阴影 */
+    height: 65vh; /* 高度为视口高度的 65% */
+    margin-right: 1rem; /* 右外边距 1rem */
+    border-radius: 8px; /* 边框圆角 8px */
+    display: flex; /* 使用 flex 布局 */
+    flex-direction: column; /* flex 方向为垂直 */
+    position: relative; /* 相对定位 */
 }
 
-.sub-component-banner {
-    background-color: #126dc2;
-    padding: 0.5rem 0;
-    text-align: center;
-    border-radius: 8px;
-    margin-bottom: 0;
+.sub-component-banner { /* 子组件标题栏样式 */
+    background-color: #126dc2; /* 背景颜色，亮蓝色 */
+    padding: 0.5rem 0; /* 内边距，上下 0.5rem，左右 0 */
+    text-align: center; /* 文本居中 */
+    border-radius: 8px; /* 边框圆角 8px */
+    margin-bottom: 0; /* 底部外边距 0 */
 }
 
-.sub-component-logo {
-    margin-right: 0.5rem;
-    height: 1.5rem;
-    vertical-align: middle;
-    display: inline-block;
-    filter: invert(1);
+.sub-component-logo { /* 子组件 Logo 样式 */
+    margin-right: 0.5rem; /* 右外边距 0.5rem */
+    height: 1.5rem; /* 高度 1.5rem */
+    vertical-align: middle; /* 垂直对齐方式为居中 */
+    display: inline-block; /* 显示为行内块元素 */
+    filter: invert(1); /* 颜色反转滤镜（常用于将黑色图标变白色） */
 }
 
-.sub-component-title {
-    font-size: 1.5rem;
-    font-weight: bold;
-    display: inline-block;
-    vertical-align: middle;
-    color: white;
-    font-family: serif;
+.sub-component-title { /* 子组件标题样式 */
+    font-size: 1.5rem; /* 字体大小 1.5rem */
+    font-weight: bold; /* 字体加粗 */
+    display: inline-block; /* 显示为行内块元素 */
+    vertical-align: middle; /* 垂直对齐方式为居中 */
+    color: white; /* 字体颜色为白色 */
+    font-family: serif; /* 字体为衬线字体 */
 }
 
-.upload-button {
-    position: absolute;
-    bottom: 1.5rem;
-    right: 2rem;
-    padding: 0;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1;
-    background-color: transparent;
+.upload-button { /* 上传按钮样式 */
+    position: absolute; /* 绝对定位 */
+    bottom: 1.5rem; /* 距离底部 1.5rem */
+    right: 2rem; /* 距离右侧 2rem */
+    padding: 0; /* 内边距 0 */
+    border-radius: 4px; /* 边框圆角 4px */
+    cursor: pointer; /* 鼠标样式为指针 */
+    display: flex; /* 使用 flex 布局 */
+    align-items: center; /* 垂直居中对齐 */
+    justify-content: center; /* 水平居中对齐 */
+    z-index: 1; /* 层叠顺序为 1 */
+    background-color: transparent; /* 背景颜色透明 */
 }
 
-.upload-button-logo {
-    height: 3rem;
-    vertical-align: middle;
-    transition: transform 0.3s ease;
-    filter: invert(1);
+.upload-button-logo { /* 上传按钮 Logo 样式 */
+    height: 3rem; /* 高度 3rem */
+    vertical-align: middle; /* 垂直对齐方式为居中 */
+    transition: transform 0.3s ease; /* transform 属性过渡效果，持续 0.3s，缓动函数为 ease */
+    filter: invert(1); /* 颜色反转滤镜 */
 }
 
-.upload-button:active .upload-button-logo {
-    transform: scale(0.9);
+.upload-button:active .upload-button-logo { /* 上传按钮被激活（点击）时其内部 Logo 的样式 */
+    transform: scale(0.9); /* 缩小到 90% */
 }
 
-.dropdown-container-wrapper {
-    max-height: 720px;
-    overflow-y: auto;
-    margin-top: 20px;
-    color: #063160;
-    scrollbar-color: #063160 #072446;
+.dropdown-container-wrapper { /* 下拉容器的包装器样式 */
+    max-height: 720px; /* 最大高度 720px */
+    overflow-y: auto; /* Y 轴超出部分显示滚动条 */
+    margin-top: 20px; /* 顶部外边距 20px */
+    color: #063160; /* 字体颜色 */
+    scrollbar-color: #063160 #072446; /* 滚动条颜色（滑块和轨道） */
 }
 
-.dropdown-container {
-    margin-bottom: 20px;
+.dropdown-container { /* 下拉容器样式 */
+    margin-bottom: 20px; /* 底部外边距 20px */
 }
 
-.dropdown-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    background-color: #126dc2;
-    border-radius: 4px;
-    cursor: pointer;
-    color: white;
-    font-family: serif;
+.dropdown-header { /* 下拉菜单头部样式 */
+    display: flex; /* 使用 flex 布局 */
+    justify-content: space-between; /* 子元素两端对齐 */
+    align-items: center; /* 垂直居中对齐 */
+    padding: 10px; /* 内边距 10px */
+    background-color: #126dc2; /* 背景颜色，亮蓝色 */
+    border-radius: 4px; /* 边框圆角 4px */
+    cursor: pointer; /* 鼠标样式为指针 */
+    color: white; /* 字体颜色为白色 */
+    font-family: serif; /* 字体为衬线字体 */
 }
 
-.dropdown-button {
-    font-size: 14px;
-    color: white;
+.dropdown-button { /* 下拉按钮样式 */
+    font-size: 14px; /* 字体大小 14px */
+    color: white; /* 字体颜色为白色 */
 }
 
-.button-group {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
+.button-group { /* 按钮组样式 */
+    display: flex; /* 使用 flex 布局 */
+    align-items: center; /* 垂直居中对齐 */
+    justify-content: flex-end; /* 水平靠右对齐 */
 }
 
 /* ActionSpace */
 
-.blue-divider {
-    width: 1px;
-    height: 20px;
-    background-color: #1890ff;
-    margin: 0 10px;
+.blue-divider { /* 蓝色分割线样式 */
+    width: 1px; /* 宽度 1px */
+    height: 20px; /* 高度 20px */
+    background-color: #1890ff; /* 背景颜色，亮蓝色 */
+    margin: 0 10px; /* 外边距，上下为 0，左右为 10px */
 }
 
-.rule-button {
-    width: 80px;
-    height: 30px;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: white;
-    transition: color 0.3s ease;
+.rule-button { /* 规则按钮样式 */
+    width: 80px; /* 宽度 80px */
+    height: 30px; /* 高度 30px */
+    border-radius: 4px; /* 边框圆角 4px */
+    display: flex; /* 使用 flex 布局 */
+    align-items: center; /* 垂直居中对齐 */
+    justify-content: center; /* 水平居中对齐 */
+    cursor: pointer; /* 鼠标样式为指针 */
+    color: white; /* 字体颜色为白色 */
+    transition: color 0.3s ease; /* 颜色属性过渡效果，持续 0.3s，缓动函数为 ease */
 }
 
-.rule-button.active {
-    color: #1890ff;
+.rule-button.active { /* 激活状态的规则按钮样式 */
+    color: #1890ff; /* 字体颜色为亮蓝色 */
 }
 
-.modal-content {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+.modal-content { /* 模态框内容样式 */
+    display: flex; /* 使用 flex 布局 */
+    flex-direction: column; /* flex 方向为垂直 */
+    gap: 16px; /* 子元素之间的间距 16px */
 }
 
-.modal-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: white;
-    font-family: serif;
+.modal-row { /* 模态框行样式 */
+    display: flex; /* 使用 flex 布局 */
+    align-items: center; /* 垂直居中对齐 */
+    gap: 8px; /* 子元素之间的间距 8px */
+    color: white; /* 字体颜色为白色 */
+    font-family: serif; /* 字体为衬线字体 */
 }
 
-.modal-label {
-    width: 100px;
-    text-align: right;
-    color: white;
-    font-family: serif;
+.modal-label { /* 模态框标签样式 */
+    width: 100px; /* 宽度 100px */
+    text-align: right; /* 文本右对齐 */
+    color: white; /* 字体颜色为白色 */
+    font-family: serif; /* 字体为衬线字体 */
 }
 
-.table-container {
-    margin-top: 10px;
-    max-height: 240px;
-    border-radius: 4px;
+.table-container { /* 表格容器样式 */
+    margin-top: 10px; /* 顶部外边距 10px */
+    max-height: 240px; /* 最大高度 240px */
+    border-radius: 4px; /* 边框圆角 4px */
 }
 
-.fixed-table {
-    width: 100%;
-    table-layout: fixed;
+.fixed-table { /* 固定布局表格样式 */
+    width: 100%; /* 宽度占满父容器 */
+    table-layout: fixed; /* 表格布局算法为固定布局 */
 }
 
-.fixed-table .ant-table-thead > tr > th {
-    position: sticky;
-    top: 0;
+.fixed-table .ant-table-thead > tr > th { /* antd 表格的表头单元格样式 */
+    position: sticky; /* 粘性定位 */
+    top: 0; /* 粘性定位的顶部偏移量为 0，实现表头固定 */
 }
 
-.fixed-table .ant-table-body {
-    overflow-y: auto;
+.fixed-table .ant-table-body { /* antd 表格的主体部分样式 */
+    overflow-y: auto; /* Y 轴超出部分显示滚动条 */
 }
 
-.action-container {
-    padding: 10px;
-    border: 1px solid #e8e8e8;
-    border-radius: 4px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    text-align: left;
+.action-container { /* 动作容器样式 */
+    padding: 10px; /* 内边距 10px */
+    border: 1px solid #e8e8e8; /* 边框，1px 实线，浅灰色 */
+    border-radius: 4px; /* 边框圆角 4px */
+    display: flex; /* 使用 flex 布局 */
+    flex-direction: column; /* flex 方向为垂直 */
+    align-items: flex-start; /* 交叉轴（水平）靠左对齐 */
+    text-align: left; /* 文本左对齐 */
 }
 
-.action-buttons {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 20px;
-    width: 100%;
+.action-buttons { /* 动作按钮组样式 */
+    display: flex; /* 使用 flex 布局 */
+    justify-content: flex-end; /* 水平靠右对齐 */
+    margin-top: 20px; /* 顶部外边距 20px */
+    width: 100%; /* 宽度占满父容器 */
 }
 
-.action-buttons button {
-    margin-left: 10px;
+.action-buttons button { /* 动作按钮组中的按钮样式 */
+    margin-left: 10px; /* 左外边距 10px */
 }
 
-.action-text {
-    margin-bottom: 8px;
-    color: white;
-    font-family: serif;
+.action-text { /* 动作文本样式 */
+    margin-bottom: 8px; /* 底部外边距 8px */
+    color: white; /* 字体颜色为白色 */
+    font-family: serif; /* 字体为衬线字体 */
 }
 
-.rule-container {
-    padding: 10px;
-    border: 1px solid #e8e8e8;
-    border-radius: 4px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.rule-container { /* 规则容器样式 */
+    padding: 10px; /* 内边距 10px */
+    border: 1px solid #e8e8e8; /* 边框，1px 实线，浅灰色 */
+    border-radius: 4px; /* 边框圆角 4px */
+    display: flex; /* 使用 flex 布局 */
+    flex-direction: column; /* flex 方向为垂直 */
+    align-items: center; /* 交叉轴（水平）居中对齐 */
 }
 
-.rule-row {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-    width: 100%;
-    justify-content: center;
-    color: white;
-    font-family: serif;
+.rule-row { /* 规则行样式 */
+    display: flex; /* 使用 flex 布局 */
+    align-items: center; /* 垂直居中对齐 */
+    margin-bottom: 10px; /* 底部外边距 10px */
+    width: 100%; /* 宽度占满父容器 */
+    justify-content: center; /* 水平居中对齐 */
+    color: white; /* 字体颜色为白色 */
+    font-family: serif; /* 字体为衬线字体 */
 }
 
-.rule-buttons {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 20px;
-    width: 100%;
+.rule-buttons { /* 规则按钮组样式 */
+    display: flex; /* 使用 flex 布局 */
+    justify-content: flex-end; /* 水平靠右对齐 */
+    margin-top: 20px; /* 顶部外边距 20px */
+    width: 100%; /* 宽度占满父容器 */
 }
 
-.rule-buttons button {
-    margin-left: 10px;
+.rule-buttons button { /* 规则按钮组中的按钮样式 */
+    margin-left: 10px; /* 左外边距 10px */
 }
 
-.common-input {
-    width: 200px;
+.common-input { /* 通用输入框样式 */
+    width: 200px; /* 宽度 200px */
 }
 
 /* RewardFunction */
 
-.dropdown-content {
-    color: white;
-    font-family: serif;
+.dropdown-content { /* 下拉菜单内容样式 */
+    color: white; /* 字体颜色为白色 */
+    font-family: serif; /* 字体为衬线字体 */
 }
 
-.reward-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 999;
+.reward-modal-overlay { /* 奖励函数模态框遮罩层样式 */
+    position: fixed; /* 固定定位，覆盖整个视口 */
+    top: 0; /* 距离顶部 0 */
+    left: 0; /* 距离左侧 0 */
+    width: 100%; /* 宽度 100% */
+    height: 100%; /* 高度 100% */
+    background: rgba(0, 0, 0, 0.5); /* 半透明黑色背景 */
+    display: flex; /* 使用 flex 布局 */
+    justify-content: center; /* 水平居中 */
+    align-items: center; /* 垂直居中 */
+    z-index: 999; /* 层叠顺序，确保在顶层 */
 }
 
-.reward-modal {
-    background: #001b38;
-    padding: 30px;
-    border-radius: 12px;
-    width: 800px;
-    max-width: 90%;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    color: white;
+.reward-modal { /* 奖励函数模态框样式 */
+    background: #001b38; /* 背景颜色，深蓝色 */
+    padding: 30px; /* 内边距 30px */
+    border-radius: 12px; /* 边框圆角 12px */
+    width: 800px; /* 宽度 800px */
+    max-width: 90%; /* 最大宽度为父容器的 90% */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* 盒子阴影 */
+    color: white; /* 字体颜色为白色 */
 }
 
-.reward-modal-header {
-    text-align: center;
-    margin-bottom: 30px;
-    font-size: 24px;
+.reward-modal-header { /* 奖励函数模态框头部样式 */
+    text-align: center; /* 文本居中 */
+    margin-bottom: 30px; /* 底部外边距 30px */
+    font-size: 24px; /* 字体大小 24px */
 }
 
-.symbol-groups {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 30px;
-    scrollbar-color: #063160 #072446;
+.symbol-groups { /* 符号组容器样式 */
+    display: flex; /* 使用 flex 布局 */
+    justify-content: space-between; /* 子元素两端对齐 */
+    margin-bottom: 30px; /* 底部外边距 30px */
+    scrollbar-color: #063160 #072446; /* 滚动条颜色 */
 }
 
-.symbol-group {
-    display: flex;
-    flex-wrap: wrap;
-    max-height: 200px;
-    overflow-y: auto;
-    width: 48%;
-    gap: 10px;
+.symbol-group { /* 单个符号组样式 */
+    display: flex; /* 使用 flex 布局 */
+    flex-wrap: wrap; /* 允许子元素换行 */
+    max-height: 200px; /* 最大高度 200px */
+    overflow-y: auto; /* Y 轴超出部分显示滚动条 */
+    width: 48%; /* 宽度 48% */
+    gap: 10px; /* 子元素之间的间距 10px */
 }
 
-.symbol-group button {
-    background-color: #0a4a8a;
-    margin: 5px;
-    padding: 15px 20px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    cursor: pointer;
-    flex: 1 1 calc(25% - 20px);
-    font-size: 18px;
-    transition: background 0.3s;
-    color: white;
-    font-family: serif;
+.symbol-group button { /* 符号组中的按钮样式 */
+    background-color: #0a4a8a; /* 背景颜色，中蓝色 */
+    margin: 5px; /* 外边距 5px */
+    padding: 15px 20px; /* 内边距 */
+    border: 1px solid #ccc; /* 边框，1px 实线，灰色 */
+    border-radius: 8px; /* 边框圆角 8px */
+    cursor: pointer; /* 鼠标样式为指针 */
+    flex: 1 1 calc(25% - 20px); /* flex 布局项目：可增长，可收缩，基础宽度为 25% 减去间距 */
+    font-size: 18px; /* 字体大小 18px */
+    transition: background 0.3s; /* 背景颜色过渡效果，持续 0.3s */
+    color: white; /* 字体颜色为白色 */
+    font-family: serif; /* 字体为衬线字体 */
 }
 
-.symbol-group button:hover {
-    background: white;
-    color: #0a4a8a;
+.symbol-group button:hover { /* 符号组中按钮悬停时的样式 */
+    background: white; /* 背景变为白色 */
+    color: #0a4a8a; /* 字体颜色变为中蓝色 */
 }
 
-.equation-input {
-    width: 100%;
-    height: 150px;
-    margin-bottom: 30px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 18px;
-    resize: none;
+.equation-input { /* 方程式输入框样式 */
+    width: 100%; /* 宽度占满父容器 */
+    height: 150px; /* 高度 150px */
+    margin-bottom: 30px; /* 底部外边距 30px */
+    border: 1px solid #ccc; /* 边框，1px 实线，灰色 */
+    border-radius: 8px; /* 边框圆角 8px */
+    font-size: 18px; /* 字体大小 18px */
+    resize: none; /* 禁止用户调整大小 */
 }
 
-.equation-preview {
-    margin-bottom: 30px;
-    font-size: 20px;
-    padding: 20px;
-    border: 2px solid #000;
-    border-radius: 8px;
-    background: white;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-    color: black;
+.equation-preview { /* 方程式预览区域样式 */
+    margin-bottom: 30px; /* 底部外边距 30px */
+    font-size: 20px; /* 字体大小 20px */
+    padding: 20px; /* 内边距 20px */
+    border: 2px solid #000; /* 边框，2px 实线，黑色 */
+    border-radius: 8px; /* 边框圆角 8px */
+    background: white; /* 背景为白色 */
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1); /* 内阴影 */
+    color: black; /* 字体颜色为黑色 */
 }
 
-.modal-buttons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 20px;
+.modal-buttons { /* 模态框按钮组样式 */
+    display: flex; /* 使用 flex 布局 */
+    justify-content: flex-end; /* 水平靠右对齐 */
+    gap: 20px; /* 子元素之间的间距 20px */
 }
 
-.confirm-button, .cancel-button {
-    margin-left: 10px;
-    padding: 20px 30px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 18px;
-    transition: background 0.3s, color 0.3s;
+.confirm-button, .cancel-button { /* 确认按钮和取消按钮的通用样式 */
+    margin-left: 10px; /* 左外边距 10px */
+    padding: 20px 30px; /* 内边距 */
+    border: none; /* 无边框 */
+    border-radius: 8px; /* 边框圆角 8px */
+    cursor: pointer; /* 鼠标样式为指针 */
+    font-size: 18px; /* 字体大小 18px */
+    transition: background 0.3s, color 0.3s; /* 背景和颜色过渡效果，持续 0.3s */
 }
 
-.confirm-button {
-    background: #1890ff;
-    color: white;
+.confirm-button { /* 确认按钮样式 */
+    background: #1890ff; /* 背景颜色，亮蓝色 */
+    color: white; /* 字体颜色为白色 */
 }
 
-.confirm-button:hover {
-    background: #40a9ff;
+.confirm-button:hover { /* 确认按钮悬停时的样式 */
+    background: #40a9ff; /* 背景颜色变浅 */
 }
 
-.cancel-button {
-    background: #f5f5f5;
-    color: black;
+.cancel-button { /* 取消按钮样式 */
+    background: #f5f5f5; /* 背景颜色，浅灰色 */
+    color: black; /* 字体颜色为黑色 */
 }
 
-.cancel-button:hover {
-    background: #e0e0e0;
+.cancel-button:hover { /* 取消按钮悬停时的样式 */
+    background: #e0e0e0; /* 背景颜色变深 */
 }
 
-.tooltip {
-    position: fixed;
-    background-color: #fff;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    max-width: 200px;
-    word-wrap: break-word;
+.tooltip { /* 提示框样式（通用）*/
+    position: fixed; /* 固定定位 */
+    background-color: #fff; /* 背景为白色 */
+    border: 1px solid #ccc; /* 边框，1px 实线，灰色 */
+    border-radius: 4px; /* 边框圆角 4px */
+    padding: 8px; /* 内边距 8px */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* 盒子阴影 */
+    z-index: 1000; /* 层叠顺序，确保在最上层 */
+    max-width: 200px; /* 最大宽度 200px */
+    word-wrap: break-word; /* 允许长单词换行 */
 }
 
-.tooltip {
-    position: absolute;
-    left: 75%;
-    top: 40%;
-    background-color: #0a4a8a;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    max-width: 200px;
-    word-wrap: break-word;
-    color: white;
-    font-family: serif;
+.tooltip { /* 提示框样式（特定，会覆盖上面的样式）*/
+    position: absolute; /* 绝对定位 */
+    left: 75%; /* 距离左侧 75% */
+    top: 40%; /* 距离顶部 40% */
+    background-color: #0a4a8a; /* 背景颜色，中蓝色 */
+    border: 1px solid #ccc; /* 边框，1px 实线，灰色 */
+    border-radius: 4px; /* 边框圆角 4px */
+    padding: 8px; /* 内边距 8px */
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* 盒子阴影 */
+    z-index: 1000; /* 层叠顺序 */
+    max-width: 200px; /* 最大宽度 200px */
+    word-wrap: break-word; /* 允许长单词换行 */
+    color: white; /* 字体颜色为白色 */
+    font-family: serif; /* 字体为衬线字体 */
 }
 
-.tooltip-content {
-    display: flex;
-    flex-direction: column;
+.tooltip-content { /* 提示框内容样式 */
+    display: flex; /* 使用 flex 布局 */
+    flex-direction: column; /* flex 方向为垂直 */
 }
 
-.tooltip-title {
-    font-weight: bold;
-    margin-bottom: 4px;
+.tooltip-title { /* 提示框标题样式 */
+    font-weight: bold; /* 字体加粗 */
+    margin-bottom: 4px; /* 底部外边距 4px */
 }
 
-.tooltip-description {
-    margin-bottom: 4px;
+.tooltip-description { /* 提示框描述样式 */
+    margin-bottom: 4px; /* 底部外边距 4px */
 }
 
-.tooltip-unit {
-    font-size: 0.9em;
+.tooltip-unit { /* 提示框单位样式 */
+    font-size: 0.9em; /* 字体大小为父元素的 0.9 倍 */
 }
 
-/* EntityAssignmentModal */
+/* EntityAssignmentModal */ /* 实体分配模态框 */
 
-.entity-assignment-modal__content {
-    display: flex;
-    justify-content: space-between;
+.entity-assignment-modal__content { /* 模态框内容区域样式 */
+    display: flex; /* 使用 flex 布局 */
+    justify-content: space-between; /* 子元素两端对齐 */
 }
 
-.entity-assignment-modal__column {
-    width: 45%;
+.entity-assignment-modal__column { /* 模态框中的列样式 */
+    width: 45%; /* 宽度为 45% */
 }
 
-.entity-assignment-modal__title {
-    font-size: 16px;
-    font-weight: bold;
-    margin-bottom: 12px;
-    color: white;
-    font-family: serif;
+.entity-assignment-modal__title { /* 模态框标题样式 */
+    font-size: 16px; /* 字体大小 16px */
+    font-weight: bold; /* 字体加粗 */
+    margin-bottom: 12px; /* 底部外边距 12px */
+    color: white; /* 字体颜色为白色 */
+    font-family: serif; /* 字体为衬线字体 */
 }
 
-.entity-assignment-modal__alert {
-    margin-bottom: 16px;
+.entity-assignment-modal__alert { /* 模态框警告/提示信息样式 */
+    margin-bottom: 16px; /* 底部外边距 16px */
 }
 
-.entity-assignment-modal__agent-item {
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 4px;
-    transition: background-color 0.3s;
+.entity-assignment-modal__agent-item { /* 模态框中的智能体项目样式 */
+    cursor: pointer; /* 鼠标样式为指针 */
+    padding: 8px; /* 内边距 8px */
+    border-radius: 4px; /* 边框圆角 4px */
+    transition: background-color 0.3s; /* 背景颜色过渡效果，持续 0.3s */
 }
 
-.entity-assignment-modal__agent-item--active {
-    background-color: #1890ff;
+.entity-assignment-modal__agent-item--active { /* 激活状态的智能体项目样式 */
+    background-color: #1890ff; /* 背景颜色为亮蓝色 */
 }
 
-.entity-assignment-modal__agent-content {
-    width: 100%;
-    color: white;
-    font-family: serif;
+.entity-assignment-modal__agent-content { /* 智能体内容区域样式 */
+    width: 100%; /* 宽度占满父容器 */
+    color: white; /* 字体颜色为白色 */
+    font-family: serif; /* 字体为衬线字体 */
 }
 
-.entity-assignment-modal__entity-name {
-    margin-right: 8px;
-    color: white;
-    font-family: serif;
+.entity-assignment-modal__entity-name { /* 实体名称样式 */
+    margin-right: 8px; /* 右外边距 8px */
+    color: white; /* 字体颜色为白色 */
+    font-family: serif; /* 字体为衬线字体 */
 }
 
-.entity-assignment-modal__entity-item {
-    display: flex;
-    align-items: center;
+.entity-assignment-modal__entity-item { /* 实体项目样式 */
+    display: flex; /* 使用 flex 布局 */
+    align-items: center; /* 垂直居中对齐 */
 }
 
-.entity-assignment-modal__checkbox {
-    margin-right: 8px;
-    color: white;
-    font-family: serif;
+.entity-assignment-modal__checkbox { /* 复选框样式 */
+    margin-right: 8px; /* 右外边距 8px */
+    color: white; /* 字体颜色为白色 */
+    font-family: serif; /* 字体为衬线字体 */
 }
 
-.entity-assignment-modal__checkbox.ant-checkbox-wrapper-disabled > span:last-child {
-    color: #888 !important;
+.entity-assignment-modal__checkbox.ant-checkbox-wrapper-disabled > span:last-child { /* antd 禁用的复选框的文本样式 */
+    color: #888 !important; /* 字体颜色为深灰色，!important 提高优先级 */
 }
 
-.entity-assignment-modal__checkbox.ant-checkbox-wrapper-disabled .ant-checkbox-inner {
-    background-color: #333 !important;
-    border-color: #555 !important;
+.entity-assignment-modal__checkbox.ant-checkbox-wrapper-disabled .ant-checkbox-inner { /* antd 禁用的复选框的内部方框样式 */
+    background-color: #333 !important; /* 背景颜色为深灰色，!important 提高优先级 */
+    border-color: #555 !important; /* 边框颜色为更深的灰色，!important 提高优先级 */
 }
 
-.entity-assignment-modal__assigned-label {
-    margin-left: 8px;
-    color: white;
-    font-family: serif;
+.entity-assignment-modal__assigned-label { /* “已分配”标签样式 */
+    margin-left: 8px; /* 左外边距 8px */
+    color: white; /* 字体颜色为白色 */
+    font-family: serif; /* 字体为衬线字体 */
 }
