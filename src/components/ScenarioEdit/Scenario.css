@@ -1,41 +1,41 @@
 .scenario-edit-container {
-  display: flex;
-  height: calc(100vh - 100px); /* 根据您应用的实际页头高度进行调整 */
-  width: 100%;
-  background-color: #001b38;
+  display: flex; /* 使用 flex 布局 */
+  height: calc(100vh - 100px); /* 高度为视口高度减去 100px */
+  width: 100%; /* 宽度占满父容器 */
+  background-color: #001b38; /* 背景颜色为深蓝色 */
 }
 
 .scenario-left-panel {
-  overflow-y: auto;
-  background-color: #001b38;
-  flex: 1; 
-  padding: 16px;
+  overflow-y: auto; /* Y 轴内容超出时显示滚动条 */
+  background-color: #001b38; /* 背景颜色为深蓝色 */
+  flex: 1; /* flex 布局：占据剩余空间 */
+  padding: 16px; /* 内边距为 16px */
 }
 
 .scenario-right-panel {
-  flex: 1;
-  padding: 16px;
-  overflow-y: auto;
+  flex: 1; /* flex 布局：占据剩余空间 */
+  padding: 16px; /* 内边距为 16px */
+  overflow-y: auto; /* Y 轴内容超出时显示滚动条 */
 }
 
 /* --- 从 left.jsx 提取的样式 --- */
 
 .scenario-header {
-  margin-bottom: 50px;
-  margin-top: 16px;
+  margin-bottom: 50px; /* 下外边距为 50px */
+  margin-top: 16px; /* 上外边距为 16px */
 }
 
 .config-section {
-  border: 1px solid #ffffff; /* 使用了更清晰的白色边框 */
-  border-radius: 6px;
-  padding: 16px;
-  margin-bottom: 50px;
+  border: 1px solid #ffffff; /* 边框为 1px 白色实线 */
+  border-radius: 6px; /* 边框圆角为 6px */
+  padding: 16px; /* 内边距为 16px */
+  margin-bottom: 50px; /* 下外边距为 50px */
 }
 
 .side-selector {
-  margin-bottom: 16px;
-  background-color: #063160;
-  color:#ffffff
+  margin-bottom: 16px; /* 下外边距为 16px */
+  background-color: #063160; /* 背景颜色为较深的蓝色 */
+  color:#ffffff; /* 文字颜色为白色 */
 }
 /* --- 新增：为选中的标签设置特定样式 --- */
 .side-selector .ant-segmented-item-selected {
@@ -46,128 +46,128 @@
 
 /* --- 新增：设置标签文本的通用样式 --- */
 .side-selector .ant-segmented-item-label {
-    font-weight: bold;
+    font-weight: bold; /* 字体加粗 */
 }
 
 .entity-selector-container {
-  display: flex;
-  align-items: center;
-  margin-bottom: 16px;
+  display: flex; /* 使用 flex 布局 */
+  align-items: center; /* 垂直居中对齐 */
+  margin-bottom: 16px; /* 下外边距为 16px */
 }
 
 .entity-tree-select {
-  flex: 1;
-  background-color: #063160;
-  color: #ffffff;
+  flex: 1; /* flex 布局：占据剩余空间 */
+  background-color: #063160; /* 背景颜色为较深的蓝色 */
+  color: #ffffff; /* 文字颜色为白色 */
 }
 
 .add-button {
-  margin-left: 8px;
-  color: #ffffff;
-  background-color: #063160;
+  margin-left: 8px; /* 左外边距为 8px */
+  color: #ffffff; /* 文字颜色为白色 */
+  background-color: #063160; /* 背景颜色为较深的蓝色 */
 }
 
 /* --- 新增：修改加号按钮内图标颜色 --- */
 .add-button svg {
-  color: white !important;
+  color: white !important; /* svg 图标颜色为白色 */
 }
 
 .value-select {
-  width: 100%;
+  width: 100%; /* 宽度占满父容器 */
 }
 
 .action-buttons {
-  width: 100%;
-  justify-content: space-evenly;
+  width: 100%; /* 宽度占满父容器 */
+  justify-content: space-evenly; /* flex 布局：项目平均分布 */
 }
 
 .action-buttons .ant-btn:not(.ant-btn-icon-only) {
-  background: url(../../assets/button.png) no-repeat center/contain !important;
-  padding: 0 !important;
-  width: 100px !important;
-  height: 30px !important;
-  border: none !important;
-  box-shadow: none !important;
-  overflow: hidden;
-  margin-right: 8px;
-  color: white;
-  font-family: serif;
+  background: url(../../assets/button.png) no-repeat center/contain !important; /* 使用背景图片，不重复，居中显示，缩放以包含在容器内 */
+  padding: 0 !important; /* 内边距为 0 */
+  width: 100px !important; /* 宽度为 100px */
+  height: 30px !important; /* 高度为 30px */
+  border: none !important; /* 无边框 */
+  box-shadow: none !important; /* 无阴影 */
+  overflow: hidden; /* 内容超出部分隐藏 */
+  margin-right: 8px; /* 右外边距为 8px */
+  color: white; /* 文字颜色为白色 */
+  font-family: serif; /* 字体为 serif */
 }
 
 /* 鼠标悬浮和激活状态的统一样式 */
 .action-buttons .ant-btn:not(.ant-btn-icon-only):hover {
-    filter: brightness(1.5);
+    filter: brightness(1.5); /* 悬浮时亮度增加 50% */
     transform: scale(1.05);   /* 轻微放大 */
     transition: all 0.2s ease-in-out; /* 使过渡更平滑 */
 }
 
 .action-buttons .ant-btn:not(.ant-btn-icon-only):active {
-    filter: brightness(0.8); /* 显著变暗 */
+    filter: brightness(0.8); /* 激活时亮度降低 20% */
     transform: translateY(2px) scale(1.02); /* 更明显的下沉和缩放 */
-    transition: all 0.1s ease-in-out;
+    transition: all 0.1s ease-in-out; /* 使过渡更平滑 */
 }
 
 /* --- 从 right.jsx 提取的样式 --- */
 
 .placeholder-card {
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  height: 100%; /* 高度占满父容器 */
+  display: flex; /* 使用 flex 布局 */
+  justify-content: center; /* 水平居中 */
+  align-items: center; /* 垂直居中 */
 }
 
 .placeholder-text {
-  color: #ffffff;
+  color: #ffffff; /* 文字颜色为白色 */
 }
 
 .deployment-card {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+  height: 100%; /* 高度占满父容器 */
+  display: flex; /* 使用 flex 布局 */
+  flex-direction: column; /* flex 方向为垂直 */
 }
 
 .deployment-canvas-container {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: #063160;
-  padding: 16px;
+  flex: 1; /* flex 布局：占据剩余空间 */
+  display: flex; /* 使用 flex 布局 */
+  justify-content: center; /* 水平居中 */
+  align-items: center; /* 垂直居中 */
+  background-color: #063160; /* 背景颜色为较深的蓝色 */
+  padding: 16px; /* 内边距为 16px */
 }
 
 .deployment-error-text {
-  color: #ffffff;
-  text-align: center;
+  color: #ffffff; /* 文字颜色为白色 */
+  text-align: center; /* 文字居中对齐 */
 }
 
 /* 定制 TreeSelect 下拉菜单样式 --- */
 .ant-select-dropdown {
-  background-color: #001b38 !important; /* 设置下拉菜单的背景颜色 */
+  background-color: #001b38 !important; /* 下拉菜单背景颜色为深蓝色 */
 }
 
 .ant-select-tree {
-  color: white !important; /* 设置树形结构的基础字体颜色 */
-  background-color: #001b38 !important; /* 确保树背景也是深色 */
+  color: white !important; /* 树形结构文字颜色为白色 */
+  background-color: #001b38 !important; /* 树形结构背景颜色为深蓝色 */
 }
 
 /* 设置树节点的文本颜色 */
 .ant-select-tree .ant-select-tree-node-content-wrapper {
-  color: white !important;
+  color: white !important; /* 树节点内容文字颜色为白色 */
 }
 
 /* 设置树节点在鼠标悬浮时的背景和字体颜色 */
 .ant-select-tree .ant-select-tree-node-content-wrapper:hover {
-  background-color: #063160 !important; /* 悬浮时背景变亮 */
-  color: #ffffff !important;
+  background-color: #063160 !important; /* 悬浮时背景为较深的蓝色 */
+  color: #ffffff !important; /* 悬浮时文字颜色为白色 */
 }
 
 /* 设置当前选中节点的背景和字体颜色 */
 .ant-select-tree .ant-select-tree-node-content-wrapper.ant-select-tree-node-selected {
-  background-color: #0a4a8e !important; /* 选中时使用更亮的蓝色 */
-  color: #ffffff !important;
+  background-color: #0a4a8e !important; /* 选中时背景为更亮的蓝色 */
+  color: #ffffff !important; /* 选中时文字颜色为白色 */
 }
 
 /* 移除下拉菜单中可能存在的内边距，使其与输入框对齐 */
 .ant-select-dropdown .ant-select-tree-list-holder-inner{
-    padding: 0;
+    padding: 0; /* 内边距为 0 */
 }

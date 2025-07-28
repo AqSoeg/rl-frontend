@@ -1,123 +1,123 @@
 .trainingservice {
-    display: flex;
-    height: 100%;
-    padding: 20px;
-    background-color: #001b38;
+    display: flex; /* 使用 flex 布局 */
+    height: 100%; /* 高度占满父容器 */
+    padding: 20px; /* 内边距为 20px */
+    background-color: #001b38; /* 背景颜色为深蓝色 */
 }
 
 .left {
-  flex: 0 0 15%;
-  padding: 1rem;
+  flex: 0 0 15%; /* flex 布局：不增长，不收缩，基础宽度为 15% */
+  padding: 1rem; /* 内边距为 1rem */
 }
 
 .form-item {
-    margin-bottom: 1rem;
-    background-color: #072446;
-    padding: 1rem;
-    border-radius: 0.5rem;
-    scrollbar-color: #063160 #072446;
+    margin-bottom: 1rem; /* 下外边距为 1rem */
+    background-color: #072446; /* 背景颜色为深蓝色 */
+    padding: 1rem; /* 内边距为 1rem */
+    border-radius: 0.5rem; /* 边框圆角为 0.5rem */
+    scrollbar-color: #063160 #072446; /* 滚动条颜色 */
 }
 .modal-view .ant-table-tbody .ant-btn .anticon {
-  color: white !important;
+  color: white !important; /* 弹窗中表格内按钮图标颜色为白色 */
 }
 .select-text {
-    font-weight: bold;
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
-    color: white;
-    font-family: serif;
+    font-weight: bold; /* 字体加粗 */
+    margin-top: 0.5rem; /* 上外边距为 0.5rem */
+    margin-bottom: 0.5rem; /* 下外边距为 0.5rem */
+    color: white; /* 文字颜色为白色 */
+    font-family: serif; /* 字体为 serif */
 }
 
 
 .right {
-    position: relative;
-    display: flex;
-    width: calc(100% - 40px);
-    height: 75vh;
-    padding: 20px;
-    background: linear-gradient(to bottom, #002044, #002044, #002044);
-    border-radius: 8px;
-    margin: 0 20px;
+    position: relative; /* 相对定位 */
+    display: flex; /* 使用 flex 布局 */
+    width: calc(100% - 40px); /* 宽度为父容器的 100% 减去 40px */
+    height: 75vh; /* 高度为视口高度的 75% */
+    padding: 20px; /* 内边距为 20px */
+    background: linear-gradient(to bottom, #002044, #002044, #002044); /* 线性渐变背景 */
+    border-radius: 8px; /* 边框圆角为 8px */
+    margin: 0 20px; /* 上下外边距为 0，左右外边距为 20px */
 }
 
 .right1 {
-  display: flex;
-  flex-direction: column;
-  gap: 16px; /*多个组件之间的距离*/
+  display: flex; /* 使用 flex 布局 */
+  flex-direction: column; /* flex 方向为垂直 */
+  gap: 16px; /* 子元素之间的间距为 16px */
 }
 
 .right1 .ant-space-item span {
-  color: rgb(255, 255, 255); /* 参数选项框对文字的颜色 */
+  color: rgb(255, 255, 255); /* 参数选项框文字颜色为白色 */
 }
 
 .button-container {/*四个按钮之间的距离、分布方以及和上面组件的距离*/
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-  margin-top: 16px;
+  display: flex; /* 使用 flex 布局 */
+  justify-content: center; /* 水平居中 */
+  gap: 16px; /* 子元素之间的间距为 16px */
+  margin-top: 16px; /* 上外边距为 16px */
 }
 
 
 
 .modal-view .ant-modal-body p {
-  color: #e0e0e0; /* 设置段落文字为灰白色，以提高可读性 */
+  color: #e0e0e0; /* 弹窗中段落文字颜色为灰白色 */
 }
 
 .modal-view .ant-modal-body strong {
-  color: #ffffff; /* 设置加粗文字为纯白色 */
+  color: #ffffff; /* 弹窗中加粗文字颜色为白色 */
 }
 
 
 .modal-view .ant-modal-body h3,
 .modal-view .ant-modal-body h4 {
-  color: #1890ff; /* 使用醒目的蓝色作为子标题颜色 */
-  margin-top: 16px; /* 设置上边距 */
-  border-bottom: 1px solid #072446; /* 添加下划线 */
-  padding-bottom: 8px; /* 设置下内边距 */
+  color: #1890ff; /* 弹窗中 h3, h4 标题颜色为蓝色 */
+  margin-top: 16px; /* 上外边距为 16px */
+  border-bottom: 1px solid #072446; /* 下边框为 1px 实线深蓝色 */
+  padding-bottom: 8px; /* 下内边距为 8px */
 }
 
 /* 实体状态信息的容器 */
 .entity-state-container {
-  margin-bottom: 16px; /* 设置下边距 */
-  border: 1px solid #072446; /* 设置一个浅色边框 */
-  border-radius: 4px; /* 设置圆角 */
-  padding: 12px; /* 设置内边距 */
+  margin-bottom: 16px; /* 下外边距为 16px */
+  border: 1px solid #072446; /* 边框为 1px 实线深蓝色 */
+  border-radius: 4px; /* 边框圆角为 4px */
+  padding: 12px; /* 内边距为 12px */
 }
 
 /* 实体状态信息的标题 */
 .entity-state-title {
   font-weight: bold; /* 字体加粗 */
-  font-size: 16px; /* 设置字体大小 */
-  margin-bottom: 8px; /* 设置下边距 */
-  color: #ffffff; /* 设置文字为白色 */
+  font-size: 16px; /* 字体大小为 16px */
+  margin-bottom: 8px; /* 下外边距为 8px */
+  color: #ffffff; /* 文字颜色为白色 */
 }
 
 /* 实体状态信息的每一行 */
 .entity-state-row {
-  display: flex; /* 使用 flex 布局实现左右对齐 */
-  margin-bottom: 4px; /* 设置下边距 */
-  padding-left: 12px; /* 设置左内边距 */
+  display: flex; /* 使用 flex 布局 */
+  margin-bottom: 4px; /* 下外边距为 4px */
+  padding-left: 12px; /* 左内边距为 12px */
 }
 
 /* 实体状态信息的标签（左侧部分） */
 .entity-state-label {
-  flex: 0 0 180px; /* 固定宽度为 180px */
-  color: #a0a0a0; /* 设置标签文字为灰色 */
+  flex: 0 0 180px; /* flex 布局：不增长，不收缩，基础宽度为 180px */
+  color: #a0a0a0; /* 文字颜色为灰色 */
 }
 
 /* 实体状态信息的值（右侧部分） */
 .entity-state-value {
-  flex: 1; /* 占据剩余空间 */
-  color: #e0e0e0; /* 设置值的文字为灰白色 */
+  flex: 1; /* flex 布局：占据剩余空间 */
+  color: #e0e0e0; /* 文字颜色为灰白色 */
 }
 
 /* 用于设置卡片内部提示信息的样式 */
 .card-text {
-  color: #ececec;       /* 设置文字颜色 */
-  text-align: center;   /* 文字水平居中显示 */
-  padding: 20px 0;      /* 增加一些垂直内边距，使其在卡片内上下也基本居中 */
-  font-size: 1rem;      /* 设置合适的字体大小 */
-  font-style: italic;   /* 使用斜体以区别于常规内容 */
+  color: #ececec;       /* 文字颜色为浅灰色 */
+  text-align: center;   /* 文字水平居中 */
+  padding: 20px 0;      /* 上下内边距为 20px，左右为 0 */
+  font-size: 1rem;      /* 字体大小为 1rem */
+  font-style: italic;   /* 字体样式为斜体 */
 }
 
 .right1 .button-container .ant-btn:not(.ant-btn-icon-only),
@@ -125,16 +125,16 @@
 .right .ant-btn-primary:not(.ant-btn-icon-only),
 .right .ant-btn:not(.ant-btn-primary):not(.ant-btn-icon-only),
 .modal-view .ant-table-tbody .ant-btn:not(.ant-btn-icon-only) {
-  background: url(../../assets/button.png) no-repeat center/contain !important;
-  padding: 0 !important;
-  width: 100px !important;
-  height: 30px !important;
-  border: none !important;
-  box-shadow: none !important;
-  overflow: hidden;
-  margin-right: 8px;
-  color: white;
-  font-family: serif;
+  background: url(../../assets/button.png) no-repeat center/contain !important; /* 使用背景图片，不重复，居中显示，缩放以包含在容器内 */
+  padding: 0 !important; /* 内边距为 0 */
+  width: 100px !important; /* 宽度为 100px */
+  height: 30px !important; /* 高度为 30px */
+  border: none !important; /* 无边框 */
+  box-shadow: none !important; /* 无阴影 */
+  overflow: hidden; /* 内容超出部分隐藏 */
+  margin-right: 8px; /* 右外边距为 8px */
+  color: white; /* 文字颜色为白色 */
+  font-family: serif; /* 字体为 serif */
 }
 
 
@@ -142,18 +142,14 @@
 /* 鼠标悬浮和激活状态的统一样式 */
 .right .ant-btn:not(.ant-btn-icon-only):hover,
 .modal-view .ant-table-tbody .ant-btn:not(.ant-btn-icon-only):hover {
-    filter: brightness(1.5);
+    filter: brightness(1.5); /* 悬浮时亮度增加 50% */
     transform: scale(1.05);   /* 轻微放大 */
     transition: all 0.2s ease-in-out; /* 使过渡更平滑 */
 }
 
 .right .ant-btn:not(.ant-btn-icon-only):active,
 .modal-view .ant-table-tbody .ant-btn:not(.ant-btn-icon-only):active {
-    filter: brightness(0.8); /* 显著变暗 */
+    filter: brightness(0.8); /* 激活时亮度降低 20% */
     transform: translateY(2px) scale(1.02); /* 更明显的下沉和缩放 */
-    transition: all 0.1s ease-in-out;
+    transition: all 0.1s ease-in-out; /* 使过渡更平滑 */
 }
-
-
-
-

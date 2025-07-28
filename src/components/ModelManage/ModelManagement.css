@@ -1,72 +1,72 @@
 /* --- 整体页面布局 --- */
 .model {
-    display: flex;
-    height: 100%;
-    padding: 20px;
-    background-color: #001b38;
+    display: flex; /* 使用 flex 布局 */
+    height: 100%; /* 高度占满父容器 */
+    padding: 20px; /* 内边距为 20px */
+    background-color: #001b38; /* 背景颜色为深蓝色 */
 }
 
 /* --- 左侧侧边栏 --- */
 .modelleft {
-    flex: 0 0 10%;
-    padding: 1rem;
+    flex: 0 0 10%; /* flex 布局：不增长，不收缩，基础宽度为 10% */
+    padding: 1rem; /* 内边距为 1rem */
 }
-
+/*按钮样式*/
+.model_button {
+    background: url(../../assets/button.png) no-repeat center/contain !important; /* 使用背景图片，不重复，居中显示，缩放以包含在容器内 */
+    padding: 0 !important; /* 内边距为 0 */
+    width: 180px !important; /* 宽度为 180px */
+    height: 70px !important; /* 高度为 70px */
+    border: none !important; /* 无边框 */
+    box-shadow: none !important; /* 无阴影 */
+    overflow: hidden; /* 内容超出部分隐藏 */
+    color:#ffffff; /* 文字颜色为白色 */
+}
 /* --- 右侧主内容区域 --- */
 .modelright {
-    position: relative;
-    width: calc(100% - 40px);
-    height: 85vh;
-    padding: 20px;
-    background: linear-gradient(to bottom, #002044, #002044, #002044);
-    border-radius: 8px;
-    margin: 0 20px;
-    overflow-y: auto;
+    position: relative; /* 相对定位 */
+    width: calc(100% - 40px); /* 宽度为父容器的 100% 减去 40px */
+    height: 85vh; /* 高度为视口高度的 85% */
+    padding: 20px; /* 内边距为 20px */
+    background: linear-gradient(to bottom, #002044, #002044, #002044); /* 线性渐变背景 */
+    border-radius: 8px; /* 边框圆角为 8px */
+    margin: 0 20px; /* 上下外边距为 0，左右外边距为 20px */
+    overflow-y: auto; /* Y 轴内容超出时显示滚动条 */
 }
 
-.model_button {
-    background: url(../../assets/button.png) no-repeat center/contain !important;
-    padding: 0 !important;
-    width: 180px !important;
-    height: 70px !important;
-    border: none !important;
-    box-shadow: none !important;
-    overflow: hidden;
-    color:#ffffff
-}
 
 
 /* --- 统一输入框样式 --- */
 .modelright .ant-input,
 .modelright .ant-input-affix-wrapper,
 .modelright .ant-select-selector {
-    background-color: #0a2548 !important;
-    border: 1px solid #126dc2 !important;
-    color: #ffffff !important;
+    background-color: #0a2548 !important; /* 背景颜色为深蓝色 */
+    border: 1px solid #126dc2 !important; /* 边框为 1px 实线蓝色 */
+    color: #ffffff !important; /* 文字颜色为白色 */
 }
 
 .modelright .ant-input::placeholder,
 .modelright .ant-select-selection-placeholder {
-    color: #fff9f9 !important;
+    color: #fff9f9 !important; /* 占位符文字颜色为白色 */
 }
 
 .modelright .ant-input-disabled {
-    background-color: #0a2548 !important;
-    color: #a0a0a0 !important;
+    background-color: #0a2548 !important; /* 禁用状态下背景颜色为深蓝色 */
+    color: #a0a0a0 !important; /* 禁用状态下文字颜色为灰色 */
 }
 
 .modelright .ant-select-dropdown {
-    background-color: #001a35 !important;
-    border: 1px solid #126dc2 !important;
+    background-color: #001a35 !important; /* 下拉菜单背景颜色为深蓝色 */
+    border: 1px solid #126dc2 !important; /* 下拉菜单边框为 1px 实线蓝色 */
 }
 
 .modelright .ant-select-item {
-    color: #ffffff !important;
+    color: #ffffff !important; /* 下拉选项文字颜色为白色 */
 }
 
 .modelright .ant-select-item-option-active,
 .modelright .ant-select-item-option-selected {
-    background-color: #126dc2 !important;
+    background-color: #126dc2 !important; /* 悬浮或选中时背景颜色为蓝色 */
 }
 
 
@@ -74,7 +74,7 @@
 
 /* 弹窗中表单标签的样式 */
 .ant-modal .ant-form-item-label > label {
-    color: #ffffff !important;
+    color: #ffffff !important; /* 标签文字颜色为白色 */
 }
 
 /* 弹窗中输入框、选择框的样式 */
@@ -82,51 +82,52 @@
 .ant-modal .ant-input-affix-wrapper,
 .ant-modal .ant-select-selector,
 .ant-modal .ant-input-number {
-    background-color: #0a2548 !important;
-    border: 1px solid #126dc2 !important;
-    color: #ffffff !important;
+    background-color: #0a2548 !important; /* 背景颜色为深蓝色 */
+    border: 1px solid #126dc2 !important; /* 边框为 1px 实线蓝色 */
+    color: #ffffff !important; /* 文字颜色为白色 */
 }
 
 /* 弹窗中输入框、选择框的占位符样式 */
 .ant-modal .ant-input::placeholder,
 .ant-modal .ant-select-selection-placeholder {
-    color: #bfbfbf !important;
+    color: #bfbfbf !important; /* 占位符文字颜色为浅灰色 */
 }
 
 /* 弹窗中禁用的输入框样式 */
 .ant-modal .ant-input-disabled {
-    background-color: #0a2548 !important;
-    color: #a0a0a0 !important;
+    background-color: #0a2548 !important; /* 禁用状态下背景颜色为深蓝色 */
+    color: #a0a0a0 !important; /* 禁用状态下文字颜色为灰色 */
 }
+
 .modelright .ant-btn-primary:not(.ant-btn-icon-only) {
-  background: url(../../assets/button.png) no-repeat center/contain !important;
-  padding: 0 !important;
-  width: 250px !important;
-  height: 50px !important;
-  border: none !important;
-  box-shadow: none !important;
-  overflow: hidden;
-  margin-right: 8px;
-  color: white;
-  font-family: serif;
+  background: url(../../assets/button.png) no-repeat center/contain !important; /* 使用背景图片，不重复，居中显示，缩放以包含在容器内 */
+  padding: 0 !important; /* 内边距为 0 */
+  width: 250px !important; /* 宽度为 250px */
+  height: 50px !important; /* 高度为 50px */
+  border: none !important; /* 无边框 */
+  box-shadow: none !important; /* 无阴影 */
+  overflow: hidden; /* 内容超出部分隐藏 */
+  margin-right: 8px; /* 右外边距为 8px */
+  color: white; /* 文字颜色为白色 */
+  font-family: serif; /* 字体为 serif */
 }
 
 .modelright .ant-btn:not(.ant-btn-primary):not(.ant-btn-icon-only) {
-    background: url(../../assets/button.png) no-repeat center/contain !important;
-    padding: 0 !important;
-    width: 100px !important;
-    height: 30px !important;
-    border: none !important;
-    box-shadow: none !important;
-    overflow: hidden;
-    margin-right: 8px;
+    background: url(../../assets/button.png) no-repeat center/contain !important; /* 使用背景图片，不重复，居中显示，缩放以包含在容器内 */
+    padding: 0 !important; /* 内边距为 0 */
+    width: 100px !important; /* 宽度为 100px */
+    height: 30px !important; /* 高度为 30px */
+    border: none !important; /* 无边框 */
+    box-shadow: none !important; /* 无阴影 */
+    overflow: hidden; /* 内容超出部分隐藏 */
+    margin-right: 8px; /* 右外边距为 8px */
     color: white !important; /* 确保文字颜色为白色 */
-    font-family: serif;
+    font-family: serif; /* 字体为 serif */
 }
 
 /* 鼠标悬浮和激活状态的统一样式 */
 .modelright .ant-btn:not(.ant-btn-icon-only):hover {
-    filter: brightness(1.2);
+    filter: brightness(1.2); /* 悬浮时亮度增加 20% */
     transform: scale(1.05);   /* 轻微放大 */
     transition: all 0.2s ease-in-out; /* 使过渡更平滑 */
 
@@ -134,14 +135,14 @@
 
 .modelright .ant-btn:not(.ant-btn-icon-only):active,
 .model_button:active {
-    filter: brightness(0.8); /* 显著变暗 */
+    filter: brightness(0.8); /* 激活时亮度降低 20% */
     transform: translateY(2px) scale(1.02); /* 更明显的下沉和缩放 */
-    transition: all 0.1s ease-in-out;
+    transition: all 0.1s ease-in-out; /* 使过渡更平滑 */
 }
 
 
 .model_button:hover {
-    filter: brightness(1.5);
+    filter: brightness(1.5); /* 悬浮时亮度增加 50% */
     transform: scale(1.05);   /* 轻微放大 */
     transition: all 0.2s ease-in-out; /* 使过渡更平滑 */
 
