@@ -4,6 +4,7 @@
     display: flex;
     height: 100%;
     padding: 20px;
+    background-color: #001b38;
 }
 
 .gradient-box {
@@ -12,7 +13,7 @@
     width: calc(100% - 40px);
     height: 75vh;
     padding: 20px;
-    background: linear-gradient(to bottom, #b2dfdb, #b0bec5, #ffffff);
+    background: linear-gradient(to bottom, #002044, #002044, #002044);
     border-radius: 8px;
     margin: 0 20px;
 }
@@ -26,7 +27,7 @@
 
 .sidebar-section {
     margin-bottom: 1rem;
-    background-color: #ecf4fc;
+    background-color: #072446;
     padding: 1rem;
     border-radius: 0.5rem;
 }
@@ -35,12 +36,36 @@
     font-weight: bold;
     margin-top: 0.5rem;
     margin-bottom: 0.5rem;
+    color: white;
+    font-family: '宋体';
+}
+.ant-select-arrow{
+    color: white;
 }
 
+.ant-select,
+.ant-select-selector,
+.ant-select-selection-item,
+.ant-select-item-option-content{
+    color: white;
+    border: #063160;
+    background: #063160;
+}
+:where(.css-dev-only-do-not-override-142vneq).ant-select-outlined:not(.ant-select-customize-input) .ant-select-selector,
+:where(.css-dev-only-do-not-override-142vneq).ant-select-dropdown .ant-select-item-option-select:not(.ant-select-item-option-disabled),
+:where(.css-dev-only-do-not-override-142vneq).ant-select-dropdown .ant-select-item-option-active:not(.ant-select-item-option-disabled){
+    color:white;
+    border: #063160;
+    background: #063160;
+    background-color: #063160;
+}
 .sidebar-section .ant-select,
 .sidebar-section .ant-input {
     width: 100%;
+    background: #063160;
+    background-color: #063160;
 }
+
 
 .sidebar-section .ant-alert {
     margin-top: 0.5rem;
@@ -84,7 +109,7 @@
 .sub-component {
     flex: 1;
     padding: 0.5rem;
-    background-color: white;
+    background-color: #063160;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     height: 65vh;
     margin-right: 1rem;
@@ -95,7 +120,7 @@
 }
 
 .sub-component-banner {
-    background-color: #ADD8E6;
+    background-color: #126dc2;
     padding: 0.5rem 0;
     text-align: center;
     border-radius: 8px;
@@ -144,6 +169,7 @@
     max-height: 720px;
     overflow-y: auto;
     margin-top: 20px;
+    color: #063160
 }
 
 .dropdown-container {
@@ -155,7 +181,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 10px;
-    background-color: #f0f0f0;
+    background-color: #126dc2;
     border-radius: 4px;
     cursor: pointer;
 }

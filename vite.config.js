@@ -30,12 +30,22 @@ const appConfig = {
   getExtraDecisionModels:"http://localhost:5000/getExtraDecisionModels",
   startTraining: "http://localhost:5000/startTraining",
   uploadFile: "http://localhost:5000/uploadFile",
+  EvaluationTrain:"http://localhost:5000/EvaluationTrain",
+  getRewardModels:"http://localhost:5000/getRewardModels",
+  uploadextratable:"http://localhost:5000/uploadExtraTable",
+  removeExtra:"http://localhost:5000/removeExtra",
+  OutExport:"http://localhost:5000/OutExport",
   websocketUrl: "ws://localhost:8080", // WebSocket 服务器地址
   
 };
 
 export default defineConfig({
   plugins: [react()],
+  server:{
+    host: '0.0.0.0',
+    port: 5173,
+    strictPort: true
+  },
   define: {
     __APP_CONFIG__: JSON.stringify(appConfig)
   }

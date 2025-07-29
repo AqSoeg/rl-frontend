@@ -340,7 +340,12 @@ const DropdownContainer = ({ uniqueKey, action, onEdit, onDelete, modelID, selec
                 return;
             }
         }
-
+    console.log(condition);
+        if (condition == ""){
+            let errorMessage = '请输入条件';
+            alert(errorMessage);
+            return;
+        }
         const rule = {
             ruleType,
             condition,

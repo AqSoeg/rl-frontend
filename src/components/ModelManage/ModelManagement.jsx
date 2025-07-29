@@ -7,6 +7,7 @@ import DecisionModelLibrary from './decisionmodellibrary';
 import EvaluateTable from './evaluatetable';
 import './ModelManagement.css';
 import ExtraDecisionModelLibrary from './ExtraDecisionModelLibrary'; 
+import RewardModelLibrary from './rewardmodeltable';
 import { message } from 'antd';
 
 const ModelManagement = () => {
@@ -17,7 +18,9 @@ const ModelManagement = () => {
   const [datasets, setDatasets] = useState([]);
   const [decisions, setDecisions] = useState([]);
   const [evaluatetables, setEvaluateTables] = useState([]);
+     const [Rewads, setRewards] = useState([]); 
   const [extraDecisions, setExtraDecisions] = useState([]); 
+ 
 
   const fetchModels = async () => {
     try {
@@ -130,6 +133,26 @@ const ModelManagement = () => {
       message.error('获取额外决策模型失败');
     }
   };
+    const fetchRewardModel = async () => { // New fetch function for extra decisions
+    try {
+      const response = await fetch(__APP_CONFIG__.getRewardModels, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ library: 'RewardModel' }),
+      });
+      if (!response.ok) {
+        throw new Error('Network response was not ok ' + response.statusText);
+      }
+        console.log("gggggg")
+      const data = await response.json();
+      setRewards(data);
+    } catch (error) {
+      console.error('Error fetching reward models:', error);
+      message.error('获取reward模型失败');
+    }
+  };
   const fetchEvaluatetables = async () => {
     try {
       const response = await fetch(__APP_CONFIG__.getEvaluateTables, {
@@ -158,6 +181,7 @@ const ModelManagement = () => {
     fetchScenarios();
     fetchDecisions(); // 调用 fetchDecisions
     fetchEvaluatetables();
+    fetchRewardModel();
     fetchExtraDecisions();
   }, []);
 
@@ -174,6 +198,7 @@ const ModelManagement = () => {
         <button className='button' onClick={() => handleButtonClick('ScenarioLibrary')}>想定场景库</button>
         <button className='button' onClick={() => handleButtonClick('DecisionModelLibrary')}>决策模型库</button>
         <button className='button' onClick={() => handleButtonClick('EvaluateTable')}>评估数据表</button>
+        <button className='button' onClick={() => handleButtonClick('RewardModelLibrary')}>奖励模型表</button>
         <button className='button' onClick={() => handleButtonClick('ExtraDecisionModelLibrary')}>额外决策模型库</button> 
       </div>
       <div className='modelright'>
@@ -183,6 +208,7 @@ const ModelManagement = () => {
         {activeComponent === 'ScenarioLibrary' && <ScenarioLibrary scenarios={scenarios} fetchScenarios={fetchScenarios} />}
         {activeComponent === 'DecisionModelLibrary' && <DecisionModelLibrary decisions={decisions} fetchDecisions={fetchDecisions} />}
         {activeComponent === 'EvaluateTable' && <EvaluateTable decisions={evaluatetables} fetchDecisions={fetchEvaluatetables} />}
+        {activeComponent === 'RewardModelLibrary' && <RewardModelLibrary decisions={Rewads} fetchDecisions={fetchRewardModel} />}
         {activeComponent === 'ExtraDecisionModelLibrary' && <ExtraDecisionModelLibrary decisions={extraDecisions} fetchDecisions={fetchExtraDecisions} />}
       </div>
     </div>

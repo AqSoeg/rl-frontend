@@ -288,8 +288,18 @@ const handleTrainingModeChange = (value) => {
           {!intelligentStore.algorithmsByType.length && <Option value="">请选择</Option>}
         </Select>
       </div>
+      <div className='form-item'>
+        {intelligentStore.selectedAgent ? (
+          <div style={{ maxHeight: '350px', overflowY: 'auto' }}>
+            <h3>已载入算法信息</h3>
+            <p><strong>算法名称：</strong>{intelligentStore.selectedAlgorithm.name}</p>
+            <p><strong>描述：</strong>{intelligentStore.selectedAlgorithm.description}</p>
+          </div>
+        ) : (
+          <div>请选择一个算法</div>
+        )}
+      </div>
 
-      
       <div className='form-item'>
         {intelligentStore.selectedAgent ? (
           <div style={{ maxHeight: '350px', overflowY: 'auto' }}>

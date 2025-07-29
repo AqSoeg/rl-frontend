@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react';
 import { useEffect, useRef } from 'react';
 import * as echarts from 'echarts';
-import { Button, Select, Modal, Table, Space, InputNumber } from 'antd';
+import { Button, Select, Modal, Table, Space, InputNumber,message} from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 import evaluationOptimizationStore from './EvaluationOptimizationStore';
 import './EvaluationOptimization.css';
@@ -20,6 +20,7 @@ const EvaluationOptimization = observer(() => {
         });
 
         const radarDom = radarChartRef.current;
+
         if (radarDom && !echarts.getInstanceByDom(radarDom)) {
             echarts.init(radarDom);
         }
@@ -230,6 +231,7 @@ const EvaluationOptimization = observer(() => {
 
     const handleViewEvaluationData = async (record) => {
         try {
+            
             const response = await fetch(__APP_CONFIG__.viewEvaluationData, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -240,6 +242,7 @@ const EvaluationOptimization = observer(() => {
                     trainID: record.trainID
                 })
             });
+            console.log("record",record);
             if (!response.ok) {
                 throw new Error('Failed to fetch evaluation data');
             }
@@ -272,7 +275,7 @@ const EvaluationOptimization = observer(() => {
     const handleLoadEvaluationData = async (record, subModelId, dataFile) => {
         try {
             evaluationOptimizationStore.resetRightPanel();
-
+            
             const response = await fetch(__APP_CONFIG__.viewEvaluationData, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -280,9 +283,12 @@ const EvaluationOptimization = observer(() => {
                     role_name: record.role_name,
                     scenario_name: record.scenario_name,
                     agentID: record.agentID,
-                    trainID: record.trainID
+                    trainID: record.trainID,
+                    subModelId:subModelId,
+                     dataFile:dataFile
                 })
             });
+
             if (!response.ok) {
                 throw new Error('Failed to fetch evaluation data');
             }
@@ -314,6 +320,8 @@ const EvaluationOptimization = observer(() => {
             });
             evaluationOptimizationStore.setDataLoaded(true);
             evaluationOptimizationStore.setIsDataModalVisible(false);
+
+
         } catch (error) {
             console.error('载入评估数据失败:', error);
             alert('载入评估数据失败！');
@@ -354,7 +362,7 @@ const EvaluationOptimization = observer(() => {
                 const errorData = await response.json();
                 throw new Error(errorData.error || '评估请求失败');
             }
-            alert("数据发送成功，后台正在评估中•••");
+            alert("数据发送成功，后台正在计算中•••");
             const result = await response.json();
             evaluationOptimizationStore.setChartOptions(result.chart_data);
             evaluationOptimizationStore.setCharts(Array(4).fill({ img: null }));
@@ -362,6 +370,52 @@ const EvaluationOptimization = observer(() => {
             evaluationOptimizationStore.setRadarImage(result.radar_chart_data);
             evaluationOptimizationStore.setEvalScore(result.eval_score);
             evaluationOptimizationStore.setEvalSuggestion(result.eval_suggestion);
+        } catch (error) {
+            console.error('图表计算失败:', error);
+            alert(`图标计算失败：${error.message}`);
+        }
+
+        handleEvaluationTrain();
+    };
+
+    const handleEvaluationTrain = async () => {
+        if (!evaluationOptimizationStore.dataLoaded) {
+            alert('请先载入数据！');
+            return;
+        }
+        try {
+            const evalData = {
+                evaluateData: {
+                    id: evaluationOptimizationStore.sidebarData.evaluateDataInfo.id,
+                    img_url: evaluationOptimizationStore.sidebarData.modelInfo.img_url,
+                    model_path: evaluationOptimizationStore.sidebarData.modelInfo.model_path,
+                    evaluateData_path: evaluationOptimizationStore.sidebarData.evaluateDataInfo.evaluateData_path,
+                    select_evaluateData: [evaluationOptimizationStore.sidebarData.evaluateDataInfo.dataFile, evaluationOptimizationStore.sidebarData.evaluateDataInfo.select_evaluateData],
+                    name: evaluationOptimizationStore.sidebarData.modelInfo.name,
+                    nn_model_type: evaluationOptimizationStore.sidebarData.modelInfo.nn_model_type,
+                    role_name: evaluationOptimizationStore.sidebarData.scenarioInfo.role_name,
+                    scenario_name: evaluationOptimizationStore.sidebarData.scenarioInfo.name,
+                    agentID: evaluationOptimizationStore.sidebarData.scenarioInfo.agent_id,
+                    trainID: evaluationOptimizationStore.sidebarData.modelInfo.id,
+                    time: evaluationOptimizationStore.sidebarData.evaluateDataInfo.time,
+                    version: evaluationOptimizationStore.sidebarData.modelInfo.version
+                }
+            };
+            const response = await fetch(__APP_CONFIG__.EvaluationTrain, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(evalData),
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || '评估模型训练请求失败');
+            }
+            alert("数据发送成功，后台正在评估模型训练中•••");
+            const result = await response.json();
+            console.log(result);
+            if (result.status === "success") {
+                message.success('训练完成，评估模型已保存！');
+            }
         } catch (error) {
             console.error('评估失败:', error);
             alert(`评估失败：${error.message}`);
@@ -489,12 +543,12 @@ const EvaluationOptimization = observer(() => {
                     >
                         查看
                     </Button>
-                    <Button
+                    {/* <Button
                         className="EO-modal-button"
                         onClick={() => handleEffectModel(record.img_url)}
                     >
                         效果
-                    </Button>
+                    </Button> */}
                 </Space>
             ),
         },
@@ -707,25 +761,26 @@ const EvaluationOptimization = observer(() => {
                             </div>
                         ))}
                     </div>
-                    <div className="EO-text">事件：</div>
+                    {/* <div className="EO-text">事件：</div>
                     <div className="EO-event-log">
                         {evaluationOptimizationStore.events.map((event, i) => (
                             <div key={i} className="EO-event-item">
                                 <span>事件{i + 1}：{event.content}</span>
                             </div>
                         ))}
-                    </div>
+                    </div> */}
+
                 </div>
                 <div className="EO-right-panel">
-                    {evaluationOptimizationStore.radarImage && (
+                    {/* {evaluationOptimizationStore.radarImage && (
                         <div className="EO-radar-chart-container">
                             <div
                                 ref={radarChartRef}
                                 style={{ width: '100%', height: '400px' }}
                             ></div>
                         </div>
-                    )}
-                    <div className="EO-evaluation-module">
+                    )} */}
+                    {/* <div className="EO-evaluation-module">
                         <div className="EO-evaluation">
                             <div className="EO-text">分数评估：</div>
                             {evaluationOptimizationStore.evalScore && <div className="EO-score">{evaluationOptimizationStore.evalScore}</div>}
@@ -740,11 +795,12 @@ const EvaluationOptimization = observer(() => {
                                 </div>
                             )}
                         </div>
-                    </div>
+                    </div> */}
                     <div className="EO-model-button-container">
                         <Button className="EO-model-button" onClick={handleViewModelList}>数据生成</Button>
                         <Button className="EO-model-button" onClick={handleLoadData}>数据载入</Button>
                         <Button className="EO-model-button" onClick={handleStartEvaluation}>开始评估</Button>
+                        {/* <Button className="EO-model-button" onClick={handleEvaluationTrain}>评估模型训练</Button> */}
                     </div>
                 </div>
             </div>

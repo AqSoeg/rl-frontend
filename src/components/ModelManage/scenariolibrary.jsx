@@ -161,7 +161,7 @@ const ScenarioLibrary = ({ scenarios, fetchScenarios }) => {
             key: 'rewardParams',
             render: (roles) => (
                 <Text>
-                    {roles?.map((role) => `${role.name}: ${role.RewardParams.map(rp => rp[0]).join(', ')}`).join('\n')}
+                    {roles?.map((role) => `${role.name}: ${role.RewardParams.map(rp => rp[1]).join(', ')}`).join('\n')}
                 </Text>
             )
         },
@@ -190,11 +190,11 @@ const ScenarioLibrary = ({ scenarios, fetchScenarios }) => {
     return (
         <Card title="想定场景库" bordered={true}>
             <span>检索：</span>
-            <Select value={searchField} onChange={setSearchField} style={{ width: 120, marginRight: 8 }}>
+            <Select value={searchField} onChange={setSearchField} style={{ width: 200, marginRight: 8 }}>
                 <Select.Option value="id">想定场景 ID</Select.Option>
                 <Select.Option value="name">想定场景名称</Select.Option>
-                <Select.Option value="description">描述</Select.Option>
-                <Select.Option value="createTime">创建时间</Select.Option>
+                {/* <Select.Option value="description">描述</Select.Option>
+                <Select.Option value="createTime">创建时间</Select.Option> */}
             </Select>
             <Input placeholder="单行输入" value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ width: 200, marginRight: 8 }} />
             <Button type="primary" onClick={handleSearch}>搜索</Button>
@@ -209,7 +209,7 @@ const ScenarioLibrary = ({ scenarios, fetchScenarios }) => {
             >
                 <Form form={editForm} initialValues={currentScenario} onFinish={handleFinishEdit}>
                     <Form.Item label="想定场景 ID" name="id">
-                        <Input disabled={!isEditMode} />
+                        <Input disabled={true} />
                     </Form.Item>
                     <Form.Item label="想定场景名称" name="name">
                         <Input disabled={!isEditMode} />

@@ -48,6 +48,10 @@ class IntelligentStore {
   setSelectedDataset(dataset) {
     this.selectedDataset = dataset; // 保存加载的离线数据集
   }
+
+    setupdataparams(data) {
+    this.selectedScenario.env_params = data; // 保存加载的离线数据集
+  }
 }
 
 export const intelligentStore = new IntelligentStore();

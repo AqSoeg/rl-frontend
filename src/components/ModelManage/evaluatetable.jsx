@@ -8,7 +8,7 @@ const EvaluateTable = ({ decisions, fetchDecisions }) => {
     const [currentDecision, setCurrentDecision] = useState(null);
     const [isEditMode, setIsEditMode] = useState(false);
     const [searchText, setSearchText] = useState('');
-    const [searchField, setSearchField] = useState('AGENT_MODEL_ID');
+    const [searchField, setSearchField] = useState('');
     const [filteredDecisions, setFilteredDecisions] = useState(decisions || []);
     const editForm = Form.useForm()[0];
     const addForm = Form.useForm()[0];
@@ -134,12 +134,12 @@ const EvaluateTable = ({ decisions, fetchDecisions }) => {
 
     const columns = [
         { title: '序号', dataIndex: 'key', key: 'key', render: (text, record, index) => index + 1 },
-        { title: '智能体模型 ID', dataIndex: 'AGENT_MODEL_ID', key: 'AGENT_MODEL_ID' },
+        { title: '决策模型训练 ID', dataIndex: 'TRAIN_ID', key: 'TRAIN_ID' },
         { title: '智能体模型名称', dataIndex: 'AGENT_NAME', key: 'AGENT_NAME' },
         { title: '所属想定场景名称', dataIndex: 'SCENARIO_NAME', key: 'SCENARIO_NAME' },
         { title: '角色名称', dataIndex: 'ROLE_NAME', key: 'ROLE_NAME' },
         { title: '神经网络模型类型', dataIndex: 'NN_MODEL_TYPE', key: 'NN_MODEL_TYPE' },
-        { title: '模型路径', dataIndex: 'MODEL_PATH', key: 'MODEL_PATH' },
+        { title: '模型', dataIndex: 'MODEL_LIST', key: 'MODEL_LIST' },
         { title: '文件位置', dataIndex: 'DATA_FILE', key: 'DATA_FILE' },
         { title: '创建时间', dataIndex: 'CREAT_TIME', key: 'CREAT_TIME' ,render: time => new Date(time).toLocaleString()},
         {
@@ -149,7 +149,7 @@ const EvaluateTable = ({ decisions, fetchDecisions }) => {
                 <div>
                     <Button type="link" onClick={() => { setCurrentDecision(record); setIsEditMode(false); setIsEditModalVisible(true); }}>查看</Button>
                     <Button type="link" onClick={() => { setCurrentDecision(record); setIsEditMode(true); setIsEditModalVisible(true); editForm.setFieldsValue(record); }}>更新</Button>
-                    <Button type="link" onClick={() => handleDelete(record.AGENT_MODEL_ID)}>删除</Button>
+                    <Button type="link" onClick={() => handleDelete(record.DATA_FILE)}>删除</Button>
                 </div>
             ),
         },
@@ -158,19 +158,19 @@ const EvaluateTable = ({ decisions, fetchDecisions }) => {
     return (
         <Card title="评估数据表" bordered={true}>
             <span>检索：</span>
-            <Select value={searchField} onChange={setSearchField} style={{ width: 120, marginRight: 8 }}>
-                <Select.Option value="AGENT_MODEL_ID">智能体模型 ID</Select.Option>
+            <Select value={searchField} onChange={setSearchField} style={{ width: 200, marginRight: 8 }}>
+                <Select.Option value="TRAIN_ID">决策模型训练 ID</Select.Option>
                 <Select.Option value="AGENT_NAME">智能体模型名称</Select.Option>
                 <Select.Option value="SCENARIO_NAME">所属想定场景名称</Select.Option>
                 <Select.Option value="ROLE_NAME">角色名称</Select.Option>
                 <Select.Option value="NN_MODEL_TYPE">神经网络模型类型</Select.Option>
-                <Select.Option value="MODEL_PATH">模型路径</Select.Option>
+                {/* <Select.Option value="MODEL_PATH">模型路径</Select.Option>
                 <Select.Option value="DATA_FILE">文件位置</Select.Option>
-                <Select.Option value="CREAT_TIME">创建时间</Select.Option>
+                <Select.Option value="CREAT_TIME">创建时间</Select.Option> */}
             </Select>
             <Input placeholder="单行输入" value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ width: 200, marginRight: 8 }} />
             <Button type="primary" onClick={handleSearch}>搜索</Button>
-            <Table dataSource={filteredDecisions} columns={columns} rowKey="AGENT_MODEL_ID" />
+            <Table dataSource={filteredDecisions} columns={columns} rowKey="TRAIN_ID" />
 
             {/* 编辑和查看的模态框 */}
             <Modal
@@ -180,8 +180,8 @@ const EvaluateTable = ({ decisions, fetchDecisions }) => {
                 onCancel={() => setIsEditModalVisible(false)}
             >
                 <Form form={editForm} initialValues={currentDecision} onFinish={handleFinishEdit}>
-                    <Form.Item label="智能体模型 ID" name="AGENT_MODEL_ID">
-                        <Input disabled={!isEditMode} />
+                    <Form.Item label="决策模型训练 ID" name="TRAIN_ID">
+                        <Input disabled={true} />
                     </Form.Item>
                     <Form.Item label="智能体模型名称" name="AGENT_NAME">
                         <Input disabled={!isEditMode} />
@@ -195,7 +195,7 @@ const EvaluateTable = ({ decisions, fetchDecisions }) => {
                     <Form.Item label="神经网络模型类型" name="NN_MODEL_TYPE">
                         <Input disabled={!isEditMode} />
                     </Form.Item>
-                    <Form.Item label="模型路径" name="MODEL_PATH">
+                    <Form.Item label="模型" name="MODEL_LIST">
                         <Input disabled={!isEditMode} />
                     </Form.Item>
                     <Form.Item label="文件位置" name="DATA_FILE">
@@ -215,7 +215,7 @@ const EvaluateTable = ({ decisions, fetchDecisions }) => {
                 onCancel={() => setIsAddModalVisible(false)}
             >
                 <Form form={addForm} onFinish={handleAdd}>
-                    <Form.Item label="智能体模型 ID" name="AGENT_MODEL_ID">
+                    <Form.Item label="决策模型训练 ID" name="TRAIN_ID">
                         <Input />
                     </Form.Item>
                     <Form.Item label="智能体模型名称" name="AGENT_NAME">
@@ -230,7 +230,7 @@ const EvaluateTable = ({ decisions, fetchDecisions }) => {
                     <Form.Item label="神经网络模型类型" name="NN_MODEL_TYPE">
                         <Input />
                     </Form.Item>
-                    <Form.Item label="模型路径" name="MODEL_PATH">
+                    <Form.Item label="模型" name="MODEL_LIST">
                         <Input />
                     </Form.Item>
                     <Form.Item label="文件位置" name="DATA_FILE">

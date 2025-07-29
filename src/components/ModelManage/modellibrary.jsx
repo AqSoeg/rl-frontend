@@ -194,14 +194,14 @@ const ModelLibrary = ({ data, fetchModels }) => {
       <Select
         value={searchField}
         onChange={setSearchField}
-        style={{ width: 120, marginRight: 8 }}
+        style={{ width: 200, marginRight: 8 }}
       >
         <Select.Option value="scenarioID">想定场景</Select.Option>
         <Select.Option value="agentID">智能体ID</Select.Option>
         <Select.Option value="agentName">智能体名称</Select.Option>
         <Select.Option value="agentType">智能体类型</Select.Option>
         <Select.Option value="agentRoleID">智能体角色</Select.Option>
-        <Select.Option value="updateTime">更新时间</Select.Option>
+        {/* <Select.Option value="updateTime">更新时间</Select.Option> */}
       </Select>
       <Input
         placeholder="单行输入"
@@ -228,7 +228,7 @@ const ModelLibrary = ({ data, fetchModels }) => {
           {currentModel && (
             <>
               <Form.Item label="模型ID" name="agentID">
-                <Input disabled={!isEditing} />
+                <Input disabled={true} />
               </Form.Item>
               <Form.Item label="模型名称" name="agentName">
                 <Input disabled={!isEditing} />
@@ -240,7 +240,7 @@ const ModelLibrary = ({ data, fetchModels }) => {
                 <Input disabled={!isEditing} />
               </Form.Item>
               <Form.Item label="智能体角色" name="agentRoleID">
-                <Input disabled={!isEditing} />
+                <Input disabled={true} />
               </Form.Item>
               {!isEditing && (
                 <Form.Item label="更新时间" name="updateTime">

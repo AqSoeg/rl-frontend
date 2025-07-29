@@ -114,6 +114,11 @@ const AgentTrainingPanel = observer(() => {
               [selectedAttributeInfo.label]: value,
             },
           }));
+          console.log(modifiedParams);
+          console.log(data);
+          console.log(intelligentStore);
+          intelligentStore.setupdataparams(data.updatedScenario.env_params);
+          console.log(intelligentStore.selectScenario.env_params);
 
           const displayText = selectedEntityParams
             .map(attr => `${attr.label}：${attr.key === attribute ? value : attr.value}`)
@@ -750,7 +755,20 @@ const AgentTrainingPanel = observer(() => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ scenarioId: intelligentStore.selectedScenario.id }),
+        body: JSON.stringify({ 
+        scenarioEditInfo: {
+          scenarioName: intelligentStore.selectedScenario.name,
+          agentRoleName: intelligentStore.selectedAgentRole.name,
+          env_params: intelligentStore.selectedScenario.env_params.map(param => ({
+            id: param.id,
+            name: param.name,
+            params: param.params.map(p => ({
+              key: p[0],
+              label: p[1],
+              value: p[2]
+            }))
+          }))
+        }}),         
       });
 
       if (!response.ok) {
@@ -799,7 +817,7 @@ const handleprocess = async () => {
             render: (text, subRecord) => subModelPublishStatus[subRecord.id] ? '已发布' : '未发布'
           },
           { 
-            title: '载入状态(持续训练)', 
+            title: '载入状态(接续训练)', 
             key: 'loadStatus',
             render: (text, subRecord) => loadedModel && loadedModel.model.select_model === subRecord.id ? '已载入' : '未载入'  
           },
@@ -1168,7 +1186,7 @@ const handleprocess = async () => {
             <p><strong>角色名称：</strong>{currentModel.model.role_name}</p>
             <p><strong>模型版本：</strong>{currentModel.model.version}</p>
             <p><strong>模型类型：</strong>{currentModel.model.nn_model_type}</p>
-            <p><strong>创建时间：</strong>{currentModel.model.time}</p>
+            <p><strong>创建时间：</strong>{Date(currentModel.model.time).toLocaleString() }</p>
             <p><strong>模型存放路径：</strong>{currentModel.model.model_path}</p>
             <p><strong>模型效果图路径：</strong>{currentModel.model.img_url}</p>
           </div>
@@ -1208,11 +1226,11 @@ const handleprocess = async () => {
         open={isScenarioModalVisible}
         onOk={() => setIsScenarioModalVisible(false)}
         onCancel={() => setIsScenarioModalVisible(false)}
-        width={1800} 
+        width={1000} 
         footer={null}
       >
         <Row gutter={16}>
-          <Col span={12}>
+          <Col>
             <Card title="部署图" bordered={false} style={{ height: '100%' }}>
               {deploymentData ? (
                 <div style={{ 
@@ -1235,7 +1253,7 @@ const handleprocess = async () => {
               )}
             </Card>
           </Col>
-          <Col span={12}>
+          {/* <Col span={0.1}>
             <Card 
               title="场景信息" 
               bordered={false}
@@ -1259,7 +1277,7 @@ const handleprocess = async () => {
                 )}
               </div>
             </Card>
-          </Col>
+          </Col> */}
         </Row>
       </Modal>
 
