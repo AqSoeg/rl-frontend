@@ -1,0 +1,187 @@
+[
+  {
+    "algorithm": {
+      "hyper-parameters": {
+        "学习率": "0.001",
+        "折扣因子": "0.99",
+        "采样步数": "256",
+        "批量大小": "32",
+        "更新步数": "4",
+        "GAE参数": "0.95",
+        "裁剪范围": "0.3",
+        "策略熵系数": "0.01",
+        "MAPPO总步数": "1000000"
+      },
+      "id": "MAPPO",
+      "mode": "共享多智能体",
+      "name": "mappo"
+    },
+    "env_param": {
+      "time1": 0.2,
+      "time2": 0.9,
+      "position": [
+        300,
+        150
+      ]
+    },
+    "model": {
+      "id": "ecb74ee5f7a1301",
+      "img_url": "http://example.com/image2",
+      "model_list": [
+        "ecb74ee5f7a1301-0",
+        "ecb74ee5f7a1301-20"
+      ],
+      "model_path": "/path/to/model2.pt",
+      "name": "同构多智能体模型",
+      "nn_model_type": "共享多智能体",
+      "role_name": "红绿灯",
+      "scenario_name": "城市交通",
+      "agentID": "407cb54f5528f7e",
+      "time": "2025-05-11T13:16:48.449Z",
+      "version": "1.0"
+    }
+  },
+  {
+    "algorithm": {
+      "hyper-parameters": {
+        "学习率": "0.0005",
+        "折扣因子": "0.95",
+        "采样步数": "128",
+        "批量大小": "64",
+        "更新步数": "8",
+        "GAE参数": "0.9",
+        "裁剪范围": "0.2",
+        "策略熵系数": "0.02",
+        "总步数": "2000000"
+      },
+      "id": "QMIX",
+      "mode": "分布多智能体",
+      "name": "qmix"
+    },
+    "env_param": {
+      "time1": 0.3,
+      "time2": 0.7,
+      "position": [
+        320,
+        150
+      ]
+    },
+    "model": {
+      "id": "aa11c3eab13189e",
+      "img_url": "http://example.com/image1",
+      "model_list": [
+        "aa11c3eab13189e-0",
+        "aa11c3eab13189e-20"
+      ],
+      "model_path": "/path/to/model1.pt",
+      "name": "异构多智能体模型",
+      "nn_model_type": "分布多智能体",
+      "role_name": "红绿灯",
+      "scenario_name": "城市交通",
+      "agentID": "4c4fa8d4f591fc6",
+      "time": "2025-05-11T13:08:13.225Z",
+      "version": "2.0"
+    }
+  },
+  {
+    "algorithm": {
+      "hyper-parameters": {
+        "学习率": "0.0003",
+        "折扣因子": "0.9",
+        "采样步数": "512",
+        "批量大小": "128",
+        "更新步数": "16",
+        "GAE参数": "0.85",
+        "裁剪范围": "0.1",
+        "策略熵系数": "0.05",
+        "总步数": "500000"
+      },
+      "id": "PPO",
+      "mode": "单智能体",
+      "name": "ppo"
+    },
+    "env_param": {
+      "time1": 0.4,
+      "time2": 0.6,
+      "position": [
+        300,
+        180
+      ]
+    },
+    "model": {
+      "id": "b2c45d6e8f90123",
+      "img_url": "http://example.com/image3",
+      "model_list": [
+        "b2c45d6e8f90123-0",
+        "b2c45d6e8f90123-20"
+      ],
+      "model_path": "/path/to/model3.pt",
+      "name": "单智能体模型",
+      "nn_model_type": "单智能体",
+      "role_name": "机器人",
+      "scenario_name": "工业生产线",
+      "agentID": "d6c1afac8b5b3d7",
+      "time": "2025-05-02T10:30:45.789Z",
+      "version": "3.0"
+    }
+  },
+  {
+    "model": {
+      "id": "1749895458",
+      "name": "agent",
+      "version": "1",
+      "nn_model_type": "共享多智能体",
+      "time": "2025-06-14T18:04:18.537028",
+      "img_url": "http://example.com/image",
+      "model_path": "mock/ppo_model.pkl",
+      "model_list": [
+        "1749895458-0",
+        "1749895458-20"
+      ],
+      "role_name": "红绿灯",
+      "scenario_name": "城市交通",
+      "agentID": "0778ef6316ea96a"
+    },
+    "env_param": {
+      "间隔时间1": 30,
+      "额外时间1": 2,
+      "间隔时间2": 35,
+      "额外时间2": 1,
+      "间隔时间3": 23,
+      "额外时间3": 1,
+      "间隔时间4": 24,
+      "额外时间4": 1,
+      "行驶速度1": 201,
+      "行驶速度2": 202,
+      "行驶速度3": 203,
+      "行驶速度4": 204,
+      "行驶速度5": 105,
+      "行驶速度6": 206,
+      "行驶速度7": 207,
+      "行驶速度8": 108,
+      "行驶速度9": 209,
+      "行驶速度10": 200,
+      "身高1": 170,
+      "体重1": 70
+    },
+    "algorithm": {
+      "id": "MAPPO",
+      "name": "MAPPO",
+      "mode": "共享多智能体",
+      "hyper-parameters": {
+        "learning_rate": 0.001,
+        "gamma": 0.99,
+        "n_steps": 256,
+        "batch_size": 32,
+        "n_epochs": 4,
+        "lambda_": 0.95,
+        "clip_range": 0.3,
+        "ent_coef": 0.01,
+        "total_timesteps": 1000000
+      }
+    },
+    "reward": {
+      "reward1": "x'+b'"
+    }
+  }
+]

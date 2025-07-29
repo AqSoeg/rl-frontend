@@ -1,0 +1,52 @@
+.trainingservice {
+  display: flex;
+  height: 100%;
+  padding: 20px;
+}
+
+.left {
+  flex: 0 0 10%;
+  padding: 1rem;
+}
+
+.form-item {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  background-color: #ecf4fc;
+  border-radius: 0.5rem;
+}
+
+.form-item .ant-select,
+.form-item .ant-btn {
+  margin-top: 0.5rem;
+}
+
+.right {
+  position: relative;
+  display: flex;
+  width: calc(100% - 40px);
+  height: 75vh;
+  padding: 20px;
+  background: linear-gradient(to bottom, #b2dfdb, #b0bec5, #ffffff);
+  border-radius: 8px;
+  margin: 0 20px;
+}
+
+.button-container {
+  position: absolute;
+  margin-top: 10px;
+  width: 100%;
+  text-align: center;
+}
+
+.select-style {
+  margin-right: 10px;
+}
+
+.update-button {
+  margin-left: 10px;
+}
+
+.input{
+  margin-top: 10px;
+}
