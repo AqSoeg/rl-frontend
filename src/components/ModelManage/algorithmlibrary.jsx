@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, Input, Card, Select, message } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { Table, Button, Modal, Form, Input, Card, Select, message, Tooltip } from 'antd';
+import { SettingOutlined,PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 
 const AlgorithmLibrary = ({ algorithms, fetchAlgorithms }) => {
   const [isViewEditModalVisible, setIsViewEditModalVisible] = useState(false);
@@ -132,24 +132,32 @@ const AlgorithmLibrary = ({ algorithms, fetchAlgorithms }) => {
   };
 
   const columns = [
-    { title: '算法id', dataIndex: 'algorithm_id', key: 'algorithm_id' },
-    { title: '类型', dataIndex: 'type_name', key: 'type_name' },
-    { title: '名称', dataIndex: 'name', key: 'name' },
-    // { title: '时间', dataIndex: 'time', key: 'time' ,render: time => new Date(time).toLocaleString()},
+    { title: '算法id', dataIndex: 'algorithm_id', key: 'algorithm_id', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+    { title: '类型', dataIndex: 'type_name', key: 'type_name', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+    { title: '名称', dataIndex: 'name', key: 'name', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
     {
       title: '超参数',
       dataIndex: 'hyper-parameters',
       key: 'hyper-parameters',
+      onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }),
       render: (params) => <div style={{ whiteSpace: 'pre-wrap' }}>{renderHyperParametersText(params)}</div>,
     },
     {
       title: '操作',
       key: 'action',
+      width:150,
+      onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }),
       render: (text, record) => (
         <>
-          <Button type="link" onClick={() => { setCurrentAlgorithm(record); setIsEditing(false); setIsViewEditModalVisible(true); }}>查看</Button>
-          <Button type="link" onClick={() => { setCurrentAlgorithm(record); setIsEditing(true); setIsViewEditModalVisible(true); }}>更新</Button>
-          <Button type="link" onClick={() => handleDelete(record.algorithm_id)}>删除</Button>
+          <Tooltip title="查看">
+            <Button type="link" icon={<EyeOutlined />} onClick={() => { setCurrentAlgorithm(record); setIsEditing(false); setIsViewEditModalVisible(true); }} />
+          </Tooltip>
+          <Tooltip title="更新">
+            <Button type="link" icon={<EditOutlined />} onClick={() => { setCurrentAlgorithm(record); setIsEditing(true); setIsViewEditModalVisible(true); }} />
+          </Tooltip>
+          <Tooltip title="删除">
+            <Button type="link" icon={<DeleteOutlined />} onClick={() => handleDelete(record.algorithm_id)} />
+          </Tooltip>
         </>
       ),
     },
@@ -221,8 +229,15 @@ const AlgorithmLibrary = ({ algorithms, fetchAlgorithms }) => {
   };
 
   return (
-    <Card title="算法库" bordered={true}>
-      <span>检索：</span>
+    <Card title={
+        <div>
+        算法数据库
+        <SettingOutlined style={{ marginLeft: 8 }} />
+        </div>
+    }
+    bordered={true}
+    >
+      <span style={{color:'white'}}>检索：</span>
       <Select value={searchField} onChange={setSearchField} style={{ width: 200, marginRight: 8 }}>
         <Select.Option value="type_name">类型</Select.Option>
         <Select.Option value="name">名称</Select.Option>
@@ -231,9 +246,9 @@ const AlgorithmLibrary = ({ algorithms, fetchAlgorithms }) => {
         placeholder="单行输入"
         value={searchText}
         onChange={(e) => setSearchText(e.target.value)}
-        style={{ width: 200, marginRight: 8 }}
+        style={{ width: 200, marginRight: 8,marginBottom:18 }}
       />
-      <Button type="primary" onClick={handleSearch}>搜索</Button>
+      <Button onClick={handleSearch}>搜索</Button>
 
       <Table pagination={{pageSize:2}} dataSource={filteredAlgorithms} columns={columns} rowKey='algorithm_id' />
 
@@ -256,8 +271,8 @@ const AlgorithmLibrary = ({ algorithms, fetchAlgorithms }) => {
           </Form.Item>
           {/* <Form.Item label="时间" name="time">
             <Input disabled={true} />
-          </Form.Item> */}
-          {/* {renderHyperParametersForm()} */}
+          </Form.Item>
+          {renderHyperParametersForm()} */}
         </Form>
       </Modal>
 

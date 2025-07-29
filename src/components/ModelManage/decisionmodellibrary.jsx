@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Button, Modal, Form, Input, Card, Select, message } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
+import { Table, Button, Modal, Form, Input, Card, Select, message, Tooltip } from 'antd';
+import { SettingOutlined,PlusOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 
 const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
@@ -48,7 +48,6 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
                 ROLE_NAME: currentDecision.ROLE_NAME,
                 NN_MODEL_TYPE: currentDecision.NN_MODEL_TYPE,
                 MODEL_PATH: currentDecision.MODEL_PATH,
-                MODEL_LIST: currentDecision.MODEL_LIST,
                 IMG_URL: currentDecision.IMG_URL,
                 CREAT_TIME: currentDecision.CREAT_TIME
             });
@@ -94,7 +93,7 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
                 scenario: {
                     name: values.SCENARIO_NAME,
                     // description: currentDecision.rawData.scenario.description,
-                    envParams: currentDecision.rawData.envParams
+                    envParams: currentDecision.rawData.scenario.envParams
                 },
                 agent: {
                     role: values.ROLE_NAME,
@@ -169,7 +168,7 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
             const newData = {
                 model: {
                     id: values.AGENT_MODEL_ID,
-                
+
                     name: values.AGENT_NAME,
                     version: '1',
                     type: values.NN_MODEL_TYPE,
@@ -217,32 +216,46 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
     };
 
     const columns = [
-        { title: '序号', dataIndex: 'key', key: 'index', render: (text, record, index) => index + 1 },
-        { title: '决策模型训练 ID', dataIndex: 'AGENT_MODEL_ID', key: 'AGENT_MODEL_ID' },
-        { title: '智能体ID', dataIndex: 'AGENT_ID', key: 'AGENT_ID' },
-        { title: '智能体模型名称', dataIndex: 'AGENT_NAME', key: 'AGENT_NAME' },
-        { title: '所属想定场景名称', dataIndex: 'SCENARIO_NAME', key: 'SCENARIO_NAME' },
-        { title: '角色名称', dataIndex: 'ROLE_NAME', key: 'ROLE_NAME' },
-        { title: '神经网络模型类型', dataIndex: 'NN_MODEL_TYPE', key: 'NN_MODEL_TYPE' },
-        { title: '模型', dataIndex: 'MODEL_LIST', key: 'MODEL_LIST' },
-        { title: '图片链接', dataIndex: 'IMG_URL', key: 'IMG_URL' },
-        { title: '创建时间', dataIndex: 'CREAT_TIME', key: 'CREAT_TIME' ,render: time => new Date(time).toLocaleString()},
+        { title: '序号', dataIndex: 'key', key: 'index', render: (text, record, index) => index + 1, onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '决策模型训练 ID', dataIndex: 'AGENT_MODEL_ID', key: 'AGENT_MODEL_ID', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '智能体ID', dataIndex: 'AGENT_ID', key: 'AGENT_ID', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '智能体模型名称', dataIndex: 'AGENT_NAME', key: 'AGENT_NAME', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '所属想定场景名称', dataIndex: 'SCENARIO_NAME', key: 'SCENARIO_NAME', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '角色名称', dataIndex: 'ROLE_NAME', key: 'ROLE_NAME', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '神经网络模型类型', dataIndex: 'NN_MODEL_TYPE', key: 'NN_MODEL_TYPE', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '模型', dataIndex: 'MODEL_LIST', key: 'MODEL_LIST', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '图片链接', dataIndex: 'IMG_URL', key: 'IMG_URL', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+        { title: '创建时间', dataIndex: 'CREAT_TIME', key: 'CREAT_TIME', render: time => new Date(time).toLocaleString(), onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
         {
             title: '操作',
             key: 'action',
+            width:150,
+            onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }),
             render: (text, record) => (
                 <div>
-                    <Button type="link" onClick={() => { setCurrentDecision(record); setIsEditMode(false); setIsEditModalVisible(true); }}>查看</Button>
-                    <Button type="link" onClick={() => { setCurrentDecision(record); setIsEditMode(true); setIsEditModalVisible(true); editForm.setFieldsValue(record); }}>更新</Button>
-                    <Button type="link" onClick={() => handleDelete(record.AGENT_MODEL_ID)}>删除</Button>
+                    <Tooltip title="查看">
+                        <Button type="link" icon={<EyeOutlined />} onClick={() => { setCurrentDecision(record); setIsEditMode(false); setIsEditModalVisible(true); }} />
+                    </Tooltip>
+                    <Tooltip title="更新">
+                        <Button type="link" icon={<EditOutlined />} onClick={() => { setCurrentDecision(record); setIsEditMode(true); setIsEditModalVisible(true); editForm.setFieldsValue(record); }} />
+                    </Tooltip>
+                    <Tooltip title="删除">
+                        <Button type="link" icon={<DeleteOutlined />} onClick={() => handleDelete(record.AGENT_MODEL_ID)} />
+                    </Tooltip>
                 </div>
             ),
         },
     ];
 
     return (
-        <Card title="决策模型库" bordered={true}>
-            <span>检索：</span>
+        <Card title={
+            <div>决策模型库
+            <SettingOutlined style={{ marginLeft: 8 }} />
+            </div>
+        }
+        bordered={true}
+        >
+            <span style={{color:'white'}}>检索：</span>
             <Select value={searchField} onChange={setSearchField} style={{ width: 200, marginRight: 8 }}>
                 <Select.Option value="train_id">决策模型训练 ID</Select.Option>
                 <Select.Option value="name">智能体模型名称</Select.Option>
@@ -254,8 +267,8 @@ const DecisionModelLibrary = ({ decisions, fetchDecisions }) => {
                 <Select.Option value="model.img_url">图片链接</Select.Option>
                 <Select.Option value="model.time">创建时间</Select.Option> */}
             </Select>
-            <Input placeholder="单行输入" value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ width: 200, marginRight: 8 }} />
-            <Button type="primary" onClick={handleSearch}>搜索</Button>
+            <Input placeholder="单行输入" value={searchText} onChange={(e) => setSearchText(e.target.value)} style={{ width: 200, marginRight: 8,marginBottom:18 }} />
+            <Button onClick={handleSearch}>搜索</Button>
             <Table
                 dataSource={filteredDecisions}
                 columns={columns}

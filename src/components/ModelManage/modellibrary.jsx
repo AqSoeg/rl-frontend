@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from'react';
-import { Table, Button, Modal, Form, Input, Card, Select, message } from 'antd';
-import { PlusOutlined, SettingOutlined } from '@ant-design/icons';
-import { Link } from'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Table, Button, Modal, Form, Input, Card, Select, message, Tooltip } from 'antd';
+import { PlusOutlined, SettingOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Link } from 'react-router-dom';
 
 const ModelLibrary = ({ data, fetchModels }) => {
   const [models, setModels] = useState(data || []);
@@ -103,48 +103,50 @@ const ModelLibrary = ({ data, fetchModels }) => {
 
   const handleSearch = async () => {
     try {
-        const response = await fetch(__APP_CONFIG__.searchAll, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                type:'model', // 根据页面类型传入不同的 type
-                field: searchField,
-                value: searchText
-            })
-        });
+      const response = await fetch(__APP_CONFIG__.searchAll, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: 'model',
+          field: searchField,
+          value: searchText
+        })
+      });
 
-        const result = await response.json();
-        if (Array.isArray(result)) {
-            setModels(result); // 更新 models 状态
-        } else {
-            console.error('Expected an array but got:', result);
-            setModels([]); // 如果返回的不是数组，设置为空数组
-        }
+      const result = await response.json();
+      if (Array.isArray(result)) {
+        setModels(result); 
+      } else {
+        console.error('Expected an array but got:', result);
+        setModels([]); 
+      }
     } catch (error) {
-        console.error('Error searching models:', error);
-        message.error('模型搜索失败');
+      console.error('Error searching models:', error);
+      message.error('模型搜索失败');
     }
-};
+  };
   const columns = [
     {
       title: '序号',
       dataIndex: 'key',
       key: 'key',
       render: (text, record, index) => index + 1,
-    },
-    { title: '想定场景', dataIndex:'scenarioID', key:'scenarioID' },
-    { title: '智能体ID', dataIndex: 'agentID', key: 'agentID' },
-    { title: '智能体名称', dataIndex: 'agentName', key: 'agentName' },
-    { title: '版本', dataIndex: 'agentVersion', key: 'agentVersion' },
-    { title: '智能体类型', dataIndex: 'agentType', key: 'agentType' },
-    { title: '智能体角色', dataIndex: 'agentRoleID', key: 'agentRoleID' },
-    { title: '更新时间', dataIndex: 'updateTime', key: 'updateTime',render: time => new Date(time).toLocaleString()  },
+      onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }),
+    },//表格标题不换行style
+    { title: '想定场景', dataIndex: 'scenarioID', key: 'scenarioID', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+    { title: '智能体ID', dataIndex: 'agentID', key: 'agentID', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+    { title: '智能体名称', dataIndex: 'agentName', key: 'agentName', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+    { title: '版本', dataIndex: 'agentVersion', key: 'agentVersion', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+    { title: '智能体类型', dataIndex: 'agentType', key: 'agentType', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+    { title: '智能体角色', dataIndex: 'agentRoleID', key: 'agentRoleID', onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
+    { title: '更新时间', dataIndex: 'updateTime', key: 'updateTime', render: time => new Date(time).toLocaleString(), onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }) },
     {
       title: '实体分配',
       dataIndex: 'entityAssignments',
       key: 'entityAssignments',
+      onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }),
       render: (text, record) => {
         const assignments = record.entityAssignments.map((assignment, index) => {
           const agentName = Object.keys(assignment)[0];
@@ -164,12 +166,21 @@ const ModelLibrary = ({ data, fetchModels }) => {
     {
       title: '操作',
       key: 'action',
+      width:150,//操作一列的大小，方便将三个按钮显示在同一行中
+      onHeaderCell: () => ({ style: { whiteSpace: 'nowrap' } }),
       render: (text, record) => (
         <>
-          <Button type="link" onClick={() => showModal(record)}>查看</Button>
-          <Button type="link" onClick={() => update(record)}>更新</Button>
-          <Button type="link" onClick={() => handleDelete(record)}>删除</Button>
+          <Tooltip title="查看">
+            <Button type="link" icon={<EyeOutlined />} onClick={() => showModal(record)} />
+          </Tooltip>
+          <Tooltip title="更新">
+            <Button type="link" icon={<EditOutlined />} onClick={() => update(record)} />
+          </Tooltip>
+          <Tooltip title="删除">
+            <Button type="link" icon={<DeleteOutlined />} onClick={() => handleDelete(record)} />
+          </Tooltip>
         </>
+        // 三个图标代替文字EyeOutlined眼状表示查看，EditOutlined笔状表示更新，DeleteOutlined垃圾桶表示删除
       ),
     },
   ];
@@ -178,23 +189,23 @@ const ModelLibrary = ({ data, fetchModels }) => {
     <Card
       title={
         <div
-          style={{
-            backgroundColor: '#f0f0f0',
-            fontSize: '40px',
-            textAlign: 'center',
-          }}
+          // style={{
+          //   backgroundColor: '#f0f0f0',
+          //   fontSize: '40px',
+          //   textAlign: 'center',
+          // }}
         >
           智能体模型管理
-          <SettingOutlined style={{ marginLeft: 8 }} />
+          <SettingOutlined style={{ marginLeft: 8 }} /> {/* 图标离文字的距离*/ }
         </div>
       }
       bordered={true}
-    >
-      <span>检索：</span>
+    > 
+      <span style={{color:'white'}}>检索：</span>
       <Select
         value={searchField}
         onChange={setSearchField}
-        style={{ width: 200, marginRight: 8 }}
+        style={{ width: 120, marginRight: 8 ,marginBottom:18}} //选项框的样式，大小以及和右侧组件的距离
       >
         <Select.Option value="scenarioID">想定场景</Select.Option>
         <Select.Option value="agentID">智能体ID</Select.Option>
@@ -207,9 +218,9 @@ const ModelLibrary = ({ data, fetchModels }) => {
         placeholder="单行输入"
         value={searchText}
         onChange={(e) => setSearchText(e.target.value)}
-        style={{ width: 200, marginRight: 8 }}
+        style={{ width: 200, marginRight: 8 }} 
       />
-      <Button type="primary" onClick={handleSearch}>
+      <Button onClick={handleSearch} >
         搜索
       </Button>
       <Table
@@ -252,8 +263,8 @@ const ModelLibrary = ({ data, fetchModels }) => {
         </Form>
       </Modal>
       <Link to="/智能体编辑" style={{ marginBottom: 20 }}>
-        <Button type="primary" icon={<PlusOutlined />} style={{ marginBottom: 20 }}>
-          新增模型
+        <Button type="primary" icon={<PlusOutlined />} style={{ marginBottom: 20 }}> 
+          新增模型 
         </Button>
       </Link>
     </Card>

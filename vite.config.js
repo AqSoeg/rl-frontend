@@ -35,7 +35,7 @@ const appConfig = {
   uploadextratable:"http://localhost:5000/uploadExtraTable",
   removeExtra:"http://localhost:5000/removeExtra",
   OutExport:"http://localhost:5000/OutExport",
-  websocketUrl: "ws://localhost:8080", // WebSocket æœåŠ¡å™¨åœ°å€
+  websocketUrl: "ws://localhost:8080", // WebSocket ·şÎñÆ÷µØÖ·
   
 };
 

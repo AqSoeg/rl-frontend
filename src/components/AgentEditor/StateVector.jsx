@@ -228,6 +228,7 @@ const StateVector = ({ entities }) => {
                         {visible[i] && (
                             <div className="table-container">
                                 <Table
+                                    bordered={true}
                                     columns={[
                                         {
                                             title: (

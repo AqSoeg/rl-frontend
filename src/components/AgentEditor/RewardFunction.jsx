@@ -158,8 +158,8 @@ const RewardFunction = observer(({ selectedParams }) => {
                                     {reward.type === '团队奖励' ? '团队奖励' : `个人奖励 - ${reward.agent}`}
                                 </div>
                                 <div>
-                                    <Button type="link" onClick={() => handleEdit(index)}>编辑</Button>
-                                    <Button type="link" onClick={() => handleDelete(index)}>删除</Button>
+                                    <Button onClick={() => handleEdit(index)} className="entity-button">编辑</Button>
+                                    <Button onClick={() => handleDelete(index)} className="entity-button">删除</Button>
                                 </div>
                             </div>
                         )}
@@ -225,8 +225,8 @@ const RewardFunction = observer(({ selectedParams }) => {
                             placeholder="在此输入或编辑公式"
                         />
                         <div className="modal-buttons">
-                            <Button onClick={handleCancel}>取消</Button>
-                            <Button type="primary" onClick={handleConfirm}>确认</Button>
+                            <Button onClick={handleCancel} className="entity-button">取消</Button>
+                            <Button onClick={handleConfirm} className={"entity-button"}>确认</Button>
                         </div>
                     </div>
 

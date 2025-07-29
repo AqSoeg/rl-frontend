@@ -83,7 +83,7 @@ const DeploymentCanvas = ({ deploymentData, width, height }) => {
             ctx.stroke();
           }
           // Draw entity name near the circle center
-          ctx.fillStyle = `rgba(0, 0, 0, 1)`; // Black color for text
+          ctx.fillStyle = `rgba(255, 255, 255, 1)`; // Black color for text
           ctx.font = `${12 / scale}px Arial`; // Adjust font size based on scale
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
@@ -98,7 +98,7 @@ const DeploymentCanvas = ({ deploymentData, width, height }) => {
           // Draw entity name near the middle of the line
           const midX = (entity.type.start[0] + entity.type.end[0]) / 2;
           const midY = (entity.type.start[1] + entity.type.end[1]) / 2;
-          ctx.fillStyle = `rgba(0, 0, 0, 1)`; // Black color for text
+          ctx.fillStyle = `rgba(255, 255, 255, 1)`; // Black color for text
           ctx.font = `${12 / scale}px Arial`; // Adjust font size based on scale
           ctx.textAlign = 'center';
           ctx.textBaseline = 'bottom';
@@ -118,7 +118,7 @@ const DeploymentCanvas = ({ deploymentData, width, height }) => {
           ctx.closePath();
           ctx.fill();
           // Draw entity name near the fan center
-          ctx.fillStyle = `rgba(0, 0, 0, 1)`; // Black color for text
+          ctx.fillStyle = `rgba(255, 255, 255, 1)`; // Black color for text
           ctx.font = `${12 / scale}px Arial`; // Adjust font size based on scale
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';

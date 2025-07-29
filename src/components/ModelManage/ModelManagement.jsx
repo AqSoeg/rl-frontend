@@ -18,9 +18,9 @@ const ModelManagement = () => {
   const [datasets, setDatasets] = useState([]);
   const [decisions, setDecisions] = useState([]);
   const [evaluatetables, setEvaluateTables] = useState([]);
-     const [Rewads, setRewards] = useState([]); 
+  const [Rewads, setRewards] = useState([]); 
   const [extraDecisions, setExtraDecisions] = useState([]); 
- 
+
 
   const fetchModels = async () => {
     try {
@@ -133,26 +133,26 @@ const ModelManagement = () => {
       message.error('获取额外决策模型失败');
     }
   };
-    const fetchRewardModel = async () => { // New fetch function for extra decisions
-    try {
-      const response = await fetch(__APP_CONFIG__.getRewardModels, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ library: 'RewardModel' }),
-      });
-      if (!response.ok) {
-        throw new Error('Network response was not ok ' + response.statusText);
+      const fetchRewardModel = async () => { // New fetch function for extra decisions
+      try {
+        const response = await fetch(__APP_CONFIG__.getRewardModels, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ library: 'RewardModel' }),
+        });
+        if (!response.ok) {
+          throw new Error('Network response was not ok ' + response.statusText);
+        }
+          console.log("gggggg")
+        const data = await response.json();
+        setRewards(data);
+      } catch (error) {
+        console.error('Error fetching reward models:', error);
+        message.error('获取reward模型失败');
       }
-        console.log("gggggg")
-      const data = await response.json();
-      setRewards(data);
-    } catch (error) {
-      console.error('Error fetching reward models:', error);
-      message.error('获取reward模型失败');
-    }
-  };
+    };
   const fetchEvaluatetables = async () => {
     try {
       const response = await fetch(__APP_CONFIG__.getEvaluateTables, {
@@ -192,14 +192,53 @@ const ModelManagement = () => {
   return (
     <div className='model'>
       <div className='modelleft'>
-        <button className='button' onClick={() => handleButtonClick('ModelLibrary')}>智能体模型库</button>
-        <button className='button' onClick={() => handleButtonClick('AlgorithmLibrary')}>算法库</button>
-        <button className='button' onClick={() => handleButtonClick('OfflineDatabase')}>离线数据集库</button>
-        <button className='button' onClick={() => handleButtonClick('ScenarioLibrary')}>想定场景库</button>
-        <button className='button' onClick={() => handleButtonClick('DecisionModelLibrary')}>决策模型库</button>
-        <button className='button' onClick={() => handleButtonClick('EvaluateTable')}>评估数据表</button>
-        <button className='button' onClick={() => handleButtonClick('RewardModelLibrary')}>奖励模型表</button>
-        <button className='button' onClick={() => handleButtonClick('ExtraDecisionModelLibrary')}>额外决策模型库</button> 
+        <button
+          className={`model_button ${activeComponent === 'ModelLibrary' ? 'active' : ''}`}
+          onClick={() => handleButtonClick('ModelLibrary')}
+        >
+          智能体模型库
+        </button>
+        <button
+          className={`model_button ${activeComponent === 'AlgorithmLibrary' ? 'active' : ''}`}
+          onClick={() => handleButtonClick('AlgorithmLibrary')}
+        >
+          算法库
+        </button>
+        <button
+          className={`model_button ${activeComponent === 'OfflineDatabase' ? 'active' : ''}`}
+          onClick={() => handleButtonClick('OfflineDatabase')}
+        >
+          离线数据集库
+        </button>
+        <button
+          className={`model_button ${activeComponent === 'ScenarioLibrary' ? 'active' : ''}`}
+          onClick={() => handleButtonClick('ScenarioLibrary')}
+        >
+          想定场景库
+        </button>
+        <button
+          className={`model_button ${activeComponent === 'DecisionModelLibrary' ? 'active' : ''}`}
+          onClick={() => handleButtonClick('DecisionModelLibrary')}
+        >
+          决策模型库
+        </button>
+        <button
+          className={`model_button ${activeComponent === 'EvaluateTable' ? 'active' : ''}`}
+          onClick={() => handleButtonClick('EvaluateTable')}
+        >
+          评估数据表
+        </button>
+        <button 
+          className={`model_button ${activeComponent === 'RewardModelLibrary' ? 'active' : ''}`}
+          onClick={() => handleButtonClick('RewardModelLibrary')}>
+            奖励模型表
+        </button>
+        <button
+          className={`model_button ${activeComponent === 'ExtraDecisionModelLibrary' ? 'active' : ''}`}
+          onClick={() => handleButtonClick('ExtraDecisionModelLibrary')}
+        >
+          额外决策模型库
+        </button>
       </div>
       <div className='modelright'>
         {activeComponent === 'ModelLibrary' && <ModelLibrary data={models} fetchModels={fetchModels} />}

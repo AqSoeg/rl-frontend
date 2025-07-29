@@ -498,7 +498,7 @@ const DropdownContainer = ({ uniqueKey, action, onEdit, onDelete, modelID, selec
                                 </Option>
                             ))}
                         </Select>
-                        <Button className="centered-button" onClick={handleAddRule}>+</Button>
+                        <Button className="centered-button" onClick={handleAddRule} style={{backgroundColor: '#0a4a8a', color: 'white'}}>+</Button>
                     </div>
 
                     {selectedRuleNumber && (
@@ -567,8 +567,8 @@ const DropdownContainer = ({ uniqueKey, action, onEdit, onDelete, modelID, selec
                                             placeholder="在此输入或编辑条件表达式"
                                         />
                                         <div className="modal-buttons">
-                                            <Button onClick={() => setIsConditionEditorOpen(false)}>取消</Button>
-                                            <Button type="primary" onClick={() => setIsConditionEditorOpen(false)}>确认</Button>
+                                            <Button onClick={() => setIsConditionEditorOpen(false)} className="entity-button">取消</Button>
+                                            <Button type="primary" onClick={() => setIsConditionEditorOpen(false)} className="entity-button">确认</Button>
                                         </div>
                                     </div>
                                 </div>
@@ -582,9 +582,12 @@ const DropdownContainer = ({ uniqueKey, action, onEdit, onDelete, modelID, selec
                                             <div className="discrete-buttons">
                                                 {action.discreteValues.map(value => (
                                                     <Button
-                                                        style={{ marginRight: 10 }}
+                                                        style={{
+                                                            marginRight: 10,
+                                                            backgroundColor: execution1.includes(value) ? '#0a4a8a' : 'white',
+                                                            color: execution1.includes(value) ? 'white' : 'black'
+                                                        }}
                                                         key={value}
-                                                        type={execution1.includes(value) ? 'primary' : 'default'}
                                                         onClick={() => toggleDiscreteValue(value, true)}
                                                     >
                                                         {value}
@@ -618,9 +621,12 @@ const DropdownContainer = ({ uniqueKey, action, onEdit, onDelete, modelID, selec
                                                 <div className="discrete-buttons">
                                                     {action.discreteValues.map(value => (
                                                         <Button
-                                                            style={{ marginRight: 10 }}
+                                                            style={{
+                                                                marginRight: 10,
+                                                                backgroundColor: execution2.includes(value) ? '#0a4a8a' : 'white',
+                                                                color: execution2.includes(value) ? 'white' : 'black'
+                                                            }}
                                                             key={value}
-                                                            type={execution2.includes(value) ? 'primary' : 'default'}
                                                             onClick={() => toggleDiscreteValue(value, false)}
                                                         >
                                                             {value}
@@ -658,8 +664,8 @@ const DropdownContainer = ({ uniqueKey, action, onEdit, onDelete, modelID, selec
                                     </div>
 
                                     <div className="rule-buttons">
-                                        <Button type="primary" onClick={handleRuleConfirm}>保存</Button>
-                                        <Button onClick={handleRuleCancel}>删除</Button>
+                                        <Button onClick={handleRuleConfirm} className="entity-button">保存</Button>
+                                        <Button onClick={handleRuleCancel} className="entity-button">删除</Button>
                                     </div>
                                 </>
                             )}
@@ -694,8 +700,8 @@ const ActionContent = ({ action, onEdit, onDelete }) => {
                 </>
             )}
             <div className="action-buttons">
-                <Button type="primary" onClick={() => onEdit(`${action.entity}：${action.actionType}`)}>编辑</Button>
-                <Button onClick={() => onDelete(`${action.entity}：${action.actionType}`)}>删除</Button>
+                <Button onClick={() => onEdit(`${action.entity}：${action.actionType}`)} className="entity-button">编辑</Button>
+                <Button onClick={() => onDelete(`${action.entity}：${action.actionType}`)} className="entity-button">删除</Button>
             </div>
         </div>
     );
@@ -882,7 +888,7 @@ const ActionModal = ({
                             <Input
                                 value={upperLimit}
                                 onChange={handleUpperLimitChange}
-                                addonAfter={getActionUnit()}
+                                addonAfter={<span style={{ color: 'white' }}>{getActionUnit()}</span>}
                                 style={{ width: '250px' }}
                             />
                         </div>
@@ -891,7 +897,7 @@ const ActionModal = ({
                             <Input
                                 value={lowerLimit}
                                 onChange={handleLowerLimitChange}
-                                addonAfter={getActionUnit()}
+                                addonAfter={<span style={{ color: 'white' }}>{getActionUnit()}</span>}
                                 style={{ width: '250px' }}
                             />
                         </div>
@@ -917,11 +923,11 @@ const ActionModal = ({
                                             <Option key={option} value={option}>{option}</Option>
                                         ))}
                                 </Select>
-                                <Button onClick={() => handleRemoveDiscreteValue(index)}>-</Button>
+                                <Button onClick={() => handleRemoveDiscreteValue(index)} style={{backgroundColor: '#0a4a8a', color: 'white'}}>-</Button>
                             </div>
                         ))}
                         <div className="modal-row">
-                            <Button onClick={handleAddDiscreteValue}>+</Button>
+                            <Button onClick={handleAddDiscreteValue} style={{backgroundColor: '#0a4a8a', color: 'white'}}>+</Button>
                         </div>
                         <div className="modal-row">
                             <span className="modal-label">可选取值：</span>
