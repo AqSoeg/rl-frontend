@@ -870,6 +870,16 @@ def upload_file():
     except Exception as e:
         print(f'Error uploading file: {str(e)}')
         return jsonify({'status': 'error', 'message': str(e)}), 500
-
+@app.route('/SaveScenarios', methods=['POST'])
+def save_scenarios():
+    try:
+        data = request.json
+        scenario_id = data.get('scenario_id')
+        # 在这里您可以添加保存场景的逻辑
+        print(f"Received save request for scenario_id: {scenario_id}")
+        return jsonify({'status': 'success', 'message': 'Scenario saved successfully.'})
+    except Exception as e:
+        print(f'Error saving scenario: {str(e)}')
+        return jsonify({'status': 'error', 'message': str(e)}), 500
 if __name__ == '__main__':
     socketio.run(app, port=5000, debug=True)

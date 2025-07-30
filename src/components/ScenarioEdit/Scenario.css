@@ -13,7 +13,7 @@
 }
 
 .scenario-right-panel {
-  flex: 1; /* flex 布局：占据剩余空间 */
+  flex: 3; /* flex 布局：占据剩余空间 */
   padding: 16px; /* 内边距为 16px */
   overflow-y: auto; /* Y 轴内容超出时显示滚动条 */
 }

@@ -147,3 +147,17 @@
     transition: all 0.2s ease-in-out; /* 使过渡更平滑 */
 
 }
+
+/* 1. 将表格布局算法设置为 'fixed' */
+/* 这使得表格的宽度由表格自身宽度决定，而不是其内容 */
+.modelright .ant-table table {
+  table-layout: fixed;
+  width: 100%; /* 确保表格宽度严格等于其容器宽度 */
+}
+
+/* 2. 强制单元格内的长文本换行 */
+/* 这会让文件路径等超长内容在到达单元格边缘时自动换到下一行 */
+.modelright .ant-table-tbody > tr > td {
+  word-wrap: break-word;
+  word-break: break-all;
+}

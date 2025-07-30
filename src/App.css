@@ -2,7 +2,7 @@ body { /* 定义 body 元素的样式 */
     margin: 0; /* 移除 body 的外边距 */
     padding: 0; /* 移除 body 的内边距 */
     color: white; /* 设置默认文本颜色为白色 */
-    font-family: serif; /* 设置默认字体为衬线字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif; /* 设置默认字体为微软雅黑和Segoe UI */
 }
 
 .app-container { /* 定义应用主容器的样式 */
@@ -35,7 +35,7 @@ body { /* 定义 body 元素的样式 */
     font-weight: bold; /* 字体加粗 */
     font-size: 1.25rem; /* 字体大小 */
     color: white; /* 文本颜色为白色 */
-    font-family: serif; /* 字体为衬线字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif; /* 字体为衬线字体 */
 }
 
 .settings-button { /* 定义设置按钮的样式 */
@@ -71,7 +71,7 @@ body { /* 定义 body 元素的样式 */
 .nav-link { /* 定义导航链接的样式 */
     text-decoration: none; /* 去除文本下划线 */
     color: white; /* 文本颜色为白色 */
-    font-family: serif; /* 字体为衬线字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif; /* 字体为衬线字体 */
     padding: 15px 25px; /* 内边距 */
     border-radius: 5px; /* 边框圆角 */
     transition: background-color 0.3s, color 0.3s; /* 为背景色和颜色变化添加 0.3 秒的过渡效果 */
@@ -119,7 +119,7 @@ body { /* 定义 body 元素的样式 */
     display: flex; /* 使用 flexbox 布局 */
     align-items: baseline; /* 子元素按基线对齐 */
     color: white; /* 文本颜色为白色 */
-    font-family: serif; /* 字体为衬线字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif; /* 字体为衬线字体 */
 }
 
 .main-title { /* 定义主标题的样式 */
@@ -144,21 +144,25 @@ body { /* 定义 body 元素的样式 */
 
 .ant-select-selection-placeholder { /* Ant Design Select 组件占位符文本的样式 */
     color: rgba(255, 255, 255, 0.7) !important; /* 占位符文本颜色为半透明白色 */
-    font-family: serif; /* 字体为衬线字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif; /* 字体为衬线字体 */
 }
 
 .ant-select-selector { /* Ant Design Select 组件选择框的样式 */
     width: 100%; /* 宽度为 100% */
     background: #063160 !important; /* 背景颜色 */
     color: white !important;; /* 文本颜色为白色 */
-    font-family: serif; /* 字体为衬线字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif; /* 字体为衬线字体 */
+    border-radius: 0 !important; /* 将圆角改为直角 */
 }
 
 .ant-select-dropdown, /* Ant Design Select 组件下拉菜单的样式 */
+.ant-select-item, /* Ant Design Select 组件下拉选项的样式 */
 .ant-select-item-option-content { /* Ant Design Select 组件下拉选项内容的样式 */
     background: #063160; /* 背景颜色 */
     color: white; /* 文本颜色为白色 */
-    font-family: serif; /* 字体为衬线字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif; /* 字体为衬线字体 */
+    border-radius: 0 !important; /* 将圆角改为直角 */
+    transition: none !important;
 }
 
 .ant-select-item-option-active:not(.ant-select-item-option-disabled), /* Ant Design Select 组件激活状态（悬停）的下拉选项样式 */
@@ -166,48 +170,62 @@ body { /* 定义 body 元素的样式 */
 .ant-select-item-option-selected:not(.ant-select-item-option-disabled), /* Ant Design Select 组件已选中状态的下拉选项样式 */
 .ant-select-item-option-selected:not(.ant-select-item-option-disabled) .ant-select-item-option-content { /* 已选中状态的下拉选项内容的样式 */
     background: #0a4a8a !important; /* 背景颜色（悬停或选中时）*/
+    border-radius: 0 !important; /* 将圆角改为直角 */
 }
 
 .ant-input { /* Ant Design Input 组件的样式 */
     background: #063160 !important; /* 背景颜色 */
     color: white !important;; /* 文本颜色 */
-    font-family: serif; /* 字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif; /* 字体 */
 }
 
 .ant-input::placeholder { /* Ant Design Input 组件占位符文本的样式 */
     color: rgba(255, 255, 255, 0.7); /* 占位符颜色为半透明白色 */
-    font-family: serif; /* 字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif; /* 字体 */
 }
+
+.ant-input-number-input {
+    color: white!important; /* Ant Design Input Number 组件输入框文本颜色 */
+  }
 
 .ant-table-thead > tr > th { /* Ant Design Table 组件表头的样式 */
     background-color: #01284d !important; /* 表头背景颜色 */
     color: white !important; /* 表头文本颜色 */
-    font-family: serif; /* 字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif; /* 字体 */
 }
 
 .ant-table-tbody > tr > td { /* Ant Design Table 组件表格单元格的样式 */
     background-color: #01284d !important; /* 单元格背景颜色 */
     color: white; /* 单元格文本颜色 */
-    font-family: serif; /* 字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif; /* 字体 */
 }
 
 .ant-table-body { /* Ant Design Table 组件表格主体（滚动区域）的样式 */
     scrollbar-color: #063160 #072446; /* 设置滚动条颜色（滑块和轨道） */
 }
 
+.ant-table-bordered .ant-table-container,
+.ant-table-bordered .ant-table-thead > tr > th,
+.ant-table-bordered .ant-table-tbody > tr > td {
+  border-color: #1890ff !important; /* Ant Design Table 组件边框颜色 */
+}
+
 .ant-card { /* Ant Design Card 组件的样式 */
     background-color: #001a35; /* 卡片背景颜色 */
-    border: 1px solid #e6eaee; /* 卡片边框 */
+    border: 1px solid #1890ff; /* 卡片边框 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif; /* 字体 */
 }
 
 .ant-card-head { /* Ant Design Card 组件头部的样式 */
     background-color: #022d55; /* 头部背景颜色 */
     text-align: center; /* 文本居中 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif; /* 字体 */
 }
 
 .ant-card-head-title { /* Ant Design Card 组件头部标题的样式 */
     color: rgb(255, 255, 255) !important; /* 标题颜色为白色 */
     font-size: 1.2rem; /* 字体大小 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif; /* 字体 */
 }
 
 .ant-modal { /* Ant Design Modal (对话框) 组件的样式 */
@@ -217,7 +235,7 @@ body { /* 定义 body 元素的样式 */
     .ant-modal-content { /* 嵌套规则：对话框内容区域的样式 */
         background-color: #001b38; /* 内容区域背景颜色 */
         color: white; /* 文本颜色 */
-        font-family: serif; /* 字体 */
+        font-family: "Microsoft YaHei", "Segoe UI", sans-serif; /* 字体 */
 
         .ant-modal-header { /* 嵌套规则：对话框头部的样式 */
             background-color: #001b38; /* 头部背景颜色 */
@@ -225,7 +243,7 @@ body { /* 定义 body 元素的样式 */
 
         .ant-modal-title { /* 嵌套规则：对话框标题的样式 */
             color: white; /* 标题颜色 */
-            font-family: serif; /* 字体 */
+            font-family: "Microsoft YaHei", "Segoe UI", sans-serif; /* 字体 */
         }
 
         .ant-modal-close-x { /* 嵌套规则：对话框关闭按钮的样式 */
@@ -243,6 +261,109 @@ body { /* 定义 body 元素的样式 */
         overflow: hidden; /* 隐藏溢出内容 */
         margin-right: 8px; /* 右外边距 */
         color: white; /* 文本颜色 */
-        font-family: serif; /* 字体 */
+        font-family: "Microsoft YaHei", "Segoe UI", sans-serif; /* 字体 */
     }
+}
+
+
+/* 分页容器及内部文字 */
+.ant-pagination {
+    color: #ffffff !important; 
+}
+
+/* 单个页码 */
+.ant-pagination .ant-pagination-item {
+    background-color: #0a2548 !important;
+    border: 1px solid #126dc2 !important;
+    border-radius: 4px !important;
+}
+
+.ant-pagination .ant-pagination-item a {
+    color: #ffffff !important;
+}
+
+/* 激活的页码 */
+.ant-pagination .ant-pagination-item-active {
+    background-color: #126dc2 !important;
+    border-color: #126dc2 !important;
+}
+
+.ant-pagination .ant-pagination-item-active a {
+    color: #ffffff !important;
+}
+
+/* 上一页/下一页按钮 */
+.ant-pagination .ant-pagination-prev .ant-pagination-item-link,
+.ant-pagination .ant-pagination-next .ant-pagination-item-link {
+    background-color: #0a2548 !important;
+    border: 1px solid #126dc2 !important;
+    color: #ffffff !important;
+    border-radius: 4px !important;
+}
+
+/* 禁用的上一页/下一页按钮 */
+.ant-pagination .ant-pagination-disabled .ant-pagination-item-link {
+    color: #a0a0a0 !important;
+}
+
+/* 快速跳转输入框 */
+.ant-pagination .ant-pagination-options-quick-jumper input {
+    background-color: #0a2548 !important;
+    border: 1px solid #126dc2 !important;
+    color: #ffffff !important;
+}
+
+/* 鼠标悬浮效果 */
+.ant-pagination .ant-pagination-item:hover,
+.ant-pagination .ant-pagination-prev:hover .ant-pagination-item-link,
+.ant-pagination .ant-pagination-next:hover .ant-pagination-item-link {
+    background-color: #126dc2 !important;
+    border-color: #126dc2 !important;
+}
+
+.ant-pagination .ant-pagination-item:hover a {
+    color: #ffffff !important;
+}
+
+
+/* --- Card内嵌Table终极统一样式 --- */
+
+/* 表头单元格的终极修复 */
+.ant-card .ant-table-thead > tr > th {
+    background-color: #01284d !important;
+    color: #87CEFA !important; /* 字体颜色：浅蓝色 */
+    font-family: "Segoe UI", "Microsoft YaHei", sans-serif !important; /* 中英文字体 */
+    text-align: center !important; /* 字体居中 */
+    
+    /* 强制移除所有可能的边框和轮廓 */
+    border: none !important;
+    border-bottom: 1px solid #1890ff !important; /* 只保留我们需要的底部蓝色边框 */
+    outline: none !important;
+    
+    /* 强制移除所有可能的阴影效果 */
+    box-shadow: none !important;
+    
+    /* 强制移除背景图片，防止用图片模拟边框 */
+    background-image: none !important;
+}
+
+/* 强制隐藏表头单元格的所有伪元素（::before 和 ::after）*/
+.ant-card .ant-table-thead > tr > th::before,
+.ant-card .ant-table-thead > tr > th::after {
+    display: none !important;
+    content: none !important;
+    background: none !important;
+    border: none !important;
+}
+
+/* 表格主体单元格样式 */
+.ant-card .ant-table-tbody > tr > td {
+    border: none !important;
+    border-bottom: 1px solid #1890ff !important;
+    font-family: "Segoe UI", "Microsoft YaHei", sans-serif !important;
+}
+
+/* 移除最后一行数据的下边框 */
+.ant-card .ant-table-tbody > tr:last-child > td {
+    border-bottom: none !important;
 }
