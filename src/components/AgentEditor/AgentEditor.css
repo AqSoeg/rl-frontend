@@ -13,8 +13,8 @@
     width: calc(100% - 40px); /* 宽度计算，100% 减去 40px */
     height: 75vh; /* 高度为视口高度的 75% */
     padding: 20px; /* 内边距 20px */
-    background: linear-gradient(to bottom, #002044, #002044, #002044); /* 线性渐变背景（实际上是纯色） */
-    border-radius: 8px; /* 边框圆角 8px */
+    background: linear-gradient(to bottom, #002a56, #002a56, #002a56); /* 线性渐变背景（实际上是纯色） */
+    /* border-radius: 8px; 边框圆角 8px */
     margin: 0 20px; /* 外边距，上下为 0，左右为 20px */
 }
 
@@ -40,11 +40,12 @@
 .sidebar{ /* 侧边栏容器样式 */
     flex: 0 0 10%; /* flex 布局项目：不增长，不收缩，基础宽度为 10% */
     padding: 1rem; /* 内边距 1rem */
+    background-color: #002a56;
 }
 
 .sidebar-section { /* 侧边栏区域样式 */
     margin-bottom: 1rem; /* 底部外边距 1rem */
-    background-color: #072446; /* 背景颜色，深蓝色 */
+    background-color: #01366e; /* 背景颜色，深蓝色 */
     padding: 1rem; /* 内边距 1rem */
     border-radius: 0.5rem; /* 边框圆角 0.5rem */
 }

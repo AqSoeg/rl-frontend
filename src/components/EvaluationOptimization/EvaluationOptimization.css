@@ -8,11 +8,12 @@
 .EO-sidebar { /* 定义侧边栏样式 */
     flex: 0 0 10%; /* flex 属性：不增长，不收缩，基础宽度为 10% */
     padding: 1rem; /* 内边距为 1rem (约16px) */
+    background-color: #002a56;
 }
 
 .EO-sidebar-section { /* 定义侧边栏区域样式 */
     margin-bottom: 1rem; /* 底部外边距为 1rem */
-    background-color: #072446; /* 背景颜色为较深的蓝色 */
+    background-color: #01366e; /* 背景颜色为较深的蓝色 */
     padding: 1rem; /* 内边距为 1rem */
     border-radius: 0.5rem; /* 边框圆角为 0.5rem (约8px) */
     max-height: 200px; /* 最大高度为 200px */
@@ -41,7 +42,7 @@
     width: calc(100% - 40px); /* 宽度为父容器宽度的 100% 减去 40px */
     height: 77vh; /* 高度为视口高度的 77% */
     padding: 20px; /* 内边距为 20px */
-    background: linear-gradient(to bottom, #002044, #002044, #002044); /* 从上到下的线性渐变背景 */
+    background: linear-gradient(to bottom, #002a56, #002a56, #002a56); /* 从上到下的线性渐变背景 */
     border-radius: 8px; /* 边框圆角为 8px */
     margin: 0 20px; /* 上下外边距为 0，左右外边距为 20px */
 }
@@ -68,7 +69,7 @@
 }
 
 .EO-chart-item { /* 定义图表项样式 */
-    background: linear-gradient(to bottom, #002044, #002044, #002044); /* 从上到下的线性渐变背景 */
+    background: linear-gradient(to bottom, #01366e, #01366e, #01366e); /* 从上到下的线性渐变背景 */
     border-radius: 8px; /* 边框圆角为 8px */
     padding: 15px; /* 内边距为 15px */
     box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* 添加阴影效果 */

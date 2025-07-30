@@ -700,6 +700,7 @@ const handleprocess = async () => {
   return (
     <div className='right1' style={{ height: '85vh', width:'95%',margin: '0 auto' }}>
       <Card 
+        className='right1-card'
         title={<div >智能体载入</div>} 
       >
         {intelligentStore.selectedScenario && intelligentStore.selectedAgentRole ? (
@@ -722,6 +723,7 @@ const handleprocess = async () => {
       </Card>
      
       <Card 
+        className='right1-card'
         title={<div >训练超参数</div>} 
       >
         {intelligentStore.selectedAlgorithm && intelligentStore.selectedAlgorithm['hyper-parameters'] ? (
