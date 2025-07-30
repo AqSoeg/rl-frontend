@@ -377,6 +377,9 @@ const handleExportFolderSelected = async (record) => {
                     <Tooltip title="数据导入">
                         <Button type="link" icon={<UploadOutlined />} onClick={() => handleImportData(record)} />
                     </Tooltip>
+                    <Tooltip title="数据导出">
+                        <Button type="link" icon={<UploadOutlined />} onClick={() => handleExportFolderSelected(record)} />
+                    </Tooltip>
                     <Tooltip title={trainingLoading[record.ALGORITHM_ID] ? '训练中' : '开始训练'}>
                         <Button
                             type="link"

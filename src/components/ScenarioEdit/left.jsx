@@ -167,8 +167,11 @@ const Left = observer(({ scenarios }) => {
                 newValue: value,
             }),
         });
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        await response.json();
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        intelligentStore.setupdataparams(data.updatedScenario.env_params);
   
         const updatedParamsMap = { ...envParamsMap };
         const attrToUpdate = updatedParamsMap[entity].find(attr => attr.key === attribute);
@@ -213,7 +216,7 @@ const Left = observer(({ scenarios }) => {
   const valueOptions = () => envParamsMap[entity]?.find(param => param.key === attribute)?.options.map(option => <Option key={option} value={option}>{option}</Option>) || [];
 
   return (
-    <Card title="场景编辑">
+    <Card title="场景编辑" className='scenario-card'>
       <div className="scenario-header">
         <label style={{ fontSize: 20, color: 'white' }}>想定场景：</label>
         <Select value={selectedScenarioName} onChange={handleScenarioSelectChange} placeholder="请选择想定" className="scenario-select">
