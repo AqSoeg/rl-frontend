@@ -106,8 +106,11 @@ const Left = observer(({ scenarios }) => {
           newValue: value
         }),
       });
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      await response.json();
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      intelligentStore.setupdataparams(data.updatedScenario.env_params);
       
       const updatedParamsMap = { ...envParamsMap };
       const attrToUpdate = updatedParamsMap[entity].find(attr => attr.key === attribute);

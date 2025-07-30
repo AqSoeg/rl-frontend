@@ -106,7 +106,7 @@ const EvaluationOptimization = observer(() => {
 
         const textStyle = {
             color: 'white',
-            fontFamily: 'serif'
+            fontFamily: 'Microsoft YaHei, Segoe UI, sans-serif',
         }
 
         const option = {
@@ -577,17 +577,18 @@ const EvaluationOptimization = observer(() => {
     ];
 
     const modelListColumns = [
-        { title: '模型ID', dataIndex: ['model', 'id'], key: 'modelId' },
-        { title: '决策模型名称', dataIndex: ['model', 'name'], key: 'modelName' },
-        { title: '场景名称', dataIndex: ['model', 'scenario_name'], key: 'scenarioName' },
-        { title: '角色名称', dataIndex: ['model', 'role_name'], key: 'roleName' },
-        { title: '模型类型', dataIndex: ['model', 'nn_model_type'], key: 'modelType' },
-        { title: '模型版本', dataIndex: ['model', 'version'], key: 'modelVersion' },
+        { title: '模型ID', dataIndex: ['model', 'id'], key: 'modelId', width: 150 },
+        { title: '决策模型名称', dataIndex: ['model', 'name'], key: 'modelName', width: 150 },
+        { title: '场景名称', dataIndex: ['model', 'scenario_name'], key: 'scenarioName', width: 150 },
+        { title: '角色名称', dataIndex: ['model', 'role_name'], key: 'roleName', width: 150 },
+        { title: '模型类型', dataIndex: ['model', 'nn_model_type'], key: 'modelType', width: 150 },
+        { title: '模型版本', dataIndex: ['model', 'version'], key: 'modelVersion', width: 150 },
         {
             title: '创建时间',
             dataIndex: ['model', 'time'],
             key: 'createTime',
-            render: time => formatDate(time)
+            render: time => formatDate(time),
+            width: 150
         },
         {
             title: '操作',
@@ -608,6 +609,7 @@ const EvaluationOptimization = observer(() => {
                     </Button>
                 </Space>
             ),
+            width: 250
         },
     ];
 
@@ -768,47 +770,11 @@ const EvaluationOptimization = observer(() => {
                             </div>
                         ))}
                     </div>
-                    {/* <div className="EO-text">事件：</div>
-                    <div className="EO-event-log">
-                        {evaluationOptimizationStore.events.map((event, i) => (
-                            <div key={i} className="EO-event-item">
-                                <span>事件{i + 1}：{event.content}</span>
-                            </div>
-                        ))}
-                    </div> */}
-
                 </div>
-                <div className="EO-right-panel">
-                    {/* {evaluationOptimizationStore.radarImage && (
-                        <div className="EO-radar-chart-container">
-                            <div
-                                ref={radarChartRef}
-                                style={{ width: '100%', height: '400px' }}
-                            ></div>
-                        </div>
-                    )} */}
-                    {/* <div className="EO-evaluation-module">
-                        <div className="EO-evaluation">
-                            <div className="EO-text">分数评估：</div>
-                            {evaluationOptimizationStore.evalScore && <div className="EO-score">{evaluationOptimizationStore.evalScore}</div>}
-                        </div>
-                        <div>
-                            <div className="EO-text">优化评估：</div>
-                            {evaluationOptimizationStore.evalSuggestion && (
-                                <div className="EO-optimization-suggestion">
-                                    {evaluationOptimizationStore.evalSuggestion.map((suggestion, index) => (
-                                        <div key={index} className="EO-suggestion-item">{suggestion}</div>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    </div> */}
-                    <div className="EO-model-button-container">
-                        <Button className="EO-model-button" onClick={handleViewModelList}>数据生成</Button>
-                        <Button className="EO-model-button" onClick={handleLoadData}>数据载入</Button>
-                        <Button className="EO-model-button" onClick={handleStartEvaluation}>开始评估</Button>
-                        {/* <Button className="EO-model-button" onClick={handleEvaluationTrain}>评估模型训练</Button> */}
-                    </div>
+                <div className="EO-model-button-container">
+                    <Button className="EO-model-button" onClick={handleViewModelList}>数据生成</Button>
+                    <Button className="EO-model-button" onClick={handleLoadData}>数据载入</Button>
+                    <Button className="EO-model-button" onClick={handleStartEvaluation}>开始评估</Button>
                 </div>
             </div>
             <Modal
@@ -818,11 +784,11 @@ const EvaluationOptimization = observer(() => {
                 footer={null}
                 width={1500}
             >
+                <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
                 <Table
                     bordered
                     columns={dataColumns}
                     dataSource={evaluationOptimizationStore.evaluationData}
-                    scroll={{ y: 500 }}
                     pagination={false}
                     rowKey={(record) => record.id}
                     expandable={{
@@ -847,6 +813,7 @@ const EvaluationOptimization = observer(() => {
                         )
                     }}
                 />
+                </div>
             </Modal>
             <Modal
                 title="数据详细信息"
@@ -906,11 +873,11 @@ const EvaluationOptimization = observer(() => {
                 footer={null}
                 width={2000}
             >
+                <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
                 <Table
                     bordered
                     columns={modelListColumns}
                     dataSource={evaluationOptimizationStore.decisionModels}
-                    scroll={{ y: 500 }}
                     pagination={false}
                     rowKey={(record) => record.model.id}
                     expandable={{
@@ -934,6 +901,7 @@ const EvaluationOptimization = observer(() => {
                         )
                     }}
                 />
+                </div>
             </Modal>
             <Modal
                 title="模型详细信息"

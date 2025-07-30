@@ -18,7 +18,21 @@ const Right = observer(() => {
         const response = await fetch(__APP_CONFIG__.get_deployment_image, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ scenarioId: intelligentStore.selectedScenario.id }),
+          body: JSON.stringify({
+            scenarioEditInfo: {
+              scenarioName: intelligentStore.selectedScenario.name,
+              // agentRoleName: intelligentStore.selectedAgentRole.name,
+              env_params: intelligentStore.selectedScenario.env_params.map(param => ({
+                id: param.id,
+                name: param.name,
+                params: param.params.map(p => ({
+                  key: p[0],
+                  label: p[1],
+                  value: p[2]
+                }))
+              }))
+            }
+          }),
         });
 
         if (!response.ok) {

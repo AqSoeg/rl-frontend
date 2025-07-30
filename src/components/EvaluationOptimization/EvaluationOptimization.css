@@ -18,7 +18,7 @@
     max-height: 200px; /* 最大高度为 200px */
     overflow-y: auto; /* Y轴（垂直方向）内容溢出时显示滚动条 */
     color: white; /* 字体颜色为白色 */
-    font-family: serif; /* 字体为衬线字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
 }
 
 .EO-sidebar-scrollable { /* 定义侧边栏可滚动区域样式 */
@@ -32,7 +32,7 @@
     margin-top: 0.5rem; /* 顶部外边距为 0.5rem */
     margin-bottom: 0.5rem; /* 底部外边距为 0.5rem */
     color: white; /* 字体颜色为白色 */
-    font-family: serif; /* 字体为衬线字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
 }
 
 .EO-gradient-box { /* 定义渐变背景盒子样式 */
@@ -53,7 +53,7 @@
     border-radius: 8px; /* 边框圆角为 8px */
     padding-right: 20px; /* 右内边距为 20px */
     padding-bottom: 10px; /* 下内边距为 10px */
-    width: 80%; /* 宽度为父容器的 80% */
+    width: 100%; /* 宽度为父容器的 80% */
 }
 
 .EO-chart-grid { /* 定义图表网格布局样式 */
@@ -80,77 +80,9 @@
     object-fit: cover; /* 保持图片宽高比，裁剪以填充整个容器 */
 }
 
-.EO-event-log { /* 定义事件日志容器样式 */
-    height: 20%; /* 高度为父容器的 20% */
-    background: white; /* 背景颜色为白色 */
-    border-radius: 8px; /* 边框圆角为 8px */
-    padding: 15px; /* 内边距为 15px */
-    overflow-y: auto; /* Y轴（垂直方向）内容溢出时显示滚动条 */
-}
-
-.EO-event-item { /* 定义事件日志项样式 */
-    display: flex; /* 使用 flexbox 布局 */
-    gap: 10px; /* flex 项目之间的间距为 10px */
-    padding: 8px 0; /* 上下内边距为 8px，左右为 0 */
-    border-bottom: 1px solid #eee; /* 底部边框为 1px 实线淡灰色 */
-}
-
-.EO-right-panel { /* 定义右侧面板样式 */
-    width: 30%; /* 宽度为父容器的 30% */
-    display: flex; /* 使用 flexbox 布局 */
-    flex-direction: column; /* flex 项目垂直排列 */
-    gap: 20px; /* flex 项目之间的间距为 20px */
-}
-
-.EO-radar-chart-container { /* 定义雷达图容器样式 */
-    background: white; /* 背景颜色为白色 */
-    border-radius: 8px; /* 边框圆角为 8px */
-    padding: 15px; /* 内边距为 15px */
-}
-
-.EO-radar-chart-container img { /* 定义雷达图容器内图片的样式 */
-    width: 100%; /* 宽度占满父容器 */
-    height: 100%; /* 高度占满父容器 */
-    object-fit: contain; /* 保持图片宽高比，缩放以完整显示在容器内 */
-}
-
-.EO-evaluation-module { /* 定义评估模块样式 */
-    background: white; /* 背景颜色为白色 */
-    border-radius: 8px; /* 边框圆角为 8px */
-    padding: 15px; /* 内边距为 15px */
-    display: flex; /* 使用 flexbox 布局 */
-    flex-direction: column; /* flex 项目垂直排列 */
-    gap: 15px; /* flex 项目之间的间距为 15px */
-}
-
 .EO-evaluation { /* 定义评估项样式 */
     display: flex; /* 使用 flexbox 布局 */
     align-items: center; /* flex 项目在交叉轴上居中对齐 */
-}
-
-.EO-score { /* 定义分数样式 */
-    font-size: 1.2em; /* 字体大小为默认的 1.2 倍 */
-    color: #27ae60; /* 字体颜色为绿色 */
-}
-
-.EO-optimization-suggestion { /* 定义优化建议容器样式 */
-    display: flex; /* 使用 flexbox 布局 */
-    flex-direction: column; /* flex 项目垂直排列 */
-    gap: 8px; /* flex 项目之间的间距为 8px */
-    color: #e67e22; /* 字体颜色为橙色 */
-}
-
-.EO-suggestion-item { /* 定义建议项样式 */
-    line-height: 1.5; /* 行高为 1.5 倍 */
-    padding-left: 12px; /* 左内边距为 12px (为前面的圆点留出空间) */
-    position: relative; /* 相对定位，为伪元素定位做准备 */
-}
-
-.EO-suggestion-item::before { /* 定义建议项前面的圆点符号 */
-    content: "•"; /* 内容为一个圆点符号 */
-    position: absolute; /* 绝对定位 */
-    left: 0; /* 距离左侧 0 */
-    color: #1890ff; /* 颜色为蓝色 */
 }
 
 .EO-model-button-container { /* 定义模型按钮容器样式 */
@@ -170,7 +102,7 @@
     box-shadow: none !important; /* 无阴影，!important 提高优先级 */
     overflow: hidden; /* 内容溢出时隐藏 */
     color: white; /* 字体颜色为白色 */
-    font-family: serif; /* 字体为衬线字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
 }
 
 .EO-model-button:hover { /* 定义模型按钮鼠标悬停时的样式 */
@@ -190,7 +122,7 @@
     box-shadow: none !important; /* 无阴影，!important 提高优先级 */
     overflow: hidden; /* 内容溢出时隐藏 */
     color: white; /* 字体颜色为白色 */
-    font-family: serif; /* 字体为衬线字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
 }
 
 .EO-modal-button:hover { /* 定义模态框按钮鼠标悬停时的样式 */
@@ -222,4 +154,6 @@
 
 .EO-info-item { /* 定义信息项样式 */
     margin-bottom: 8px; /* 底部外边距为 8px */
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
