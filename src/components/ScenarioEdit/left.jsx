@@ -157,29 +157,32 @@ const Left = observer(({ scenarios }) => {
       return;
     }
     try {
-        const response = await fetch(__APP_CONFIG__.updateDbJson, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                scenarioId: intelligentStore.selectedScenario.id,
-                entityName: entity,
-                attributeKey: attribute,
-                newValue: value,
-            }),
-        });
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        await response.json();
-  
-        const updatedParamsMap = { ...envParamsMap };
-        const attrToUpdate = updatedParamsMap[entity].find(attr => attr.key === attribute);
-        if (attrToUpdate) attrToUpdate.value = value;
-        setEnvParamsMap(updatedParamsMap);
-  
-        message.success('更新成功');
-      } catch (error) {
-        message.error('更新失败');
-        console.error('更新失败:', error);
+      const response = await fetch(__APP_CONFIG__.updateDbJson, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          scenarioId: intelligentStore.selectedScenario.id,
+          entityName: entity,
+          attributeKey: attribute,
+          newValue: value
+        }),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+      const data = await response.json();
+      intelligentStore.setupdataparams(data.updatedScenario.env_params);
+      
+      const updatedParamsMap = { ...envParamsMap };
+      const attrToUpdate = updatedParamsMap[entity].find(attr => attr.key === attribute);
+      if (attrToUpdate) attrToUpdate.value = value;
+      setEnvParamsMap(updatedParamsMap);
+      
+      message.success('更新成功');
+    } catch (error) {
+      message.error('更新失败');
+      console.error('更新失败:', error);
+    }
   };
 
   const handleSave = async () => {

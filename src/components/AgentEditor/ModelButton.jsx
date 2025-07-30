@@ -354,11 +354,11 @@ const ModelFunction = ({scenarios}) => {
                 cancelText="取消"
                 width={1000}
             >
+                <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
                 <Table
                     bordered={true}
                     columns={columns}
                     dataSource={tableData}
-                    scroll={{ y: 500 }}
                     rowSelection={{
                         type: 'radio',
                         selectedRowKeys: selectedModel ? [tableData.findIndex(item => item.agentID === selectedModel.agentID)] : [],
@@ -374,6 +374,7 @@ const ModelFunction = ({scenarios}) => {
                     })}
                     pagination={false}
                 />
+                </div>
             </Modal>
         </div>
     );

@@ -28,7 +28,7 @@
     overflow: hidden; /* 超出部分隐藏 */
     margin-right: 8px; /* 右外边距 8px */
     color: white; /* 字体颜色为白色 */
-    font-family: serif; /* 字体为衬线字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
 }
 
 .entity-button[disabled] { /* 实体按钮被禁用时的样式 */
@@ -54,7 +54,7 @@
     margin-top: 0.5rem; /* 顶部外边距 0.5rem */
     margin-bottom: 0.5rem; /* 底部外边距 0.5rem */
     color: white; /* 字体颜色为白色 */
-    font-family: serif; /* 字体为衬线字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
 }
 
 /* ModelButton */
@@ -76,7 +76,7 @@
     box-shadow: none !important; /* 无阴影，!important 提高优先级 */
     overflow: hidden; /* 超出部分隐藏 */
     color: white; /* 字体颜色为白色 */
-    font-family: serif; /* 字体为衬线字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
 }
 
 .model-button:hover { /* 模型按钮悬停时的样式 */
@@ -124,7 +124,7 @@
     display: inline-block; /* 显示为行内块元素 */
     vertical-align: middle; /* 垂直对齐方式为居中 */
     color: white; /* 字体颜色为白色 */
-    font-family: serif; /* 字体为衬线字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
 }
 
 .upload-button { /* 上传按钮样式 */
@@ -173,7 +173,7 @@
     border-radius: 4px; /* 边框圆角 4px */
     cursor: pointer; /* 鼠标样式为指针 */
     color: white; /* 字体颜色为白色 */
-    font-family: serif; /* 字体为衬线字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
 }
 
 .dropdown-button { /* 下拉按钮样式 */
@@ -223,34 +223,33 @@
     align-items: center; /* 垂直居中对齐 */
     gap: 8px; /* 子元素之间的间距 8px */
     color: white; /* 字体颜色为白色 */
-    font-family: serif; /* 字体为衬线字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
 }
 
 .modal-label { /* 模态框标签样式 */
     width: 100px; /* 宽度 100px */
     text-align: right; /* 文本右对齐 */
     color: white; /* 字体颜色为白色 */
-    font-family: serif; /* 字体为衬线字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
 }
 
 .table-container { /* 表格容器样式 */
     margin-top: 10px; /* 顶部外边距 10px */
     max-height: 240px; /* 最大高度 240px */
     border-radius: 4px; /* 边框圆角 4px */
+    overflow-y: auto; 
 }
 
 .fixed-table { /* 固定布局表格样式 */
     width: 100%; /* 宽度占满父容器 */
     table-layout: fixed; /* 表格布局算法为固定布局 */
+    border: none;
 }
 
 .fixed-table .ant-table-thead > tr > th { /* antd 表格的表头单元格样式 */
     position: sticky; /* 粘性定位 */
     top: 0; /* 粘性定位的顶部偏移量为 0，实现表头固定 */
-}
-
-.fixed-table .ant-table-body { /* antd 表格的主体部分样式 */
-    overflow-y: auto; /* Y 轴超出部分显示滚动条 */
+    z-index: 10;
 }
 
 .action-container { /* 动作容器样式 */
@@ -277,7 +276,7 @@
 .action-text { /* 动作文本样式 */
     margin-bottom: 8px; /* 底部外边距 8px */
     color: white; /* 字体颜色为白色 */
-    font-family: serif; /* 字体为衬线字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
 }
 
 .rule-container { /* 规则容器样式 */
@@ -296,7 +295,7 @@
     width: 100%; /* 宽度占满父容器 */
     justify-content: center; /* 水平居中对齐 */
     color: white; /* 字体颜色为白色 */
-    font-family: serif; /* 字体为衬线字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
 }
 
 .rule-buttons { /* 规则按钮组样式 */
@@ -318,7 +317,7 @@
 
 .dropdown-content { /* 下拉菜单内容样式 */
     color: white; /* 字体颜色为白色 */
-    font-family: serif; /* 字体为衬线字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
 }
 
 .reward-modal-overlay { /* 奖励函数模态框遮罩层样式 */
@@ -377,7 +376,7 @@
     font-size: 18px; /* 字体大小 18px */
     transition: background 0.3s; /* 背景颜色过渡效果，持续 0.3s */
     color: white; /* 字体颜色为白色 */
-    font-family: serif; /* 字体为衬线字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
 }
 
 .symbol-group button:hover { /* 符号组中按钮悬停时的样式 */
@@ -386,6 +385,7 @@
 }
 
 .equation-input { /* 方程式输入框样式 */
+    background: #063160;
     width: 100%; /* 宽度占满父容器 */
     height: 150px; /* 高度 150px */
     margin-bottom: 30px; /* 底部外边距 30px */
@@ -393,6 +393,7 @@
     border-radius: 8px; /* 边框圆角 8px */
     font-size: 18px; /* 字体大小 18px */
     resize: none; /* 禁止用户调整大小 */
+    color: white;
 }
 
 .equation-preview { /* 方程式预览区域样式 */
@@ -401,9 +402,9 @@
     padding: 20px; /* 内边距 20px */
     border: 2px solid #000; /* 边框，2px 实线，黑色 */
     border-radius: 8px; /* 边框圆角 8px */
-    background: white; /* 背景为白色 */
+    background: #063160; /* 背景为白色 */
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1); /* 内阴影 */
-    color: black; /* 字体颜色为黑色 */
+    color: white; /* 字体颜色为黑色 */
 }
 
 .modal-buttons { /* 模态框按钮组样式 */
@@ -465,7 +466,7 @@
     max-width: 200px; /* 最大宽度 200px */
     word-wrap: break-word; /* 允许长单词换行 */
     color: white; /* 字体颜色为白色 */
-    font-family: serif; /* 字体为衬线字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
 }
 
 .tooltip-content { /* 提示框内容样式 */
@@ -497,12 +498,20 @@
     width: 45%; /* 宽度为 45% */
 }
 
+.entity-assignment-modal__column .ant-list-bordered {
+    border-color: #1890ff !important;
+}
+
+.entity-assignment-modal__column .ant-list-item {
+    border-color: #1890ff !important;
+}
+
 .entity-assignment-modal__title { /* 模态框标题样式 */
     font-size: 16px; /* 字体大小 16px */
     font-weight: bold; /* 字体加粗 */
     margin-bottom: 12px; /* 底部外边距 12px */
     color: white; /* 字体颜色为白色 */
-    font-family: serif; /* 字体为衬线字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
 }
 
 .entity-assignment-modal__alert { /* 模态框警告/提示信息样式 */
@@ -523,13 +532,13 @@
 .entity-assignment-modal__agent-content { /* 智能体内容区域样式 */
     width: 100%; /* 宽度占满父容器 */
     color: white; /* 字体颜色为白色 */
-    font-family: serif; /* 字体为衬线字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
 }
 
 .entity-assignment-modal__entity-name { /* 实体名称样式 */
     margin-right: 8px; /* 右外边距 8px */
     color: white; /* 字体颜色为白色 */
-    font-family: serif; /* 字体为衬线字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
 }
 
 .entity-assignment-modal__entity-item { /* 实体项目样式 */
@@ -540,7 +549,7 @@
 .entity-assignment-modal__checkbox { /* 复选框样式 */
     margin-right: 8px; /* 右外边距 8px */
     color: white; /* 字体颜色为白色 */
-    font-family: serif; /* 字体为衬线字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
 }
 
 .entity-assignment-modal__checkbox.ant-checkbox-wrapper-disabled > span:last-child { /* antd 禁用的复选框的文本样式 */
@@ -555,5 +564,5 @@
 .entity-assignment-modal__assigned-label { /* “已分配”标签样式 */
     margin-left: 8px; /* 左外边距 8px */
     color: white; /* 字体颜色为白色 */
-    font-family: serif; /* 字体为衬线字体 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
 }

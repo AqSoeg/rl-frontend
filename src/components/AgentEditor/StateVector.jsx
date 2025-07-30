@@ -250,7 +250,6 @@ const StateVector = ({ entities }) => {
                                     ]}
                                     dataSource={getTableData(entity)}
                                     pagination={false}
-                                    scroll={{y: 240}}
                                     className="fixed-table"
                                 />
                             </div>

@@ -165,6 +165,11 @@ body { /* 定义 body 元素的样式 */
     transition: none !important;
 }
 
+.ant-select-selection-item {
+    color: white !important; /* 强制设置选中项在输入框中显示的文本颜色为白色 */
+    font-family: "Microsoft YaHei", "Segoe UI", sans-serif; /* 最好也统一一下字体 */
+}
+
 .ant-select-item-option-active:not(.ant-select-item-option-disabled), /* Ant Design Select 组件激活状态（悬停）的下拉选项样式 */
 .ant-select-item-option-active:not(.ant-select-item-option-disabled) .ant-select-item-option-content, /* 激活状态的下拉选项内容的样式 */
 .ant-select-item-option-selected:not(.ant-select-item-option-disabled), /* Ant Design Select 组件已选中状态的下拉选项样式 */
