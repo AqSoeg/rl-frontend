@@ -7,18 +7,30 @@
 
 .scenario-left-panel {
   overflow-y: auto; /* Y 轴内容超出时显示滚动条 */
-  background-color: #001b38; /* 背景颜色为深蓝色 */
+  background-color: #002a56; /* 背景颜色为深蓝色 */
   flex: 1; /* flex 布局：占据剩余空间 */
   padding: 16px; /* 内边距为 16px */
 }
 
 .scenario-right-panel {
+  background-color: #002a56; /* 背景颜色为深蓝色 */
   flex: 3; /* flex 布局：占据剩余空间 */
   padding: 16px; /* 内边距为 16px */
   overflow-y: auto; /* Y 轴内容超出时显示滚动条 */
 }
 
+.scenario-mid-panel {
+  background-color: #001b38; /* 背景颜色为深蓝色 */
+  flex: 0.001; /* flex 布局：占据剩余空间 */
+  padding: 16px; /* 内边距为 16px */
+  overflow-y: auto; /* Y 轴内容超出时显示滚动条 */
+}
+
 /* --- 从 left.jsx 提取的样式 --- */
+
+.scenario-card {
+  background-color: #01366e !important;
+}
 
 .scenario-header {
   margin-bottom: 50px; /* 下外边距为 50px */
@@ -30,6 +42,7 @@
   border-radius: 6px; /* 边框圆角为 6px */
   padding: 16px; /* 内边距为 16px */
   margin-bottom: 50px; /* 下外边距为 50px */
+  color: white;
 }
 
 .side-selector {
@@ -110,6 +123,7 @@
 /* --- 从 right.jsx 提取的样式 --- */
 
 .placeholder-card {
+  background-color: #01366e !important;
   height: 100%; /* 高度占满父容器 */
   display: flex; /* 使用 flex 布局 */
   justify-content: center; /* 水平居中 */
@@ -131,7 +145,7 @@
   display: flex; /* 使用 flex 布局 */
   justify-content: center; /* 水平居中 */
   align-items: center; /* 垂直居中 */
-  background-color: #063160; /* 背景颜色为较深的蓝色 */
+  background-color: #01366e; /* 背景颜色为较深的蓝色 */
   padding: 16px; /* 内边距为 16px */
 }
 

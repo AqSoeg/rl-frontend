@@ -40,6 +40,9 @@ const ScenarioEdit = observer(() => {
       <div className='scenario-left-panel'>
         <Left scenarios={scenarios} />
       </div>
+      <div className='scenario-mid-panel'>
+        
+      </div>
       <div className='scenario-right-panel'>
         <Right />
       </div>
