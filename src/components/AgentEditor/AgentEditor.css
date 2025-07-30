@@ -393,17 +393,19 @@
     border-radius: 8px; /* 边框圆角 8px */
     font-size: 18px; /* 字体大小 18px */
     resize: none; /* 禁止用户调整大小 */
+    background: #002a56;
+    color: white;
 }
 
 .equation-preview { /* 方程式预览区域样式 */
     margin-bottom: 30px; /* 底部外边距 30px */
     font-size: 20px; /* 字体大小 20px */
     padding: 20px; /* 内边距 20px */
-    border: 2px solid #000; /* 边框，2px 实线，黑色 */
+    border: 2px solid #ccc; /* 边框，2px 实线，黑色 */
     border-radius: 8px; /* 边框圆角 8px */
-    background: white; /* 背景为白色 */
+    background: #002a56; /* 背景为白色 */
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1); /* 内阴影 */
-    color: black; /* 字体颜色为黑色 */
+    color: white; /* 字体颜色为黑色 */
 }
 
 .modal-buttons { /* 模态框按钮组样式 */
