@@ -692,8 +692,7 @@ def update_db_json():
 def get_deployment_image():
     data = request.get_json()
     scenario_id = data.get('scenarioId')
-    if not scenario_id:
-        return jsonify({"status": "error", "message": "Missing scenarioId"}), 400
+
 
     # 构造绘图数据，类似于你提供的JSON
     deployment_data = {
@@ -743,7 +742,6 @@ def get_deployment_image():
             }
         ],
         "info": [
-            {"key": "场景编号", "value": scenario_id, "datetime": datetime.datetime.now().isoformat()},
             {"key": "创建时间", "value": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
         ]
     }
